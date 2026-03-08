@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Gowanus Rezoning Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link
+    href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="map"></div>
+
+  <div class="ui-panel">
+    <h3>Gowanus Rezoning</h3>
+    <p>Scroll to move through the stages.</p>
+    <p><strong>Stage 0:</strong> Flat footprints</p>
+    <p><strong>Stage 1:</strong> Existing building heights</p>
+    <p><strong>Stage 2:</strong> Rezoning towers added in blue</p>
+    <p><strong>Alt + Scroll:</strong> Zoom map</p>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: Arial, sans-serif;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.ui-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  width: 260px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  line-height: 1.35;
+  font-size: 14px;
+}
+
+.ui-panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.ui-panel p {
+  margin: 6px 0;
+}
