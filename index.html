@@ -3,8 +3,13 @@
 
 <head>
 <meta charset="utf-8">
-<title>Diagrams</title>
+<title>Gowanus Landscaping</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+rel="stylesheet"
+/>
 
 <link rel="stylesheet" href="style.css">
 
@@ -15,24 +20,22 @@
 <div class="navbar">
 
   <div class="nav-left">
-    SponGwanus 
+    SponGwanus
   </div>
 
   <div class="nav-tabs">
-    <a href="index.html">Map</a>
-    <a href="diagrams.html">Diagrams</a>
+    <a href="/">Map</a>
+    <a href="/diagrams.html">Diagrams</a>
   </div>
 
 </div>
 
-<div class="page-content">
+<div id="map"></div>
 
-  <h1>Diagrams</h1>
-  <p>Place your architectural diagrams here.</p>
-
-</div>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script type="module" src="main.js"></script>
+
+<script type="module" src="main.js"></script>
+
 </body>
 
 </html>
