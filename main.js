@@ -225,6 +225,28 @@ window.addEventListener('wheel', (event) => {
   setStage(currentStage);
 }, { passive: false });
 
+const mapElement = document.getElementById('map');
+
+mapElement.addEventListener('wheel', (event) => {
+  if (event.altKey) {
+    map.scrollZoom.enable();
+    return;
+  }
+
+  map.scrollZoom.disable();
+  event.preventDefault();
+
+  if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) return;
+
+  if (event.deltaY > 0) {
+    currentStage = clamp(currentStage + 1, 0, 2);
+  } else {
+    currentStage = clamp(currentStage - 1, 0, 2);
+  }
+
+  setStage(currentStage);
+}, { passive: false });
+
 window.addEventListener('keyup', (event) => {
   if (event.key === 'Alt') {
     map.scrollZoom.disable();
