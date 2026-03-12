@@ -1,3 +1,51 @@
+/* BAR */
+
+.navbar{
+  position: fixed;
+  top:0;
+  left:0;
+  right:0;
+
+  height:60px;
+
+  background:#111;
+  color:white;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:0 25px;
+
+  z-index:1000;
+}
+
+.nav-left{
+  font-size:18px;
+  font-weight:600;
+}
+
+.nav-tabs a{
+  color:white;
+  text-decoration:none;
+  margin-left:20px;
+  font-size:15px;
+}
+
+.nav-tabs a:hover{
+  opacity:0.7;
+}
+
+
+/* PUSH MAP DOWN BELOW NAVBAR */
+
+#map{
+  position:absolute;
+  top:60px;
+  bottom:0;
+  width:100%;
+}
+
 html, body {
   margin: 0;
   width: 100%;
