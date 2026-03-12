@@ -1,67 +1,105 @@
-/* BAR */
-
-.navbar{
-  position: fixed;
-  top:0;
-  left:0;
-  right:0;
-
-  height:60px;
-
-  background:#111;
-  color:white;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  padding:0 25px;
-
-  z-index:1000;
+* {
+  box-sizing: border-box;
 }
 
-.nav-left{
-  font-size:18px;
-  font-weight:600;
-}
-
-.nav-tabs a{
-  color:white;
-  text-decoration:none;
-  margin-left:20px;
-  font-size:15px;
-}
-
-.nav-tabs a:hover{
-  opacity:0.7;
-}
-
-.page-content{
-  padding-top:100px;
-  text-align:center;
-}
-
-
-/* PUSH MAP DOWN BELOW NAVBAR */
-
-#map{
-  position:absolute;
-  top:60px;
-  bottom:0;
-  width:100%;
-}
-
-html, body {
+html,
+body {
   margin: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
   background: #000;
   font-family: Arial, sans-serif;
 }
 
-#map {
-  width: 100%;
-  height: 100%;
+/* TOP NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #111;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
 }
 
+.nav-left {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-tabs a {
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.nav-tabs a:hover {
+  opacity: 0.7;
+}
+
+/* MAP PAGE */
+#map {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+/* OPTIONAL OLD UI PANEL STYLING */
+/* this can stay even if the panel is deleted from HTML */
+.ui-panel {
+  position: absolute;
+  top: 76px;
+  left: 16px;
+  z-index: 10;
+  width: 260px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  line-height: 1.35;
+  font-size: 14px;
+}
+
+.ui-panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.ui-panel p {
+  margin: 6px 0;
+}
+
+/* DIAGRAMS PAGE */
+.page-content {
+  padding-top: 100px;
+  min-height: 100vh;
+  color: white;
+  text-align: center;
+}
+
+.page-content h1 {
+  margin: 0 0 16px 0;
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.page-content p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.85;
+}
