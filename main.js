@@ -11,123 +11,31 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl());
 map.scrollZoom.disable();
 
-let currentStage = 0;
-let isAnimating = false;
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-// Existing building height from OSM GeoJSON
-// OSM height is usually stored as text, so we convert it to number
-const existingHeightExpression = [
-  '*',
-  1.3,
-  ['coalesce',
-    ['to-number', ['get', 'height']],
-    ['*', 3.2, ['to-number', ['get', 'building:levels']]],
-    12
-  ]
-];
-
-// Proposed rezoning building height
-const proposedHeightExpression = [
-  'coalesce',
-  ['to-number', ['get', 'proposed_height']],
-  0
-];
-
-function setStageInstant(stage) {
-  if (stage === 0) {
-    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-  }
-
-  if (stage === 1) {
-    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-  }
-
-  if (stage === 2) {
-    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', proposedHeightExpression);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0.95);
-  }
-}
-
-function animateStage(stage) {
-  if (isAnimating) return;
-  isAnimating = true;
-
-  const duration = 1000;
-  const startTime = performance.now();
-
-  function step(now) {
-    const raw = clamp((now - startTime) / duration, 0, 1);
-    const t = easeOutCubic(raw);
-
-    if (stage === 0) {
-      map.setPaintProperty(
-        'existing-buildings',
-        'fill-extrusion-height',
-        ['*', 1 - t, existingHeightExpression]
-      );
-
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-    }
-
-    if (stage === 1) {
-      map.setPaintProperty(
-        'existing-buildings',
-        'fill-extrusion-height',
-        ['*', t, existingHeightExpression]
-      );
-
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-    }
-
-    if (stage === 2) {
-      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-
-      map.setPaintProperty(
-        'proposed-buildings',
-        'fill-extrusion-height',
-        ['*', t, proposedHeightExpression]
-      );
-
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', t * 0.95);
-    }
-
-    if (raw < 1) {
-      requestAnimationFrame(step);
-    } else {
-      setStageInstant(stage);
-      isAnimating = false;
-    }
-  }
-
-  requestAnimationFrame(step);
-}
-
 map.on('load', async () => {
-  const [existingResponse, proposedResponse] = await Promise.all([
+
+  const [existingResponse, proposedResponse, treesResponse, parksResponse] = await Promise.all([
     fetch('./data/gowanus-buildings.geojson'),
-    fetch('./data/rezoning-buildings.geojson')
+    fetch('./data/rezoning-buildings.geojson'),
+    fetch('./data/gowanus_trees.json'),
+    fetch('./data/parks.geojson')
   ]);
 
   const existingData = await existingResponse.json();
   const proposedData = await proposedResponse.json();
+  const treesData = await treesResponse.json();
+  const parksData = await parksResponse.json();
 
-  console.log('Existing building count:', existingData.features.length);
-  console.log('Sample existing props:', existingData.features.slice(0, 5).map(f => f.properties));
+  const treesGeoJSON = {
+    type: "FeatureCollection",
+    features: treesData.map(tree => ({
+      type: "Feature",
+      properties: tree,
+      geometry: {
+        type: "Point",
+        coordinates: [tree.lon, tree.lat]
+      }
+    }))
+  };
 
   map.addSource('existing', {
     type: 'geojson',
@@ -140,9 +48,9 @@ map.on('load', async () => {
     source: 'existing',
     paint: {
       'fill-extrusion-color': '#8b5cf6',
+      'fill-extrusion-height': ['get','height'],
       'fill-extrusion-base': 0,
-      'fill-extrusion-height': 0,
-      'fill-extrusion-opacity': 0.92
+      'fill-extrusion-opacity': 0.9
     }
   });
 
@@ -157,39 +65,51 @@ map.on('load', async () => {
     source: 'proposed',
     paint: {
       'fill-extrusion-color': '#3b82f6',
+      'fill-extrusion-height': ['get','proposed_height'],
       'fill-extrusion-base': 0,
-      'fill-extrusion-height': 0,
-      'fill-extrusion-opacity': 0
+      'fill-extrusion-opacity': 0.9
     }
   });
 
-  setStageInstant(0);
-});
+  map.addSource('parks', {
+    type: 'geojson',
+    data: parksData
+  });
 
-// Scroll = change stages
-// Alt + Scroll = zoom
-window.addEventListener('wheel', (event) => {
-  if (event.altKey) {
-    map.scrollZoom.enable();
-    return;
-  }
+  map.addLayer({
+    id: 'parks-fill',
+    type: 'fill',
+    source: 'parks',
+    paint: {
+      'fill-color': '#3a5a40',
+      'fill-opacity': 0.45
+    }
+  });
 
-  map.scrollZoom.disable();
-  event.preventDefault();
+  map.addLayer({
+    id: 'parks-outline',
+    type: 'line',
+    source: 'parks',
+    paint: {
+      'line-color': '#a3b18a',
+      'line-width': 2
+    }
+  });
 
-  if (isAnimating) return;
+  map.addSource('trees', {
+    type: 'geojson',
+    data: treesGeoJSON
+  });
 
-  if (event.deltaY > 0) {
-    currentStage = clamp(currentStage + 1, 0, 2);
-  } else {
-    currentStage = clamp(currentStage - 1, 0, 2);
-  }
+  map.addLayer({
+    id: 'trees',
+    type: 'circle',
+    source: 'trees',
+    paint: {
+      'circle-radius': 4,
+      'circle-color': '#6fcf97',
+      'circle-opacity': 0.9
+    }
+  });
 
-  animateStage(currentStage);
-}, { passive: false });
-
-window.addEventListener('keyup', (event) => {
-  if (event.key === 'Alt') {
-    map.scrollZoom.disable();
-  }
 });
