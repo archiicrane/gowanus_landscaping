@@ -1,6 +1,10 @@
+console.log('trees.js loaded');
+
 window.TreeRenderer = {
   async initTrees(map) {
     try {
+      console.log('initTrees called');
+
       const response = await fetch('./data/gowanus_trees.json');
 
       if (!response.ok) {
@@ -8,15 +12,21 @@ window.TreeRenderer = {
       }
 
       const rawData = await response.json();
-      console.log('Tree sample:', rawData[0]);
+
+      console.log('Tree raw data:', rawData);
+      console.log(
+        'Tree sample:',
+        Array.isArray(rawData) ? rawData[0] : rawData?.features?.[0]
+      );
 
       let features = [];
 
-      // Case 1: plain array of objects with lat/lon
-      if (Array.isArray(rawData)) {
+      if (rawData?.type === 'FeatureCollection' && Array.isArray(rawData.features)) {
+        features = rawData.features;
+      } else if (Array.isArray(rawData) && rawData.length > 0 && 'lat' in rawData[0] && 'lon' in rawData[0]) {
         features = rawData
-          .filter(t => t.lat != null && t.lon != null)
-          .map(t => ({
+          .filter((t) => t.lat != null && t.lon != null)
+          .map((t) => ({
             type: 'Feature',
             geometry: {
               type: 'Point',
@@ -26,49 +36,66 @@ window.TreeRenderer = {
               species: t.species || 'Unknown'
             }
           }));
-      }
-
-      // Case 2: already GeoJSON
-      if (rawData?.type === 'FeatureCollection' && Array.isArray(rawData.features)) {
-        features = rawData.features;
+      } else if (Array.isArray(rawData) && rawData.length > 0 && 'latitude' in rawData[0] && 'longitude' in rawData[0]) {
+        features = rawData
+          .filter((t) => t.latitude != null && t.longitude != null)
+          .map((t) => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [Number(t.longitude), Number(t.latitude)]
+            },
+            properties: {
+              species: t.species || 'Unknown'
+            }
+          }));
+      } else {
+        console.error('Unknown tree data format:', rawData);
+        return;
       }
 
       console.log('Tree feature count:', features.length);
 
-      if (!map.getSource('trees')) {
-        map.addSource('trees', {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features
-          }
-        });
+      if (map.getLayer('trees-layer')) {
+        map.removeLayer('trees-layer');
       }
 
-      if (!map.getLayer('trees-layer')) {
-        map.addLayer({
-          id: 'trees-layer',
-          type: 'circle',
-          source: 'trees',
-          layout: {
-            visibility: 'none'
-          },
-          paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              13, 1.5,
-              15, 3,
-              17, 5
-            ],
-            'circle-color': '#22c55e',
-            'circle-opacity': 0.9,
-            'circle-stroke-color': '#d9ffd0',
-            'circle-stroke-width': 0.75
-          }
-        });
+      if (map.getSource('trees')) {
+        map.removeSource('trees');
       }
+
+      map.addSource('trees', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features
+        }
+      });
+
+      map.addLayer({
+        id: 'trees-layer',
+        type: 'circle',
+        source: 'trees',
+        layout: {
+          visibility: 'visible'
+        },
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            13, 3,
+            15, 5,
+            17, 8
+          ],
+          'circle-color': '#22c55e',
+          'circle-opacity': 1,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1.2
+        }
+      });
+
+      console.log('trees-layer added');
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }

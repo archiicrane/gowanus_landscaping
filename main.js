@@ -14,16 +14,6 @@ map.scrollZoom.disable();
 let currentStage = 0;
 let isAnimating = false;
 
-// ---------- helpers ----------
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-// ---------- stage text ----------
 const stageContent = [
   {
     title: "Gowanus Canal",
@@ -39,6 +29,14 @@ const stageContent = [
   }
 ];
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
 function updateStageUI(stage) {
   const titleEl = document.getElementById('stage-title');
   const descEl = document.getElementById('stage-desc');
@@ -47,7 +45,6 @@ function updateStageUI(stage) {
   if (descEl) descEl.innerText = stageContent[stage].desc;
 }
 
-// ---------- building height expressions ----------
 const existingHeightExpression = [
   '*',
   1.3,
@@ -64,7 +61,6 @@ const proposedHeightExpression = [
   0
 ];
 
-// ---------- stage states ----------
 function setStageInstant(stage) {
   if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) {
     return;
@@ -173,7 +169,6 @@ function animateStage(stage) {
   requestAnimationFrame(step);
 }
 
-// ---------- map load ----------
 map.on('load', async () => {
   try {
     const [existingResponse, proposedResponse] = await Promise.all([
@@ -194,7 +189,7 @@ map.on('load', async () => {
 
     console.log('Existing building count:', existingData.features?.length || 0);
     console.log('Proposed building count:', proposedData.features?.length || 0);
-    console.log('Sample existing props:', existingData.features?.slice(0, 3).map(f => f.properties));
+    console.log('Sample existing props:', existingData.features?.slice(0, 3).map((f) => f.properties));
 
     map.addSource('existing', {
       type: 'geojson',
@@ -230,8 +225,12 @@ map.on('load', async () => {
       }
     });
 
+    console.log('window.TreeRenderer:', window.TreeRenderer);
+
     if (window.TreeRenderer?.initTrees) {
       await window.TreeRenderer.initTrees(map);
+    } else {
+      console.error('TreeRenderer not found');
     }
 
     setStageInstant(0);
@@ -240,9 +239,6 @@ map.on('load', async () => {
   }
 });
 
-// ---------- scroll stages ----------
-// normal scroll = stage changes
-// hold Alt = allow map zoom
 window.addEventListener('wheel', (event) => {
   if (event.altKey) {
     map.scrollZoom.enable();
