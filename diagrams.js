@@ -67,12 +67,11 @@ function getBoundingBoxAreaKm2(trees) {
   return Math.abs(latKm * lonKm);
 }
 
-/* -----------------------------
-   CANOPY + WATER RETENTION LOGIC
-   ----------------------------- */
+/* ---------------------------------
+   CANOPY + WATER RETENTION ESTIMATE
+---------------------------------- */
 
-// Conceptual canopy-diameter estimate from DBH.
-// If DBH is missing, fall back to a 12 m canopy diameter.
+// If DBH is missing, use a fallback canopy diameter.
 function estimateCanopyDiameterMeters(dbhInches) {
   if (!Number.isFinite(dbhInches) || dbhInches <= 0) return 12;
   return Math.max(6, Math.min(18, 4 + dbhInches * 0.35));
@@ -84,9 +83,9 @@ function estimateCanopyAreaM2(dbhInches) {
   return Math.PI * radius * radius;
 }
 
-// Assumptions for conceptual water-retention estimate
+// Assumptions
 const EFFECTIVE_SOIL_DEPTH_M = 0.9144; // 3 ft
-const AVAILABLE_WATER_FRACTION = 0.20; // conceptual loam-like holding fraction
+const AVAILABLE_WATER_FRACTION = 0.20; // conceptual holding capacity
 
 function estimateWaterRetentionM3(dbhInches) {
   const canopyArea = estimateCanopyAreaM2(dbhInches);
@@ -96,6 +95,7 @@ function estimateWaterRetentionM3(dbhInches) {
 function renderMetric(id, value, subtitle = '') {
   const el = document.getElementById(id);
   if (!el) return;
+
   el.innerHTML = `
     <div class="metric-value">${value}</div>
     ${subtitle ? `<div class="metric-subtitle">${subtitle}</div>` : ''}
@@ -264,9 +264,9 @@ function makeWaterRetentionChart(speciesRetentionEntries) {
   const labels = top.map(([name]) => titleCase(name));
   const values = top.map(([, retentionM3]) => Number(retentionM3.toFixed(1)));
 
-  destroyChart('dbhChart');
+  destroyChart('waterRetentionChart');
 
-  new Chart(document.getElementById('dbhChart'), {
+  new Chart(document.getElementById('waterRetentionChart'), {
     type: 'bar',
     data: {
       labels,
@@ -294,7 +294,7 @@ function makeWaterRetentionChart(speciesRetentionEntries) {
 function makeCanopyBySpeciesChart(speciesCanopyEntries) {
   const top = speciesCanopyEntries.slice(0, 8);
   const labels = top.map(([name]) => titleCase(name));
-  const values = top.map(([, canopy]) => Number((canopy / 10000).toFixed(2)));
+  const values = top.map(([, canopy]) => Number((canopy / 10000).toFixed(2))); // hectares
 
   destroyChart('canopySpeciesChart');
 
@@ -431,7 +431,7 @@ async function buildGowanusTreeDashboard() {
     renderMetric('canopyMetric', `${formatNumber(canopyCoveragePct, 1)}%`, `${formatNumber(totalEstimatedCanopyHa, 1)} ha estimated canopy`);
     renderMetric('densityMetric', formatNumber(densityPerKm2, 0), 'Trees per km²');
     renderMetric(
-      'dbhMetric',
+      'waterMetric',
       `${formatNumber(totalEstimatedRetentionM3, 0)} m³`,
       `${formatNumber(totalEstimatedRetentionLiters, 0)} L estimated storage`
     );
