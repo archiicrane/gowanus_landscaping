@@ -1,61 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Rewilding Gowanus</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewilding Gowanus</title>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jscastro76/threebox@master/dist/threebox.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="map-page">
-  <div class="navbar">
-    <div class="nav-left">Rewilding Gowanus</div>
-    <div class="nav-tabs">
-      <a href="./index.html">Map</a>
-      <a href="./diagrams.html">Diagrams</a>
+<body>
+    <nav class="top-bar">
+        <div class="brand">Rewilding Gowanus</div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-btn active">Map</a>
+            <a href="diagrams.html" class="nav-btn">Diagrams</a>
+        </div>
+    </nav>
+
+    <div id="map"></div>
+
+    <div id="overlay-ui">
+        <div id="stage-info" class="panel">
+            <h2 id="stage-title">Gowanus Canal</h2>
+            <p id="stage-text">The industrial heart of Brooklyn. Scroll to begin the story.</p>
+        </div>
+
+        <div id="stats-panel" class="panel">
+            <h3>Gowanus Stats</h3>
+            <div class="stat-item"><span>Tree Coverage</span><div class="bar"><div style="width: 15%"></div></div></div>
+            <div class="stat-item"><span>Open Space</span><div class="bar"><div style="width: 8%"></div></div></div>
+            <div class="stat-item"><span>Building Density</span><div class="bar"><div style="width: 75%"></div></div></div>
+            <div class="stat-item"><span>Environmental Health</span><div class="bar"><div style="width: 40%"></div></div></div>
+        </div>
     </div>
-  </div>
 
-  <div id="map"></div>
-
-  <div class="map-overlay">
-    <div class="stage-chip" id="stage-chip">Scroll to begin</div>
-
-    <div class="legend-card">
-      <h3>Scroll Story</h3>
-      <p><strong>1st scroll:</strong> existing building heights rise</p>
-      <p><strong>2nd scroll:</strong> trees + parks appear</p>
-      <p><strong>3rd scroll:</strong> Gowanus stats panel appears</p>
-      <p class="legend-note">Hold <strong>Alt</strong> while scrolling to zoom the map.</p>
-    </div>
-
-    <div class="stats-panel hidden" id="stats-panel">
-      <h2>Current Gowanus Stats</h2>
-      <div class="stats-grid">
-        <div class="stat-box">
-          <span class="stat-label">Tree Count</span>
-          <span class="stat-value">1,017</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-label">Park Area</span>
-          <span class="stat-value">Placeholder</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-label">Canopy Coverage</span>
-          <span class="stat-value">Placeholder</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-label">Impervious Surface</span>
-          <span class="stat-value">Placeholder</span>
-        </div>
-      </div>
-
-      <div class="chart-placeholder">Future chart placeholder</div>
-      <div class="chart-placeholder">Future text / graph placeholder</div>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script type="module" src="main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
