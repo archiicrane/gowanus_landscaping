@@ -201,6 +201,20 @@ map.on('load', async () => {
         'fill-extrusion-opacity': 0
       }
     });
+    
+    map.addSource('terrain', {
+      type: 'raster-dem',
+      url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
+      tileSize: 256,
+      maxzoom: 14
+    });
+
+    map.setTerrain({
+      source: 'terrain',
+      exaggeration: 1.5
+    });
+
+    
 
     await window.TreeRenderer?.initTrees?.(map);
 
