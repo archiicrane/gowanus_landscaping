@@ -1,15 +1,11 @@
 // --- CONFIG & BOUNDARY ---
 const GOWANUS_COORDS = [
-    [40.683945676183654, -73.98963594611494],
-    [40.680669969224006, -73.98084416376932],
-    [40.665495232798115, -73.99274143083169],
-    [40.667988596328655, -73.99607305804426],
-    [40.67260255106102, -73.99889524234268],
-    [40.67744610487334, -73.9964465299067],
+    [40.683945676183654, -73.98963594611494], [40.680669969224006, -73.98084416376932],
+    [40.665495232798115, -73.99274143083169], [40.667988596328655, -73.99607305804426],
+    [40.67260255106102, -73.99889524234268], [40.67744610487334, -73.9964465299067],
     [40.67663528353369, -73.99461997552936]
 ];
 
-// Point-in-polygon check for filtering
 function isInsideGowanus(lat, lon) {
     let inside = false;
     for (let i = 0, j = GOWANUS_COORDS.length - 1; i < GOWANUS_COORDS.length; j = i++) {
@@ -25,90 +21,88 @@ function isInsideGowanus(lat, lon) {
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [-73.990, 40.675],
-    zoom: 15.5,
+    center: [-73.991, 40.675],
+    zoom: 16,
     pitch: 60,
     bearing: -20,
     interactive: false 
 });
 
-let tb;
+window.tb = null;
 let currentStage = 0;
-let isAnimating = false;
+let isScrolling = false;
 let buildings = [];
 let trees = [];
 
 map.on('style.load', () => {
     map.addLayer({
-        id: 'threejs-layer',
+        id: 'custom-three-layer',
         type: 'custom',
         renderingMode: '3d',
         onAdd: function (map, gl) {
-            tb = new Threebox(map, gl, { defaultLights: true });
+            window.tb = new Threebox(map, gl, { defaultLights: true });
+            console.log("Threebox Initialized");
         },
-        render: function () { tb.update(); }
+        render: function () {
+            if (window.tb) window.tb.update();
+        }
     });
 });
 
-// --- STAGE MANAGER ---
-async function updateStage(stage) {
-    if (isAnimating) return;
-    isAnimating = true;
+// --- STAGE LOGIC ---
+window.addEventListener('wheel', (e) => {
+    if (isScrolling) return;
+    isScrolling = true;
+    setTimeout(() => { isScrolling = false; }, 800);
 
-    // UI Updates
-    const title = document.getElementById('stage-title');
-    const text = document.getElementById('stage-text');
+    // Scroll down moves forward, Scroll up moves back
+    if (e.deltaY > 0) currentStage = Math.min(currentStage + 1, 3);
+    else currentStage = Math.max(currentStage - 1, 0);
+
+    console.log("Current Stage:", currentStage);
+    applyStage(currentStage);
+}, { passive: true });
+
+async function applyStage(stage) {
+    // UI Feedback
     const stats = document.getElementById('stats-panel');
+    if (stats) stats.classList.toggle('visible', stage === 3);
 
     if (stage === 0) {
-        title.innerText = "Gowanus Canal";
-        text.innerText = "The industrial heart of Brooklyn. Scroll to begin.";
-        stats.classList.remove('visible');
-        toggleVisibility(buildings, false);
-        toggleVisibility(trees, false);
+        setItemsVisible(buildings, false);
+        setItemsVisible(trees, false);
     } 
     else if (stage === 1) {
-        title.innerText = "Existing Built Form";
-        text.innerText = "Extracting building heights from GeoJSON...";
-        stats.classList.remove('visible');
-        await loadBuildings();
-        toggleVisibility(buildings, true);
-        toggleVisibility(trees, false);
+        await ensureBuildingsLoaded();
+        setItemsVisible(buildings, true);
+        setItemsVisible(trees, false);
         animateRise(buildings);
     } 
-    else if (stage === 2) {
-        title.innerText = "Urban Forest";
-        text.innerText = "Adding species-specific canopy from tree data.";
-        stats.classList.remove('visible');
-        await loadTrees();
-        toggleVisibility(buildings, true);
-        toggleVisibility(trees, true);
+    else if (stage === 2 || stage === 3) {
+        await ensureBuildingsLoaded();
+        await ensureTreesLoaded();
+        setItemsVisible(buildings, true);
+        setItemsVisible(trees, true);
         animateRise(trees);
-    } 
-    else if (stage === 3) {
-        title.innerText = "Environmental Stats";
-        text.innerText = "Projected impact of the rewilding strategy.";
-        stats.classList.add('visible');
     }
-
-    setTimeout(() => { isAnimating = false; }, 800);
 }
 
-// --- DATA LOADERS ---
-async function loadBuildings() {
+// --- THREE.JS LOADERS ---
+
+async function ensureBuildingsLoaded() {
     if (buildings.length > 0) return;
+    console.log("Loading Buildings...");
     const res = await fetch('gowanus-buildings.geojson');
     const data = await res.json();
 
     data.features.forEach(f => {
         if (f.geometry.type !== 'Polygon') return;
-        
-        // Use the height property from your JSON
-        const h = parseFloat(f.properties.height) || 12;
+        const height = parseFloat(f.properties.height) || 12;
         const coords = f.geometry.coordinates[0];
 
-        const meshOptions = { color: 0xeeeeee, side: THREE.DoubleSide, transparent: true, opacity: 0.9 };
-        const building = tb.utils.makeTriangulatedMesh(coords, h, meshOptions);
+        // Threebox triangulated mesh for buildings
+        const meshOptions = { color: 0xdddddd, side: THREE.DoubleSide };
+        const building = tb.utils.makeTriangulatedMesh(coords, height, meshOptions);
         
         building.visible = false;
         tb.add(building);
@@ -116,29 +110,34 @@ async function loadBuildings() {
     });
 }
 
-async function loadTrees() {
+async function ensureTreesLoaded() {
     if (trees.length > 0) return;
+    console.log("Loading Trees...");
     const res = await fetch('gowanus_trees.json');
     const data = await res.json();
 
     data.forEach(t => {
         if (!t.lat || !t.lon || !isInsideGowanus(t.lat, t.lon)) return;
 
-        // Create Three.js tree model (Trunk + Canopy)
-        const treeGroup = new THREE.Group();
+        // Build a stylized Three.js tree group
+        const group = new THREE.Group();
+        
+        // Trunk
         const trunk = new THREE.Mesh(
             new THREE.CylinderGeometry(0.2, 0.2, 1.2),
             new THREE.MeshPhongMaterial({ color: 0x4d2e1e })
         );
+        // Canopy
         const canopy = new THREE.Mesh(
-            new THREE.SphereGeometry(1.2, 8, 8),
+            new THREE.SphereGeometry(1, 8, 8),
             new THREE.MeshPhongMaterial({ color: getTreeColor(t.species) })
         );
         canopy.position.y = 1.2;
-        treeGroup.add(trunk);
-        treeGroup.add(canopy);
+        group.add(trunk);
+        group.add(canopy);
 
-        const treeObj = tb.Object3D({ obj: treeGroup, anchor: 'bottom' })
+        // Position it in the 3D map space
+        const treeObj = tb.Object3D({ obj: group, anchor: 'bottom' })
             .setCoords([t.lon, t.lat, 0]);
 
         treeObj.visible = false;
@@ -147,41 +146,30 @@ async function loadTrees() {
     });
 }
 
-// --- HELPERS ---
+// --- UTILS ---
+
 function getTreeColor(species) {
-    const shades = ['#2d5a27', '#467c3a', '#386641', '#6a994e', '#a7c957'];
+    const greens = ['#2d5a27', '#467c3a', '#3a5a40', '#588157', '#a3b18a'];
     let hash = 0;
     if (species) {
         for (let i = 0; i < species.length; i++) hash = species.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return shades[Math.abs(hash) % shades.length];
+    return greens[Math.abs(hash) % greens.length];
 }
 
-function toggleVisibility(array, state) {
-    array.forEach(item => item.visible = state);
+function setItemsVisible(array, visible) {
+    array.forEach(item => { item.visible = visible; });
 }
 
 function animateRise(array) {
     array.forEach(item => {
+        if (item.scale.z > 0.1) return; // Already risen
         item.scale.z = 0.01;
         let s = 0;
-        const interval = setInterval(() => {
+        const intr = setInterval(() => {
             s += 0.05;
             item.scale.z = s;
-            if (s >= 1) {
-                item.scale.z = 1;
-                clearInterval(interval);
-            }
-        }, 20);
+            if (s >= 1) clearInterval(intr);
+        }, 30);
     });
 }
-
-// --- SCROLL INTERACTION ---
-window.addEventListener('wheel', (e) => {
-    if (isAnimating) return;
-    
-    if (e.deltaY > 0) currentStage = Math.min(currentStage + 1, 3);
-    else currentStage = Math.max(currentStage - 1, 0);
-
-    updateStage(currentStage);
-}, { passive: true });
