@@ -8,33 +8,13 @@ const map = new maplibregl.Map({
   antialias: true
 });
 
+map.addControl(new maplibregl.NavigationControl());
 map.scrollZoom.disable();
 
 let currentStage = 0;
 let isAnimating = false;
 
-const stageContent = [
-  {
-    title: "Gowanus Canal",
-    desc: "Scroll to move through the stages."
-  },
-  {
-    title: "Existing Density",
-    desc: "Building footprints extrude to their recorded heights."
-  },
-  {
-    title: "Rewilding Gowanus",
-    desc: "Street tree locations appear across the neighborhood."
-  },
-  {
-    title: "Future Impact",
-    desc: "Ecological coverage and open space improvements are highlighted."
-  }
-];
-
-// Use building height property, fallback to 12 if missing
-const existingHeightExpression = ['coalesce', ['to-number', ['get', 'height']], 12];
-
+// ---------- helpers ----------
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -43,65 +23,93 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function setStageText(stage) {
-  document.getElementById('stage-title').innerText = stageContent[stage].title;
-  document.getElementById('stage-desc').innerText = stageContent[stage].desc;
-}
-
-function setTreeVisibility(show) {
-  if (map.getLayer('trees-circle')) {
-    map.setLayoutProperty('trees-circle', 'visibility', show ? 'visible' : 'none');
+// ---------- stage text ----------
+const stageContent = [
+  {
+    title: "Gowanus Canal",
+    desc: "Scroll to move through the stages."
+  },
+  {
+    title: "Existing Density",
+    desc: "Existing building footprints extrude using recorded height data."
+  },
+  {
+    title: "Proposed Rezoning",
+    desc: "Rezoning massing appears over the existing neighborhood fabric."
   }
+];
+
+function updateStageUI(stage) {
+  const titleEl = document.getElementById('stage-title');
+  const descEl = document.getElementById('stage-desc');
+
+  if (titleEl) titleEl.innerText = stageContent[stage].title;
+  if (descEl) descEl.innerText = stageContent[stage].desc;
 }
 
-function setStatsVisibility(show) {
-  const stats = document.getElementById('stats-panel');
-  stats.classList.toggle('hidden', !show);
-}
+// ---------- building height expressions ----------
+const existingHeightExpression = [
+  '*',
+  1.3,
+  ['coalesce',
+    ['to-number', ['get', 'height']],
+    ['*', 3.2, ['to-number', ['get', 'building:levels']]],
+    12
+  ]
+];
 
-function setBuildingHeight(multiplier) {
-  if (!map.getLayer('existing-buildings')) return;
+const proposedHeightExpression = [
+  'coalesce',
+  ['to-number', ['get', 'proposed_height']],
+  0
+];
 
-  map.setPaintProperty(
-    'existing-buildings',
-    'fill-extrusion-height',
-    ['*', multiplier, existingHeightExpression]
-  );
-}
-
+// ---------- stage states ----------
 function setStageInstant(stage) {
+  if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) {
+    return;
+  }
+
   if (stage === 0) {
-    setBuildingHeight(0);
-    setTreeVisibility(false);
-    setStatsVisibility(false);
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+
+    if (window.TreeRenderer?.hideTrees) {
+      window.TreeRenderer.hideTrees(map);
+    }
   }
 
   if (stage === 1) {
-    setBuildingHeight(1);
-    setTreeVisibility(false);
-    setStatsVisibility(false);
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+
+    if (window.TreeRenderer?.hideTrees) {
+      window.TreeRenderer.hideTrees(map);
+    }
   }
 
   if (stage === 2) {
-    setBuildingHeight(1);
-    setTreeVisibility(true);
-    setStatsVisibility(false);
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', proposedHeightExpression);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0.95);
+
+    if (window.TreeRenderer?.showTrees) {
+      window.TreeRenderer.showTrees(map);
+    }
   }
 
-  if (stage === 3) {
-    setBuildingHeight(1);
-    setTreeVisibility(true);
-    setStatsVisibility(true);
-  }
-
-  setStageText(stage);
+  updateStageUI(stage);
 }
 
 function animateStage(stage) {
   if (isAnimating) return;
+  if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) return;
+
   isAnimating = true;
 
-  const duration = 900;
+  const duration = 1000;
   const startTime = performance.now();
 
   function step(now) {
@@ -109,31 +117,49 @@ function animateStage(stage) {
     const t = easeOutCubic(raw);
 
     if (stage === 0) {
-      // collapse buildings, hide trees
-      setBuildingHeight(1 - t);
-      setTreeVisibility(false);
-      setStatsVisibility(false);
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', 1 - t, existingHeightExpression]
+      );
+
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+
+      if (window.TreeRenderer?.hideTrees) {
+        window.TreeRenderer.hideTrees(map);
+      }
     }
 
     if (stage === 1) {
-      // grow buildings
-      setBuildingHeight(t);
-      setTreeVisibility(false);
-      setStatsVisibility(false);
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', t, existingHeightExpression]
+      );
+
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+
+      if (window.TreeRenderer?.hideTrees) {
+        window.TreeRenderer.hideTrees(map);
+      }
     }
 
     if (stage === 2) {
-      // keep buildings, show trees
-      setBuildingHeight(1);
-      if (raw > 0.2) setTreeVisibility(true);
-      setStatsVisibility(false);
-    }
+      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
 
-    if (stage === 3) {
-      // keep everything, show stats
-      setBuildingHeight(1);
-      setTreeVisibility(true);
-      if (raw > 0.3) setStatsVisibility(true);
+      map.setPaintProperty(
+        'proposed-buildings',
+        'fill-extrusion-height',
+        ['*', t, proposedHeightExpression]
+      );
+
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', t * 0.95);
+
+      if (raw > 0.2 && window.TreeRenderer?.showTrees) {
+        window.TreeRenderer.showTrees(map);
+      }
     }
 
     if (raw < 1) {
@@ -147,95 +173,98 @@ function animateStage(stage) {
   requestAnimationFrame(step);
 }
 
-async function loadTreesAsPoints() {
-  const res = await fetch('/data/gowanus_trees.json');
-  const data = await res.json();
-
-  // Convert whatever your JSON is into GeoJSON features
-  const features = data
-    .filter(t => t.lat != null && t.lon != null)
-    .map(t => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [Number(t.lon), Number(t.lat)]
-      },
-      properties: {
-        species: t.species || 'Unknown'
-      }
-    }));
-
-  const geojson = {
-    type: 'FeatureCollection',
-    features
-  };
-
-  map.addSource('trees', {
-    type: 'geojson',
-    data: geojson
-  });
-
-  map.addLayer({
-    id: 'trees-circle',
-    type: 'circle',
-    source: 'trees',
-    layout: {
-      visibility: 'none'
-    },
-    paint: {
-      'circle-radius': 3,
-      'circle-color': [
-        'match',
-        ['%', ['string-length', ['coalesce', ['get', 'species'], '']], 4],
-        0, '#2d5a27',
-        1, '#467c3a',
-        2, '#3a5a40',
-        3, '#588157',
-        '#467c3a'
-      ],
-      'circle-opacity': 0.95,
-      'circle-stroke-color': '#d9ffd0',
-      'circle-stroke-width': 0.5
-    }
-  });
-}
-
+// ---------- map load ----------
 map.on('load', async () => {
-  const res = await fetch('/data/gowanus-buildings.geojson');
-  const existingData = await res.json();
+  try {
+    const [existingResponse, proposedResponse] = await Promise.all([
+      fetch('./data/gowanus-buildings.geojson'),
+      fetch('./data/rezoning-buildings.geojson')
+    ]);
 
-  map.addSource('existing', {
-    type: 'geojson',
-    data: existingData
-  });
-
-  map.addLayer({
-    id: 'existing-buildings',
-    type: 'fill-extrusion',
-    source: 'existing',
-    paint: {
-      'fill-extrusion-color': '#e0e0e0',
-      'fill-extrusion-base': 0,
-      'fill-extrusion-height': 0,
-      'fill-extrusion-opacity': 0.9
+    if (!existingResponse.ok) {
+      throw new Error(`Existing buildings fetch failed: ${existingResponse.status} ${existingResponse.statusText}`);
     }
-  });
 
-  await loadTreesAsPoints();
+    if (!proposedResponse.ok) {
+      throw new Error(`Proposed buildings fetch failed: ${proposedResponse.status} ${proposedResponse.statusText}`);
+    }
 
-  setStageInstant(0);
+    const existingData = await existingResponse.json();
+    const proposedData = await proposedResponse.json();
+
+    console.log('Existing building count:', existingData.features?.length || 0);
+    console.log('Proposed building count:', proposedData.features?.length || 0);
+    console.log('Sample existing props:', existingData.features?.slice(0, 3).map(f => f.properties));
+
+    map.addSource('existing', {
+      type: 'geojson',
+      data: existingData
+    });
+
+    map.addLayer({
+      id: 'existing-buildings',
+      type: 'fill-extrusion',
+      source: 'existing',
+      paint: {
+        'fill-extrusion-color': '#8b5cf6',
+        'fill-extrusion-base': 0,
+        'fill-extrusion-height': 0,
+        'fill-extrusion-opacity': 0.92
+      }
+    });
+
+    map.addSource('proposed', {
+      type: 'geojson',
+      data: proposedData
+    });
+
+    map.addLayer({
+      id: 'proposed-buildings',
+      type: 'fill-extrusion',
+      source: 'proposed',
+      paint: {
+        'fill-extrusion-color': '#3b82f6',
+        'fill-extrusion-base': 0,
+        'fill-extrusion-height': 0,
+        'fill-extrusion-opacity': 0
+      }
+    });
+
+    if (window.TreeRenderer?.initTrees) {
+      await window.TreeRenderer.initTrees(map);
+    }
+
+    setStageInstant(0);
+  } catch (err) {
+    console.error('MAP LOAD ERROR:', err);
+  }
 });
 
+// ---------- scroll stages ----------
+// normal scroll = stage changes
+// hold Alt = allow map zoom
 window.addEventListener('wheel', (event) => {
+  if (event.altKey) {
+    map.scrollZoom.enable();
+    return;
+  }
+
+  map.scrollZoom.disable();
   event.preventDefault();
 
   if (isAnimating) return;
 
-  const direction = event.deltaY > 0 ? 1 : -1;
-  const nextStage = clamp(currentStage + direction, 0, 3);
+  if (event.deltaY > 0) {
+    currentStage = clamp(currentStage + 1, 0, 2);
+  } else {
+    currentStage = clamp(currentStage - 1, 0, 2);
+  }
 
-  if (nextStage === currentStage) return;
-
-  currentStage = nextStage;
   animateStage(currentStage);
 }, { passive: false });
+
+window.addEventListener('keyup', (event) => {
+  if (event.key === 'Alt') {
+    map.scrollZoom.disable();
+  }
+});
