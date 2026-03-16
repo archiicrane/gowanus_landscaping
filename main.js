@@ -148,7 +148,7 @@ function animateStage(stage) {
 }
 
 async function loadTreesAsPoints() {
-  const res = await fetch('gowanus_trees.json');
+  const res = await fetch('/data/gowanus_trees.json');
   const data = await res.json();
 
   // Convert whatever your JSON is into GeoJSON features
@@ -201,7 +201,7 @@ async function loadTreesAsPoints() {
 }
 
 map.on('load', async () => {
-  const res = await fetch('gowanus-buildings.geojson');
+  const res = await fetch('/data/gowanus-buildings.geojson');
   const existingData = await res.json();
 
   map.addSource('existing', {
