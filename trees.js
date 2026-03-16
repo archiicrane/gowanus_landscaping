@@ -9,7 +9,14 @@ window.TreeRenderer = {
         throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
       }
 
-      const rawData = await response.json();
+      // Read as text first because the file contains invalid JSON tokens like NaN
+      const rawText = await response.text();
+
+      // Replace bare NaN values with null so JSON.parse works
+      const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
+
+      const rawData = JSON.parse(cleanedText);
+
       console.log('Tree sample:', rawData[0]);
 
       const features = rawData
@@ -21,7 +28,9 @@ window.TreeRenderer = {
             coordinates: [Number(t.lon), Number(t.lat)]
           },
           properties: {
-            species: t.species || 'Unknown'
+            tree_id: t.tree_id ?? null,
+            species: t.species ?? 'Unknown',
+            health: t.health ?? 'Unknown'
           }
         }));
 
@@ -61,7 +70,7 @@ window.TreeRenderer = {
           ],
           'circle-color': [
             'match',
-            ['downcase', ['coalesce', ['get', 'species'], 'unknown']],
+            ['downcase', ['to-string', ['coalesce', ['get', 'species'], 'unknown']]],
             'kentucky coffeetree', '#8bc34a',
             'honeylocust', '#7ddc6f',
             'london planetree', '#5fbf72',
