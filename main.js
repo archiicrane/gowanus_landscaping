@@ -9,6 +9,7 @@ const GOWANUS_COORDS = [
     [40.67663528353369, -73.99461997552936]
 ];
 
+// Point-in-polygon check for filtering
 function isInsideGowanus(lat, lon) {
     let inside = false;
     for (let i = 0, j = GOWANUS_COORDS.length - 1; i < GOWANUS_COORDS.length; j = i++) {
@@ -24,133 +25,163 @@ function isInsideGowanus(lat, lon) {
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [-73.991, 40.675],
-    zoom: 16,
-    pitch: 60, // Isometric-like tilt
+    center: [-73.990, 40.675],
+    zoom: 15.5,
+    pitch: 60,
     bearing: -20,
     interactive: false 
 });
 
-window.tb = null;
+let tb;
 let currentStage = 0;
-let isScrolling = false;
-const buildings = [];
-const trees = [];
+let isAnimating = false;
+let buildings = [];
+let trees = [];
 
 map.on('style.load', () => {
     map.addLayer({
-        id: 'custom-threebox-layer',
+        id: 'threejs-layer',
         type: 'custom',
         renderingMode: '3d',
         onAdd: function (map, gl) {
-            // CRITICAL: Initialize Threebox with the map and gl context
-            window.tb = new Threebox(map, gl, { defaultLights: true });
+            tb = new Threebox(map, gl, { defaultLights: true });
         },
-        render: function () {
-            if (window.tb) window.tb.update();
-        }
+        render: function () { tb.update(); }
     });
 });
 
-// --- SCROLL INTERACTION ---
-window.addEventListener('wheel', (e) => {
-    if (isScrolling) return;
-    isScrolling = true;
-    setTimeout(() => { isScrolling = false; }, 800);
+// --- STAGE MANAGER ---
+async function updateStage(stage) {
+    if (isAnimating) return;
+    isAnimating = true;
 
-    if (e.deltaY > 0 && currentStage < 3) currentStage++;
-    else if (e.deltaY < 0 && currentStage > 0) currentStage--;
+    // UI Updates
+    const title = document.getElementById('stage-title');
+    const text = document.getElementById('stage-text');
+    const stats = document.getElementById('stats-panel');
 
-    updateExperience();
-}, { passive: true });
+    if (stage === 0) {
+        title.innerText = "Gowanus Canal";
+        text.innerText = "The industrial heart of Brooklyn. Scroll to begin.";
+        stats.classList.remove('visible');
+        toggleVisibility(buildings, false);
+        toggleVisibility(trees, false);
+    } 
+    else if (stage === 1) {
+        title.innerText = "Existing Built Form";
+        text.innerText = "Extracting building heights from GeoJSON...";
+        stats.classList.remove('visible');
+        await loadBuildings();
+        toggleVisibility(buildings, true);
+        toggleVisibility(trees, false);
+        animateRise(buildings);
+    } 
+    else if (stage === 2) {
+        title.innerText = "Urban Forest";
+        text.innerText = "Adding species-specific canopy from tree data.";
+        stats.classList.remove('visible');
+        await loadTrees();
+        toggleVisibility(buildings, true);
+        toggleVisibility(trees, true);
+        animateRise(trees);
+    } 
+    else if (stage === 3) {
+        title.innerText = "Environmental Stats";
+        text.innerText = "Projected impact of the rewilding strategy.";
+        stats.classList.add('visible');
+    }
 
-function updateExperience() {
-    document.getElementById('stats-panel').classList.toggle('visible', currentStage === 3);
-    
-    if (currentStage >= 1) loadBuildings();
-    if (currentStage >= 2) loadTrees();
-
-    // Toggle visibility based on stage
-    buildings.forEach(b => b.visible = (currentStage >= 1));
-    trees.forEach(t => t.visible = (currentStage >= 2));
+    setTimeout(() => { isAnimating = false; }, 800);
 }
 
-// --- 3D BUILDING GENERATION ---
-function loadBuildings() {
+// --- DATA LOADERS ---
+async function loadBuildings() {
     if (buildings.length > 0) return;
+    const res = await fetch('gowanus-buildings.geojson');
+    const data = await res.json();
 
-    fetch('gowanus-buildings.geojson')
-        .then(res => res.json())
-        .then(data => {
-            data.features.forEach(feature => {
-                if (feature.geometry.type !== 'Polygon') return;
+    data.features.forEach(f => {
+        if (f.geometry.type !== 'Polygon') return;
+        
+        // Use the height property from your JSON
+        const h = parseFloat(f.properties.height) || 12;
+        const coords = f.geometry.coordinates[0];
 
-                // 1. Convert height
-                const h = parseFloat(feature.properties.height) || 15;
-                const coords = feature.geometry.coordinates[0];
-
-                // 2. Create the 3D Shape using Threebox utility
-                // We use tb.utils.projectToWorld to convert GPS to Three.js units
-                const shapePoints = coords.map(p => tb.utils.projectToWorld([p[0], p[1]]));
-                const shape = new THREE.Shape(shapePoints);
-
-                const geometry = new THREE.ExtrudeGeometry(shape, { 
-                    depth: h, 
-                    bevelEnabled: false 
-                });
-                
-                const material = new THREE.MeshPhongMaterial({ color: 0xdddddd, side: THREE.DoubleSide });
-                const mesh = new THREE.Mesh(geometry, material);
-                
-                // 3. Wrap in Threebox Object and add to map
-                const obj = tb.Object3D({ obj: mesh, anchor: 'bottom' });
-                // Use the first coordinate as the anchor point
-                obj.setCoords([coords[0][0], coords[0][1], 0]);
-                
-                tb.add(obj);
-                buildings.push(obj);
-            });
-        });
+        const meshOptions = { color: 0xeeeeee, side: THREE.DoubleSide, transparent: true, opacity: 0.9 };
+        const building = tb.utils.makeTriangulatedMesh(coords, h, meshOptions);
+        
+        building.visible = false;
+        tb.add(building);
+        buildings.push(building);
+    });
 }
 
-// --- 3D TREE GENERATION ---
-function loadTrees() {
+async function loadTrees() {
     if (trees.length > 0) return;
+    const res = await fetch('gowanus_trees.json');
+    const data = await res.json();
 
-    fetch('gowanus_trees.json')
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(t => {
-                if (!t.lat || !t.lon || !isInsideGowanus(t.lat, t.lon)) return;
+    data.forEach(t => {
+        if (!t.lat || !t.lon || !isInsideGowanus(t.lat, t.lon)) return;
 
-                // Create a stylized tree (Trunk + Canopy)
-                const treeGroup = new THREE.Group();
-                const trunk = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.2, 0.2, 1.5),
-                    new THREE.MeshPhongMaterial({ color: 0x4d2e1e })
-                );
-                const canopy = new THREE.Mesh(
-                    new THREE.SphereGeometry(1.2, 8, 8),
-                    new THREE.MeshPhongMaterial({ color: getSpeciesColor(t.species) })
-                );
-                canopy.position.y = 1.5;
-                treeGroup.add(trunk);
-                treeGroup.add(canopy);
+        // Create Three.js tree model (Trunk + Canopy)
+        const treeGroup = new THREE.Group();
+        const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.2, 1.2),
+            new THREE.MeshPhongMaterial({ color: 0x4d2e1e })
+        );
+        const canopy = new THREE.Mesh(
+            new THREE.SphereGeometry(1.2, 8, 8),
+            new THREE.MeshPhongMaterial({ color: getTreeColor(t.species) })
+        );
+        canopy.position.y = 1.2;
+        treeGroup.add(trunk);
+        treeGroup.add(canopy);
 
-                const treeObj = tb.Object3D({ obj: treeGroup, anchor: 'bottom' })
-                    .setCoords([t.lon, t.lat, 0]);
+        const treeObj = tb.Object3D({ obj: treeGroup, anchor: 'bottom' })
+            .setCoords([t.lon, t.lat, 0]);
 
-                tb.add(treeObj);
-                trees.push(treeObj);
-            });
-        });
+        treeObj.visible = false;
+        tb.add(treeObj);
+        trees.push(treeObj);
+    });
 }
 
-function getSpeciesColor(species) {
-    const palette = ['#2d5a27', '#467c3a', '#386641', '#6a994e', '#a7c957'];
+// --- HELPERS ---
+function getTreeColor(species) {
+    const shades = ['#2d5a27', '#467c3a', '#386641', '#6a994e', '#a7c957'];
     let hash = 0;
     if (species) {
         for (let i = 0; i < species.length; i++) hash = species.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return palette[Math.abs(hash) % palette.length];
+    return shades[Math.abs(hash) % shades.length];
 }
+
+function toggleVisibility(array, state) {
+    array.forEach(item => item.visible = state);
+}
+
+function animateRise(array) {
+    array.forEach(item => {
+        item.scale.z = 0.01;
+        let s = 0;
+        const interval = setInterval(() => {
+            s += 0.05;
+            item.scale.z = s;
+            if (s >= 1) {
+                item.scale.z = 1;
+                clearInterval(interval);
+            }
+        }, 20);
+    });
+}
+
+// --- SCROLL INTERACTION ---
+window.addEventListener('wheel', (e) => {
+    if (isAnimating) return;
+    
+    if (e.deltaY > 0) currentStage = Math.min(currentStage + 1, 3);
+    else currentStage = Math.max(currentStage - 1, 0);
+
+    updateStage(currentStage);
+}, { passive: true });
