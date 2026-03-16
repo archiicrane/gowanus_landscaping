@@ -3,24 +3,24 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background: #000;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #fff;
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- Top Bar ---------- */
 .top-bar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 44px;
-  background: rgba(10, 10, 10, 0.85);
+  height: 56px;
+  background: rgba(8, 8, 8, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -30,10 +30,10 @@ body {
 }
 
 .brand {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   color: #ffffff;
 }
 
@@ -44,12 +44,12 @@ body {
 
 .nav-btn {
   text-decoration: none;
-  font-size: 11px;
-  font-weight: 500;
-  color: #888;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7b7b7b;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: color 0.3s ease;
+  letter-spacing: 0.06em;
+  transition: color 0.25s ease;
 }
 
 .nav-btn:hover,
@@ -57,6 +57,7 @@ body {
   color: #ffffff;
 }
 
+/* ---------- Map Page ---------- */
 #map {
   position: absolute;
   inset: 0;
@@ -68,70 +69,272 @@ body {
 .ui-panel {
   position: absolute;
   z-index: 100;
-  background: rgba(18, 18, 18, 0.8);
+  background: rgba(18, 18, 18, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
 #stage-info {
   bottom: 32px;
   left: 32px;
-  width: 320px;
+  width: 340px;
 }
 
 #stage-title {
   margin: 0 0 8px 0;
-  font-size: 18px;
-  font-weight: 300;
+  font-size: 20px;
+  font-weight: 500;
   letter-spacing: -0.02em;
 }
 
 #stage-desc {
   margin: 0;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
-  color: #aaa;
+  color: #aaaaaa;
+}
+
+/* ---------- Diagrams Page ---------- */
+.diagrams-page {
+  background: #000;
+  color: #fff;
+}
+
+.diagrams-layout {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 104px 28px 48px;
+  box-sizing: border-box;
+}
+
+.diagrams-header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #7ddc6f;
+}
+
+.diagrams-header h1 {
+  margin: 0 0 14px 0;
+  font-size: clamp(2.25rem, 4vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.diagrams-intro {
+  margin: 0;
+  max-width: 980px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #b4b4b4;
+}
+
+.diagram-error {
+  padding: 14px 16px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  background: rgba(127, 29, 29, 0.32);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  color: #fecaca;
+  font-size: 0.95rem;
+}
+
+/* ---------- Metric Cards ---------- */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.metric-card {
+  background: linear-gradient(180deg, rgba(16, 16, 16, 0.95), rgba(10, 10, 10, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px 18px 20px;
+  min-height: 150px;
+  box-sizing: border-box;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+}
+
+.metric-label {
+  margin: 0 0 18px 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #a3a3a3;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metric-value {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  letter-spacing: -0.04em;
+}
+
+.metric-subtitle {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #8f8f8f;
+}
+
+/* ---------- Chart Panels ---------- */
+.charts-grid {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.charts-grid.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-card {
+  background: linear-gradient(180deg, rgba(16, 16, 16, 0.96), rgba(9, 9, 9, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.panel-header {
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.panel-header p {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #9f9f9f;
 }
 
 .chart-wrap {
   position: relative;
   width: 100%;
-  height: 320px;
+  height: 340px;
 }
 
-.metric-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.metric-subtitle {
-  margin-top: 6px;
-  font-size: 0.9rem;
-  color: #a1a1aa;
+/* ---------- Notes ---------- */
+.notes-card {
+  margin-bottom: 0;
 }
 
+/* ---------- Table ---------- */
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  color: white;
+  color: #ffffff;
+  font-size: 0.95rem;
 }
 
-.data-table th,
-.data-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+.data-table thead th {
   text-align: left;
+  padding: 12px 12px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8d8d8d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-#diagramError {
-  padding: 12px 14px;
-  margin-bottom: 16px;
-  color: #fecaca;
-  background: rgba(127, 29, 29, 0.3);
-  border: 1px solid rgba(248, 113, 113, 0.3);
+.data-table tbody td {
+  padding: 13px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #ededed;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .diagrams-layout {
+    padding: 92px 18px 28px;
+  }
+
+  .charts-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-wrap {
+    height: 300px;
+  }
+}
+
+@media (max-width: 560px) {
+  .top-bar {
+    padding: 0 16px;
+  }
+
+  .brand {
+    font-size: 11px;
+  }
+
+  .nav-links {
+    gap: 14px;
+  }
+
+  .nav-btn {
+    font-size: 11px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-card,
+  .metric-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .chart-wrap {
+    height: 260px;
+  }
+
+  #stage-info {
+    left: 16px;
+    bottom: 16px;
+    width: calc(100% - 32px);
+  }
 }
