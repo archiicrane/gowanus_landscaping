@@ -1,54 +1,6 @@
 console.log('trees.js loaded');
 
 window.TreeRenderer = {
-  speciesColor(species) {
-    const s = (species || 'Unknown').toLowerCase();
-
-    const colorMap = {
-      'honeylocust': '#7ddc6f',
-      'london planetree': '#5fbf72',
-      'japanese zelkova': '#4caf50',
-      'littleleaf linden': '#9ccc65',
-      'callery pear': '#c0e57b',
-      'pin oak': '#2e7d32',
-      'ginkgo': '#ffd54f',
-      'bald cypress': '#2f855a',
-      'cornelian cherry': '#ff8a65',
-      'kentucky coffeetree': '#8bc34a',
-      'black walnut': '#6d8f3f',
-      'japanese tree lilac': '#ba68c8',
-      'swamp white oak': '#66bb6a',
-      'chinese elm': '#43a047',
-      'red maple': '#ef5350',
-      'norway maple': '#ef6c00',
-      'american linden': '#aed581',
-      'silver linden': '#d4e157',
-      'english oak': '#388e3c',
-      'white oak': '#81c784',
-      'sweetgum': '#26a69a',
-      'crab apple': '#f06292',
-      'sophora': '#26c6da',
-      'common hackberry': '#78909c',
-      'golden raintree': '#ffca28',
-      'hardy rubber tree': '#7cb342',
-      'silver birch': '#b0bec5',
-      'black locust': '#8d6e63',
-      'american elm': '#66bb6a',
-      'green ash': '#9e9d24',
-      'amur maackia': '#a1887f',
-      'amur maple': '#ff7043',
-      'siberian elm': '#558b2f',
-      'pine': '#1b5e20',
-      'tree of heaven': '#8bc34a',
-      'sawtooth oak': '#689f38',
-      'japanese hornbeam': '#90a4ae',
-      'pagoda dogwood': '#ce93d8',
-      "'schubert' chokecherry": '#ab47bc'
-    };
-
-    return colorMap[s] || '#22c55e';
-  },
-
   async initTrees(map) {
     try {
       const response = await fetch('./data/gowanus_trees.json');
@@ -69,9 +21,7 @@ window.TreeRenderer = {
             coordinates: [Number(t.lon), Number(t.lat)]
           },
           properties: {
-            tree_id: t.tree_id ?? null,
-            species: t.species || 'Unknown',
-            health: t.health || 'Unknown'
+            species: t.species || 'Unknown'
           }
         }));
 
@@ -98,21 +48,21 @@ window.TreeRenderer = {
         type: 'circle',
         source: 'trees',
         layout: {
-          visibility: 'visible'
+          visibility: 'none'
         },
         paint: {
           'circle-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            13, 2.5,
-            15, 4,
-            17, 6
+            13, 4,
+            15, 6,
+            17, 9
           ],
           'circle-color': [
             'match',
             ['downcase', ['coalesce', ['get', 'species'], 'unknown']],
-
+            'kentucky coffeetree', '#8bc34a',
             'honeylocust', '#7ddc6f',
             'london planetree', '#5fbf72',
             'japanese zelkova', '#4caf50',
@@ -122,42 +72,15 @@ window.TreeRenderer = {
             'ginkgo', '#ffd54f',
             'bald cypress', '#2f855a',
             'cornelian cherry', '#ff8a65',
-            'kentucky coffeetree', '#8bc34a',
             'black walnut', '#6d8f3f',
             'japanese tree lilac', '#ba68c8',
-            'swamp white oak', '#66bb6a',
-            'chinese elm', '#43a047',
             'red maple', '#ef5350',
             'norway maple', '#ef6c00',
-            'american linden', '#aed581',
-            'silver linden', '#d4e157',
-            'english oak', '#388e3c',
-            'white oak', '#81c784',
-            'sweetgum', '#26a69a',
-            'crab apple', '#f06292',
-            'sophora', '#26c6da',
-            'common hackberry', '#78909c',
-            'golden raintree', '#ffca28',
-            'hardy rubber tree', '#7cb342',
-            'silver birch', '#b0bec5',
-            'black locust', '#8d6e63',
-            'american elm', '#66bb6a',
-            'green ash', '#9e9d24',
-            'amur maackia', '#a1887f',
-            'amur maple', '#ff7043',
-            'siberian elm', '#558b2f',
-            'pine', '#1b5e20',
-            'tree of heaven', '#8bc34a',
-            'sawtooth oak', '#689f38',
-            'japanese hornbeam', '#90a4ae',
-            'pagoda dogwood', '#ce93d8',
-            "'schubert' chokecherry", '#ab47bc',
-
             '#22c55e'
           ],
-          'circle-opacity': 0.95,
+          'circle-opacity': 1,
           'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 0.8
+          'circle-stroke-width': 1.2
         }
       });
 
@@ -168,12 +91,14 @@ window.TreeRenderer = {
   },
 
   showTrees(map) {
+    console.log('showTrees called');
     if (map.getLayer('trees-layer')) {
       map.setLayoutProperty('trees-layer', 'visibility', 'visible');
     }
   },
 
   hideTrees(map) {
+    console.log('hideTrees called');
     if (map.getLayer('trees-layer')) {
       map.setLayoutProperty('trees-layer', 'visibility', 'none');
     }

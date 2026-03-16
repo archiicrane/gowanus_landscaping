@@ -25,7 +25,7 @@ const stageContent = [
   },
   {
     title: "Proposed Rezoning + Trees",
-    desc: "Rezoning massing appears with tree locations rendered as low-poly 3D objects."
+    desc: "Rezoning massing appears with street tree locations."
   }
 ];
 
@@ -70,24 +70,21 @@ function setStageInstant(stage) {
     map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-
-    window.TreeRenderer?.hideTrees?.();
+    window.TreeRenderer?.hideTrees?.(map);
   }
 
   if (stage === 1) {
     map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-
-    window.TreeRenderer?.hideTrees?.();
+    window.TreeRenderer?.hideTrees?.(map);
   }
 
   if (stage === 2) {
     map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', proposedHeightExpression);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0.95);
-
-    window.TreeRenderer?.showTrees?.();
+    window.TreeRenderer?.showTrees?.(map);
   }
 
   updateStageUI(stage);
@@ -112,11 +109,9 @@ function animateStage(stage) {
         'fill-extrusion-height',
         ['*', 1 - t, existingHeightExpression]
       );
-
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-
-      window.TreeRenderer?.hideTrees?.();
+      window.TreeRenderer?.hideTrees?.(map);
     }
 
     if (stage === 1) {
@@ -125,26 +120,22 @@ function animateStage(stage) {
         'fill-extrusion-height',
         ['*', t, existingHeightExpression]
       );
-
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-
-      window.TreeRenderer?.hideTrees?.();
+      window.TreeRenderer?.hideTrees?.(map);
     }
 
     if (stage === 2) {
       map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-
       map.setPaintProperty(
         'proposed-buildings',
         'fill-extrusion-height',
         ['*', t, proposedHeightExpression]
       );
-
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', t * 0.95);
 
       if (raw > 0.2) {
-        window.TreeRenderer?.showTrees?.();
+        window.TreeRenderer?.showTrees?.(map);
       }
     }
 
@@ -176,9 +167,6 @@ map.on('load', async () => {
 
     const existingData = await existingResponse.json();
     const proposedData = await proposedResponse.json();
-
-    console.log('Existing building count:', existingData.features?.length || 0);
-    console.log('Proposed building count:', proposedData.features?.length || 0);
 
     map.addSource('existing', {
       type: 'geojson',
@@ -214,7 +202,7 @@ map.on('load', async () => {
       }
     });
 
-    await window.TreeRenderer?.init?.(map);
+    await window.TreeRenderer?.initTrees?.(map);
 
     setStageInstant(0);
   } catch (err) {
