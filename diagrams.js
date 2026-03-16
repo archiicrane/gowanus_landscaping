@@ -67,6 +67,12 @@ function getBoundingBoxAreaKm2(trees) {
   return Math.abs(latKm * lonKm);
 }
 
+/* -----------------------------
+   CANOPY + WATER RETENTION LOGIC
+   ----------------------------- */
+
+// Conceptual canopy-diameter estimate from DBH.
+// If DBH is missing, fall back to a 12 m canopy diameter.
 function estimateCanopyDiameterMeters(dbhInches) {
   if (!Number.isFinite(dbhInches) || dbhInches <= 0) return 12;
   return Math.max(6, Math.min(18, 4 + dbhInches * 0.35));
@@ -78,29 +84,13 @@ function estimateCanopyAreaM2(dbhInches) {
   return Math.PI * radius * radius;
 }
 
-function buildDbhBins(trees) {
-  const bins = [
-    { label: '0–6"', min: 0, max: 6, count: 0 },
-    { label: '7–12"', min: 7, max: 12, count: 0 },
-    { label: '13–18"', min: 13, max: 18, count: 0 },
-    { label: '19–24"', min: 19, max: 24, count: 0 },
-    { label: '25+"', min: 25, max: Infinity, count: 0 },
-    { label: 'Unknown', min: null, max: null, count: 0 }
-  ];
+// Assumptions for conceptual water-retention estimate
+const EFFECTIVE_SOIL_DEPTH_M = 0.9144; // 3 ft
+const AVAILABLE_WATER_FRACTION = 0.20; // conceptual loam-like holding fraction
 
-  for (const tree of trees) {
-    const dbh = safeNumber(tree.dbh);
-
-    if (dbh === null) {
-      bins[bins.length - 1].count += 1;
-      continue;
-    }
-
-    const match = bins.find((bin) => bin.min !== null && dbh >= bin.min && dbh <= bin.max);
-    if (match) match.count += 1;
-  }
-
-  return bins;
+function estimateWaterRetentionM3(dbhInches) {
+  const canopyArea = estimateCanopyAreaM2(dbhInches);
+  return canopyArea * EFFECTIVE_SOIL_DEPTH_M * AVAILABLE_WATER_FRACTION;
 }
 
 function renderMetric(id, value, subtitle = '') {
@@ -269,9 +259,10 @@ function makeHealthChart(healthCounts) {
   });
 }
 
-function makeDbhChart(dbhBins) {
-  const labels = dbhBins.map((b) => b.label);
-  const values = dbhBins.map((b) => b.count);
+function makeWaterRetentionChart(speciesRetentionEntries) {
+  const top = speciesRetentionEntries.slice(0, 8);
+  const labels = top.map(([name]) => titleCase(name));
+  const values = top.map(([, retentionM3]) => Number(retentionM3.toFixed(1)));
 
   destroyChart('dbhChart');
 
@@ -281,7 +272,7 @@ function makeDbhChart(dbhBins) {
       labels,
       datasets: [
         {
-          label: 'Trees',
+          label: 'Estimated Retention (m³)',
           data: values,
           backgroundColor: '#60a5fa',
           borderColor: '#ffffff',
@@ -291,6 +282,7 @@ function makeDbhChart(dbhBins) {
     },
     options: {
       ...baseChartOptions(),
+      indexAxis: 'y',
       plugins: {
         ...baseChartOptions().plugins,
         legend: { display: false }
@@ -302,7 +294,7 @@ function makeDbhChart(dbhBins) {
 function makeCanopyBySpeciesChart(speciesCanopyEntries) {
   const top = speciesCanopyEntries.slice(0, 8);
   const labels = top.map(([name]) => titleCase(name));
-  const values = top.map(([, canopy]) => Number((canopy / 10000).toFixed(2))); // hectares
+  const values = top.map(([, canopy]) => Number((canopy / 10000).toFixed(2)));
 
   destroyChart('canopySpeciesChart');
 
@@ -398,14 +390,6 @@ async function buildGowanusTreeDashboard() {
 
     const speciesCounts = countBy(validTrees, (t) => String(t.species || 'Unknown').trim());
 
-    const dbhValues = validTrees
-      .map((t) => safeNumber(t.dbh))
-      .filter((v) => v !== null);
-
-    const meanDbh = dbhValues.length
-      ? dbhValues.reduce((a, b) => a + b, 0) / dbhValues.length
-      : 0;
-
     const studyAreaKm2 = getBoundingBoxAreaKm2(validTrees);
     const densityPerKm2 = studyAreaKm2 > 0 ? totalTrees / studyAreaKm2 : 0;
 
@@ -416,14 +400,26 @@ async function buildGowanusTreeDashboard() {
     const studyAreaM2 = studyAreaKm2 * 1000000;
     const canopyCoveragePct = studyAreaM2 > 0 ? (totalEstimatedCanopyM2 / studyAreaM2) * 100 : 0;
 
+    const totalEstimatedRetentionM3 = sumBy(validTrees, (t) =>
+      estimateWaterRetentionM3(safeNumber(t.dbh))
+    );
+    const totalEstimatedRetentionLiters = totalEstimatedRetentionM3 * 1000;
+
     const speciesCanopy = {};
+    const speciesRetention = {};
+
     for (const tree of validTrees) {
       const species = String(tree.species || 'Unknown').trim();
-      speciesCanopy[species] = (speciesCanopy[species] || 0) + estimateCanopyAreaM2(safeNumber(tree.dbh));
-    }
-    const speciesCanopyEntries = sortEntriesDesc(speciesCanopy);
+      const canopy = estimateCanopyAreaM2(safeNumber(tree.dbh));
+      const retention = estimateWaterRetentionM3(safeNumber(tree.dbh));
 
-    const dbhBins = buildDbhBins(validTrees);
+      speciesCanopy[species] = (speciesCanopy[species] || 0) + canopy;
+      speciesRetention[species] = (speciesRetention[species] || 0) + retention;
+    }
+
+    const speciesCanopyEntries = sortEntriesDesc(speciesCanopy);
+    const speciesRetentionEntries = sortEntriesDesc(speciesRetention);
+
     const topSpeciesRows = sortEntriesDesc(speciesCounts)
       .slice(0, 10)
       .map(([label, value]) => ({
@@ -434,7 +430,11 @@ async function buildGowanusTreeDashboard() {
     renderMetric('totalTreesMetric', formatNumber(totalTrees), 'Street trees in study area');
     renderMetric('canopyMetric', `${formatNumber(canopyCoveragePct, 1)}%`, `${formatNumber(totalEstimatedCanopyHa, 1)} ha estimated canopy`);
     renderMetric('densityMetric', formatNumber(densityPerKm2, 0), 'Trees per km²');
-    renderMetric('dbhMetric', `${formatNumber(meanDbh, 1)}"`, 'Average trunk diameter');
+    renderMetric(
+      'dbhMetric',
+      `${formatNumber(totalEstimatedRetentionM3, 0)} m³`,
+      `${formatNumber(totalEstimatedRetentionLiters, 0)} L estimated storage`
+    );
     renderMetric('studyAreaMetric', `${formatNumber(studyAreaKm2, 2)} km²`, 'Bounding study area');
 
     const goodPct = totalTrees ? (healthCounts.Good / totalTrees) * 100 : 0;
@@ -444,7 +444,7 @@ async function buildGowanusTreeDashboard() {
 
     makeSpeciesChart(speciesCounts);
     makeHealthChart(healthCounts);
-    makeDbhChart(dbhBins);
+    makeWaterRetentionChart(speciesRetentionEntries);
     makeCanopyBySpeciesChart(speciesCanopyEntries);
     makeHealthBySpeciesChart(validTrees);
   } catch (error) {
