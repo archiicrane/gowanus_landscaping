@@ -1,21 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Rewilding Gowanus - Diagrams</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rewilding Gowanus - Diagrams</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body style="background: #000; color: #555; display: flex; align-items: center; justify-content: center; height: 100vh;">
-    <nav class="top-bar">
-        <div class="brand">Rewilding Gowanus</div>
-        <div class="nav-links">
-            <a href="index.html" class="nav-btn">Map</a>
-            <a href="diagrams.html" class="nav-btn active">Diagrams</a>
-        </div>
-    </nav>
-    <div style="text-align: center;">
-        <h2>Diagrams Placeholder</h2>
-        <p>This page will house technical site sections and analysis charts.</p>
+<body class="diagrams-page">
+  <nav class="top-bar">
+    <div class="brand">Rewilding Gowanus</div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn">Map</a>
+      <a href="diagrams.html" class="nav-btn active">Diagrams</a>
     </div>
+  </nav>
+
+  <main class="diagrams-layout">
+    <section class="diagrams-header">
+      <p class="eyebrow">Existing Conditions</p>
+      <h1>Gowanus Tree and Landscape Baseline</h1>
+      <p class="diagrams-intro">
+        These diagrams use the current Gowanus tree dataset from the map to show
+        baseline canopy, density, health, and species conditions before the proposed
+        landscaping intervention is added.
+      </p>
+    </section>
+
+    <div id="diagramError" class="diagram-error" style="display: none;"></div>
+
+    <section class="metrics-grid">
+      <article class="metric-card">
+        <p class="metric-label">Street Trees</p>
+        <div id="totalTreesMetric"></div>
+      </article>
+
+      <article class="metric-card">
+        <p class="metric-label">Estimated Canopy Coverage</p>
+        <div id="canopyMetric"></div>
+      </article>
+
+      <article class="metric-card">
+        <p class="metric-label">Tree Density</p>
+        <div id="densityMetric"></div>
+      </article>
+
+      <article class="metric-card">
+        <p class="metric-label">Average DBH</p>
+        <div id="dbhMetric"></div>
+      </article>
+
+      <article class="metric-card">
+        <p class="metric-label">Study Area</p>
+        <div id="studyAreaMetric"></div>
+      </article>
+
+      <article class="metric-card">
+        <p class="metric-label">Good Health Share</p>
+        <div id="healthMetric"></div>
+      </article>
+    </section>
+
+    <section class="charts-grid two-col">
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>Top Tree Species</h2>
+          <p>Most common species currently present in the study area.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="speciesChart"></canvas>
+        </div>
+      </article>
+
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>Tree Health Distribution</h2>
+          <p>Current condition of the mapped street trees.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="healthChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="charts-grid two-col">
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>DBH Size Distribution</h2>
+          <p>Tree trunk diameter classes across the study area.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="dbhChart"></canvas>
+        </div>
+      </article>
+
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>Estimated Canopy by Species</h2>
+          <p>Approximate canopy contribution by the most common species.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="canopySpeciesChart"></canvas>
+        </div>
+      </article>
+    </section>
+
+    <section class="charts-grid two-col">
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>Health by Top Species</h2>
+          <p>Stacked comparison of health conditions across dominant species.</p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="healthSpeciesChart"></canvas>
+        </div>
+      </article>
+
+      <article class="panel-card">
+        <div class="panel-header">
+          <h2>Species Ranking Table</h2>
+          <p>Top ten species counts from the current tree dataset.</p>
+        </div>
+        <div id="topSpeciesTable" class="table-wrap"></div>
+      </article>
+    </section>
+
+    <section class="panel-card notes-card">
+      <div class="panel-header">
+        <h2>How to Use These Baselines</h2>
+        <p>
+          When your proposed landscaping data is ready, duplicate these same metrics
+          to compare existing versus proposed canopy, density, tree count, and species diversity.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script src="diagrams.js"></script>
 </body>
 </html>

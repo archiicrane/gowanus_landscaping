@@ -1,0 +1,461 @@
+async function loadTreeData() {
+  const response = await fetch('./data/gowanus_trees.json');
+
+  if (!response.ok) {
+    throw new Error(`Failed to load tree data: ${response.status} ${response.statusText}`);
+  }
+
+  const rawText = await response.text();
+  const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
+  return JSON.parse(cleanedText);
+}
+
+function safeNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function titleCase(str) {
+  if (!str) return 'Unknown';
+  return String(str)
+    .toLowerCase()
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function formatNumber(value, digits = 0) {
+  return Number(value).toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+}
+
+function countBy(items, accessor) {
+  const counts = {};
+  for (const item of items) {
+    const key = accessor(item);
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return counts;
+}
+
+function sumBy(items, accessor) {
+  return items.reduce((sum, item) => sum + accessor(item), 0);
+}
+
+function sortEntriesDesc(obj) {
+  return Object.entries(obj).sort((a, b) => b[1] - a[1]);
+}
+
+function getBoundingBoxAreaKm2(trees) {
+  const valid = trees.filter((t) => safeNumber(t.lat) !== null && safeNumber(t.lon) !== null);
+
+  if (!valid.length) return 0;
+
+  const lats = valid.map((t) => safeNumber(t.lat));
+  const lons = valid.map((t) => safeNumber(t.lon));
+
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLon = Math.min(...lons);
+  const maxLon = Math.max(...lons);
+
+  const meanLatRad = ((minLat + maxLat) / 2) * (Math.PI / 180);
+
+  const latKm = (maxLat - minLat) * 111.32;
+  const lonKm = (maxLon - minLon) * 111.32 * Math.cos(meanLatRad);
+
+  return Math.abs(latKm * lonKm);
+}
+
+function estimateCanopyDiameterMeters(dbhInches) {
+  if (!Number.isFinite(dbhInches) || dbhInches <= 0) return 12;
+  return Math.max(6, Math.min(18, 4 + dbhInches * 0.35));
+}
+
+function estimateCanopyAreaM2(dbhInches) {
+  const diameter = estimateCanopyDiameterMeters(dbhInches);
+  const radius = diameter / 2;
+  return Math.PI * radius * radius;
+}
+
+function buildDbhBins(trees) {
+  const bins = [
+    { label: '0–6"', min: 0, max: 6, count: 0 },
+    { label: '7–12"', min: 7, max: 12, count: 0 },
+    { label: '13–18"', min: 13, max: 18, count: 0 },
+    { label: '19–24"', min: 19, max: 24, count: 0 },
+    { label: '25+"', min: 25, max: Infinity, count: 0 },
+    { label: 'Unknown', min: null, max: null, count: 0 }
+  ];
+
+  for (const tree of trees) {
+    const dbh = safeNumber(tree.dbh);
+
+    if (dbh === null) {
+      bins[bins.length - 1].count += 1;
+      continue;
+    }
+
+    const match = bins.find((bin) => bin.min !== null && dbh >= bin.min && dbh <= bin.max);
+    if (match) match.count += 1;
+  }
+
+  return bins;
+}
+
+function renderMetric(id, value, subtitle = '') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="metric-value">${value}</div>
+    ${subtitle ? `<div class="metric-subtitle">${subtitle}</div>` : ''}
+  `;
+}
+
+function renderTable(id, rows) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const body = rows
+    .map(
+      (row) => `
+        <tr>
+          <td>${row.label}</td>
+          <td>${row.value}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  el.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Species</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${body}
+      </tbody>
+    </table>
+  `;
+}
+
+function chartFontColor() {
+  return '#e5e7eb';
+}
+
+function chartGridColor() {
+  return 'rgba(255,255,255,0.12)';
+}
+
+function baseChartOptions() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: chartFontColor()
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15,15,15,0.95)',
+        titleColor: '#ffffff',
+        bodyColor: '#e5e7eb',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: chartFontColor() },
+        grid: { color: chartGridColor() }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: { color: chartFontColor() },
+        grid: { color: chartGridColor() }
+      }
+    }
+  };
+}
+
+function destroyChart(canvasId) {
+  const chart = Chart.getChart(canvasId);
+  if (chart) chart.destroy();
+}
+
+function makeSpeciesChart(speciesCounts) {
+  const topSpecies = sortEntriesDesc(speciesCounts).slice(0, 10);
+  const labels = topSpecies.map(([name]) => titleCase(name));
+  const values = topSpecies.map(([, count]) => count);
+
+  destroyChart('speciesChart');
+
+  new Chart(document.getElementById('speciesChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Tree Count',
+          data: values,
+          backgroundColor: [
+            '#7ddc6f',
+            '#5fbf72',
+            '#4caf50',
+            '#9ccc65',
+            '#c0e57b',
+            '#2e7d32',
+            '#ffd54f',
+            '#2f855a',
+            '#ff8a65',
+            '#ba68c8'
+          ],
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function makeHealthChart(healthCounts) {
+  const order = ['Good', 'Fair', 'Poor', 'Unknown'];
+  const labels = order.filter((k) => healthCounts[k] != null);
+  const values = labels.map((k) => healthCounts[k]);
+
+  destroyChart('healthChart');
+
+  new Chart(document.getElementById('healthChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [
+        {
+          data: values,
+          backgroundColor: ['#22c55e', '#facc15', '#ef4444', '#94a3b8'],
+          borderColor: '#111111',
+          borderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: chartFontColor()
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,15,15,0.95)',
+          titleColor: '#ffffff',
+          bodyColor: '#e5e7eb'
+        }
+      }
+    }
+  });
+}
+
+function makeDbhChart(dbhBins) {
+  const labels = dbhBins.map((b) => b.label);
+  const values = dbhBins.map((b) => b.count);
+
+  destroyChart('dbhChart');
+
+  new Chart(document.getElementById('dbhChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Trees',
+          data: values,
+          backgroundColor: '#60a5fa',
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function makeCanopyBySpeciesChart(speciesCanopyEntries) {
+  const top = speciesCanopyEntries.slice(0, 8);
+  const labels = top.map(([name]) => titleCase(name));
+  const values = top.map(([, canopy]) => Number((canopy / 10000).toFixed(2))); // hectares
+
+  destroyChart('canopySpeciesChart');
+
+  new Chart(document.getElementById('canopySpeciesChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Estimated Canopy (ha)',
+          data: values,
+          backgroundColor: '#34d399',
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      indexAxis: 'y',
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function makeHealthBySpeciesChart(trees) {
+  const topSpeciesNames = sortEntriesDesc(
+    countBy(trees, (t) => titleCase(t.species || 'Unknown'))
+  )
+    .slice(0, 6)
+    .map(([name]) => name);
+
+  const healthOrder = ['Good', 'Fair', 'Poor', 'Unknown'];
+  const datasets = healthOrder.map((health, idx) => {
+    const colors = ['#22c55e', '#facc15', '#ef4444', '#94a3b8'];
+    return {
+      label: health,
+      data: topSpeciesNames.map((species) =>
+        trees.filter(
+          (t) =>
+            titleCase(t.species || 'Unknown') === species &&
+            titleCase(t.health || 'Unknown') === health
+        ).length
+      ),
+      backgroundColor: colors[idx]
+    };
+  });
+
+  destroyChart('healthSpeciesChart');
+
+  new Chart(document.getElementById('healthSpeciesChart'), {
+    type: 'bar',
+    data: {
+      labels: topSpeciesNames,
+      datasets
+    },
+    options: {
+      ...baseChartOptions(),
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { color: chartFontColor() },
+          grid: { color: chartGridColor() }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: { color: chartFontColor() },
+          grid: { color: chartGridColor() }
+        }
+      }
+    }
+  });
+}
+
+async function buildGowanusTreeDashboard() {
+  try {
+    const trees = await loadTreeData();
+
+    const validTrees = trees.filter((t) => safeNumber(t.lat) !== null && safeNumber(t.lon) !== null);
+    const totalTrees = validTrees.length;
+
+    const healthCountsRaw = countBy(validTrees, (t) => titleCase(t.health || 'Unknown'));
+    const healthCounts = {
+      Good: healthCountsRaw.Good || 0,
+      Fair: healthCountsRaw.Fair || 0,
+      Poor: healthCountsRaw.Poor || 0,
+      Unknown: healthCountsRaw.Unknown || 0
+    };
+
+    const speciesCounts = countBy(validTrees, (t) => String(t.species || 'Unknown').trim());
+
+    const dbhValues = validTrees
+      .map((t) => safeNumber(t.dbh))
+      .filter((v) => v !== null);
+
+    const meanDbh = dbhValues.length
+      ? dbhValues.reduce((a, b) => a + b, 0) / dbhValues.length
+      : 0;
+
+    const studyAreaKm2 = getBoundingBoxAreaKm2(validTrees);
+    const densityPerKm2 = studyAreaKm2 > 0 ? totalTrees / studyAreaKm2 : 0;
+
+    const totalEstimatedCanopyM2 = sumBy(validTrees, (t) =>
+      estimateCanopyAreaM2(safeNumber(t.dbh))
+    );
+    const totalEstimatedCanopyHa = totalEstimatedCanopyM2 / 10000;
+    const studyAreaM2 = studyAreaKm2 * 1000000;
+    const canopyCoveragePct = studyAreaM2 > 0 ? (totalEstimatedCanopyM2 / studyAreaM2) * 100 : 0;
+
+    const speciesCanopy = {};
+    for (const tree of validTrees) {
+      const species = String(tree.species || 'Unknown').trim();
+      speciesCanopy[species] = (speciesCanopy[species] || 0) + estimateCanopyAreaM2(safeNumber(tree.dbh));
+    }
+    const speciesCanopyEntries = sortEntriesDesc(speciesCanopy);
+
+    const dbhBins = buildDbhBins(validTrees);
+    const topSpeciesRows = sortEntriesDesc(speciesCounts)
+      .slice(0, 10)
+      .map(([label, value]) => ({
+        label: titleCase(label),
+        value: formatNumber(value)
+      }));
+
+    renderMetric('totalTreesMetric', formatNumber(totalTrees), 'Street trees in study area');
+    renderMetric('canopyMetric', `${formatNumber(canopyCoveragePct, 1)}%`, `${formatNumber(totalEstimatedCanopyHa, 1)} ha estimated canopy`);
+    renderMetric('densityMetric', formatNumber(densityPerKm2, 0), 'Trees per km²');
+    renderMetric('dbhMetric', `${formatNumber(meanDbh, 1)}"`, 'Average trunk diameter');
+    renderMetric('studyAreaMetric', `${formatNumber(studyAreaKm2, 2)} km²`, 'Bounding study area');
+
+    const goodPct = totalTrees ? (healthCounts.Good / totalTrees) * 100 : 0;
+    renderMetric('healthMetric', `${formatNumber(goodPct, 0)}%`, 'Trees in good health');
+
+    renderTable('topSpeciesTable', topSpeciesRows);
+
+    makeSpeciesChart(speciesCounts);
+    makeHealthChart(healthCounts);
+    makeDbhChart(dbhBins);
+    makeCanopyBySpeciesChart(speciesCanopyEntries);
+    makeHealthBySpeciesChart(validTrees);
+  } catch (error) {
+    console.error('Failed to build diagrams page:', error);
+
+    const errorBox = document.getElementById('diagramError');
+    if (errorBox) {
+      errorBox.textContent = `Could not load tree charts: ${error.message}`;
+      errorBox.style.display = 'block';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', buildGowanusTreeDashboard);
