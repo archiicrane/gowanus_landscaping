@@ -12,71 +12,96 @@ map.scrollZoom.disable();
 
 let currentStage = 0;
 let isAnimating = false;
-let tb; // Threebox instance for trees
-let treeModels = [];
 
-// Your working expressions
+const stageContent = [
+  {
+    title: "Gowanus Canal",
+    desc: "Scroll to move through the stages."
+  },
+  {
+    title: "Existing Density",
+    desc: "Building footprints extrude to their recorded heights."
+  },
+  {
+    title: "Rewilding Gowanus",
+    desc: "Street tree locations appear across the neighborhood."
+  },
+  {
+    title: "Future Impact",
+    desc: "Ecological coverage and open space improvements are highlighted."
+  }
+];
+
+// Use building height property, fallback to 12 if missing
 const existingHeightExpression = ['coalesce', ['to-number', ['get', 'height']], 12];
 
-function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
-function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-
-// --- TREE LOGIC ---
-function getTreeColor(species) {
-  const greens = ['#2d5a27', '#467c3a', '#3a5a40', '#588157'];
-  const index = species ? species.length % greens.length : 0;
-  return greens[index];
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
-async function loadTrees() {
-  const res = await fetch('gowanus_trees.json');
-  const data = await res.json();
-
-  data.forEach(t => {
-    if (!t.lat || !t.lon) return;
-
-    // Create Three.js tree: Trunk + Canopy
-    const group = new THREE.Group();
-    const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.2, 0.2, 1), 
-      new THREE.MeshPhongMaterial({color: 0x4d2e1e})
-    );
-    const canopy = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 8, 8), 
-      new THREE.MeshPhongMaterial({color: getTreeColor(t.species)})
-    );
-    canopy.position.y = 1;
-    group.add(trunk);
-    group.add(canopy);
-
-    const obj = tb.Object3D({ obj: group, anchor: 'bottom' }).setCoords([t.lon, t.lat, 0]);
-    obj.visible = false;
-    obj.scale.set(0.01, 0.01, 0.01);
-    tb.add(obj);
-    treeModels.push(obj);
-  });
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
 }
 
-// --- STAGE LOGIC ---
+function setStageText(stage) {
+  document.getElementById('stage-title').innerText = stageContent[stage].title;
+  document.getElementById('stage-desc').innerText = stageContent[stage].desc;
+}
+
+function setTreeVisibility(show) {
+  if (map.getLayer('trees-circle')) {
+    map.setLayoutProperty('trees-circle', 'visibility', show ? 'visible' : 'none');
+  }
+}
+
+function setStatsVisibility(show) {
+  const stats = document.getElementById('stats-panel');
+  stats.classList.toggle('hidden', !show);
+}
+
+function setBuildingHeight(multiplier) {
+  if (!map.getLayer('existing-buildings')) return;
+
+  map.setPaintProperty(
+    'existing-buildings',
+    'fill-extrusion-height',
+    ['*', multiplier, existingHeightExpression]
+  );
+}
+
 function setStageInstant(stage) {
-  // Buildings
-  map.setPaintProperty('existing-buildings', 'fill-extrusion-height', stage >= 1 ? existingHeightExpression : 0);
-  
-  // Trees
-  treeModels.forEach(t => {
-    t.visible = stage >= 2;
-    t.scale.set(stage >= 2 ? 1 : 0.01, stage >= 2 ? 1 : 0.01, stage >= 2 ? 1 : 0.01);
-  });
+  if (stage === 0) {
+    setBuildingHeight(0);
+    setTreeVisibility(false);
+    setStatsVisibility(false);
+  }
 
-  // UI
-  document.getElementById('stats-panel').classList.toggle('hidden', stage < 3);
+  if (stage === 1) {
+    setBuildingHeight(1);
+    setTreeVisibility(false);
+    setStatsVisibility(false);
+  }
+
+  if (stage === 2) {
+    setBuildingHeight(1);
+    setTreeVisibility(true);
+    setStatsVisibility(false);
+  }
+
+  if (stage === 3) {
+    setBuildingHeight(1);
+    setTreeVisibility(true);
+    setStatsVisibility(true);
+  }
+
+  setStageText(stage);
 }
 
 function animateStage(stage) {
   if (isAnimating) return;
   isAnimating = true;
 
-  const duration = 1000;
+  const duration = 900;
   const startTime = performance.now();
 
   function step(now) {
@@ -84,21 +109,31 @@ function animateStage(stage) {
     const t = easeOutCubic(raw);
 
     if (stage === 0) {
-      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', ['*', 1 - t, existingHeightExpression]);
-      treeModels.forEach(m => m.visible = false);
+      // collapse buildings, hide trees
+      setBuildingHeight(1 - t);
+      setTreeVisibility(false);
+      setStatsVisibility(false);
     }
 
     if (stage === 1) {
-      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', ['*', t, existingHeightExpression]);
-      treeModels.forEach(m => m.visible = false);
+      // grow buildings
+      setBuildingHeight(t);
+      setTreeVisibility(false);
+      setStatsVisibility(false);
     }
 
-    if (stage === 2 || stage === 3) {
-      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-      treeModels.forEach(m => {
-        m.visible = true;
-        m.scale.set(t, t, t);
-      });
+    if (stage === 2) {
+      // keep buildings, show trees
+      setBuildingHeight(1);
+      if (raw > 0.2) setTreeVisibility(true);
+      setStatsVisibility(false);
+    }
+
+    if (stage === 3) {
+      // keep everything, show stats
+      setBuildingHeight(1);
+      setTreeVisibility(true);
+      if (raw > 0.3) setStatsVisibility(true);
     }
 
     if (raw < 1) {
@@ -108,14 +143,71 @@ function animateStage(stage) {
       isAnimating = false;
     }
   }
+
   requestAnimationFrame(step);
+}
+
+async function loadTreesAsPoints() {
+  const res = await fetch('gowanus_trees.json');
+  const data = await res.json();
+
+  // Convert whatever your JSON is into GeoJSON features
+  const features = data
+    .filter(t => t.lat != null && t.lon != null)
+    .map(t => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [Number(t.lon), Number(t.lat)]
+      },
+      properties: {
+        species: t.species || 'Unknown'
+      }
+    }));
+
+  const geojson = {
+    type: 'FeatureCollection',
+    features
+  };
+
+  map.addSource('trees', {
+    type: 'geojson',
+    data: geojson
+  });
+
+  map.addLayer({
+    id: 'trees-circle',
+    type: 'circle',
+    source: 'trees',
+    layout: {
+      visibility: 'none'
+    },
+    paint: {
+      'circle-radius': 3,
+      'circle-color': [
+        'match',
+        ['%', ['string-length', ['coalesce', ['get', 'species'], '']], 4],
+        0, '#2d5a27',
+        1, '#467c3a',
+        2, '#3a5a40',
+        3, '#588157',
+        '#467c3a'
+      ],
+      'circle-opacity': 0.95,
+      'circle-stroke-color': '#d9ffd0',
+      'circle-stroke-width': 0.5
+    }
+  });
 }
 
 map.on('load', async () => {
   const res = await fetch('gowanus-buildings.geojson');
   const existingData = await res.json();
 
-  map.addSource('existing', { type: 'geojson', data: existingData });
+  map.addSource('existing', {
+    type: 'geojson',
+    data: existingData
+  });
 
   map.addLayer({
     id: 'existing-buildings',
@@ -129,30 +221,21 @@ map.on('load', async () => {
     }
   });
 
-  // Add Three.js Layer for Trees
-  map.addLayer({
-    id: 'tree-layer',
-    type: 'custom',
-    renderingMode: '3d',
-    onAdd: (map, gl) => {
-      tb = new Threebox(map, gl, { defaultLights: true });
-      loadTrees();
-    },
-    render: () => { tb.update(); }
-  });
+  await loadTreesAsPoints();
 
   setStageInstant(0);
 });
 
 window.addEventListener('wheel', (event) => {
   event.preventDefault();
+
   if (isAnimating) return;
 
-  if (event.deltaY > 0) currentStage = clamp(currentStage + 1, 0, 3);
-  else currentStage = clamp(currentStage - 1, 0, 3);
+  const direction = event.deltaY > 0 ? 1 : -1;
+  const nextStage = clamp(currentStage + direction, 0, 3);
 
-  const titles = ["Gowanus Canal", "Existing Density", "Rewilding Gowanus", "Future Impact"];
-  document.getElementById('stage-title').innerText = titles[currentStage];
+  if (nextStage === currentStage) return;
 
+  currentStage = nextStage;
   animateStage(currentStage);
 }, { passive: false });
