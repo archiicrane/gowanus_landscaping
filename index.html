@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Gowanus Rezoning Viewer</title>
+  <title>Rewilding Gowanus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link
-    href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
-    rel="stylesheet"
-  />
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/jscastro76/threebox@master/dist/threebox.min.js"></script>
 </head>
 <body>
+  <nav class="top-bar">
+    <div class="brand">Rewilding Gowanus</div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-btn active">Map</a>
+      <a href="diagrams.html" class="nav-btn">Diagrams</a>
+    </div>
+  </nav>
+
   <div id="map"></div>
 
   <div class="ui-panel">
-    <h3>Gowanus Rezoning</h3>
-    <p>Scroll to move through the stages.</p>
-    <p><strong>Stage 0:</strong> Flat footprints</p>
-    <p><strong>Stage 1:</strong> Existing building heights</p>
-    <p><strong>Stage 2:</strong> Rezoning towers added in blue</p>
-    <p><strong>Alt + Scroll:</strong> Zoom map</p>
+    <h3 id="stage-title">Gowanus Canal</h3>
+    <p id="stage-desc">Scroll to move through the stages.</p>
+    <div id="stats-panel" class="hidden">
+      <hr>
+      <p><strong>Tree Coverage:</strong> +25%</p>
+      <p><strong>Open Space:</strong> 12 Acres</p>
+    </div>
   </div>
 
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
