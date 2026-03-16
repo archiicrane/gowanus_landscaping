@@ -1,41 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rewilding Gowanus</title>
-    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/jscastro76/threebox@master/dist/threebox.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <title>Gowanus Rezoning Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link
+    href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <nav class="top-bar">
-        <div class="brand">Rewilding Gowanus</div>
-        <div class="nav-links">
-            <a href="index.html" class="nav-btn active">Map</a>
-            <a href="diagrams.html" class="nav-btn">Diagrams</a>
-        </div>
-    </nav>
+  <div id="map"></div>
 
-    <div id="map"></div>
+  <div class="ui-panel">
+    <h3>Gowanus Rezoning</h3>
+    <p>Scroll to move through the stages.</p>
+    <p><strong>Stage 0:</strong> Flat footprints</p>
+    <p><strong>Stage 1:</strong> Existing building heights</p>
+    <p><strong>Stage 2:</strong> Rezoning towers added in blue</p>
+    <p><strong>Alt + Scroll:</strong> Zoom map</p>
+  </div>
 
-    <div id="overlay-ui">
-        <div id="stage-info" class="panel">
-            <h2 id="stage-title">Gowanus Canal</h2>
-            <p id="stage-text">The industrial heart of Brooklyn. Scroll to begin the story.</p>
-        </div>
-
-        <div id="stats-panel" class="panel">
-            <h3>Gowanus Stats</h3>
-            <div class="stat-item"><span>Tree Coverage</span><div class="bar"><div style="width: 15%"></div></div></div>
-            <div class="stat-item"><span>Open Space</span><div class="bar"><div style="width: 8%"></div></div></div>
-            <div class="stat-item"><span>Building Density</span><div class="bar"><div style="width: 75%"></div></div></div>
-            <div class="stat-item"><span>Environmental Health</span><div class="bar"><div style="width: 40%"></div></div></div>
-        </div>
-    </div>
-
-    <script src="main.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
