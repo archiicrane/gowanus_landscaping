@@ -1,115 +1,194 @@
 console.log('trees.js loaded');
 
-window.TreeRenderer = {
-  async initTrees(map) {
-    try {
-      console.log('initTrees called');
+window.TreeRenderer = (() => {
+  let mapRef = null;
+  let tb = null;
+  let customLayerAdded = false;
+  let treeTemplate = null;
+  let treeObjects = [];
+  let treesVisible = false;
 
-      const response = await fetch('./data/gowanus_trees.json');
+  function detectTreeCoords(item) {
+    if (item?.lat != null && item?.lon != null) {
+      return [Number(item.lon), Number(item.lat)];
+    }
 
-      if (!response.ok) {
-        throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
+    if (item?.latitude != null && item?.longitude != null) {
+      return [Number(item.longitude), Number(item.latitude)];
+    }
+
+    if (item?.geometry?.type === 'Point' && Array.isArray(item.geometry.coordinates)) {
+      return item.geometry.coordinates;
+    }
+
+    return null;
+  }
+
+  function tintTreeObject(obj, canopyColor = 0x5fa35f, trunkColor = 0x6b4f2a) {
+    obj.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = false;
+        child.receiveShadow = false;
+
+        const name = (child.name || '').toLowerCase();
+        const mat = new THREE.MeshStandardMaterial({
+          color: name.includes('trunk') || name.includes('stem') ? trunkColor : canopyColor,
+          roughness: 1
+        });
+
+        child.material = mat;
       }
+    });
+  }
 
-      const rawData = await response.json();
+  async function loadObjTemplate() {
+    return new Promise((resolve, reject) => {
+      const loader = new THREE.OBJLoader();
 
-      console.log('Tree raw data:', rawData);
-      console.log(
-        'Tree sample:',
-        Array.isArray(rawData) ? rawData[0] : rawData?.features?.[0]
-      );
-
-      let features = [];
-
-      if (rawData?.type === 'FeatureCollection' && Array.isArray(rawData.features)) {
-        features = rawData.features;
-      } else if (Array.isArray(rawData) && rawData.length > 0 && 'lat' in rawData[0] && 'lon' in rawData[0]) {
-        features = rawData
-          .filter((t) => t.lat != null && t.lon != null)
-          .map((t) => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [Number(t.lon), Number(t.lat)]
-            },
-            properties: {
-              species: t.species || 'Unknown'
-            }
-          }));
-      } else if (Array.isArray(rawData) && rawData.length > 0 && 'latitude' in rawData[0] && 'longitude' in rawData[0]) {
-        features = rawData
-          .filter((t) => t.latitude != null && t.longitude != null)
-          .map((t) => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [Number(t.longitude), Number(t.latitude)]
-            },
-            properties: {
-              species: t.species || 'Unknown'
-            }
-          }));
-      } else {
-        console.error('Unknown tree data format:', rawData);
-        return;
-      }
-
-      console.log('Tree feature count:', features.length);
-
-      if (map.getLayer('trees-layer')) {
-        map.removeLayer('trees-layer');
-      }
-
-      if (map.getSource('trees')) {
-        map.removeSource('trees');
-      }
-
-      map.addSource('trees', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features
-        }
-      });
-
-      map.addLayer({
-        id: 'trees-layer',
-        type: 'circle',
-        source: 'trees',
-        layout: {
-          visibility: 'visible'
+      loader.load(
+        './models/Tree low.obj',
+        (obj) => {
+          console.log('OBJ tree loaded:', obj);
+          tintTreeObject(obj);
+          resolve(obj);
         },
-        paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            13, 3,
-            15, 5,
-            17, 8
-          ],
-          'circle-color': '#22c55e',
-          'circle-opacity': 1,
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 1.2
-        }
-      });
+        undefined,
+        (err) => reject(err)
+      );
+    });
+  }
 
-      console.log('trees-layer added');
+  async function loadTreeData() {
+    const response = await fetch('./data/gowanus_trees.json');
+
+    if (!response.ok) {
+      throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
+    }
+
+    const rawData = await response.json();
+    console.log('Tree raw data:', rawData);
+    console.log('Tree sample:', Array.isArray(rawData) ? rawData[0] : rawData?.features?.[0]);
+
+    let items = [];
+
+    if (Array.isArray(rawData)) {
+      items = rawData;
+    } else if (rawData?.type === 'FeatureCollection' && Array.isArray(rawData.features)) {
+      items = rawData.features;
+    } else {
+      throw new Error('Unknown tree data format');
+    }
+
+    return items;
+  }
+
+  function ensureThreeboxLayer(map) {
+    if (customLayerAdded) return;
+
+    map.addLayer({
+      id: 'threebox-tree-layer',
+      type: 'custom',
+      renderingMode: '3d',
+      onAdd: function (mapInstance, gl) {
+        tb = new Threebox(mapInstance, gl, { defaultLights: true });
+      },
+      render: function () {
+        if (tb) tb.update();
+      }
+    });
+
+    customLayerAdded = true;
+  }
+
+  function clearTrees() {
+    if (!tb) return;
+
+    for (const obj of treeObjects) {
+      try {
+        tb.remove(obj);
+      } catch (e) {
+        console.warn('Could not remove tree object:', e);
+      }
+    }
+
+    treeObjects = [];
+  }
+
+  async function init(map) {
+    try {
+      mapRef = map;
+      ensureThreeboxLayer(mapRef);
+
+      // Wait until tb exists
+      let tries = 0;
+      while (!tb && tries < 50) {
+        await new Promise((r) => setTimeout(r, 50));
+        tries++;
+      }
+
+      if (!tb) {
+        throw new Error('Threebox failed to initialize');
+      }
+
+      const [objTemplate, treeData] = await Promise.all([
+        loadObjTemplate(),
+        loadTreeData()
+      ]);
+
+      treeTemplate = objTemplate;
+      clearTrees();
+
+      let addedCount = 0;
+
+      for (const item of treeData) {
+        const coords = detectTreeCoords(item);
+        if (!coords) continue;
+
+        const clone = treeTemplate.clone(true);
+
+        clone.rotation.x = Math.PI / 2;
+
+        const tree = tb.Object3D({
+          obj: clone,
+          units: 'meters',
+          anchor: 'bottom'
+        });
+
+        tree.setCoords([coords[0], coords[1], 0]);
+
+        const scale = 0.8 + Math.random() * 0.8;
+        tree.setScale(scale, scale, scale);
+
+        tree.visible = false;
+
+        tb.add(tree);
+        treeObjects.push(tree);
+        addedCount++;
+      }
+
+      console.log('3D tree objects added:', addedCount);
     } catch (err) {
-      console.error('TREE LOAD ERROR:', err);
-    }
-  },
-
-  showTrees(map) {
-    if (map.getLayer('trees-layer')) {
-      map.setLayoutProperty('trees-layer', 'visibility', 'visible');
-    }
-  },
-
-  hideTrees(map) {
-    if (map.getLayer('trees-layer')) {
-      map.setLayoutProperty('trees-layer', 'visibility', 'none');
+      console.error('TREE INIT ERROR:', err);
     }
   }
-};
+
+  function showTrees() {
+    treesVisible = true;
+    for (const obj of treeObjects) {
+      obj.visible = true;
+    }
+  }
+
+  function hideTrees() {
+    treesVisible = false;
+    for (const obj of treeObjects) {
+      obj.visible = false;
+    }
+  }
+
+  return {
+    init,
+    showTrees,
+    hideTrees
+  };
+})();
