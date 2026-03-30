@@ -1,5 +1,9 @@
-const MAPBOX_TOKEN = 'YOUR_REAL_TOKEN';
-mapboxgl.accessToken = MAPBOX_TOKEN;
+async function initMap() {
+  const res = await fetch('/api/mapbox-token');
+  const data = await res.json();
+
+  mapboxgl.accessToken = data.token;
+
 
 const map = new mapboxgl.Map({
   container: 'map',
@@ -13,6 +17,9 @@ const map = new mapboxgl.Map({
 
 map.addControl(new mapboxgl.NavigationControl());
 map.scrollZoom.disable();
+}
+
+initMap();
 
 let currentStage = 0;
 let isAnimating = false;
