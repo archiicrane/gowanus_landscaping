@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>Rewilding Gowanus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -18,12 +18,27 @@
 
   <div id="map"></div>
 
+  <div class="layer-panel ui-panel" id="layer-panel">
+    <h3>Layers</h3>
+    <label class="layer-toggle"><input type="checkbox" id="toggle-topo" checked /> <span>Mapbox contours + terrain</span></label>
+    <label class="layer-toggle"><input type="checkbox" id="toggle-flood" checked /> <span>Flood vulnerability</span></label>
+    <div class="legend-block">
+      <div class="legend-title">Flood index</div>
+      <div class="legend-row"><span class="swatch swatch-1"></span><span>1 Low</span></div>
+      <div class="legend-row"><span class="swatch swatch-2"></span><span>2</span></div>
+      <div class="legend-row"><span class="swatch swatch-3"></span><span>3</span></div>
+      <div class="legend-row"><span class="swatch swatch-4"></span><span>4</span></div>
+      <div class="legend-row"><span class="swatch swatch-5"></span><span>5 High</span></div>
+    </div>
+  </div>
+
+
   <div class="ui-panel" id="stage-info">
     <h3 id="stage-title">Gowanus Canal</h3>
     <p id="stage-desc">Scroll to move through the stages.</p>
   </div>
 
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
   <script src="trees.js"></script>
   <script src="main.js"></script>
 </body>

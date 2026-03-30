@@ -338,3 +338,71 @@ body {
     width: calc(100% - 32px);
   }
 }
+.layer-panel {
+  top: 88px;
+  right: 24px;
+  width: 220px;
+  z-index: 120;
+}
+
+.layer-panel h3 {
+  margin: 0 0 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.layer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #d4d4d4;
+}
+
+.layer-toggle input {
+  accent-color: #7ddc6f;
+}
+
+.legend-block {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legend-title {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #d4d4d4;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.swatch-1 { background: #1d4ed8; }
+.swatch-2 { background: #2563eb; }
+.swatch-3 { background: #0ea5e9; }
+.swatch-4 { background: #f59e0b; }
+.swatch-5 { background: #ef4444; }
+
+.flood-popup {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #111827;
+}
