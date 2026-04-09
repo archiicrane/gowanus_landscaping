@@ -354,6 +354,8 @@ function addFloodLayer(floodData) {
 function setupLayerToggles() {
   const topoToggle = document.getElementById('toggle-topo');
   const floodToggle = document.getElementById('toggle-flood');
+  const observableToggle = document.getElementById('toggle-observable');
+  const observableOverlay = document.getElementById('observable-overlay');
 
   topoToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
@@ -373,6 +375,11 @@ function setupLayerToggles() {
     if (map.getLayer('flood-outline')) {
       map.setLayoutProperty('flood-outline', 'visibility', visibility);
     }
+  });
+
+  observableToggle?.addEventListener('change', (event) => {
+    const isVisible = event.target.checked;
+    observableOverlay?.classList.toggle('hidden', !isVisible);
   });
 }
 

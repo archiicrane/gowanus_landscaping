@@ -22,6 +22,7 @@
     <h3>Layers</h3>
     <label class="layer-toggle"><input type="checkbox" id="toggle-topo" checked /> <span>Mapbox contours + terrain</span></label>
     <label class="layer-toggle"><input type="checkbox" id="toggle-flood" checked /> <span>Flood vulnerability</span></label>
+    <label class="layer-toggle"><input type="checkbox" id="toggle-observable" checked /> <span>Observable drawing</span></label>
     <div class="legend-block">
       <div class="legend-title">Flood index</div>
       <div class="legend-row"><span class="swatch swatch-1"></span><span>1 Low</span></div>
@@ -36,6 +37,17 @@
   <div class="ui-panel" id="stage-info">
     <h3 id="stage-title">Gowanus Canal</h3>
     <p id="stage-desc">Scroll to move through the stages.</p>
+  </div>
+
+  <div class="observable-overlay" id="observable-overlay" aria-label="Observable drawing overlay">
+    <iframe
+      class="observable-frame"
+      title="Observable drawing overlay"
+      src="https://observablehq.com/embed/3b74ad909b2fe86e?cells=bldgDrawing"
+      loading="lazy"
+      frameborder="0"
+      referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
   </div>
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
