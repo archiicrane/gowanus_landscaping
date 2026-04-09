@@ -1,25 +1,46 @@
-async function initMap() {
+let map;
+
+async function resolveMapboxToken() {
+  const windowToken = (window.MAPBOX_TOKEN || '').trim();
+  if (windowToken) return windowToken;
+
+  const metaToken = (document.querySelector('meta[name="mapbox-token"]')?.content || '').trim();
+  if (metaToken) return metaToken;
+
   const res = await fetch('/api/mapbox-token');
+  if (!res.ok) {
+    throw new Error(`Mapbox token fetch failed: ${res.status} ${res.statusText}`);
+  }
+
   const data = await res.json();
+  const apiToken = (data?.token || '').trim();
+  if (!apiToken) {
+    throw new Error('Mapbox token is missing from /api/mapbox-token response.');
+  }
 
-  mapboxgl.accessToken = data.token;
-
-
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/mapbox/dark-v11',
-  center: [-73.9895, 40.6745],
-  zoom: 15.3,
-  pitch: 65,
-  bearing: -20,
-  antialias: true
-});
-
-map.addControl(new mapboxgl.NavigationControl());
-map.scrollZoom.disable();
+  return apiToken;
 }
 
-initMap();
+async function initMap() {
+  const token = await resolveMapboxToken();
+
+  mapboxgl.accessToken = token;
+
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: [-73.9895, 40.6745],
+    zoom: 15.3,
+    pitch: 65,
+    bearing: -20,
+    antialias: true
+  });
+
+  map.addControl(new mapboxgl.NavigationControl());
+  map.scrollZoom.disable();
+
+  attachMapHandlers();
+}
 
 let currentStage = 0;
 let isAnimating = false;
@@ -355,85 +376,89 @@ function setupLayerToggles() {
   });
 }
 
-map.on('load', async () => {
-  try {
-    const [existingResponse, proposedResponse, floodResponse] = await Promise.all([
-      fetch('./data/gowanus-buildings.geojson'),
-      fetch('./data/rezoning-buildings.geojson'),
-      fetch('./data/flood-vulnerability.geojson')
-    ]);
+function attachMapHandlers() {
+  map.on('load', async () => {
+    try {
+      const [existingResponse, proposedResponse, floodResponse] = await Promise.all([
+        fetch('./data/gowanus-buildings.geojson'),
+        fetch('./data/rezoning-buildings.geojson'),
+        fetch('./data/flood-vulnerability.geojson')
+      ]);
 
-    if (!existingResponse.ok) {
-      throw new Error(`Existing buildings fetch failed: ${existingResponse.status} ${existingResponse.statusText}`);
-    }
-
-    if (!proposedResponse.ok) {
-      throw new Error(`Proposed buildings fetch failed: ${proposedResponse.status} ${proposedResponse.statusText}`);
-    }
-
-    if (!floodResponse.ok) {
-      throw new Error(`Flood data fetch failed: ${floodResponse.status} ${floodResponse.statusText}`);
-    }
-
-    const existingData = await existingResponse.json();
-    const proposedData = await proposedResponse.json();
-    const floodData = await floodResponse.json();
-
-    addMapboxTerrainAndContours();
-    addFloodLayer(floodData);
-
-    map.addSource('existing', {
-      type: 'geojson',
-      data: existingData
-    });
-
-    map.addLayer({
-      id: 'existing-buildings',
-      type: 'fill-extrusion',
-      source: 'existing',
-      paint: {
-        'fill-extrusion-color': '#8b5cf6',
-        'fill-extrusion-base': 0,
-        'fill-extrusion-height': 0,
-        'fill-extrusion-opacity': 0.92
+      if (!existingResponse.ok) {
+        throw new Error(`Existing buildings fetch failed: ${existingResponse.status} ${existingResponse.statusText}`);
       }
-    });
 
-    map.addSource('proposed', {
-      type: 'geojson',
-      data: proposedData
-    });
-
-    map.addLayer({
-      id: 'proposed-buildings',
-      type: 'fill-extrusion',
-      source: 'proposed',
-      paint: {
-        'fill-extrusion-color': '#3b82f6',
-        'fill-extrusion-base': 0,
-        'fill-extrusion-height': 0,
-        'fill-extrusion-opacity': 0
+      if (!proposedResponse.ok) {
+        throw new Error(`Proposed buildings fetch failed: ${proposedResponse.status} ${proposedResponse.statusText}`);
       }
-    });
 
-    map.fitBounds([
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-      [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
-    ], {
-      padding: { top: 90, right: 80, bottom: 80, left: 80 },
-      duration: 0
-    });
+      if (!floodResponse.ok) {
+        throw new Error(`Flood data fetch failed: ${floodResponse.status} ${floodResponse.statusText}`);
+      }
 
-    setupLayerToggles();
-    await window.TreeRenderer?.initTrees?.(map);
+      const existingData = await existingResponse.json();
+      const proposedData = await proposedResponse.json();
+      const floodData = await floodResponse.json();
 
-    setStageInstant(0);
-  } catch (err) {
-    console.error('MAP LOAD ERROR:', err);
-  }
-});
+      addMapboxTerrainAndContours();
+      addFloodLayer(floodData);
+
+      map.addSource('existing', {
+        type: 'geojson',
+        data: existingData
+      });
+
+      map.addLayer({
+        id: 'existing-buildings',
+        type: 'fill-extrusion',
+        source: 'existing',
+        paint: {
+          'fill-extrusion-color': '#8b5cf6',
+          'fill-extrusion-base': 0,
+          'fill-extrusion-height': 0,
+          'fill-extrusion-opacity': 0.92
+        }
+      });
+
+      map.addSource('proposed', {
+        type: 'geojson',
+        data: proposedData
+      });
+
+      map.addLayer({
+        id: 'proposed-buildings',
+        type: 'fill-extrusion',
+        source: 'proposed',
+        paint: {
+          'fill-extrusion-color': '#3b82f6',
+          'fill-extrusion-base': 0,
+          'fill-extrusion-height': 0,
+          'fill-extrusion-opacity': 0
+        }
+      });
+
+      map.fitBounds([
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
+      ], {
+        padding: { top: 90, right: 80, bottom: 80, left: 80 },
+        duration: 0
+      });
+
+      setupLayerToggles();
+      await window.TreeRenderer?.initTrees?.(map);
+
+      setStageInstant(0);
+    } catch (err) {
+      console.error('MAP LOAD ERROR:', err);
+    }
+  });
+}
 
 window.addEventListener('wheel', (event) => {
+  if (!map) return;
+
   if (event.altKey) {
     map.scrollZoom.enable();
     return;
@@ -460,7 +485,13 @@ window.addEventListener('wheel', (event) => {
 }, { passive: false });
 
 window.addEventListener('keyup', (event) => {
+  if (!map) return;
+
   if (event.key === 'Alt') {
     map.scrollZoom.disable();
   }
+});
+
+initMap().catch((err) => {
+  console.error('MAP INIT ERROR:', err);
 });
