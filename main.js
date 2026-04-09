@@ -444,10 +444,16 @@ window.addEventListener('wheel', (event) => {
 
   if (isAnimating) return;
 
+  const previousStage = currentStage;
+
   if (event.deltaY > 0) {
     currentStage = clamp(currentStage + 1, 0, 2);
   } else {
     currentStage = clamp(currentStage - 1, 0, 2);
+  }
+
+  if (currentStage === previousStage) {
+    return;
   }
 
   animateStage(currentStage);
