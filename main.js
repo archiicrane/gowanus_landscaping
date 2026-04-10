@@ -265,6 +265,53 @@ function addMapboxTerrainAndContours() {
   }
 }
 
+function addMapboxGroundParks() {
+  if (!map.getSource('mapbox-streets-parks')) {
+    map.addSource('mapbox-streets-parks', {
+      type: 'vector',
+      url: 'mapbox://mapbox.mapbox-streets-v8'
+    });
+  }
+
+  const gowanusClipBounds = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+      ]]
+    }
+  };
+
+  if (!map.getLayer('gowanus-parks-ground')) {
+    map.addLayer({
+      id: 'gowanus-parks-ground',
+      type: 'fill',
+      source: 'mapbox-streets-parks',
+      'source-layer': 'landuse',
+      filter: [
+        'all',
+        ['within', gowanusClipBounds],
+        [
+          'any',
+          ['==', ['get', 'class'], 'park'],
+          ['==', ['get', 'class'], 'garden'],
+          ['==', ['get', 'class'], 'recreation_ground'],
+          ['==', ['get', 'type'], 'park']
+        ]
+      ],
+      paint: {
+        'fill-color': '#cfe3c8',
+        'fill-opacity': 0.62
+      }
+    });
+  }
+}
+
 function addFloodLayer(floodData) {
   if (map.getSource('flood-vulnerability')) return;
 
@@ -421,6 +468,7 @@ function attachMapHandlers() {
       const floodData = await floodResponse.json();
 
       addMapboxTerrainAndContours();
+      addMapboxGroundParks();
       addFloodLayer(floodData);
 
       map.addSource('existing', {
