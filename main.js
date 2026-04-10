@@ -30,9 +30,9 @@ async function initMap() {
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
     center: [-73.9895, 40.6745],
-    zoom: 15.3,
-    pitch: 65,
-    bearing: -20,
+    zoom: 15.1,
+    pitch: 60,
+    bearing: -45,
     antialias: true
   });
 

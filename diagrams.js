@@ -133,11 +133,11 @@ function renderTable(id, rows) {
 }
 
 function chartFontColor() {
-  return '#e5e7eb';
+  return '#4f4538';
 }
 
 function chartGridColor() {
-  return 'rgba(255,255,255,0.12)';
+  return 'rgba(86,73,53,0.18)';
 }
 
 function baseChartOptions() {
@@ -151,10 +151,10 @@ function baseChartOptions() {
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(15,15,15,0.95)',
-        titleColor: '#ffffff',
-        bodyColor: '#e5e7eb',
-        borderColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(250,247,241,0.98)',
+        titleColor: '#2f2a24',
+        bodyColor: '#4f4538',
+        borderColor: 'rgba(86,73,53,0.2)',
         borderWidth: 1
       }
     },
@@ -193,18 +193,18 @@ function makeSpeciesChart(speciesCounts) {
           label: 'Tree Count',
           data: values,
           backgroundColor: [
-            '#7ddc6f',
-            '#5fbf72',
-            '#4caf50',
-            '#9ccc65',
-            '#c0e57b',
-            '#2e7d32',
-            '#ffd54f',
-            '#2f855a',
-            '#ff8a65',
-            '#ba68c8'
+            '#b8d7a5',
+            '#b7e1c2',
+            '#a8d5ba',
+            '#9fcfb2',
+            '#d6e3b2',
+            '#8fbba1',
+            '#f2e3ab',
+            '#9dc8ba',
+            '#e9c8b8',
+            '#d6c8de'
           ],
-          borderColor: '#ffffff',
+          borderColor: 'rgba(86,73,53,0.25)',
           borderWidth: 1
         }
       ]
@@ -233,8 +233,8 @@ function makeHealthChart(healthCounts) {
       datasets: [
         {
           data: values,
-          backgroundColor: ['#22c55e', '#facc15', '#ef4444', '#94a3b8'],
-          borderColor: '#111111',
+          backgroundColor: ['#b7e1c2', '#f2e3ab', '#e7b8b3', '#c7c4be'],
+          borderColor: '#f2eee7',
           borderWidth: 2
         }
       ]
@@ -250,9 +250,11 @@ function makeHealthChart(healthCounts) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15,15,15,0.95)',
-          titleColor: '#ffffff',
-          bodyColor: '#e5e7eb'
+          backgroundColor: 'rgba(250,247,241,0.98)',
+          titleColor: '#2f2a24',
+          bodyColor: '#4f4538',
+          borderColor: 'rgba(86,73,53,0.2)',
+          borderWidth: 1
         }
       }
     }
@@ -274,8 +276,8 @@ function makeWaterRetentionChart(speciesRetentionEntries) {
         {
           label: 'Estimated Retention (m³)',
           data: values,
-          backgroundColor: '#60a5fa',
-          borderColor: '#ffffff',
+          backgroundColor: '#b7c7a0',
+          borderColor: 'rgba(86,73,53,0.25)',
           borderWidth: 1
         }
       ]
@@ -306,8 +308,8 @@ function makeCanopyBySpeciesChart(speciesCanopyEntries) {
         {
           label: 'Estimated Canopy (ha)',
           data: values,
-          backgroundColor: '#34d399',
-          borderColor: '#ffffff',
+          backgroundColor: '#b9d8b6',
+          borderColor: 'rgba(86,73,53,0.25)',
           borderWidth: 1
         }
       ]
@@ -332,7 +334,7 @@ function makeHealthBySpeciesChart(trees) {
 
   const healthOrder = ['Good', 'Fair', 'Poor', 'Unknown'];
   const datasets = healthOrder.map((health, idx) => {
-    const colors = ['#22c55e', '#facc15', '#ef4444', '#94a3b8'];
+    const colors = ['#b7e1c2', '#f2e3ab', '#e7b8b3', '#c7c4be'];
     return {
       label: health,
       data: topSpeciesNames.map((species) =>
