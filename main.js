@@ -277,10 +277,25 @@ function addFloodLayer(floodData) {
     data: floodData
   });
 
+  const gowanusClipBounds = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+      ]]
+    }
+  };
+
   map.addLayer({
     id: 'flood-fill',
     type: 'fill',
     source: 'flood-vulnerability',
+    filter: ['within', gowanusClipBounds],
     paint: {
       'fill-color': [
         'interpolate',
@@ -301,6 +316,7 @@ function addFloodLayer(floodData) {
     id: 'flood-outline',
     type: 'line',
     source: 'flood-vulnerability',
+    filter: ['within', gowanusClipBounds],
     paint: {
       'line-color': '#93c5fd',
       'line-width': [
