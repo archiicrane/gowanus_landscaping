@@ -349,6 +349,48 @@ body {
   accent-color: #7a8f6f;
 }
 
+.story-panel {
+  position: fixed;
+  top: 108px;
+  right: 20px;
+  width: min(360px, calc(100% - 40px));
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+  z-index: 126;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.story-step {
+  padding: 14px 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(86, 73, 53, 0.16);
+  background: rgba(255, 252, 246, 0.9);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.story-step h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #41382d;
+}
+
+.story-step p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #655b4f;
+}
+
+.story-step.active {
+  transform: translateY(-1px);
+  border-color: rgba(122, 143, 111, 0.5);
+  box-shadow: 0 8px 20px rgba(82, 69, 49, 0.14);
+}
+
 .flood-popup {
   font-size: 12px;
   line-height: 1.5;
@@ -359,7 +401,7 @@ body {
   position: absolute;
   top: 112px;
   left: 24px;
-  width: min(540px, calc(100% - 300px));
+  width: min(520px, calc(100% - 430px));
   height: min(68vh, 760px);
   z-index: 115;
   border-radius: 12px;
@@ -396,6 +438,15 @@ body {
     font-size: 13px;
   }
 
+  .story-panel {
+    top: auto;
+    right: 12px;
+    left: 12px;
+    bottom: 14px;
+    width: auto;
+    max-height: 40vh;
+  }
+
   .observable-overlay {
     top: 104px;
     left: 12px;
@@ -414,6 +465,23 @@ body {
   .layer-toggle {
     font-size: 12px;
     gap: 6px;
+  }
+
+  .story-panel {
+    max-height: 36vh;
+    padding: 10px;
+  }
+
+  .story-step {
+    padding: 10px 10px 12px;
+  }
+
+  .story-step h3 {
+    font-size: 12px;
+  }
+
+  .story-step p {
+    font-size: 12px;
   }
 
   .observable-overlay {

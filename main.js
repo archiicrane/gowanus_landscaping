@@ -458,6 +458,132 @@ function setupLayerToggles() {
   });
 }
 
+function applyStoryChapter(chapter) {
+  if (!map?.getLayer('existing-buildings') || !map?.getLayer('proposed-buildings')) return;
+
+  const chapters = {
+    intro: {
+      center: [-73.9895, 40.6745],
+      zoom: 16.1,
+      pitch: 60,
+      bearing: -45,
+      stage: 1,
+      proposalVisible: false,
+      floodVisible: true
+    },
+    flood: {
+      center: [-73.9952, 40.6705],
+      zoom: 16.0,
+      pitch: 58,
+      bearing: -28,
+      stage: 0,
+      proposalVisible: false,
+      floodVisible: true
+    },
+    density: {
+      center: [-73.9865, 40.6776],
+      zoom: 16.35,
+      pitch: 64,
+      bearing: -42,
+      stage: 1,
+      proposalVisible: false,
+      floodVisible: false
+    },
+    trees: {
+      center: [-73.9912, 40.6757],
+      zoom: 16.25,
+      pitch: 62,
+      bearing: -50,
+      stage: 2,
+      proposalVisible: false,
+      floodVisible: false
+    },
+    proposal: {
+      center: [-73.9895, 40.6745],
+      zoom: 16.2,
+      pitch: 64,
+      bearing: -45,
+      stage: 2,
+      proposalVisible: true,
+      floodVisible: false
+    }
+  };
+
+  const config = chapters[chapter] || chapters.intro;
+
+  map.easeTo({
+    center: config.center,
+    zoom: config.zoom,
+    pitch: config.pitch,
+    bearing: config.bearing,
+    duration: 1100,
+    essential: true
+  });
+
+  setStageInstant(config.stage);
+
+  map.setPaintProperty(
+    'proposed-buildings',
+    'fill-extrusion-height',
+    config.proposalVisible ? proposedHeightExpression : 0
+  );
+  map.setPaintProperty(
+    'proposed-buildings',
+    'fill-extrusion-opacity',
+    config.proposalVisible ? 0.72 : 0
+  );
+
+  const floodVisibility = config.floodVisible ? 'visible' : 'none';
+  if (map.getLayer('flood-fill')) {
+    map.setLayoutProperty('flood-fill', 'visibility', floodVisibility);
+  }
+  if (map.getLayer('flood-outline')) {
+    map.setLayoutProperty('flood-outline', 'visibility', floodVisibility);
+  }
+
+  const floodToggle = document.getElementById('toggle-flood');
+  if (floodToggle) {
+    floodToggle.checked = config.floodVisible;
+  }
+}
+
+function setupStoryScrollytelling() {
+  const storyPanel = document.getElementById('story-panel');
+  if (!storyPanel) return;
+
+  const steps = Array.from(storyPanel.querySelectorAll('.story-step'));
+  if (!steps.length) return;
+
+  let activeChapter = null;
+
+  const activateStep = (step) => {
+    const chapter = step.dataset.chapter;
+    if (!chapter || chapter === activeChapter) return;
+
+    activeChapter = chapter;
+    steps.forEach((el) => el.classList.toggle('active', el === step));
+    applyStoryChapter(chapter);
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) {
+        activateStep(visible.target);
+      }
+    },
+    {
+      root: storyPanel,
+      threshold: [0.4, 0.65, 0.9]
+    }
+  );
+
+  steps.forEach((step) => observer.observe(step));
+  activateStep(steps[0]);
+}
+
 function attachMapHandlers() {
   map.on('load', async () => {
     try {
@@ -522,10 +648,14 @@ function attachMapHandlers() {
 
       addMapboxGroundParks();
 
+      map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
+
       setupLayerToggles();
       await window.TreeRenderer?.initTrees?.(map);
 
       setStageInstant(0);
+      setupStoryScrollytelling();
     } catch (err) {
       console.error('MAP LOAD ERROR:', err);
     }
@@ -533,6 +663,8 @@ function attachMapHandlers() {
 }
 
 window.addEventListener('wheel', (event) => {
+  if (document.getElementById('story-panel')) return;
+
   if (!map) return;
 
   if (event.altKey) {
