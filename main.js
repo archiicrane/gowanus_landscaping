@@ -28,7 +28,7 @@ async function initMap() {
 
   map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v11',
+    style: 'mapbox://styles/mapbox/light-v11',
     center: [-73.9895, 40.6745],
     zoom: 15.3,
     pitch: 65,
