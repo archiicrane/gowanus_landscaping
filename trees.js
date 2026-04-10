@@ -211,7 +211,9 @@ window.TreeRenderer = {
           'icon-ignore-placement': true,
           // Billboard icons on pitched map.
           'icon-rotation-alignment': 'viewport',
-          'icon-pitch-alignment':    'viewport'
+          'icon-pitch-alignment':    'viewport',
+          // Keep a stable on-screen symbol size while zooming/pitching.
+          'icon-pitch-scale':        'viewport'
         }
       });
 
