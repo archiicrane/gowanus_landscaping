@@ -62,8 +62,8 @@ const stageContent = [
     desc: 'Existing building footprints extrude using recorded height data over live Mapbox terrain.'
   },
   {
-    title: 'Proposed Rezoning + Trees',
-    desc: 'Rezoning massing appears with street tree locations while the terrain, contours, and flood layer stay active.'
+    title: 'Street Trees',
+    desc: 'Street tree locations appear while existing buildings, terrain, contours, and flood layers stay active.'
   }
 ];
 
@@ -120,8 +120,8 @@ function setStageInstant(stage) {
 
   if (stage === 2) {
     map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', proposedHeightExpression);
-    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0.95);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
     window.TreeRenderer?.showTrees?.(map);
   }
 
@@ -165,12 +165,8 @@ function animateStage(stage) {
 
     if (stage === 2) {
       map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
-      map.setPaintProperty(
-        'proposed-buildings',
-        'fill-extrusion-height',
-        ['*', t, proposedHeightExpression]
-      );
-      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', t * 0.95);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
 
       if (raw > 0.2) {
         window.TreeRenderer?.showTrees?.(map);
@@ -437,7 +433,7 @@ function attachMapHandlers() {
         type: 'fill-extrusion',
         source: 'existing',
         paint: {
-          'fill-extrusion-color': '#8b5cf6',
+          'fill-extrusion-color': '#9fb3c8',
           'fill-extrusion-base': 0,
           'fill-extrusion-height': 0,
           'fill-extrusion-opacity': 0.92
