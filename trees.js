@@ -2,22 +2,22 @@
 
 // Species to canopy color mapping (matches original dot colors)
 const SPECIES_COLORS = {
-  'kentucky coffeetree': '#8bc34a',
-  'honeylocust':         '#7ddc6f',
-  'london planetree':    '#5fbf72',
-  'japanese zelkova':    '#4caf50',
-  'littleleaf linden':   '#9ccc65',
-  'callery pear':        '#c0e57b',
-  'pin oak':             '#2e7d32',
-  'ginkgo':              '#ffd54f',
-  'bald cypress':        '#2f855a',
-  'cornelian cherry':    '#ff8a65',
-  'black walnut':        '#6d8f3f',
-  'japanese tree lilac': '#ba68c8',
-  'red maple':           '#ef5350',
-  'norway maple':        '#ef6c00'
+  'kentucky coffeetree': '#b8d7a5',
+  'honeylocust':         '#b7e1c2',
+  'london planetree':    '#a8d5ba',
+  'japanese zelkova':    '#9fcfb2',
+  'littleleaf linden':   '#d6e3b2',
+  'callery pear':        '#e1e7c0',
+  'pin oak':             '#8fbba1',
+  'ginkgo':              '#f2e3ab',
+  'bald cypress':        '#9dc8ba',
+  'cornelian cherry':    '#e9c8b8',
+  'black walnut':        '#b7c7a0',
+  'japanese tree lilac': '#d6c8de',
+  'red maple':           '#e7b8b3',
+  'norway maple':        '#e4c3a8'
 };
-const DEFAULT_TREE_COLOR = '#22c55e';
+const DEFAULT_TREE_COLOR = '#b9d8b6';
 
 /**
  * Parse a hex colour into [r, g, b] integers.
@@ -206,20 +206,14 @@ window.TreeRenderer = {
         layout: {
           visibility: 'none',
           'icon-image': iconMatch,
-          'icon-size': [
-            'interpolate', ['linear'], ['zoom'],
-            13, 0.28,
-            15, 0.38,
-            17, 0.50,
-            19, 0.64
-          ],
+          'icon-size': 0.46,
           'icon-allow-overlap':    true,
           'icon-ignore-placement': true,
-          // Billboard: icons stay upright on the 65┬░ pitched map
+          // Billboard icons on pitched map.
           'icon-rotation-alignment': 'viewport',
           'icon-pitch-alignment':    'viewport'
         }
-      });
+      }, 'existing-buildings');
 
       console.log('trees-layer added (3D icons), count:', features.length);
     } catch (err) {
