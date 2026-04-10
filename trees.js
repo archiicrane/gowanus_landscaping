@@ -213,7 +213,7 @@ window.TreeRenderer = {
           'icon-rotation-alignment': 'viewport',
           'icon-pitch-alignment':    'viewport'
         }
-      }, 'existing-buildings');
+      });
 
       console.log('trees-layer added (3D icons), count:', features.length);
     } catch (err) {
