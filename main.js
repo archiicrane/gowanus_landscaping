@@ -462,7 +462,9 @@ function attachMapHandlers() {
         [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
       ], {
         padding: { top: 90, right: 80, bottom: 80, left: 80 },
-        duration: 0
+        duration: 0,
+        pitch: 60,
+        bearing: -45
       });
 
       setupLayerToggles();
