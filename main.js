@@ -30,7 +30,7 @@ async function initMap() {
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
     center: [-73.9895, 40.6745],
-    zoom: 15.1,
+    zoom: 16.1,
     pitch: 60,
     bearing: -45,
     antialias: true
@@ -266,49 +266,65 @@ function addMapboxTerrainAndContours() {
 }
 
 function addMapboxGroundParks() {
-  if (!map.getSource('mapbox-streets-parks')) {
-    map.addSource('mapbox-streets-parks', {
-      type: 'vector',
-      url: 'mapbox://mapbox.mapbox-streets-v8'
-    });
-  }
-
   const gowanusClipBounds = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-      ]]
-    }
+    type: 'Polygon',
+    coordinates: [[
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+      [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+      [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+    ]]
   };
+
+  const parksFilter = [
+    'all',
+    ['within', gowanusClipBounds],
+    [
+      'any',
+      ['==', ['get', 'class'], 'park'],
+      ['==', ['get', 'class'], 'garden'],
+      ['==', ['get', 'class'], 'recreation_ground'],
+      ['==', ['get', 'class'], 'pitch'],
+      ['==', ['get', 'class'], 'grass'],
+      ['==', ['get', 'class'], 'golf_course'],
+      ['==', ['get', 'type'], 'park']
+    ]
+  ];
 
   if (!map.getLayer('gowanus-parks-ground')) {
     map.addLayer({
       id: 'gowanus-parks-ground',
       type: 'fill',
-      source: 'mapbox-streets-parks',
+      source: 'composite',
       'source-layer': 'landuse',
-      filter: [
-        'all',
-        ['within', gowanusClipBounds],
-        [
-          'any',
-          ['==', ['get', 'class'], 'park'],
-          ['==', ['get', 'class'], 'garden'],
-          ['==', ['get', 'class'], 'recreation_ground'],
-          ['==', ['get', 'type'], 'park']
-        ]
-      ],
+      filter: parksFilter,
       paint: {
-        'fill-color': '#cfe3c8',
-        'fill-opacity': 0.62
+        'fill-color': '#bfd9b8',
+        'fill-opacity': 0.82
       }
-    });
+    }, 'existing-buildings');
+  }
+
+  if (!map.getLayer('gowanus-parks-outline')) {
+    map.addLayer({
+      id: 'gowanus-parks-outline',
+      type: 'line',
+      source: 'composite',
+      'source-layer': 'landuse',
+      filter: parksFilter,
+      paint: {
+        'line-color': '#8fb88a',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12, 0.3,
+          16, 0.9
+        ],
+        'line-opacity': 0.75
+      }
+    }, 'existing-buildings');
   }
 }
 
@@ -468,7 +484,6 @@ function attachMapHandlers() {
       const floodData = await floodResponse.json();
 
       addMapboxTerrainAndContours();
-      addMapboxGroundParks();
       addFloodLayer(floodData);
 
       map.addSource('existing', {
@@ -505,15 +520,7 @@ function attachMapHandlers() {
         }
       });
 
-      map.fitBounds([
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
-      ], {
-        padding: { top: 90, right: 80, bottom: 80, left: 80 },
-        duration: 0,
-        pitch: 60,
-        bearing: -45
-      });
+      addMapboxGroundParks();
 
       setupLayerToggles();
       await window.TreeRenderer?.initTrees?.(map);
