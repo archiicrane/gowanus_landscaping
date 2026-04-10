@@ -1,241 +1,153 @@
-console.log('trees.js loaded');
+﻿console.log('trees.js loaded');
 
-// Species → canopy colour mapping (matches original dot colours)
-const SPECIES_COLORS = {
-  'kentucky coffeetree': '#8bc34a',
-  'honeylocust':         '#7ddc6f',
-  'london planetree':    '#5fbf72',
-  'japanese zelkova':    '#4caf50',
-  'littleleaf linden':   '#9ccc65',
-  'callery pear':        '#c0e57b',
-  'pin oak':             '#2e7d32',
-  'ginkgo':              '#ffd54f',
-  'bald cypress':        '#2f855a',
-  'cornelian cherry':    '#ff8a65',
-  'black walnut':        '#6d8f3f',
-  'japanese tree lilac': '#ba68c8',
-  'red maple':           '#ef5350',
-  'norway maple':        '#ef6c00'
-};
-const DEFAULT_TREE_COLOR = '#22c55e';
+// 3-D OBJ tree renderer using Three.js InstancedMesh custom Mapbox layer.
+// Requires (loaded before this file in index.html):
+//   three@0.134.0/build/three.min.js
+//   three@0.134.0/examples/js/loaders/OBJLoader.js
 
-/**
- * Parse a hex colour into [r, g, b] integers.
- */
-function hexToRgb(hex) {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
+const _TREE_ORIGIN_LNGLAT = [-73.9895, 40.6745];
 
-function lighten(hex, amount = 0.22) {
-  const [r, g, b] = hexToRgb(hex);
-  const l = (c) => Math.min(255, Math.round(c + (255 - c) * amount));
-  return `rgb(${l(r)},${l(g)},${l(b)})`;
-}
+window.TreeRenderer = (function () {
+  var _visible = false;
 
-function darken(hex, amount = 0.28) {
-  const [r, g, b] = hexToRgb(hex);
-  const d = (c) => Math.max(0, Math.round(c * (1 - amount)));
-  return `rgb(${d(r)},${d(g)},${d(b)})`;
-}
+  return {
+    initTrees: async function (map) {
+      try {
+        // 1. Tree point data
+        var treeRes = await fetch('./data/gowanus_trees.json');
+        if (!treeRes.ok) throw new Error('Trees fetch failed: ' + treeRes.status);
+        var trees = JSON.parse((await treeRes.text()).replace(/\bNaN\b/g, 'null'))
+          .filter(function (t) { return t.lat != null && t.lon != null; })
+          .map(function (t) { return { lng: +t.lon, lat: +t.lat }; });
 
-/**
- * Draws a detailed organic tree icon onto a canvas:
- * multi-cluster leafy canopy, trunk, drop shadow, per-cluster shading.
- * Returns raw ImageData for map.addImage().
- */
-function createTreeIcon(canopyColor, size = 72) {
-  const canvas = document.createElement('canvas');
-  canvas.width  = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
+        // 2. OBJ model
+        var objRes = await fetch('./models/Tree%20low.obj');
+        if (!objRes.ok) throw new Error('OBJ fetch failed: ' + objRes.status);
+        var objText = await objRes.text();
 
-  const cx = size / 2;
-  const cy = size * 0.42;
-  const R  = size * 0.30; // base canopy radius
+        // 3. Mercator reference (scene origin)
+        var originMerc = mapboxgl.MercatorCoordinate.fromLngLat(_TREE_ORIGIN_LNGLAT, 0);
+        var mScale = originMerc.meterInMercatorCoordinateUnits();
 
-  // Leaf cluster layout: [dx, dy, radius] relative to canopy centre
-  const clusters = [
-    [  0,        0,       R        ],  // centre body
-    [ -R * 0.50, -R * 0.40, R * 0.68 ],  // top-left lobe
-    [  R * 0.48, -R * 0.38, R * 0.65 ],  // top-right lobe
-    [ -R * 0.55,  R * 0.32, R * 0.58 ],  // bottom-left lobe
-    [  R * 0.50,  R * 0.30, R * 0.56 ],  // bottom-right lobe
-    [  0,        -R * 0.60, R * 0.50 ],  // top crown
-  ];
+        // Clean up any previous layers
+        if (map.getLayer('trees-3d-layer')) map.removeLayer('trees-3d-layer');
+        if (map.getLayer('trees-layer'))    map.removeLayer('trees-layer');
+        if (map.getSource('trees'))         map.removeSource('trees');
 
-  // --- Ground shadow ---
-  ctx.beginPath();
-  ctx.ellipse(cx + 2, size * 0.87, R * 0.62, R * 0.18, 0, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-  ctx.fill();
+        var layer = {
+          id: 'trees-3d-layer',
+          type: 'custom',
+          renderingMode: '3d',
 
-  // --- Trunk ---
-  const tw = size * 0.09;
-  const trunkTop    = cy + R * 0.55;
-  const trunkBottom = size * 0.87;
-  const grad = ctx.createLinearGradient(cx - tw, 0, cx + tw, 0);
-  grad.addColorStop(0,   '#5a3010');
-  grad.addColorStop(0.4, '#8b5c2a');
-  grad.addColorStop(1,   '#4a2808');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.moveTo(cx - tw * 0.6, trunkBottom);
-  ctx.lineTo(cx - tw,       trunkTop);
-  ctx.lineTo(cx + tw,       trunkTop);
-  ctx.lineTo(cx + tw * 0.6, trunkBottom);
-  ctx.closePath();
-  ctx.fill();
+          onAdd: function (theMap, gl) {
+            this._scene    = new THREE.Scene();
+            this._camera   = new THREE.Camera();
+            this._renderer = new THREE.WebGLRenderer({ canvas: theMap.getCanvas(), context: gl, antialias: true });
+            this._renderer.autoClear = false;
 
-  // --- Canopy: dark under-shadow pass ---
-  for (const [dx, dy, r] of clusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx + 1.5, cy + dy + 2, r, 0, Math.PI * 2);
-    ctx.fillStyle = darken(canopyColor, 0.45);
-    ctx.fill();
-  }
+            this._scene.add(new THREE.AmbientLight(0xffffff, 0.60));
+            var sun = new THREE.DirectionalLight(0xfff8e7, 1.0);
+            sun.position.set(1, 2, 1).normalize();
+            this._scene.add(sun);
+            var sky = new THREE.DirectionalLight(0x99ccff, 0.35);
+            sky.position.set(-1, 0.5, -1).normalize();
+            this._scene.add(sky);
 
-  // --- Canopy: main mid-tone fill pass ---
-  for (const [dx, dy, r] of clusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2);
-    ctx.fillStyle = canopyColor;
-    ctx.fill();
-  }
+            var loader  = new THREE.OBJLoader();
+            var objRoot = loader.parse(objText);
+            objRoot.updateWorldMatrix(true, true);
 
-  // --- Canopy: lighter top surfaces (simulate light from upper-left) ---
-  const litClusters = [
-    [  0,        0,       R * 0.55 ],
-    [ -R * 0.50, -R * 0.40, R * 0.40 ],
-    [  0,        -R * 0.60, R * 0.32 ],
-  ];
-  for (const [dx, dy, r] of litClusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx - R * 0.1, cy + dy - R * 0.12, r, 0, Math.PI * 2);
-    ctx.fillStyle = lighten(canopyColor, 0.18);
-    ctx.fill();
-  }
+            var templates = [];
+            objRoot.traverse(function (child) {
+              if (!child.isMesh) return;
+              var name = ((child.parent ? child.parent.name : '') || child.name || '').toLowerCase();
+              var geo = child.geometry.clone();
+              geo.applyMatrix4(child.matrixWorld);
+              if (!geo.attributes.normal) geo.computeVertexNormals();
+              templates.push({ geo: geo, color: name.indexOf('cylinder') >= 0 ? 0x6b3e1f : 0x2d7a2d });
+            });
 
-  // --- Small dark leaf-gap dots for texture ---
-  const dots = [
-    [ R * 0.18,  R * 0.14 ],
-    [-R * 0.22,  R * 0.22 ],
-    [ R * 0.30, -R * 0.10 ],
-    [-R * 0.08, -R * 0.28 ],
-    [ R * 0.10,  R * 0.36 ],
-    [-R * 0.35,  R * 0.02 ],
-  ];
-  for (const [dx, dy] of dots) {
-    ctx.beginPath();
-    ctx.arc(cx + dx, cy + dy, R * 0.10, 0, Math.PI * 2);
-    ctx.fillStyle = darken(canopyColor, 0.38);
-    ctx.fill();
-  }
+            if (!templates.length) { console.warn('OBJ: no mesh data'); return; }
 
-  // --- Specular highlight ---
-  ctx.beginPath();
-  ctx.arc(cx - R * 0.38, cy - R * 0.50, R * 0.28, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.28)';
-  ctx.fill();
+            var tmp = new THREE.Group();
+            templates.forEach(function (t) { tmp.add(new THREE.Mesh(t.geo)); });
+            var bbox      = new THREE.Box3().setFromObject(tmp);
+            var modelH    = bbox.max.y - bbox.min.y;
+            var treeScale = 11 / modelH;
+            var baseShift = -bbox.min.y * treeScale;
 
-  return ctx.getImageData(0, 0, size, size);
-}
+            var self = this;
+            var iMeshes = templates.map(function (t) {
+              var m = new THREE.InstancedMesh(
+                t.geo,
+                new THREE.MeshLambertMaterial({ color: t.color, side: THREE.FrontSide }),
+                trees.length
+              );
+              m.frustumCulled = false;
+              self._scene.add(m);
+              return m;
+            });
 
-function iconId(species) {
-  return 'tree-icon-' + species.replace(/\s+/g, '-');
-}
+            var dummy = new THREE.Object3D();
+            trees.forEach(function (tree, i) {
+              var c = mapboxgl.MercatorCoordinate.fromLngLat([tree.lng, tree.lat], 0);
+              dummy.position.set(
+                (c.x - originMerc.x) / mScale,
+                baseShift,
+                (c.y - originMerc.y) / mScale
+              );
+              dummy.scale.setScalar(treeScale);
+              dummy.updateMatrix();
+              iMeshes.forEach(function (m) { m.setMatrixAt(i, dummy.matrix); });
+            });
+            iMeshes.forEach(function (m) { m.instanceMatrix.needsUpdate = true; });
 
-window.TreeRenderer = {
-  async initTrees(map) {
-    try {
-      const response = await fetch('./data/gowanus_trees.json');
-      if (!response.ok) {
-        throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
-      }
-
-      const rawText    = await response.text();
-      const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
-      const rawData    = JSON.parse(cleanedText);
-
-      // Register one icon image per species colour
-      const colorEntries = [...Object.entries(SPECIES_COLORS), ['default', DEFAULT_TREE_COLOR]];
-      for (const [key, color] of colorEntries) {
-        const id = iconId(key);
-        if (!map.hasImage(id)) {
-          map.addImage(id, createTreeIcon(color));
-        }
-      }
-
-      const features = rawData
-        .filter((t) => t.lat != null && t.lon != null)
-        .map((t) => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [Number(t.lon), Number(t.lat)]
+            console.log('OBJ trees ready: ' + trees.length + ' instances, ' + templates.length + ' mesh(es)');
           },
-          properties: {
-            tree_id: t.tree_id ?? null,
-            species: t.species  ?? 'Unknown',
-            health:  t.health   ?? 'Unknown'
+
+          render: function (gl, args) {
+            if (!_visible || !this._renderer) return;
+
+            var raw;
+            if (args && typeof args === 'object' && !Array.isArray(args) && !ArrayBuffer.isView(args)) {
+              raw = (args.defaultProjectionData && args.defaultProjectionData.mainMatrix)
+                  ? args.defaultProjectionData.mainMatrix
+                  : args.modelViewProjectionMatrix;
+            } else {
+              raw = args;
+            }
+            if (!raw) return;
+
+            var rotX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+            var worldMatrix = new THREE.Matrix4()
+              .makeTranslation(originMerc.x, originMerc.y, originMerc.z)
+              .scale(new THREE.Vector3(mScale, -mScale, mScale))
+              .multiply(rotX);
+
+            this._camera.projectionMatrix = new THREE.Matrix4()
+              .fromArray(Array.from(raw))
+              .multiply(worldMatrix);
+
+            this._renderer.resetState();
+            this._renderer.render(this._scene, this._camera);
           }
-        }));
+        };
 
-      if (map.getLayer('trees-layer')) map.removeLayer('trees-layer');
-      if (map.getSource('trees'))      map.removeSource('trees');
-
-      map.addSource('trees', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features }
-      });
-
-      // Build match expression: species name → icon image id
-      const iconMatch = [
-        'match',
-        ['downcase', ['to-string', ['coalesce', ['get', 'species'], 'unknown']]]
-      ];
-      for (const species of Object.keys(SPECIES_COLORS)) {
-        iconMatch.push(species, iconId(species));
+        map.addLayer(layer);
+        console.log('3D OBJ tree layer added - ' + trees.length + ' trees');
+      } catch (err) {
+        console.error('TREE LOAD ERROR:', err);
       }
-      iconMatch.push(iconId('default')); // fallback
+    },
 
-      map.addLayer({
-        id: 'trees-layer',
-        type: 'symbol',
-        source: 'trees',
-        layout: {
-          visibility: 'none',
-          'icon-image': iconMatch,
-          'icon-size': [
-            'interpolate', ['linear'], ['zoom'],
-            13, 0.28,
-            15, 0.38,
-            17, 0.50,
-            19, 0.64
-          ],
-          'icon-allow-overlap':    true,
-          'icon-ignore-placement': true,
-          // Billboard: icons stay upright on the 65° pitched map
-          'icon-rotation-alignment': 'viewport',
-          'icon-pitch-alignment':    'viewport'
-        }
-      });
+    showTrees: function (map) {
+      _visible = true;
+      map.triggerRepaint();
+    },
 
-      console.log('trees-layer added (3D icons), count:', features.length);
-    } catch (err) {
-      console.error('TREE LOAD ERROR:', err);
+    hideTrees: function (map) {
+      _visible = false;
+      map.triggerRepaint();
     }
-  },
-
-  showTrees(map) {
-    if (map.getLayer('trees-layer')) {
-      map.setLayoutProperty('trees-layer', 'visibility', 'visible');
-    }
-  },
-
-  hideTrees(map) {
-    if (map.getLayer('trees-layer')) {
-      map.setLayoutProperty('trees-layer', 'visibility', 'none');
-    }
-  }
-};
+  };
+}());
