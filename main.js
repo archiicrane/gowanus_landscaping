@@ -575,8 +575,9 @@ function setupStoryScrollytelling() {
       }
     },
     {
-      root: storyPanel,
-      threshold: [0.4, 0.65, 0.9]
+      root: null,
+      rootMargin: '-15% 0px -35% 0px',
+      threshold: [0.2, 0.45, 0.7]
     }
   );
 

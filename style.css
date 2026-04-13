@@ -350,20 +350,22 @@ body {
 }
 
 .story-panel {
-  position: fixed;
+  position: relative;
   top: 108px;
-  right: 20px;
+  right: auto;
   width: min(360px, calc(100% - 40px));
-  max-height: calc(100vh - 128px);
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   z-index: 126;
   padding: 14px;
   display: grid;
   gap: 12px;
+  margin: 108px 20px 40px auto;
 }
 
 .story-step {
   padding: 14px 14px 16px;
+  min-height: 58vh;
   border-radius: 10px;
   border: 1px solid rgba(86, 73, 53, 0.16);
   background: rgba(255, 252, 246, 0.9);
@@ -439,12 +441,13 @@ body {
   }
 
   .story-panel {
-    top: auto;
-    right: 12px;
-    left: 12px;
-    bottom: 14px;
+    top: 100px;
+    right: auto;
+    left: auto;
+    bottom: auto;
     width: auto;
-    max-height: 40vh;
+    max-height: none;
+    margin: 100px 12px 28px;
   }
 
   .observable-overlay {
@@ -468,8 +471,9 @@ body {
   }
 
   .story-panel {
-    max-height: 36vh;
+    max-height: none;
     padding: 10px;
+    margin: 92px 8px 24px;
   }
 
   .story-step {
