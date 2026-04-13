@@ -457,6 +457,37 @@ async function addParkOutline() {
     throw new Error('No park outline features found in park.geojson.');
   }
 
+  const parkRing = [];
+  for (const feature of features) {
+    const coords = feature?.geometry?.type === 'LineString' ? feature.geometry.coordinates : [];
+    for (const point of coords) {
+      if (!Array.isArray(point) || point.length < 2) continue;
+      const lngLat = [Number(point[0]), Number(point[1])];
+      const last = parkRing[parkRing.length - 1];
+      if (!last || last[0] !== lngLat[0] || last[1] !== lngLat[1]) {
+        parkRing.push(lngLat);
+      }
+    }
+  }
+
+  const parkAreaFeatures = [];
+  if (parkRing.length >= 4) {
+    const first = parkRing[0];
+    const last = parkRing[parkRing.length - 1];
+    if (first[0] !== last[0] || first[1] !== last[1]) {
+      parkRing.push([first[0], first[1]]);
+    }
+
+    parkAreaFeatures.push({
+      type: 'Feature',
+      properties: { name: 'park-area' },
+      geometry: {
+        type: 'Polygon',
+        coordinates: [parkRing]
+      }
+    });
+  }
+
   if (!map.getSource('park-outline')) {
     map.addSource('park-outline', {
       type: 'geojson',
@@ -464,6 +495,58 @@ async function addParkOutline() {
     });
   } else {
     map.getSource('park-outline').setData(parkData);
+  }
+
+  if (!map.getSource('park-area')) {
+    map.addSource('park-area', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: parkAreaFeatures
+      }
+    });
+  } else {
+    map.getSource('park-area').setData({
+      type: 'FeatureCollection',
+      features: parkAreaFeatures
+    });
+  }
+
+  if (!map.hasImage('park-hatch-red')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 24;
+    hatchCanvas.height = 24;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 24, 24);
+      ctx.strokeStyle = 'rgba(220,38,38,0.40)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 24);
+      ctx.lineTo(12, 6);
+      ctx.moveTo(0, 30);
+      ctx.lineTo(18, 12);
+      ctx.moveTo(6, 36);
+      ctx.lineTo(24, 18);
+      ctx.stroke();
+      map.addImage('park-hatch-red', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('park-hatch-fill')) {
+    map.addLayer({
+      id: 'park-hatch-fill',
+      type: 'fill',
+      source: 'park-area',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'fill-pattern': 'park-hatch-red',
+        'fill-opacity': 0.62
+      }
+    });
   }
 
   if (!map.getLayer('park-outline')) {
@@ -477,29 +560,34 @@ async function addParkOutline() {
         'line-cap': 'round'
       },
       paint: {
-        'line-color': '#4d7c0f',
+        'line-color': '#dc2626',
         'line-width': [
           'interpolate',
           ['linear'],
           ['zoom'],
-          14, 1.4,
-          16, 2.4,
-          18, 3.6
+          14, 1.6,
+          16, 2.6,
+          18, 3.9
         ],
+        'line-dasharray': [1.4, 1.1],
         'line-opacity': 0.96
       }
     });
   }
 
-  map.setPaintProperty('park-outline', 'line-color', '#4d7c0f');
+  map.setPaintProperty('park-hatch-fill', 'fill-pattern', 'park-hatch-red');
+  map.setPaintProperty('park-hatch-fill', 'fill-opacity', 0.62);
+
+  map.setPaintProperty('park-outline', 'line-color', '#dc2626');
   map.setPaintProperty('park-outline', 'line-width', [
     'interpolate',
     ['linear'],
     ['zoom'],
-    14, 1.4,
-    16, 2.4,
-    18, 3.6
+    14, 1.6,
+    16, 2.6,
+    18, 3.9
   ]);
+  map.setPaintProperty('park-outline', 'line-dasharray', [1.4, 1.1]);
   map.setPaintProperty('park-outline', 'line-opacity', 0.96);
 }
 
@@ -1314,6 +1402,19 @@ async function addElevatedRailExtrusion() {
   const extrusions = [];
 
   for (const feature of railFeatures) {
+    const structure = String(feature.properties?.structure || '').toLowerCase();
+    const brunnel = String(feature.properties?.brunnel || '').toLowerCase();
+    const layerValue = Number(feature.properties?.layer ?? 0);
+
+    const isElevated =
+      structure === 'bridge' ||
+      structure === 'elevated' ||
+      structure === 'viaduct' ||
+      brunnel === 'bridge' ||
+      layerValue > 0;
+
+    if (!isElevated) continue;
+
     const lineGroups = getFeatureLineCoordinates(feature.geometry);
     for (const lineCoords of lineGroups) {
       const clippedSegments = clipLineToStudyBoundingBox(lineCoords);
@@ -1329,7 +1430,7 @@ async function addElevatedRailExtrusion() {
         if (unique.has(key)) continue;
         unique.add(key);
 
-        const polygon = bufferLineToPolygon(coords, 4.6);
+        const polygon = bufferLineToPolygon(coords, 2.4);
         if (!polygon) continue;
 
         extrusions.push({
@@ -1365,8 +1466,8 @@ async function addElevatedRailExtrusion() {
     },
     paint: {
       'fill-extrusion-color': '#3f3f46',
-      'fill-extrusion-base': 7.5,
-      'fill-extrusion-height': 11.8,
+      'fill-extrusion-base': 9.5,
+      'fill-extrusion-height': 13.5,
       'fill-extrusion-opacity': 0.96
     }
   });
@@ -1392,7 +1493,6 @@ function setupLayerToggles() {
   const floodToggle = document.getElementById('toggle-flood');
   const bioswaleToggle = document.getElementById('toggle-bioswale');
   const parkToggle = document.getElementById('toggle-park');
-  const siteToggle = document.getElementById('toggle-site');
   const treesToggle = document.getElementById('toggle-trees');
   const observableToggle = document.getElementById('toggle-observable');
   const observableOverlay = document.getElementById('observable-overlay');
@@ -1438,15 +1538,8 @@ function setupLayerToggles() {
     if (map.getLayer('park-outline')) {
       map.setLayoutProperty('park-outline', 'visibility', visibility);
     }
-  });
-
-  siteToggle?.addEventListener('change', (event) => {
-    const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('site-hatch-fill')) {
-      map.setLayoutProperty('site-hatch-fill', 'visibility', visibility);
-    }
-    if (map.getLayer('site-lines')) {
-      map.setLayoutProperty('site-lines', 'visibility', visibility);
+    if (map.getLayer('park-hatch-fill')) {
+      map.setLayoutProperty('park-hatch-fill', 'visibility', visibility);
     }
   });
 
@@ -1704,7 +1797,6 @@ function attachMapHandlers() {
       addMapboxGroundParks();
         await addParkOutline();
         await addElevatedRailExtrusion();
-      await addSiteLinesFromText();
       await addBioswaleOpportunityLayer(floodData);
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
