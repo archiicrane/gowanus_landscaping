@@ -58,10 +58,10 @@ async function initMap() {
   map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
-    center: [-73.9895, 40.6745],
-    zoom: 15.95,
-    pitch: 0,
-    bearing: 0,
+    center: [-73.9899, 40.6749],
+    zoom: 15.55,
+    pitch: 32,
+    bearing: -10,
     antialias: true
   });
 
@@ -150,10 +150,10 @@ const stageContent = [
 
 const SCROLL_STAGE_VIEWS = [
   {
-    center: [-73.9895, 40.6745],
-    zoom: 15.95,
-    pitch: 0,
-    bearing: 0
+    center: [-73.9899, 40.6749],
+    zoom: 15.55,
+    pitch: 32,
+    bearing: -10
   },
   {
     center: [-73.9895, 40.6745],
