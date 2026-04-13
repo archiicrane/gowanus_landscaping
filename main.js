@@ -519,8 +519,6 @@ function localToLngLat(point, bounds, quad) {
 }
 
 async function addSiteLinesFromText() {
-  if (map.getLayer('site-lines')) return;
-
   const response = await fetch('./models/site2_geographic_coordinates.json');
   if (!response.ok) {
     throw new Error(`Site coordinate fetch failed: ${response.status} ${response.statusText}`);
@@ -575,6 +573,11 @@ async function addSiteLinesFromText() {
         features
       }
     });
+  } else {
+    map.getSource('site-lines').setData({
+      type: 'FeatureCollection',
+      features
+    });
   }
 
   const areaFeatures = features
@@ -606,6 +609,11 @@ async function addSiteLinesFromText() {
         type: 'FeatureCollection',
         features: areaFeatures
       }
+    });
+  } else {
+    map.getSource('site-areas').setData({
+      type: 'FeatureCollection',
+      features: areaFeatures
     });
   }
 
@@ -645,30 +653,46 @@ async function addSiteLinesFromText() {
       }
     });
   }
+  map.setPaintProperty('site-hatch-fill', 'fill-pattern', 'site-hatch-red');
+  map.setPaintProperty('site-hatch-fill', 'fill-opacity', 0.72);
 
-  map.addLayer({
-    id: 'site-lines',
-    type: 'line',
-    source: 'site-lines',
-    layout: {
-      visibility: 'visible',
-      'line-join': 'round',
-      'line-cap': 'round'
-    },
-    paint: {
-      'line-color': '#dc2626',
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        14, 1.8,
-        16, 2.8,
-        18, 4.2
-      ],
-      'line-dasharray': [1.4, 1.1],
-      'line-opacity': 0.98
-    }
-  });
+  if (!map.getLayer('site-lines')) {
+    map.addLayer({
+      id: 'site-lines',
+      type: 'line',
+      source: 'site-lines',
+      layout: {
+        visibility: 'visible',
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#dc2626',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 1.8,
+          16, 2.8,
+          18, 4.2
+        ],
+        'line-dasharray': [1.4, 1.1],
+        'line-opacity': 0.98
+      }
+    });
+  }
+
+  map.setPaintProperty('site-lines', 'line-color', '#dc2626');
+  map.setPaintProperty('site-lines', 'line-width', [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    14, 1.8,
+    16, 2.8,
+    18, 4.2
+  ]);
+  map.setPaintProperty('site-lines', 'line-dasharray', [1.4, 1.1]);
+  map.setPaintProperty('site-lines', 'line-opacity', 0.98);
 }
 
 function addFloodLayer(floodData) {
