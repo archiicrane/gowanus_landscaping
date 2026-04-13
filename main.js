@@ -433,6 +433,18 @@ function addMapboxGroundWater() {
   }
 }
 
+function hideBasemapLabels() {
+  const style = map.getStyle();
+  const layers = style?.layers || [];
+
+  for (const layer of layers) {
+    if (layer.type !== 'symbol') continue;
+    if (map.getLayer(layer.id)) {
+      map.setLayoutProperty(layer.id, 'visibility', 'none');
+    }
+  }
+}
+
 function addGowanusFocusMask() {
   if (map.getLayer('gowanus-focus-mask')) return;
 
@@ -1373,6 +1385,8 @@ function attachMapHandlers() {
       const existingData = await existingResponse.json();
       const proposedData = await proposedResponse.json();
       const floodData = await floodResponse.json();
+
+      hideBasemapLabels();
 
       addMapboxTerrainAndContours();
       addFloodLayer(floodData);
