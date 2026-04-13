@@ -266,30 +266,15 @@ function addMapboxTerrainAndContours() {
 }
 
 function addMapboxGroundParks() {
-  const gowanusClipBounds = {
-    type: 'Polygon',
-    coordinates: [[
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-      [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-      [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-    ]]
-  };
-
   const parksFilter = [
-    'all',
-    ['within', gowanusClipBounds],
-    [
-      'any',
-      ['==', ['get', 'class'], 'park'],
-      ['==', ['get', 'class'], 'garden'],
-      ['==', ['get', 'class'], 'recreation_ground'],
-      ['==', ['get', 'class'], 'pitch'],
-      ['==', ['get', 'class'], 'grass'],
-      ['==', ['get', 'class'], 'golf_course'],
-      ['==', ['get', 'type'], 'park']
-    ]
+    'any',
+    ['==', ['get', 'class'], 'park'],
+    ['==', ['get', 'class'], 'garden'],
+    ['==', ['get', 'class'], 'recreation_ground'],
+    ['==', ['get', 'class'], 'pitch'],
+    ['==', ['get', 'class'], 'grass'],
+    ['==', ['get', 'class'], 'golf_course'],
+    ['==', ['get', 'type'], 'park']
   ];
 
   if (!map.getLayer('gowanus-parks-ground')) {
@@ -308,27 +293,15 @@ function addMapboxGroundParks() {
 }
 
 function addMapboxGroundWater() {
-  const gowanusClipBounds = {
-    type: 'Polygon',
-    coordinates: [[
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-      [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-      [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-      [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-    ]]
-  };
-
   if (!map.getLayer('gowanus-water-ground')) {
     map.addLayer({
       id: 'gowanus-water-ground',
       type: 'fill',
       source: 'composite',
       'source-layer': 'water',
-      filter: ['within', gowanusClipBounds],
       paint: {
-        'fill-color': '#77aee8',
-        'fill-opacity': 0.88
+        'fill-color': '#5fa4e8',
+        'fill-opacity': 0.92
       }
     }, 'existing-buildings');
   }
