@@ -157,12 +157,46 @@ window.TreeRenderer = {
       const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
       const rawData    = JSON.parse(cleanedText);
 
+      // Load swamp white oak SVG and convert to ImageData
+      let swampWhiteOakImage = null;
+      try {
+        const svgResponse = await fetch('./models/swamp white oak tree svg.svg');
+        if (svgResponse.ok) {
+          const svgText = await svgResponse.text();
+          const blob = new Blob([svgText], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(blob);
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0, 256, 256);
+              swampWhiteOakImage = ctx.getImageData(0, 0, 256, 256);
+              URL.revokeObjectURL(url);
+              resolve();
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load swamp white oak SVG, using generated icon:', err);
+      }
+
       // Register one icon image per species colour
       const colorEntries = [...Object.entries(SPECIES_COLORS), ['default', DEFAULT_TREE_COLOR]];
       for (const [key, color] of colorEntries) {
         const id = iconId(key);
         if (!map.hasImage(id)) {
-          map.addImage(id, createTreeIcon(color));
+          if (key === 'swamp white oak' && swampWhiteOakImage) {
+            map.addImage(id, swampWhiteOakImage);
+          } else {
+            map.addImage(id, createTreeIcon(color));
+          }
         }
       }
 
