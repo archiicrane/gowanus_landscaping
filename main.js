@@ -457,36 +457,70 @@ async function addParkOutline() {
     throw new Error('No park outline features found in park.geojson.');
   }
 
-  const parkRing = [];
+  const equalPoint = (a, b, eps = 1e-8) => (
+    Math.abs(a[0] - b[0]) < eps && Math.abs(a[1] - b[1]) < eps
+  );
+
+  const closeEnough = (a, b, eps = 1e-6) => (
+    Math.abs(a[0] - b[0]) < eps && Math.abs(a[1] - b[1]) < eps
+  );
+
+  const rings = [];
+  let current = [];
+
+  const finalizeCurrent = () => {
+    if (current.length < 4) {
+      current = [];
+      return;
+    }
+
+    const first = current[0];
+    const last = current[current.length - 1];
+    if (!equalPoint(first, last)) {
+      if (closeEnough(first, last)) {
+        current.push([first[0], first[1]]);
+      } else {
+        current = [];
+        return;
+      }
+    }
+
+    rings.push(current);
+    current = [];
+  };
+
   for (const feature of features) {
     const coords = feature?.geometry?.type === 'LineString' ? feature.geometry.coordinates : [];
-    for (const point of coords) {
-      if (!Array.isArray(point) || point.length < 2) continue;
-      const lngLat = [Number(point[0]), Number(point[1])];
-      const last = parkRing[parkRing.length - 1];
-      if (!last || last[0] !== lngLat[0] || last[1] !== lngLat[1]) {
-        parkRing.push(lngLat);
-      }
-    }
-  }
+    if (coords.length < 2) continue;
 
-  const parkAreaFeatures = [];
-  if (parkRing.length >= 4) {
-    const first = parkRing[0];
-    const last = parkRing[parkRing.length - 1];
-    if (first[0] !== last[0] || first[1] !== last[1]) {
-      parkRing.push([first[0], first[1]]);
+    const a = [Number(coords[0][0]), Number(coords[0][1])];
+    const b = [Number(coords[coords.length - 1][0]), Number(coords[coords.length - 1][1])];
+
+    if (!current.length) {
+      current = [a, b];
+      continue;
     }
 
-    parkAreaFeatures.push({
-      type: 'Feature',
-      properties: { name: 'park-area' },
-      geometry: {
-        type: 'Polygon',
-        coordinates: [parkRing]
-      }
-    });
+    const tail = current[current.length - 1];
+    if (equalPoint(tail, a)) {
+      current.push(b);
+    } else if (equalPoint(tail, b)) {
+      current.push(a);
+    } else {
+      finalizeCurrent();
+      current = [a, b];
+    }
   }
+  finalizeCurrent();
+
+  const parkAreaFeatures = rings.map((ring, index) => ({
+    type: 'Feature',
+    properties: { name: `park-area-${index + 1}` },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [ring]
+    }
+  }));
 
   if (!map.getSource('park-outline')) {
     map.addSource('park-outline', {
