@@ -1417,16 +1417,16 @@ function attachMapHandlers() {
           'line-cap': 'round'
         },
         paint: {
-          'line-color': '#6b7280',
+          'line-color': '#2d3748',
           'line-width': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            13, 0.45,
-            16, 0.95,
-            18, 1.4
+            13, 0.8,
+            16, 1.5,
+            18, 2.2
           ],
-          'line-opacity': 0.82
+          'line-opacity': 1.0
         }
       });
 
@@ -1456,14 +1456,14 @@ function attachMapHandlers() {
           'line-cap': 'round'
         },
         paint: {
-          'line-color': '#7f8c84',
+          'line-color': '#2d3748',
           'line-width': [
             'interpolate',
             ['linear'],
             ['zoom'],
-            13, 0.45,
-            16, 0.95,
-            18, 1.4
+            13, 0.8,
+            16, 1.5,
+            18, 2.2
           ],
           'line-opacity': 0
         }
