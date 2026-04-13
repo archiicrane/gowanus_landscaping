@@ -579,72 +579,217 @@ function getGeometryBounds(geometry) {
 
 function pointInStudyBounds(point) {
   return (
-    point.lng >= STUDY_BOUNDS.west &&
-    point.lng <= STUDY_BOUNDS.east &&
-    point.lat >= STUDY_BOUNDS.south &&
-    point.lat <= STUDY_BOUNDS.north
+    point[0] >= STUDY_BOUNDS.west &&
+    point[0] <= STUDY_BOUNDS.east &&
+    point[1] >= STUDY_BOUNDS.south &&
+    point[1] <= STUDY_BOUNDS.north
   );
 }
 
-function buildTerrainSamplePoints(bounds) {
-  const centerLng = (bounds.minLng + bounds.maxLng) * 0.5;
-  const centerLat = (bounds.minLat + bounds.maxLat) * 0.5;
-  const dx = Math.max((bounds.maxLng - bounds.minLng) * 0.28, 0.00015);
-  const dy = Math.max((bounds.maxLat - bounds.minLat) * 0.28, 0.00015);
-
-  const points = [
-    { lng: centerLng, lat: centerLat },
-    { lng: centerLng - dx, lat: centerLat },
-    { lng: centerLng + dx, lat: centerLat },
-    { lng: centerLng, lat: centerLat - dy },
-    { lng: centerLng, lat: centerLat + dy }
-  ];
-
-  return points.filter(pointInStudyBounds);
+function boundsOverlap(a, b, padding = 0) {
+  return !(
+    a.maxLng < (b.minLng - padding) ||
+    a.minLng > (b.maxLng + padding) ||
+    a.maxLat < (b.minLat - padding) ||
+    a.minLat > (b.maxLat + padding)
+  );
 }
 
-function collectTerrainElevations(samplePoints) {
+function roughLineLength(coords) {
+  let length = 0;
+  for (let i = 1; i < coords.length; i += 1) {
+    const dx = coords[i][0] - coords[i - 1][0];
+    const dy = coords[i][1] - coords[i - 1][1];
+    length += Math.sqrt(dx * dx + dy * dy);
+  }
+  return length;
+}
+
+function clipLineToStudyBounds(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInStudyBounds(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
+function getLineSamplePoints(coords, sampleCount = 7) {
+  if (coords.length <= sampleCount) return coords;
+
+  const points = [];
+  for (let i = 0; i < sampleCount; i += 1) {
+    const idx = Math.round((i / (sampleCount - 1)) * (coords.length - 1));
+    points.push(coords[idx]);
+  }
+
+  return points;
+}
+
+function getLineTerrainStats(coords) {
   const elevations = [];
-  for (const point of samplePoints) {
-    const value = map.queryTerrainElevation(point, { exaggerated: false });
+  const samples = getLineSamplePoints(coords, 7);
+
+  for (const [lng, lat] of samples) {
+    const value = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
     if (Number.isFinite(value)) elevations.push(value);
   }
-  return elevations;
+
+  if (elevations.length < 3) return null;
+
+  const avg = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
+  const relief = Math.max(...elevations) - Math.min(...elevations);
+
+  return { avg, relief };
+}
+
+function getFeatureLineCoordinates(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === 'LineString') return [geometry.coordinates];
+  if (geometry.type === 'MultiLineString') return geometry.coordinates;
+  return [];
+}
+
+function buildFloodPriorityBounds(floodData) {
+  if (!floodData?.features?.length) return [];
+
+  const bounds = [];
+  for (const feature of floodData.features) {
+    const floodScore = Number(feature.properties?.fshri ?? 0);
+    if (floodScore < 2) continue;
+
+    const featureBounds = getGeometryBounds(feature.geometry);
+    if (featureBounds) bounds.push(featureBounds);
+  }
+
+  return bounds;
+}
+
+function buildSegmentKey(coords, roadClass, roadName = '') {
+  const start = coords[0];
+  const end = coords[coords.length - 1];
+  const a = `${start[0].toFixed(5)}:${start[1].toFixed(5)}`;
+  const b = `${end[0].toFixed(5)}:${end[1].toFixed(5)}`;
+  const [u, v] = a < b ? [a, b] : [b, a];
+  return `${roadClass}|${roadName}|${u}|${v}`;
+}
+
+function selectBestBioswaleSegments(segments) {
+  const ranked = [...segments].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.avgElevation !== b.avgElevation) return a.avgElevation - b.avgElevation;
+    return a.relief - b.relief;
+  });
+
+  const strict = ranked.filter((segment) => segment.score >= 5);
+  if (strict.length >= 18) return strict.slice(0, 95);
+
+  return ranked.filter((segment) => segment.score >= 4).slice(0, 95);
 }
 
 async function addBioswaleOpportunityLayer(floodData) {
   if (map.getLayer('bioswale-street-core')) return;
 
-  const gowanusClipBounds = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-      ]]
-    }
-  };
+  await new Promise((resolve) => map.once('idle', resolve));
 
-  const streetFilter = [
-    'all',
-    ['within', gowanusClipBounds],
-    ['match', ['get', 'class'],
-      ['street', 'secondary', 'tertiary', 'residential', 'service', 'trunk_link', 'primary_link'],
-      true,
-      false
-    ]
-  ];
+  const targetRoadClasses = ['street', 'secondary', 'tertiary', 'residential', 'service'];
+  const roadFeatures = map.querySourceFeatures('composite', {
+    sourceLayer: 'road',
+    filter: ['match', ['get', 'class'], targetRoadClasses, true, false]
+  });
+
+  const floodPriorityBounds = buildFloodPriorityBounds(floodData);
+  const unique = new Set();
+  const candidates = [];
+
+  for (const feature of roadFeatures) {
+    const roadClass = feature.properties?.class || 'street';
+    const roadName = feature.properties?.name || '';
+
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    for (const lineCoords of lineGroups) {
+      const clippedSegments = clipLineToStudyBounds(lineCoords);
+      for (const coords of clippedSegments) {
+        if (coords.length < 4) continue;
+        if (roughLineLength(coords) < 0.00035) continue;
+
+        const bounds = getGeometryBounds({ coordinates: coords });
+        if (!bounds) continue;
+
+        const terrainStats = getLineTerrainStats(coords);
+        if (!terrainStats) continue;
+
+        const floodNearby = floodPriorityBounds.some((floodBounds) => boundsOverlap(bounds, floodBounds, 0.0003));
+        const lowElevation = terrainStats.avg <= 8.8;
+        const moderateElevation = terrainStats.avg <= 10.2;
+        const gentleSlope = terrainStats.relief <= 1.25;
+        const moderateSlope = terrainStats.relief <= 2.1;
+
+        let score = 0;
+        if (floodNearby) score += 2;
+        if (lowElevation) score += 2;
+        else if (moderateElevation) score += 1;
+        if (gentleSlope) score += 2;
+        else if (moderateSlope) score += 1;
+        if (roadClass === 'residential' || roadClass === 'street') score += 1;
+
+        const key = buildSegmentKey(coords, roadClass, roadName);
+        if (unique.has(key)) continue;
+        unique.add(key);
+
+        candidates.push({
+          type: 'Feature',
+          properties: {
+            class: roadClass,
+            name: roadName,
+            score,
+            avg_elev_m: Number(terrainStats.avg.toFixed(2)),
+            relief_m: Number(terrainStats.relief.toFixed(2)),
+            flood_nearby: floodNearby ? 1 : 0
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: coords
+          },
+          score,
+          avgElevation: terrainStats.avg,
+          relief: terrainStats.relief
+        });
+      }
+    }
+  }
+
+  const selected = selectBestBioswaleSegments(candidates).map((feature) => ({
+    type: 'Feature',
+    properties: feature.properties,
+    geometry: feature.geometry
+  }));
+
+  map.addSource('bioswale-streets', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: selected
+    }
+  });
 
   map.addLayer({
     id: 'bioswale-street-glow',
     type: 'line',
-    source: 'composite',
-    'source-layer': 'road',
-    filter: streetFilter,
+    source: 'bioswale-streets',
     layout: {
       visibility: 'visible',
       'line-join': 'round',
@@ -667,9 +812,7 @@ async function addBioswaleOpportunityLayer(floodData) {
   map.addLayer({
     id: 'bioswale-street-core',
     type: 'line',
-    source: 'composite',
-    'source-layer': 'road',
-    filter: streetFilter,
+    source: 'bioswale-streets',
     layout: {
       visibility: 'visible',
       'line-join': 'round',
