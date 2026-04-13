@@ -1532,9 +1532,11 @@ async function addElevatedRailExtrusion() {
 }
 
 function centroidFromLineFeatures(features) {
-  let sumLng = 0;
-  let sumLat = 0;
-  let count = 0;
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+  let found = false;
 
   for (const feature of features || []) {
     const geom = feature?.geometry;
@@ -1543,9 +1545,13 @@ function centroidFromLineFeatures(features) {
     if (geom.type === 'LineString') {
       for (const coord of geom.coordinates || []) {
         if (!Array.isArray(coord) || coord.length < 2) continue;
-        sumLng += coord[0];
-        sumLat += coord[1];
-        count += 1;
+        const lng = coord[0];
+        const lat = coord[1];
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+        found = true;
       }
       continue;
     }
@@ -1554,16 +1560,20 @@ function centroidFromLineFeatures(features) {
       for (const line of geom.coordinates || []) {
         for (const coord of line || []) {
           if (!Array.isArray(coord) || coord.length < 2) continue;
-          sumLng += coord[0];
-          sumLat += coord[1];
-          count += 1;
+          const lng = coord[0];
+          const lat = coord[1];
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+          found = true;
         }
       }
     }
   }
 
-  if (!count) return PRESENTATION_CENTER;
-  return [sumLng / count, sumLat / count];
+  if (!found) return PRESENTATION_CENTER;
+  return [(minLng + maxLng) * 0.5, (minLat + maxLat) * 0.5];
 }
 
 function addBHeightsModelOnFootprints(anchorLngLat) {
