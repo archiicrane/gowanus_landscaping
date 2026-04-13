@@ -170,6 +170,8 @@ window.TreeRenderer = {
           canvas.width = 256;
           canvas.height = 256;
           const ctx = canvas.getContext('2d');
+          ctx.fillStyle = 'transparent';
+          ctx.fillRect(0, 0, 256, 256);
           
           await new Promise((resolve, reject) => {
             const img = new Image();
@@ -177,9 +179,13 @@ window.TreeRenderer = {
               ctx.drawImage(img, 0, 0, 256, 256);
               swampWhiteOakImage = ctx.getImageData(0, 0, 256, 256);
               URL.revokeObjectURL(url);
+              console.log('✓ Swamp white oak SVG loaded successfully');
               resolve();
             };
-            img.onerror = reject;
+            img.onerror = (e) => {
+              console.error('SVG image load error:', e);
+              reject(e);
+            };
             img.src = url;
           });
         }
@@ -240,7 +246,12 @@ window.TreeRenderer = {
         layout: {
           visibility: 'none',
           'icon-image': iconMatch,
-          'icon-size': 0.46,
+          'icon-size': [
+            'match',
+            ['downcase', ['to-string', ['coalesce', ['get', 'species'], 'unknown']]],
+            'swamp white oak', 1.0,
+            0.46
+          ],
           'icon-allow-overlap':    true,
           'icon-ignore-placement': true,
           // Billboard icons on pitched map.
@@ -251,7 +262,7 @@ window.TreeRenderer = {
         }
       });
 
-      console.log('trees-layer added (3D icons), count:', features.length);
+      console.log('trees-layer added (3D icons), count:', features.length, '| Swamp oak SVG loaded:', !!swampWhiteOakImage);
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
