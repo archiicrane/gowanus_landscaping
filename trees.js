@@ -1,4 +1,4 @@
-﻿console.log('trees.js loaded');
+console.log('trees.js loaded');
 
 // Species to canopy color mapping (matches original dot colors)
 const SPECIES_COLORS = {
@@ -160,7 +160,7 @@ window.TreeRenderer = {
       // Load swamp white oak SVG and convert to ImageData
       let swampWhiteOakImage = null;
       try {
-        const svgPath = encodeURI('./models/swamp white oak tree svg.svg');
+        const svgPath = encodeURI('./models/swamp-white-oak-tree.svg');
         const svgResponse = await fetch(svgPath);
         if (!svgResponse.ok) {
           throw new Error(`SVG fetch failed: ${svgResponse.status}`);
@@ -189,7 +189,7 @@ window.TreeRenderer = {
               finalCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 256, 256);
               
               swampWhiteOakImage = finalCtx.getImageData(0, 0, 256, 256);
-              console.log('✓ Swamp white oak SVG loaded and converted to ImageData');
+              console.log('? Swamp white oak SVG loaded and converted to ImageData');
               resolve();
             } catch (e) {
               console.error('Error converting SVG to canvas:', e);
@@ -238,7 +238,7 @@ window.TreeRenderer = {
       const oakIconId = 'tree-icon-swamp-white-oak';
       if (!map.hasImage(oakIconId)) {
         map.addImage(oakIconId, swampWhiteOakImage);
-        console.log('✓ Registered swamp white oak SVG icon');
+        console.log('? Registered swamp white oak SVG icon');
       }
 
       map.addLayer({
@@ -259,7 +259,7 @@ window.TreeRenderer = {
         }
       });
 
-      console.log('✓ Trees layer added with SVG trees, count:', features.length);
+      console.log('? Trees layer added with SVG trees, count:', features.length);
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
