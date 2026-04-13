@@ -613,105 +613,80 @@ function collectTerrainElevations(samplePoints) {
 }
 
 async function addBioswaleOpportunityLayer(floodData) {
-  if (!floodData?.features?.length) return;
-  if (map.getSource('bioswale-opportunities')) return;
+  if (map.getLayer('bioswale-street-core')) return;
 
-  await new Promise((resolve) => map.once('idle', resolve));
-
-  const terrainCandidateFeatures = [];
-  const fallbackCandidateFeatures = [];
-
-  for (const feature of floodData.features) {
-    if (!feature?.geometry) continue;
-    if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon') continue;
-
-    const floodScore = Number(feature.properties?.fshri ?? 0);
-    if (floodScore >= 2) {
-      fallbackCandidateFeatures.push({
-        type: 'Feature',
-        properties: {
-          ...(feature.properties || {}),
-          selection_mode: 'flood_fallback'
-        },
-        geometry: feature.geometry
-      });
+  const gowanusClipBounds = {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+      ]]
     }
+  };
 
-    const bounds = getGeometryBounds(feature.geometry);
-    if (!bounds) continue;
-
-    const samples = buildTerrainSamplePoints(bounds);
-    if (samples.length < 3) continue;
-
-    const elevations = collectTerrainElevations(samples);
-    if (elevations.length < 3) continue;
-
-    const avgElevation = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
-    const localRelief = Math.max(...elevations) - Math.min(...elevations);
-    const lowElevation = avgElevation <= 10.5;
-    const gentleSlope = localRelief <= 3.2;
-    const floodPressure = floodScore >= 2;
-
-    if (!lowElevation || !gentleSlope || !floodPressure) continue;
-
-    terrainCandidateFeatures.push({
-      type: 'Feature',
-      properties: {
-        ...(feature.properties || {}),
-        selection_mode: 'terrain_flood',
-        avg_elev_m: Number(avgElevation.toFixed(2)),
-        relief_m: Number(localRelief.toFixed(2))
-      },
-      geometry: feature.geometry
-    });
-  }
-
-  const candidateFeatures = terrainCandidateFeatures.length
-    ? terrainCandidateFeatures
-    : fallbackCandidateFeatures;
-
-  map.addSource('bioswale-opportunities', {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features: candidateFeatures
-    }
-  });
+  const streetFilter = [
+    'all',
+    ['within', gowanusClipBounds],
+    ['match', ['get', 'class'],
+      ['street', 'secondary', 'tertiary', 'residential', 'service', 'trunk_link', 'primary_link'],
+      true,
+      false
+    ]
+  ];
 
   map.addLayer({
-    id: 'bioswale-fill',
-    type: 'fill',
-    source: 'bioswale-opportunities',
-    paint: {
-      'fill-color': '#c7f36a',
-      'fill-opacity': 0.34
-    },
-    layout: {
-      visibility: 'visible'
-    }
-  });
-
-  map.addLayer({
-    id: 'bioswale-outline',
+    id: 'bioswale-street-glow',
     type: 'line',
-    source: 'bioswale-opportunities',
-    paint: {
-      'line-color': '#3f6212',
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        12, 2.2,
-        15, 3.2,
-        18, 4.8
-      ],
-      'line-dasharray': [1, 0.9],
-      'line-opacity': 1
-    },
+    source: 'composite',
+    'source-layer': 'road',
+    filter: streetFilter,
     layout: {
       visibility: 'visible',
       'line-join': 'round',
       'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#bef264',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 5,
+        15, 9,
+        18, 16
+      ],
+      'line-opacity': 0.42
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-core',
+    type: 'line',
+    source: 'composite',
+    'source-layer': 'road',
+    filter: streetFilter,
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#4d7c0f',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 1.6,
+        15, 2.8,
+        18, 4.4
+      ],
+      'line-dasharray': [1.2, 0.8],
+      'line-opacity': 1
     }
   });
 
@@ -719,11 +694,11 @@ async function addBioswaleOpportunityLayer(floodData) {
 }
 
 function moveBioswaleLayersToTop() {
-  if (map.getLayer('bioswale-fill')) {
-    map.moveLayer('bioswale-fill');
+  if (map.getLayer('bioswale-street-glow')) {
+    map.moveLayer('bioswale-street-glow');
   }
-  if (map.getLayer('bioswale-outline')) {
-    map.moveLayer('bioswale-outline');
+  if (map.getLayer('bioswale-street-core')) {
+    map.moveLayer('bioswale-street-core');
   }
 }
 
@@ -757,11 +732,11 @@ function setupLayerToggles() {
 
   bioswaleToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('bioswale-fill')) {
-      map.setLayoutProperty('bioswale-fill', 'visibility', visibility);
+    if (map.getLayer('bioswale-street-glow')) {
+      map.setLayoutProperty('bioswale-street-glow', 'visibility', visibility);
     }
-    if (map.getLayer('bioswale-outline')) {
-      map.setLayoutProperty('bioswale-outline', 'visibility', visibility);
+    if (map.getLayer('bioswale-street-core')) {
+      map.setLayoutProperty('bioswale-street-core', 'visibility', visibility);
     }
   });
 
