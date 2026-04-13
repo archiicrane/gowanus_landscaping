@@ -1179,6 +1179,7 @@ function setupLayerToggles() {
   const floodToggle = document.getElementById('toggle-flood');
   const bioswaleToggle = document.getElementById('toggle-bioswale');
   const siteToggle = document.getElementById('toggle-site');
+  const treesToggle = document.getElementById('toggle-trees');
   const observableToggle = document.getElementById('toggle-observable');
   const observableOverlay = document.getElementById('observable-overlay');
 
@@ -1225,6 +1226,14 @@ function setupLayerToggles() {
     }
     if (map.getLayer('site-lines')) {
       map.setLayoutProperty('site-lines', 'visibility', visibility);
+    }
+  });
+
+  treesToggle?.addEventListener('change', (event) => {
+    if (event.target.checked) {
+      window.TreeRenderer?.showTrees?.(map);
+    } else {
+      window.TreeRenderer?.hideTrees?.(map);
     }
   });
 
