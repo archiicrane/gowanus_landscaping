@@ -511,49 +511,35 @@ function localToLngLat(point, bounds, quad) {
 async function addSiteLinesFromText() {
   if (map.getLayer('site-lines')) return;
 
-  const response = await fetch('./models/site.txt');
+  const response = await fetch('./models/site2_geographic_coordinates.json');
   if (!response.ok) {
-    throw new Error(`Site text fetch failed: ${response.status} ${response.statusText}`);
+    throw new Error(`Site coordinate fetch failed: ${response.status} ${response.statusText}`);
   }
 
-  const rawText = await response.text();
-  const segments = parseSiteSegments(rawText);
+  const siteGeo = await response.json();
+  const segments = Array.isArray(siteGeo?.segmentCoordinates) ? siteGeo.segmentCoordinates : [];
   if (!segments.length) {
-    throw new Error('No coordinate segments found in site text.');
+    throw new Error('No geographic coordinate segments found in site2_geographic_coordinates.json.');
   }
 
-  const segmentOrder = [2, 0, 1];
-
-  const features = segmentOrder.map((segmentIndex, zoneIndex) => {
-    const segment = segments[segmentIndex];
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
-    for (const [x, y] of segment) {
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
-
-    const bounds = {
-      minX,
-      minY,
-      dx: Math.max(maxX - minX, 1),
-      dy: Math.max(maxY - minY, 1)
-    };
-
-    return {
+  const features = segments
+    .map((segment, index) => ({ segment, index }))
+    .filter(({ segment }) => Array.isArray(segment) && segment.length > 1)
+    .map(({ segment, index }) => ({
       type: 'Feature',
-      properties: { zone: zoneIndex + 1 },
+      properties: { zone: index + 1 },
       geometry: {
         type: 'LineString',
-        coordinates: segment.map((point) => localToLngLat(point, bounds, SITE_SEGMENT_QUADS[zoneIndex]))
+        coordinates: segment
+          .filter((point) => Array.isArray(point) && point.length >= 2)
+          .map((point) => [Number(point[0]), Number(point[1])])
       }
-    };
-  });
+    }))
+    .filter((feature) => feature.geometry.coordinates.length > 1);
+
+  if (!features.length) {
+    throw new Error('No valid line features could be built from site2_geographic_coordinates.json.');
+  }
 
   if (!map.getSource('site-lines')) {
     map.addSource('site-lines', {
