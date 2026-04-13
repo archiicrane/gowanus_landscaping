@@ -1,5 +1,4 @@
 let map;
-let siteOverlayObjectUrl = null;
 
 async function resolveMapboxToken() {
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
@@ -356,7 +355,7 @@ function buildSvgFromSiteText(rawText) {
         })
         .join(' ');
 
-      return `<polyline points="${points}" fill="none" stroke="#40566a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" />`;
+      return `<polyline points="${points}" fill="none" stroke="#1f4f82" stroke-opacity="0.95" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round" />`;
     })
     .join('');
 
@@ -377,16 +376,12 @@ async function addSiteOverlayFromText() {
 
   const rawText = await response.text();
   const svgMarkup = buildSvgFromSiteText(rawText);
-
-  if (siteOverlayObjectUrl) {
-    URL.revokeObjectURL(siteOverlayObjectUrl);
-  }
-  siteOverlayObjectUrl = URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml' }));
+  const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
 
   if (!map.getSource('site-overlay')) {
     map.addSource('site-overlay', {
       type: 'image',
-      url: siteOverlayObjectUrl,
+      url: svgUrl,
       coordinates: [
         [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
         [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
@@ -401,13 +396,13 @@ async function addSiteOverlayFromText() {
     type: 'raster',
     source: 'site-overlay',
     paint: {
-      'raster-opacity': 0.78,
+      'raster-opacity': 1,
       'raster-resampling': 'nearest'
     },
     layout: {
       visibility: 'visible'
     }
-  }, 'existing-buildings');
+  });
 }
 
 function addFloodLayer(floodData) {
