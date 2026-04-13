@@ -158,6 +158,7 @@ const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
 const SITE_POINT_B_TARGET = [-73.99071172722226, 40.675863969717426];
+const SITE_LINE_FINE_SCALE = 0.965;
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -542,6 +543,7 @@ async function addSiteLinesFromText() {
   const currentDistance = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
   const desiredDistance = Math.sqrt(desiredDx * desiredDx + desiredDy * desiredDy);
   const scaleFactor = currentDistance > 0 ? desiredDistance / currentDistance : 1;
+  const finalScale = scaleFactor * SITE_LINE_FINE_SCALE;
 
   const features = segments
     .map((segment, index) => ({ segment, index }))
@@ -554,8 +556,8 @@ async function addSiteLinesFromText() {
         coordinates: segment
           .filter((point) => Array.isArray(point) && point.length >= 2)
           .map((point) => [
-            SITE_POINT_A_TARGET[0] + (Number(point[0]) - SITE_POINT_A_SOURCE[0]) * scaleFactor,
-            SITE_POINT_A_TARGET[1] + (Number(point[1]) - SITE_POINT_A_SOURCE[1]) * scaleFactor
+            SITE_POINT_A_TARGET[0] + (Number(point[0]) - SITE_POINT_A_SOURCE[0]) * finalScale,
+            SITE_POINT_A_TARGET[1] + (Number(point[1]) - SITE_POINT_A_SOURCE[1]) * finalScale
           ])
       }
     }))
@@ -575,6 +577,75 @@ async function addSiteLinesFromText() {
     });
   }
 
+  const areaFeatures = features
+    .map((feature, index) => {
+      const ring = [...feature.geometry.coordinates];
+      if (ring.length < 4) return null;
+
+      const first = ring[0];
+      const last = ring[ring.length - 1];
+      if (first[0] !== last[0] || first[1] !== last[1]) {
+        ring.push([first[0], first[1]]);
+      }
+
+      return {
+        type: 'Feature',
+        properties: { zone: index + 1 },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [ring]
+        }
+      };
+    })
+    .filter(Boolean);
+
+  if (!map.getSource('site-areas')) {
+    map.addSource('site-areas', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: areaFeatures
+      }
+    });
+  }
+
+  if (!map.hasImage('site-hatch-red')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 24;
+    hatchCanvas.height = 24;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 24, 24);
+      ctx.strokeStyle = 'rgba(220,38,38,0.42)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 24);
+      ctx.lineTo(12, 6);
+      ctx.moveTo(0, 30);
+      ctx.lineTo(18, 12);
+      ctx.moveTo(6, 36);
+      ctx.lineTo(24, 18);
+      ctx.stroke();
+      map.addImage('site-hatch-red', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('site-hatch-fill')) {
+    map.addLayer({
+      id: 'site-hatch-fill',
+      type: 'fill',
+      source: 'site-areas',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'fill-pattern': 'site-hatch-red',
+        'fill-opacity': 0.65
+      }
+    });
+  }
+
   map.addLayer({
     id: 'site-lines',
     type: 'line',
@@ -585,7 +656,7 @@ async function addSiteLinesFromText() {
       'line-cap': 'round'
     },
     paint: {
-      'line-color': '#0d4f8b',
+      'line-color': '#dc2626',
       'line-width': [
         'interpolate',
         ['linear'],
@@ -594,7 +665,8 @@ async function addSiteLinesFromText() {
         16, 2.8,
         18, 4.2
       ],
-      'line-opacity': 0.95
+      'line-dasharray': [1.4, 1.1],
+      'line-opacity': 0.98
     }
   });
 }
@@ -1112,6 +1184,9 @@ function setupLayerToggles() {
 
   siteToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('site-hatch-fill')) {
+      map.setLayoutProperty('site-hatch-fill', 'visibility', visibility);
+    }
     if (map.getLayer('site-lines')) {
       map.setLayoutProperty('site-lines', 'visibility', visibility);
     }
