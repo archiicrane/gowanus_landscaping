@@ -258,7 +258,7 @@ function addMapboxTerrainAndContours() {
       type: 'line',
       source: 'mapbox-contours',
       'source-layer': 'contour',
-      minzoom: 11,
+      minzoom: 10,
       layout: {
         'line-join': 'round',
         'line-cap': 'round',
@@ -273,18 +273,18 @@ function addMapboxTerrainAndContours() {
           11, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            0.7,
-            0.35
+            0.95,
+            0.55
           ],
           16, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            1.4,
-            0.7
+            1.75,
+            1.0
           ]
         ],
-        'line-dasharray': [2, 2],
-        'line-opacity': 0.72
+        'line-dasharray': [1.2, 1.2],
+        'line-opacity': 0.84
       }
     });
   }
