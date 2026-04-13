@@ -618,11 +618,24 @@ async function addBioswaleOpportunityLayer(floodData) {
 
   await new Promise((resolve) => map.once('idle', resolve));
 
-  const candidateFeatures = [];
+  const terrainCandidateFeatures = [];
+  const fallbackCandidateFeatures = [];
 
   for (const feature of floodData.features) {
     if (!feature?.geometry) continue;
     if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon') continue;
+
+    const floodScore = Number(feature.properties?.fshri ?? 0);
+    if (floodScore >= 2) {
+      fallbackCandidateFeatures.push({
+        type: 'Feature',
+        properties: {
+          ...(feature.properties || {}),
+          selection_mode: 'flood_fallback'
+        },
+        geometry: feature.geometry
+      });
+    }
 
     const bounds = getGeometryBounds(feature.geometry);
     if (!bounds) continue;
@@ -635,24 +648,27 @@ async function addBioswaleOpportunityLayer(floodData) {
 
     const avgElevation = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
     const localRelief = Math.max(...elevations) - Math.min(...elevations);
-    const floodScore = Number(feature.properties?.fshri ?? 0);
-
-    const lowElevation = avgElevation <= 8.5;
-    const gentleSlope = localRelief <= 1.8;
+    const lowElevation = avgElevation <= 10.5;
+    const gentleSlope = localRelief <= 3.2;
     const floodPressure = floodScore >= 2;
 
     if (!lowElevation || !gentleSlope || !floodPressure) continue;
 
-    candidateFeatures.push({
+    terrainCandidateFeatures.push({
       type: 'Feature',
       properties: {
         ...(feature.properties || {}),
+        selection_mode: 'terrain_flood',
         avg_elev_m: Number(avgElevation.toFixed(2)),
         relief_m: Number(localRelief.toFixed(2))
       },
       geometry: feature.geometry
     });
   }
+
+  const candidateFeatures = terrainCandidateFeatures.length
+    ? terrainCandidateFeatures
+    : fallbackCandidateFeatures;
 
   map.addSource('bioswale-opportunities', {
     type: 'geojson',
@@ -698,6 +714,17 @@ async function addBioswaleOpportunityLayer(floodData) {
       'line-cap': 'round'
     }
   });
+
+  moveBioswaleLayersToTop();
+}
+
+function moveBioswaleLayersToTop() {
+  if (map.getLayer('bioswale-fill')) {
+    map.moveLayer('bioswale-fill');
+  }
+  if (map.getLayer('bioswale-outline')) {
+    map.moveLayer('bioswale-outline');
+  }
 }
 
 function setupLayerToggles() {
@@ -950,6 +977,7 @@ function attachMapHandlers() {
 
       setupLayerToggles();
       await window.TreeRenderer?.initTrees?.(map);
+      moveBioswaleLayersToTop();
 
       setStageInstant(0);
       setupStoryScrollytelling();
