@@ -300,8 +300,8 @@ function addMapboxGroundParks() {
       'source-layer': 'landuse',
       filter: parksFilter,
       paint: {
-        'fill-color': '#bfd9b8',
-        'fill-opacity': 0.82
+        'fill-color': '#b7d9ac',
+        'fill-opacity': 0.92
       }
     }, 'existing-buildings');
   }
@@ -314,15 +314,75 @@ function addMapboxGroundParks() {
       'source-layer': 'landuse',
       filter: parksFilter,
       paint: {
-        'line-color': '#8fb88a',
+        'line-color': '#6f9a67',
         'line-width': [
           'interpolate',
           ['linear'],
           ['zoom'],
-          12, 0.3,
-          16, 0.9
+          12, 0.6,
+          16, 1.4
         ],
-        'line-opacity': 0.75
+        'line-opacity': 0.9
+      }
+    }, 'existing-buildings');
+  }
+}
+
+function addMapboxRoadContext() {
+  if (!map.getLayer('gowanus-roads-minor')) {
+    map.addLayer({
+      id: 'gowanus-roads-minor',
+      type: 'line',
+      source: 'composite',
+      'source-layer': 'road',
+      minzoom: 12,
+      filter: [
+        'all',
+        ['!=', ['get', 'class'], 'motorway'],
+        ['!=', ['get', 'class'], 'motorway_link'],
+        ['!=', ['get', 'class'], 'trunk'],
+        ['!=', ['get', 'class'], 'primary']
+      ],
+      paint: {
+        'line-color': '#c8c2b8',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12, 0.6,
+          16, 1.2,
+          18, 2.0
+        ],
+        'line-opacity': 0.85
+      }
+    }, 'existing-buildings');
+  }
+
+  if (!map.getLayer('gowanus-roads-major')) {
+    map.addLayer({
+      id: 'gowanus-roads-major',
+      type: 'line',
+      source: 'composite',
+      'source-layer': 'road',
+      minzoom: 10,
+      filter: [
+        'any',
+        ['==', ['get', 'class'], 'motorway'],
+        ['==', ['get', 'class'], 'motorway_link'],
+        ['==', ['get', 'class'], 'trunk'],
+        ['==', ['get', 'class'], 'primary']
+      ],
+      paint: {
+        'line-color': '#a89d8f',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          10, 1.2,
+          14, 2.0,
+          17, 3.2
+        ],
+        'line-opacity': 0.9
       }
     }, 'existing-buildings');
   }
@@ -648,6 +708,7 @@ function attachMapHandlers() {
       });
 
       addMapboxGroundParks();
+      addMapboxRoadContext();
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
