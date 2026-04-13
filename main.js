@@ -1508,11 +1508,11 @@ async function addElevatedRailExtrusion() {
 }
 
 async function addZoningBuildingsLayer() {
-  if (map.getLayer('zoning-buildings-lines')) return;
+  if (map.getLayer('zoning-buildings')) return;
 
-  const response = await fetch('./models/buildings.geojson');
+  const response = await fetch('./data/rezoning-buildings.geojson');
   if (!response.ok) {
-    throw new Error(`Failed to load buildings.geojson: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to load rezoning-buildings.geojson: ${response.status} ${response.statusText}`);
   }
 
   const buildingsData = await response.json();
@@ -1523,7 +1523,22 @@ async function addZoningBuildingsLayer() {
   });
 
   map.addLayer({
-    id: 'zoning-buildings-lines',
+    id: 'zoning-buildings',
+    type: 'fill-extrusion',
+    source: 'zoning-buildings',
+    layout: {
+      visibility: 'visible'
+    },
+    paint: {
+      'fill-extrusion-color': '#fbbf24',
+      'fill-extrusion-height': 0,
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.85
+    }
+  });
+
+  map.addLayer({
+    id: 'zoning-buildings-outline',
     type: 'line',
     source: 'zoning-buildings',
     layout: {
@@ -1532,16 +1547,9 @@ async function addZoningBuildingsLayer() {
       'line-cap': 'round'
     },
     paint: {
-      'line-color': '#facc15',
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        13, 0.8,
-        15, 1.4,
-        17, 2.4
-      ],
-      'line-opacity': 0.95
+      'line-color': '#f59e0b',
+      'line-width': 1.5,
+      'line-opacity': 0.7
     }
   });
 }
