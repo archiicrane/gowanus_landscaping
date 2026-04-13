@@ -59,9 +59,9 @@ async function initMap() {
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
     center: [-73.9895, 40.6745],
-    zoom: 16.1,
-    pitch: 60,
-    bearing: -45,
+    zoom: 15.95,
+    pitch: 0,
+    bearing: 0,
     antialias: true
   });
 
@@ -148,6 +148,41 @@ const stageContent = [
   }
 ];
 
+const SCROLL_STAGE_VIEWS = [
+  {
+    center: [-73.9895, 40.6745],
+    zoom: 15.95,
+    pitch: 0,
+    bearing: 0
+  },
+  {
+    center: [-73.9895, 40.6745],
+    zoom: 16.1,
+    pitch: 58,
+    bearing: -42
+  },
+  {
+    center: [-73.9895, 40.6745],
+    zoom: 16.1,
+    pitch: 58,
+    bearing: -42
+  }
+];
+
+function applyCameraForStage(stage, immediate = false) {
+  const view = SCROLL_STAGE_VIEWS[stage] || SCROLL_STAGE_VIEWS[0];
+  if (immediate) {
+    map.jumpTo(view);
+    return;
+  }
+
+  map.easeTo({
+    ...view,
+    duration: 900,
+    essential: true
+  });
+}
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -193,7 +228,7 @@ function setStageInstant(stage) {
   }
 
   if (stage === 1) {
-    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
     window.TreeRenderer?.hideTrees?.(map);
@@ -203,7 +238,7 @@ function setStageInstant(stage) {
     map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
     map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-    window.TreeRenderer?.showTrees?.(map);
+    window.TreeRenderer?.hideTrees?.(map);
   }
 
   updateStageUI(stage);
@@ -237,7 +272,7 @@ function animateStage(stage) {
       map.setPaintProperty(
         'existing-buildings',
         'fill-extrusion-height',
-        ['*', t, existingHeightExpression]
+        ['*', 1 - t, existingHeightExpression]
       );
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
@@ -245,13 +280,14 @@ function animateStage(stage) {
     }
 
     if (stage === 2) {
-      map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', t, existingHeightExpression]
+      );
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
-
-      if (raw > 0.2) {
-        window.TreeRenderer?.showTrees?.(map);
-      }
+      window.TreeRenderer?.hideTrees?.(map);
     }
 
     if (raw < 1) {
@@ -1278,7 +1314,7 @@ function attachMapHandlers() {
       map.moveLayer('gowanus-focus-mask');
 
       setStageInstant(0);
-      setupStoryScrollytelling();
+      applyCameraForStage(0, true);
     } catch (err) {
       console.error('MAP LOAD ERROR:', err);
     }
@@ -1286,8 +1322,6 @@ function attachMapHandlers() {
 }
 
 window.addEventListener('wheel', (event) => {
-  if (document.getElementById('story-panel')) return;
-
   if (!map) return;
 
   if (event.altKey) {
@@ -1312,6 +1346,7 @@ window.addEventListener('wheel', (event) => {
     return;
   }
 
+  applyCameraForStage(currentStage);
   animateStage(currentStage);
 }, { passive: false });
 
