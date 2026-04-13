@@ -154,15 +154,43 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
-const ZONING_MODEL_ORIGIN = [-73.99049693123331, 40.67592049971637];
+const ZONING_POINT_A_SOURCE = { x: -1053.241, y: 825.915 };
+const ZONING_POINT_B_SOURCE = { x: -1157.140, y: 692.560 };
+const ZONING_POINT_A_TARGET = [-73.99049693123331, 40.67592049971637];
+const ZONING_POINT_B_TARGET = [-73.99021944172654, 40.6763766911124];
+const ZONING_MODEL_ORIGIN = ZONING_POINT_A_TARGET;
 const ZONING_MODEL_ALTITUDE = 0;
-const ZONING_MODEL_ROTATION = [Math.PI / 2, 0, 0];
-const ZONING_MODEL_SCALE_METERS = 1;
+const ZONING_MODEL_ROTATION_X = Math.PI / 2;
 const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
 const SITE_POINT_B_TARGET = [-73.99071172722226, 40.675863969717426];
 const SITE_LINE_FINE_SCALE = 0.965;
+
+function computeZoningModelPlacement() {
+  const meanLat = (ZONING_POINT_A_TARGET[1] + ZONING_POINT_B_TARGET[1]) * 0.5;
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((meanLat * Math.PI) / 180);
+
+  const srcDx = ZONING_POINT_B_SOURCE.x - ZONING_POINT_A_SOURCE.x;
+  const srcDy = ZONING_POINT_B_SOURCE.y - ZONING_POINT_A_SOURCE.y;
+  const sourceDist = Math.sqrt(srcDx * srcDx + srcDy * srcDy);
+  const sourceAngle = Math.atan2(srcDy, srcDx);
+
+  const dstDx = (ZONING_POINT_B_TARGET[0] - ZONING_POINT_A_TARGET[0]) * metersPerDegLng;
+  const dstDy = (ZONING_POINT_B_TARGET[1] - ZONING_POINT_A_TARGET[1]) * metersPerDegLat;
+  const targetDist = Math.sqrt(dstDx * dstDx + dstDy * dstDy);
+  const targetAngle = Math.atan2(dstDy, dstDx);
+
+  const scaleMeters = sourceDist > 0 ? targetDist / sourceDist : 1;
+  const rotateZ = targetAngle - sourceAngle;
+
+  return {
+    scaleMeters,
+    rotateZ,
+    sourceAnchor: ZONING_POINT_A_SOURCE
+  };
+}
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -1524,14 +1552,16 @@ function addZoningEnvelopeModel() {
     ZONING_MODEL_ALTITUDE
   );
 
+  const placement = computeZoningModelPlacement();
+
   const modelTransform = {
     translateX: mercator.x,
     translateY: mercator.y,
     translateZ: mercator.z,
-    rotateX: ZONING_MODEL_ROTATION[0],
-    rotateY: ZONING_MODEL_ROTATION[1],
-    rotateZ: ZONING_MODEL_ROTATION[2],
-    scale: mercator.meterInMercatorCoordinateUnits() * ZONING_MODEL_SCALE_METERS
+    rotateX: ZONING_MODEL_ROTATION_X,
+    rotateY: 0,
+    rotateZ: placement.rotateZ,
+    scale: mercator.meterInMercatorCoordinateUnits() * placement.scaleMeters
   };
 
   const customLayer = {
@@ -1553,6 +1583,7 @@ function addZoningEnvelopeModel() {
       loader.load(
         './models/zoning_envelopes.gltf',
         (gltf) => {
+          gltf.scene.position.set(-placement.sourceAnchor.x, -placement.sourceAnchor.y, 0);
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
             node.material = new THREE.MeshStandardMaterial({
