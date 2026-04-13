@@ -154,6 +154,8 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
+const SITE_LINE_OFFSET_LNG = 0.00022;
+const SITE_LINE_OFFSET_LAT = 0.00018;
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -537,7 +539,10 @@ async function addSiteLinesFromText() {
         type: 'LineString',
         coordinates: segment
           .filter((point) => Array.isArray(point) && point.length >= 2)
-          .map((point) => [Number(point[0]), Number(point[1])])
+          .map((point) => [
+            Number(point[0]) + SITE_LINE_OFFSET_LNG,
+            Number(point[1]) + SITE_LINE_OFFSET_LAT
+          ])
       }
     }))
     .filter((feature) => feature.geometry.coordinates.length > 1);
