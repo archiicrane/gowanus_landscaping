@@ -1,5 +1,11 @@
 let map;
 
+// Google control points provided by user for site placement.
+// A: south-west-ish, B: east, C: north-west-ish
+const SITE_CONTROL_A = { lng: -73.99415, lat: 40.67590 };
+const SITE_CONTROL_B = { lng: -73.990722, lat: 40.675821 };
+const SITE_CONTROL_C = { lng: -73.994018, lat: 40.676209 };
+
 async function resolveMapboxToken() {
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
   if (windowToken) return windowToken;
@@ -366,6 +372,20 @@ function buildSvgFromSiteText(rawText) {
 </svg>`;
 }
 
+function computeSiteOverlayCoordsFromControlPoints() {
+  // Derive the 4th corner D from A, B, C (parallelogram): D = B + A - C.
+  const dLng = SITE_CONTROL_B.lng + SITE_CONTROL_A.lng - SITE_CONTROL_C.lng;
+  const dLat = SITE_CONTROL_B.lat + SITE_CONTROL_A.lat - SITE_CONTROL_C.lat;
+
+  // Image source coordinate order: top-left, top-right, bottom-right, bottom-left
+  return [
+    [SITE_CONTROL_C.lng, SITE_CONTROL_C.lat],
+    [SITE_CONTROL_B.lng, SITE_CONTROL_B.lat],
+    [dLng, dLat],
+    [SITE_CONTROL_A.lng, SITE_CONTROL_A.lat]
+  ];
+}
+
 async function addSiteOverlayFromText() {
   if (map.getLayer('site-overlay')) return;
 
@@ -376,18 +396,14 @@ async function addSiteOverlayFromText() {
 
   const rawText = await response.text();
   const svgMarkup = buildSvgFromSiteText(rawText);
+  const overlayCoordinates = computeSiteOverlayCoordsFromControlPoints();
   const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
 
   if (!map.getSource('site-overlay')) {
     map.addSource('site-overlay', {
       type: 'image',
       url: svgUrl,
-      coordinates: [
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-      ]
+      coordinates: overlayCoordinates
     });
   }
 
