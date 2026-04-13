@@ -1551,16 +1551,15 @@ function addZoningEnvelopeModel() {
     ZONING_MODEL_ORIGIN,
     ZONING_MODEL_ALTITUDE
   );
-  const placement = computeZoningModelPlacement();
 
   const modelTransform = {
     translateX: mercator.x,
     translateY: mercator.y,
     translateZ: mercator.z,
     rotateX: ZONING_MODEL_ROTATION_X,
-    rotateY: -placement.rotateZ,
+    rotateY: 0,
     rotateZ: 0,
-    scale: mercator.meterInMercatorCoordinateUnits() * placement.scaleMeters
+    scale: mercator.meterInMercatorCoordinateUnits()
   };
 
   const customLayer = {
@@ -1582,13 +1581,6 @@ function addZoningEnvelopeModel() {
       loader.load(
         './models/zoning_envelopes.gltf',
         (gltf) => {
-          // CAD control points are plan coordinates; map them to model X/Z (horizontal)
-          // so Y (vertical) is not polluted by large source-coordinate offsets.
-          gltf.scene.position.set(
-            -placement.sourceAnchor.x,
-            0,
-            -placement.sourceAnchor.y
-          );
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
             node.material = new THREE.MeshStandardMaterial({
