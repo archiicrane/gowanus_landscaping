@@ -159,20 +159,26 @@ window.TreeRenderer = {
 
       // Load swamp white oak SVG and convert to ImageData
       let swampWhiteOakImage = null;
+      let svgLoadAttempted = false;
       try {
+        svgLoadAttempted = true;
         const svgResponse = await fetch('./models/swamp white oak tree svg.svg');
-        if (svgResponse.ok) {
-          const svgText = await svgResponse.text();
-          const blob = new Blob([svgText], { type: 'image/svg+xml' });
-          const url = URL.createObjectURL(blob);
-          
-          await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
+        if (!svgResponse.ok) {
+          throw new Error(`SVG fetch failed: ${svgResponse.status}`);
+        }
+        
+        const svgText = await svgResponse.text();
+        const blob = new Blob([svgText], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        
+        const loadPromise = new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            try {
               // Draw to a canvas matching the SVG's aspect ratio, then resize
               const canvas = document.createElement('canvas');
-              canvas.width = img.naturalWidth || 256;
-              canvas.height = img.naturalHeight || 256;
+              canvas.width = img.naturalWidth || 512;
+              canvas.height = img.naturalHeight || 512;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0);
               
@@ -184,20 +190,25 @@ window.TreeRenderer = {
               finalCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 256, 256);
               
               swampWhiteOakImage = finalCtx.getImageData(0, 0, 256, 256);
-              URL.revokeObjectURL(url);
-              console.log('✓ Swamp white oak SVG loaded successfully');
+              console.log('✓ Swamp white oak SVG loaded and converted to ImageData');
               resolve();
-            };
-            img.onerror = (e) => {
-              console.error('SVG image load error:', e);
-              URL.revokeObjectURL(url);
+            } catch (e) {
+              console.error('Error converting SVG to canvas:', e);
               reject(e);
-            };
-            img.src = url;
-          });
-        }
+            }
+          };
+          img.onerror = (e) => {
+            console.error('SVG image failed to load:', e);
+            reject(e);
+          };
+          img.src = url;
+        });
+        
+        await loadPromise;
+        URL.revokeObjectURL(url);
       } catch (err) {
-        console.warn('Failed to load swamp white oak SVG, using generated icon:', err);
+        console.warn('Failed to load swamp white oak SVG:', err.message);
+        svgLoadAttempted = true;
       }
 
       // Register one icon image per species colour
@@ -206,8 +217,12 @@ window.TreeRenderer = {
         const id = iconId(key);
         if (!map.hasImage(id)) {
           if (key === 'swamp white oak' && swampWhiteOakImage) {
+            console.log('✓ Registering swamp white oak SVG icon');
             map.addImage(id, swampWhiteOakImage);
           } else {
+            if (key === 'swamp white oak') {
+              console.log('⚠ Swamp white oak SVG not loaded, using generated icon. SVG loaded:', !!swampWhiteOakImage);
+            }
             map.addImage(id, createTreeIcon(color));
           }
         }
