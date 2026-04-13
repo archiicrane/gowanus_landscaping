@@ -160,7 +160,8 @@ window.TreeRenderer = {
       // Load swamp white oak SVG and convert to ImageData
       let swampWhiteOakImage = null;
       try {
-        const svgResponse = await fetch('./models/swamp white oak tree svg.svg');
+        const svgPath = encodeURI('./models/swamp white oak tree svg.svg');
+        const svgResponse = await fetch(svgPath);
         if (!svgResponse.ok) {
           throw new Error(`SVG fetch failed: ${svgResponse.status}`);
         }

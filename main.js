@@ -1232,6 +1232,7 @@ function setupLayerToggles() {
   treesToggle?.addEventListener('change', (event) => {
     if (event.target.checked) {
       window.TreeRenderer?.showTrees?.(map);
+      if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
     } else {
       window.TreeRenderer?.hideTrees?.(map);
     }
@@ -1488,6 +1489,7 @@ function attachMapHandlers() {
 
       setupLayerToggles();
       await window.TreeRenderer?.initTrees?.(map);
+      if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
       moveBioswaleLayersToTop();
       addGowanusFocusMask();
       map.moveLayer('gowanus-focus-mask');
