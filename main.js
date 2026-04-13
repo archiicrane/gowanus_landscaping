@@ -1408,6 +1408,28 @@ function attachMapHandlers() {
         }
       });
 
+      map.addLayer({
+        id: 'existing-building-outline',
+        type: 'line',
+        source: 'existing',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#6b7280',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            13, 0.45,
+            16, 0.95,
+            18, 1.4
+          ],
+          'line-opacity': 0.82
+        }
+      });
+
       map.addSource('proposed', {
         type: 'geojson',
         data: proposedData
@@ -1422,6 +1444,28 @@ function attachMapHandlers() {
           'fill-extrusion-base': 0,
           'fill-extrusion-height': 0,
           'fill-extrusion-opacity': 0
+        }
+      });
+
+      map.addLayer({
+        id: 'proposed-building-outline',
+        type: 'line',
+        source: 'proposed',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#7f8c84',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            13, 0.45,
+            16, 0.95,
+            18, 1.4
+          ],
+          'line-opacity': 0
         }
       });
 
