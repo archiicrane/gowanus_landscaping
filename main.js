@@ -1,4 +1,5 @@
 let map;
+let siteOverlayObjectUrl = null;
 
 async function resolveMapboxToken() {
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
@@ -307,6 +308,108 @@ function addMapboxGroundWater() {
   }
 }
 
+function buildSvgFromSiteText(rawText) {
+  const segments = rawText
+    .split(/\bnone\b/gi)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const points = [];
+      const matches = chunk.matchAll(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/g);
+      for (const match of matches) {
+        points.push([Number(match[1]), Number(match[2])]);
+      }
+      return points;
+    })
+    .filter((points) => points.length > 1);
+
+  if (!segments.length) {
+    throw new Error('No coordinate segments found in site text.');
+  }
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const segment of segments) {
+    for (const [x, y] of segment) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  const width = 2048;
+  const dx = Math.max(maxX - minX, 1);
+  const dy = Math.max(maxY - minY, 1);
+  const height = Math.round(width * (dy / dx));
+
+  const polylines = segments
+    .map((segment) => {
+      const points = segment
+        .map(([x, y]) => {
+          const sx = ((x - minX) / dx) * width;
+          const sy = height - ((y - minY) / dy) * height;
+          return `${sx.toFixed(2)},${sy.toFixed(2)}`;
+        })
+        .join(' ');
+
+      return `<polyline points="${points}" fill="none" stroke="#40566a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" />`;
+    })
+    .join('');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <rect width="100%" height="100%" fill="rgba(255,255,255,0)"/>
+  <g opacity="0.9">${polylines}</g>
+</svg>`;
+}
+
+async function addSiteOverlayFromText() {
+  if (map.getLayer('site-overlay')) return;
+
+  const response = await fetch('./models/site.txt');
+  if (!response.ok) {
+    throw new Error(`Site text fetch failed: ${response.status} ${response.statusText}`);
+  }
+
+  const rawText = await response.text();
+  const svgMarkup = buildSvgFromSiteText(rawText);
+
+  if (siteOverlayObjectUrl) {
+    URL.revokeObjectURL(siteOverlayObjectUrl);
+  }
+  siteOverlayObjectUrl = URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml' }));
+
+  if (!map.getSource('site-overlay')) {
+    map.addSource('site-overlay', {
+      type: 'image',
+      url: siteOverlayObjectUrl,
+      coordinates: [
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+      ]
+    });
+  }
+
+  map.addLayer({
+    id: 'site-overlay',
+    type: 'raster',
+    source: 'site-overlay',
+    paint: {
+      'raster-opacity': 0.78,
+      'raster-resampling': 'nearest'
+    },
+    layout: {
+      visibility: 'visible'
+    }
+  }, 'existing-buildings');
+}
+
 function addFloodLayer(floodData) {
   if (map.getSource('flood-vulnerability')) return;
 
@@ -408,6 +511,7 @@ function addFloodLayer(floodData) {
 function setupLayerToggles() {
   const topoToggle = document.getElementById('toggle-topo');
   const floodToggle = document.getElementById('toggle-flood');
+  const siteToggle = document.getElementById('toggle-site');
   const observableToggle = document.getElementById('toggle-observable');
   const observableOverlay = document.getElementById('observable-overlay');
 
@@ -428,6 +532,13 @@ function setupLayerToggles() {
     }
     if (map.getLayer('flood-outline')) {
       map.setLayoutProperty('flood-outline', 'visibility', visibility);
+    }
+  });
+
+  siteToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('site-overlay')) {
+      map.setLayoutProperty('site-overlay', 'visibility', visibility);
     }
   });
 
@@ -628,6 +739,7 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
+      await addSiteOverlayFromText();
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
