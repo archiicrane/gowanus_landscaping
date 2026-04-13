@@ -154,8 +154,7 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
-const SITE_LINE_OFFSET_LNG = 0.00022;
-const SITE_LINE_OFFSET_LAT = 0.00018;
+const SITE_LINE_TARGET_ANCHOR = [-73.994155, 40.675902];
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -529,6 +528,35 @@ async function addSiteLinesFromText() {
     throw new Error('No geographic coordinate segments found in site2_geographic_coordinates.json.');
   }
 
+  let sourceAnchor = null;
+  let minDistanceSq = Infinity;
+
+  for (const segment of segments) {
+    if (!Array.isArray(segment)) continue;
+    for (const point of segment) {
+      if (!Array.isArray(point) || point.length < 2) continue;
+      const lng = Number(point[0]);
+      const lat = Number(point[1]);
+      if (!Number.isFinite(lng) || !Number.isFinite(lat)) continue;
+
+      const dLng = lng - SITE_LINE_TARGET_ANCHOR[0];
+      const dLat = lat - SITE_LINE_TARGET_ANCHOR[1];
+      const distanceSq = dLng * dLng + dLat * dLat;
+
+      if (distanceSq < minDistanceSq) {
+        minDistanceSq = distanceSq;
+        sourceAnchor = [lng, lat];
+      }
+    }
+  }
+
+  if (!sourceAnchor) {
+    throw new Error('Could not determine source anchor vertex from site2_geographic_coordinates.json.');
+  }
+
+  const deltaLng = SITE_LINE_TARGET_ANCHOR[0] - sourceAnchor[0];
+  const deltaLat = SITE_LINE_TARGET_ANCHOR[1] - sourceAnchor[1];
+
   const features = segments
     .map((segment, index) => ({ segment, index }))
     .filter(({ segment }) => Array.isArray(segment) && segment.length > 1)
@@ -540,8 +568,8 @@ async function addSiteLinesFromText() {
         coordinates: segment
           .filter((point) => Array.isArray(point) && point.length >= 2)
           .map((point) => [
-            Number(point[0]) + SITE_LINE_OFFSET_LNG,
-            Number(point[1]) + SITE_LINE_OFFSET_LAT
+            Number(point[0]) + deltaLng,
+            Number(point[1]) + deltaLat
           ])
       }
     }))
