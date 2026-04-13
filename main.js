@@ -1582,7 +1582,7 @@ function addZoningEnvelopeModel() {
 
       const loader = new THREE.GLTFLoader();
       loader.load(
-        './models/zoning_envelopes.gltf',
+        './models/zoning.gltf',
         (gltf) => {
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
@@ -1599,7 +1599,7 @@ function addZoningEnvelopeModel() {
         },
         undefined,
         (err) => {
-          console.error('Failed to load zoning_envelopes.gltf:', err);
+          console.error('Failed to load zoning.gltf:', err);
         }
       );
 
