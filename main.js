@@ -265,12 +265,7 @@ function addMapboxTerrainAndContours() {
         visibility: 'visible'
       },
       paint: {
-        'line-color': [
-          'case',
-          ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-          'rgba(255,255,255,0.3)',
-          'rgba(255,255,255,0.14)'
-        ],
+        'line-color': '#c6cbd2',
         'line-width': [
           'interpolate',
           ['linear'],
@@ -288,7 +283,8 @@ function addMapboxTerrainAndContours() {
             0.7
           ]
         ],
-        'line-opacity': 0.9
+        'line-dasharray': [2, 2],
+        'line-opacity': 0.72
       }
     });
   }
