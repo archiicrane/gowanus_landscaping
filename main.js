@@ -313,65 +313,6 @@ function addMapboxGroundWater() {
   }
 }
 
-function buildSvgFromSiteText(rawText) {
-  const segments = rawText
-    .split(/\bnone\b/gi)
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .map((chunk) => {
-      const points = [];
-      const matches = chunk.matchAll(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/g);
-      for (const match of matches) {
-        points.push([Number(match[1]), Number(match[2])]);
-      }
-      return points;
-    })
-    .filter((points) => points.length > 1);
-
-  if (!segments.length) {
-    throw new Error('No coordinate segments found in site text.');
-  }
-
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-
-  for (const segment of segments) {
-    for (const [x, y] of segment) {
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
-  }
-
-  const width = 2048;
-  const dx = Math.max(maxX - minX, 1);
-  const dy = Math.max(maxY - minY, 1);
-  const height = Math.round(width * (dy / dx));
-
-  const polylines = segments
-    .map((segment) => {
-      const points = segment
-        .map(([x, y]) => {
-          const sx = ((x - minX) / dx) * width;
-          const sy = height - ((y - minY) / dy) * height;
-          return `${sx.toFixed(2)},${sy.toFixed(2)}`;
-        })
-        .join(' ');
-
-      return `<polyline points="${points}" fill="none" stroke="#1f4f82" stroke-opacity="0.95" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round" />`;
-    })
-    .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <rect width="100%" height="100%" fill="rgba(255,255,255,0)"/>
-  <g opacity="0.9">${polylines}</g>
-</svg>`;
-}
-
 function computeSiteOverlayCoordsFromControlPoints() {
   // Derive the 4th corner D from A, B, C (parallelogram): D = B + A - C.
   const dLng = SITE_CONTROL_B.lng + SITE_CONTROL_A.lng - SITE_CONTROL_C.lng;
@@ -386,8 +327,46 @@ function computeSiteOverlayCoordsFromControlPoints() {
   ];
 }
 
-async function addSiteOverlayFromText() {
-  if (map.getLayer('site-overlay')) return;
+function parseSiteSegments(rawText) {
+  return rawText
+    .split(/\bnone\b/gi)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const points = [];
+      const matches = chunk.matchAll(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/g);
+      for (const match of matches) {
+        points.push([Number(match[1]), Number(match[2])]);
+      }
+      return points;
+    })
+    .filter((points) => points.length > 1);
+}
+
+function localToLngLat(point, bounds, quad) {
+  const [x, y] = point;
+  const u = (x - bounds.minX) / bounds.dx;
+  const v = 1 - (y - bounds.minY) / bounds.dy;
+
+  const [tl, tr, br, bl] = quad;
+
+  const lng =
+    (1 - u) * (1 - v) * tl[0] +
+    u * (1 - v) * tr[0] +
+    u * v * br[0] +
+    (1 - u) * v * bl[0];
+
+  const lat =
+    (1 - u) * (1 - v) * tl[1] +
+    u * (1 - v) * tr[1] +
+    u * v * br[1] +
+    (1 - u) * v * bl[1];
+
+  return [lng, lat];
+}
+
+async function addSiteLinesFromText() {
+  if (map.getLayer('site-lines')) return;
 
   const response = await fetch('./models/site.txt');
   if (!response.ok) {
@@ -395,28 +374,71 @@ async function addSiteOverlayFromText() {
   }
 
   const rawText = await response.text();
-  const svgMarkup = buildSvgFromSiteText(rawText);
-  const overlayCoordinates = computeSiteOverlayCoordsFromControlPoints();
-  const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
+  const segments = parseSiteSegments(rawText);
+  if (!segments.length) {
+    throw new Error('No coordinate segments found in site text.');
+  }
 
-  if (!map.getSource('site-overlay')) {
-    map.addSource('site-overlay', {
-      type: 'image',
-      url: svgUrl,
-      coordinates: overlayCoordinates
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const segment of segments) {
+    for (const [x, y] of segment) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  const bounds = {
+    minX,
+    minY,
+    dx: Math.max(maxX - minX, 1),
+    dy: Math.max(maxY - minY, 1)
+  };
+  const quad = computeSiteOverlayCoordsFromControlPoints();
+
+  const features = segments.map((segment) => ({
+    type: 'Feature',
+    properties: {},
+    geometry: {
+      type: 'LineString',
+      coordinates: segment.map((point) => localToLngLat(point, bounds, quad))
+    }
+  }));
+
+  if (!map.getSource('site-lines')) {
+    map.addSource('site-lines', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features
+      }
     });
   }
 
   map.addLayer({
-    id: 'site-overlay',
-    type: 'raster',
-    source: 'site-overlay',
-    paint: {
-      'raster-opacity': 1,
-      'raster-resampling': 'nearest'
-    },
+    id: 'site-lines',
+    type: 'line',
+    source: 'site-lines',
     layout: {
-      visibility: 'visible'
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#0d4f8b',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        14, 1.8,
+        16, 2.8,
+        18, 4.2
+      ],
+      'line-opacity': 0.95
     }
   });
 }
@@ -548,8 +570,8 @@ function setupLayerToggles() {
 
   siteToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('site-overlay')) {
-      map.setLayoutProperty('site-overlay', 'visibility', visibility);
+    if (map.getLayer('site-lines')) {
+      map.setLayoutProperty('site-lines', 'visibility', visibility);
     }
   });
 
@@ -750,7 +772,7 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
-      await addSiteOverlayFromText();
+      await addSiteLinesFromText();
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
