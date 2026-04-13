@@ -163,6 +163,12 @@ window.TreeRenderer = {
         const svgResponse = await fetch('./models/swamp white oak tree svg.svg');
         if (svgResponse.ok) {
           const svgText = await svgResponse.text();
+          
+          // Extract viewBox to compute proper scaling
+          const viewBoxMatch = svgText.match(/viewBox="([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)"/);
+          const [, x, y, vbWidth, vbHeight] = viewBoxMatch ? viewBoxMatch : [null, 0, 0, 595.5, 842.24];
+          const scale = Math.min(256 / vbWidth, 256 / vbHeight);
+          
           const blob = new Blob([svgText], { type: 'image/svg+xml' });
           const url = URL.createObjectURL(blob);
           
@@ -173,17 +179,25 @@ window.TreeRenderer = {
           ctx.fillStyle = 'transparent';
           ctx.fillRect(0, 0, 256, 256);
           
+          // Center the scaled SVG in the canvas
+          ctx.save();
+          ctx.translate(128, 128);
+          ctx.scale(scale, scale);
+          ctx.translate(-vbWidth / 2, -vbHeight / 2);
+          
           await new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
-              ctx.drawImage(img, 0, 0, 256, 256);
+              ctx.drawImage(img, 0, 0, vbWidth, vbHeight);
+              ctx.restore();
               swampWhiteOakImage = ctx.getImageData(0, 0, 256, 256);
               URL.revokeObjectURL(url);
-              console.log('✓ Swamp white oak SVG loaded successfully');
+              console.log('✓ Swamp white oak SVG loaded successfully (scale:', scale.toFixed(2) + ')');
               resolve();
             };
             img.onerror = (e) => {
               console.error('SVG image load error:', e);
+              ctx.restore();
               reject(e);
             };
             img.src = url;
