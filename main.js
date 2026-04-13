@@ -422,7 +422,7 @@ function addGowanusFocusMask() {
     source: 'gowanus-focus-mask',
     paint: {
       'fill-color': '#d1d5db',
-      'fill-opacity': 0.28
+      'fill-opacity': 0.42
     },
     layout: {
       visibility: 'visible'
