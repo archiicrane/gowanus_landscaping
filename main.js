@@ -434,6 +434,64 @@ function addMapboxGroundWater() {
 }
 
 function hideBasemapLabels() {
+
+async function addParkOutline() {
+  const response = await fetch('./models/park.geojson');
+  if (!response.ok) {
+    throw new Error(`Park outline fetch failed: ${response.status} ${response.statusText}`);
+  }
+
+  const parkData = await response.json();
+  const features = Array.isArray(parkData?.features) ? parkData.features : [];
+  if (!features.length) {
+    throw new Error('No park outline features found in park.geojson.');
+  }
+
+  if (!map.getSource('park-outline')) {
+    map.addSource('park-outline', {
+      type: 'geojson',
+      data: parkData
+    });
+  } else {
+    map.getSource('park-outline').setData(parkData);
+  }
+
+  if (!map.getLayer('park-outline')) {
+    map.addLayer({
+      id: 'park-outline',
+      type: 'line',
+      source: 'park-outline',
+      layout: {
+        visibility: 'visible',
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#4d7c0f',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 1.4,
+          16, 2.4,
+          18, 3.6
+        ],
+        'line-opacity': 0.96
+      }
+    });
+  }
+
+  map.setPaintProperty('park-outline', 'line-color', '#4d7c0f');
+  map.setPaintProperty('park-outline', 'line-width', [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    14, 1.4,
+    16, 2.4,
+    18, 3.6
+  ]);
+  map.setPaintProperty('park-outline', 'line-opacity', 0.96);
+}
   const style = map.getStyle();
   const layers = style?.layers || [];
 
@@ -1178,6 +1236,7 @@ function setupLayerToggles() {
   const topoToggle = document.getElementById('toggle-topo');
   const floodToggle = document.getElementById('toggle-flood');
   const bioswaleToggle = document.getElementById('toggle-bioswale');
+  const parkToggle = document.getElementById('toggle-park');
   const siteToggle = document.getElementById('toggle-site');
   const treesToggle = document.getElementById('toggle-trees');
   const observableToggle = document.getElementById('toggle-observable');
@@ -1216,6 +1275,13 @@ function setupLayerToggles() {
     }
     if (map.getLayer('bioswale-street-core-left')) {
       map.setLayoutProperty('bioswale-street-core-left', 'visibility', visibility);
+    }
+  });
+
+  parkToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('park-outline')) {
+      map.setLayoutProperty('park-outline', 'visibility', visibility);
     }
   });
 
@@ -1481,6 +1547,7 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
+  await addParkOutline();
       await addSiteLinesFromText();
       await addBioswaleOpportunityLayer(floodData);
 
