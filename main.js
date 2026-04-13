@@ -61,7 +61,7 @@ async function initMap() {
     center: [-73.9895, 40.6745],
     zoom: 14.6,
     pitch: 0,
-    bearing: 0,
+    bearing: 90,
     antialias: true
   });
 
@@ -174,7 +174,7 @@ function applyCameraForStage(stage, immediate = false) {
       ],
       {
         padding: { top: 70, right: 70, bottom: 70, left: 70 },
-        bearing: 0,
+        bearing: 90,
         pitch: 0,
         duration,
         essential: true
