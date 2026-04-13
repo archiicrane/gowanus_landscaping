@@ -161,6 +161,8 @@ const ZONING_POINT_B_TARGET = [-73.99021944172654, 40.6763766911124];
 const ZONING_MODEL_ORIGIN = ZONING_POINT_A_TARGET;
 const ZONING_MODEL_ALTITUDE = 0;
 const ZONING_MODEL_ROTATION_X = Math.PI / 2;
+const ZONING_MODEL_OFFSET_EAST_METERS = -14;
+const ZONING_MODEL_OFFSET_NORTH_METERS = -36;
 const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
@@ -1551,15 +1553,16 @@ function addZoningEnvelopeModel() {
     ZONING_MODEL_ORIGIN,
     ZONING_MODEL_ALTITUDE
   );
+  const meterInMercator = mercator.meterInMercatorCoordinateUnits();
 
   const modelTransform = {
-    translateX: mercator.x,
-    translateY: mercator.y,
+    translateX: mercator.x + (ZONING_MODEL_OFFSET_EAST_METERS * meterInMercator),
+    translateY: mercator.y + (-ZONING_MODEL_OFFSET_NORTH_METERS * meterInMercator),
     translateZ: mercator.z,
     rotateX: ZONING_MODEL_ROTATION_X,
     rotateY: 0,
     rotateZ: 0,
-    scale: mercator.meterInMercatorCoordinateUnits()
+    scale: meterInMercator
   };
 
   const customLayer = {
