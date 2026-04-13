@@ -74,34 +74,62 @@ async function initMap() {
 let currentStage = 0;
 let isAnimating = false;
 
-let STUDY_BOUNDS = {
-  west: -74.006007,
-  south: 40.6621176,
-  east: -73.974199,
-  north: 40.6852681
+const STUDY_COORDINATES_LAT_LNG = [
+  [40.683945676183654, -73.98963594611494],
+  [40.680669969224006, -73.98084416376932],
+  [40.665495232798115, -73.99274143083169],
+  [40.667988596328655, -73.99607305804426],
+  [40.67260255106102, -73.99889524234268],
+  [40.67744610487334, -73.9964465299067],
+  [40.67663528353369, -73.99461997552936]
+];
+
+const STUDY_RING = STUDY_COORDINATES_LAT_LNG.map(([lat, lng]) => [lng, lat]);
+
+if (
+  STUDY_RING.length && (
+    STUDY_RING[0][0] !== STUDY_RING[STUDY_RING.length - 1][0] ||
+    STUDY_RING[0][1] !== STUDY_RING[STUDY_RING.length - 1][1]
+  )
+) {
+  STUDY_RING.push([...STUDY_RING[0]]);
+}
+
+const STUDY_BOUNDS = {
+  west: Math.min(...STUDY_RING.map(([lng]) => lng)),
+  south: Math.min(...STUDY_RING.map(([, lat]) => lat)),
+  east: Math.max(...STUDY_RING.map(([lng]) => lng)),
+  north: Math.max(...STUDY_RING.map(([, lat]) => lat))
 };
 
-function updateStudyBoundsFromFeatureCollection(featureCollection) {
-  if (!featureCollection?.features?.length) return;
+function getStudyClipFeature() {
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [STUDY_RING]
+    }
+  };
+}
 
-  let west = Infinity;
-  let south = Infinity;
-  let east = -Infinity;
-  let north = -Infinity;
+function pointInStudyPolygon(point) {
+  const x = point[0];
+  const y = point[1];
+  let inside = false;
 
-  for (const feature of featureCollection.features) {
-    const bounds = getGeometryBounds(feature?.geometry);
-    if (!bounds) continue;
+  for (let i = 0, j = STUDY_RING.length - 1; i < STUDY_RING.length; j = i++) {
+    const xi = STUDY_RING[i][0];
+    const yi = STUDY_RING[i][1];
+    const xj = STUDY_RING[j][0];
+    const yj = STUDY_RING[j][1];
 
-    west = Math.min(west, bounds.minLng);
-    south = Math.min(south, bounds.minLat);
-    east = Math.max(east, bounds.maxLng);
-    north = Math.max(north, bounds.maxLat);
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+
+    if (intersects) inside = !inside;
   }
 
-  if (![west, south, east, north].every(Number.isFinite)) return;
-
-  STUDY_BOUNDS = { west, south, east, north };
+  return inside;
 }
 
 const stageContent = [
@@ -378,11 +406,7 @@ function addGowanusFocusMask() {
                   [-180, -85]
                 ],
                 [
-                  [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-                  [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-                  [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-                  [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-                  [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+                  ...STUDY_RING
                 ]
               ]
             }
@@ -533,19 +557,7 @@ function addFloodLayer(floodData) {
     data: floodData
   });
 
-  const gowanusClipBounds = {
-    type: 'Feature',
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
-      ]]
-    }
-  };
+  const gowanusClipBounds = getStudyClipFeature();
 
   map.addLayer({
     id: 'flood-fill',
@@ -652,12 +664,16 @@ function getGeometryBounds(geometry) {
 }
 
 function pointInStudyBounds(point) {
-  return (
-    point[0] >= STUDY_BOUNDS.west &&
-    point[0] <= STUDY_BOUNDS.east &&
-    point[1] >= STUDY_BOUNDS.south &&
-    point[1] <= STUDY_BOUNDS.north
-  );
+  if (
+    point[0] < STUDY_BOUNDS.west ||
+    point[0] > STUDY_BOUNDS.east ||
+    point[1] < STUDY_BOUNDS.south ||
+    point[1] > STUDY_BOUNDS.north
+  ) {
+    return false;
+  }
+
+  return pointInStudyPolygon(point);
 }
 
 function boundsOverlap(a, b, padding = 0) {
@@ -1208,8 +1224,6 @@ function attachMapHandlers() {
       const existingData = await existingResponse.json();
       const proposedData = await proposedResponse.json();
       const floodData = await floodResponse.json();
-
-      updateStudyBoundsFromFeatureCollection(existingData);
 
       addMapboxTerrainAndContours();
       addFloodLayer(floodData);
