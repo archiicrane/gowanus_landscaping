@@ -549,9 +549,161 @@ function addFloodLayer(floodData) {
   });
 }
 
+function getGeometryBounds(geometry) {
+  if (!geometry?.coordinates) return null;
+
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+
+  const visit = (node) => {
+    if (!Array.isArray(node)) return;
+    if (typeof node[0] === 'number' && typeof node[1] === 'number') {
+      const lng = node[0];
+      const lat = node[1];
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+      return;
+    }
+    for (const child of node) visit(child);
+  };
+
+  visit(geometry.coordinates);
+
+  if (!Number.isFinite(minLng) || !Number.isFinite(minLat)) return null;
+  return { minLng, maxLng, minLat, maxLat };
+}
+
+function pointInStudyBounds(point) {
+  return (
+    point.lng >= STUDY_BOUNDS.west &&
+    point.lng <= STUDY_BOUNDS.east &&
+    point.lat >= STUDY_BOUNDS.south &&
+    point.lat <= STUDY_BOUNDS.north
+  );
+}
+
+function buildTerrainSamplePoints(bounds) {
+  const centerLng = (bounds.minLng + bounds.maxLng) * 0.5;
+  const centerLat = (bounds.minLat + bounds.maxLat) * 0.5;
+  const dx = Math.max((bounds.maxLng - bounds.minLng) * 0.28, 0.00015);
+  const dy = Math.max((bounds.maxLat - bounds.minLat) * 0.28, 0.00015);
+
+  const points = [
+    { lng: centerLng, lat: centerLat },
+    { lng: centerLng - dx, lat: centerLat },
+    { lng: centerLng + dx, lat: centerLat },
+    { lng: centerLng, lat: centerLat - dy },
+    { lng: centerLng, lat: centerLat + dy }
+  ];
+
+  return points.filter(pointInStudyBounds);
+}
+
+function collectTerrainElevations(samplePoints) {
+  const elevations = [];
+  for (const point of samplePoints) {
+    const value = map.queryTerrainElevation(point, { exaggerated: false });
+    if (Number.isFinite(value)) elevations.push(value);
+  }
+  return elevations;
+}
+
+async function addBioswaleOpportunityLayer(floodData) {
+  if (!floodData?.features?.length) return;
+  if (map.getSource('bioswale-opportunities')) return;
+
+  await new Promise((resolve) => map.once('idle', resolve));
+
+  const candidateFeatures = [];
+
+  for (const feature of floodData.features) {
+    if (!feature?.geometry) continue;
+    if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon') continue;
+
+    const bounds = getGeometryBounds(feature.geometry);
+    if (!bounds) continue;
+
+    const samples = buildTerrainSamplePoints(bounds);
+    if (samples.length < 3) continue;
+
+    const elevations = collectTerrainElevations(samples);
+    if (elevations.length < 3) continue;
+
+    const avgElevation = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
+    const localRelief = Math.max(...elevations) - Math.min(...elevations);
+    const floodScore = Number(feature.properties?.fshri ?? 0);
+
+    const lowElevation = avgElevation <= 8.5;
+    const gentleSlope = localRelief <= 1.8;
+    const floodPressure = floodScore >= 2;
+
+    if (!lowElevation || !gentleSlope || !floodPressure) continue;
+
+    candidateFeatures.push({
+      type: 'Feature',
+      properties: {
+        ...(feature.properties || {}),
+        avg_elev_m: Number(avgElevation.toFixed(2)),
+        relief_m: Number(localRelief.toFixed(2))
+      },
+      geometry: feature.geometry
+    });
+  }
+
+  map.addSource('bioswale-opportunities', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: candidateFeatures
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-fill',
+    type: 'fill',
+    source: 'bioswale-opportunities',
+    paint: {
+      'fill-color': '#7f9c79',
+      'fill-opacity': 0.08
+    },
+    layout: {
+      visibility: 'visible'
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-outline',
+    type: 'line',
+    source: 'bioswale-opportunities',
+    paint: {
+      'line-color': '#5c7556',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 1.1,
+        15, 1.8,
+        18, 2.8
+      ],
+      'line-dasharray': [1.1, 1.5],
+      'line-opacity': 0.92
+    },
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    }
+  });
+}
+
 function setupLayerToggles() {
   const topoToggle = document.getElementById('toggle-topo');
   const floodToggle = document.getElementById('toggle-flood');
+  const bioswaleToggle = document.getElementById('toggle-bioswale');
   const siteToggle = document.getElementById('toggle-site');
   const observableToggle = document.getElementById('toggle-observable');
   const observableOverlay = document.getElementById('observable-overlay');
@@ -573,6 +725,16 @@ function setupLayerToggles() {
     }
     if (map.getLayer('flood-outline')) {
       map.setLayoutProperty('flood-outline', 'visibility', visibility);
+    }
+  });
+
+  bioswaleToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('bioswale-fill')) {
+      map.setLayoutProperty('bioswale-fill', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-outline')) {
+      map.setLayoutProperty('bioswale-outline', 'visibility', visibility);
     }
   });
 
@@ -743,6 +905,7 @@ function attachMapHandlers() {
 
       addMapboxTerrainAndContours();
       addFloodLayer(floodData);
+      await addBioswaleOpportunityLayer(floodData);
 
       map.addSource('existing', {
         type: 'geojson',
