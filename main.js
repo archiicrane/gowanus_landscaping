@@ -667,8 +667,8 @@ async function addBioswaleOpportunityLayer(floodData) {
     type: 'fill',
     source: 'bioswale-opportunities',
     paint: {
-      'fill-color': '#7f9c79',
-      'fill-opacity': 0.08
+      'fill-color': '#c7f36a',
+      'fill-opacity': 0.34
     },
     layout: {
       visibility: 'visible'
@@ -680,17 +680,17 @@ async function addBioswaleOpportunityLayer(floodData) {
     type: 'line',
     source: 'bioswale-opportunities',
     paint: {
-      'line-color': '#5c7556',
+      'line-color': '#3f6212',
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
-        12, 1.1,
-        15, 1.8,
-        18, 2.8
+        12, 2.2,
+        15, 3.2,
+        18, 4.8
       ],
-      'line-dasharray': [1.1, 1.5],
-      'line-opacity': 0.92
+      'line-dasharray': [1, 0.9],
+      'line-opacity': 1
     },
     layout: {
       visibility: 'visible',
@@ -905,7 +905,6 @@ function attachMapHandlers() {
 
       addMapboxTerrainAndContours();
       addFloodLayer(floodData);
-      await addBioswaleOpportunityLayer(floodData);
 
       map.addSource('existing', {
         type: 'geojson',
@@ -944,6 +943,7 @@ function attachMapHandlers() {
       addMapboxGroundWater();
       addMapboxGroundParks();
       await addSiteLinesFromText();
+      await addBioswaleOpportunityLayer(floodData);
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
