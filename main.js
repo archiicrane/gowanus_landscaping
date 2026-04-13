@@ -74,12 +74,35 @@ async function initMap() {
 let currentStage = 0;
 let isAnimating = false;
 
-const STUDY_BOUNDS = {
+let STUDY_BOUNDS = {
   west: -74.006007,
   south: 40.6621176,
   east: -73.974199,
   north: 40.6852681
 };
+
+function updateStudyBoundsFromFeatureCollection(featureCollection) {
+  if (!featureCollection?.features?.length) return;
+
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+
+  for (const feature of featureCollection.features) {
+    const bounds = getGeometryBounds(feature?.geometry);
+    if (!bounds) continue;
+
+    west = Math.min(west, bounds.minLng);
+    south = Math.min(south, bounds.minLat);
+    east = Math.max(east, bounds.maxLng);
+    north = Math.max(north, bounds.maxLat);
+  }
+
+  if (![west, south, east, north].every(Number.isFinite)) return;
+
+  STUDY_BOUNDS = { west, south, east, north };
+}
 
 const stageContent = [
   {
@@ -1185,6 +1208,8 @@ function attachMapHandlers() {
       const existingData = await existingResponse.json();
       const proposedData = await proposedResponse.json();
       const floodData = await floodResponse.json();
+
+      updateStudyBoundsFromFeatureCollection(existingData);
 
       addMapboxTerrainAndContours();
       addFloodLayer(floodData);
