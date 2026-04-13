@@ -58,10 +58,10 @@ async function initMap() {
   map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
-    center: [-73.9899, 40.6749],
-    zoom: 15.55,
-    pitch: 32,
-    bearing: -10,
+    center: [-73.9895, 40.6745],
+    zoom: 14.6,
+    pitch: 0,
+    bearing: 0,
     antialias: true
   });
 
@@ -149,12 +149,7 @@ const stageContent = [
 ];
 
 const SCROLL_STAGE_VIEWS = [
-  {
-    center: [-73.9899, 40.6749],
-    zoom: 15.55,
-    pitch: 32,
-    bearing: -10
-  },
+  null,
   {
     center: [-73.9895, 40.6745],
     zoom: 16.1,
@@ -170,7 +165,26 @@ const SCROLL_STAGE_VIEWS = [
 ];
 
 function applyCameraForStage(stage, immediate = false) {
+  if (stage === 0) {
+    const duration = immediate ? 0 : 900;
+    map.fitBounds(
+      [
+        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+        [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
+      ],
+      {
+        padding: { top: 70, right: 70, bottom: 70, left: 70 },
+        bearing: 0,
+        pitch: 0,
+        duration,
+        essential: true
+      }
+    );
+    return;
+  }
+
   const view = SCROLL_STAGE_VIEWS[stage] || SCROLL_STAGE_VIEWS[0];
+  if (!view) return;
   if (immediate) {
     map.jumpTo(view);
     return;
