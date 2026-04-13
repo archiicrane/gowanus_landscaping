@@ -1552,16 +1552,14 @@ function addZoningEnvelopeModel() {
     ZONING_MODEL_ALTITUDE
   );
 
-  const placement = computeZoningModelPlacement();
-
   const modelTransform = {
     translateX: mercator.x,
     translateY: mercator.y,
     translateZ: mercator.z,
     rotateX: ZONING_MODEL_ROTATION_X,
     rotateY: 0,
-    rotateZ: placement.rotateZ,
-    scale: mercator.meterInMercatorCoordinateUnits() * placement.scaleMeters
+    rotateZ: 0,
+    scale: mercator.meterInMercatorCoordinateUnits()
   };
 
   const customLayer = {
@@ -1583,7 +1581,6 @@ function addZoningEnvelopeModel() {
       loader.load(
         './models/zoning_envelopes.gltf',
         (gltf) => {
-          gltf.scene.position.set(-placement.sourceAnchor.x, -placement.sourceAnchor.y, 0);
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
             node.material = new THREE.MeshStandardMaterial({
