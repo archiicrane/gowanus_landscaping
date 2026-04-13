@@ -192,6 +192,156 @@ function computeZoningModelPlacement() {
   };
 }
 
+function ringCentroid(ring) {
+  if (!Array.isArray(ring) || ring.length < 3) return null;
+
+  let areaTwice = 0;
+  let cxAcc = 0;
+  let cyAcc = 0;
+
+  for (let i = 0; i < ring.length - 1; i += 1) {
+    const p0 = ring[i];
+    const p1 = ring[i + 1];
+    if (!Array.isArray(p0) || !Array.isArray(p1)) continue;
+
+    const cross = (p0[0] * p1[1]) - (p1[0] * p0[1]);
+    areaTwice += cross;
+    cxAcc += (p0[0] + p1[0]) * cross;
+    cyAcc += (p0[1] + p1[1]) * cross;
+  }
+
+  if (Math.abs(areaTwice) < 1e-12) {
+    let sx = 0;
+    let sy = 0;
+    let count = 0;
+    for (const p of ring) {
+      if (!Array.isArray(p)) continue;
+      sx += p[0];
+      sy += p[1];
+      count += 1;
+    }
+    if (!count) return null;
+    return [sx / count, sy / count];
+  }
+
+  return [cxAcc / (3 * areaTwice), cyAcc / (3 * areaTwice)];
+}
+
+function getNearestBuildingCentroidToTarget(anchorLngLat) {
+  if (!map || !map.isStyleLoaded()) return null;
+
+  let features;
+  try {
+    features = map.querySourceFeatures('composite', { sourceLayer: 'building' });
+  } catch (err) {
+    console.warn('Unable to query building source features for zoning centroid fit:', err);
+    return null;
+  }
+
+  if (!Array.isArray(features) || !features.length) return null;
+
+  const maxLngDist = 0.0015;
+  const maxLatDist = 0.0015;
+  let best = null;
+
+  for (const feature of features) {
+    const geom = feature?.geometry;
+    if (!geom) continue;
+
+    if (geom.type === 'Polygon') {
+      const ring = geom.coordinates?.[0];
+      const c = ringCentroid(ring);
+      if (!c) continue;
+
+      const dx = c[0] - anchorLngLat[0];
+      const dy = c[1] - anchorLngLat[1];
+      if (Math.abs(dx) > maxLngDist || Math.abs(dy) > maxLatDist) continue;
+
+      const d2 = dx * dx + dy * dy;
+      if (!best || d2 < best.d2) best = { centroid: c, d2 };
+      continue;
+    }
+
+    if (geom.type === 'MultiPolygon') {
+      for (const poly of geom.coordinates || []) {
+        const ring = poly?.[0];
+        const c = ringCentroid(ring);
+        if (!c) continue;
+
+        const dx = c[0] - anchorLngLat[0];
+        const dy = c[1] - anchorLngLat[1];
+        if (Math.abs(dx) > maxLngDist || Math.abs(dy) > maxLatDist) continue;
+
+        const d2 = dx * dx + dy * dy;
+        if (!best || d2 < best.d2) best = { centroid: c, d2 };
+      }
+    }
+  }
+
+  return best ? best.centroid : null;
+}
+
+function getNearestModelCentroidToSourceAnchor(modelRoot, sourceAnchor) {
+  if (!modelRoot) return null;
+
+  modelRoot.updateMatrixWorld(true);
+
+  let best = null;
+  modelRoot.traverse((node) => {
+    if (!node.isMesh || !node.geometry) return;
+    if (!node.geometry.boundingBox) node.geometry.computeBoundingBox();
+    if (!node.geometry.boundingBox) return;
+
+    const center = new THREE.Vector3();
+    node.geometry.boundingBox.getCenter(center);
+    center.applyMatrix4(node.matrixWorld);
+
+    const dx = center.x - sourceAnchor.x;
+    const dy = center.z - sourceAnchor.y;
+    const d2 = dx * dx + dy * dy;
+
+    if (!best || d2 < best.d2) {
+      best = { x: center.x, y: center.z, d2 };
+    }
+  });
+
+  return best ? { x: best.x, y: best.y } : null;
+}
+
+function computeZoningCentroidCorrectionMeters(modelRoot, placement) {
+  const targetCentroid = getNearestBuildingCentroidToTarget(ZONING_POINT_A_TARGET);
+  if (!targetCentroid) return { x: 0, y: 0 };
+
+  const sourceCentroid = getNearestModelCentroidToSourceAnchor(modelRoot, placement.sourceAnchor);
+  if (!sourceCentroid) return { x: 0, y: 0 };
+
+  const meanLat = (ZONING_POINT_A_TARGET[1] + targetCentroid[1]) * 0.5;
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((meanLat * Math.PI) / 180);
+
+  const targetMeters = {
+    x: (targetCentroid[0] - ZONING_POINT_A_TARGET[0]) * metersPerDegLng,
+    y: (targetCentroid[1] - ZONING_POINT_A_TARGET[1]) * metersPerDegLat
+  };
+
+  const sourceRel = {
+    x: sourceCentroid.x - placement.sourceAnchor.x,
+    y: sourceCentroid.y - placement.sourceAnchor.y
+  };
+
+  const c = Math.cos(placement.rotateZ);
+  const s = Math.sin(placement.rotateZ);
+  const predictedMeters = {
+    x: placement.scaleMeters * ((sourceRel.x * c) - (sourceRel.y * s)),
+    y: placement.scaleMeters * ((sourceRel.x * s) + (sourceRel.y * c))
+  };
+
+  return {
+    x: targetMeters.x - predictedMeters.x,
+    y: targetMeters.y - predictedMeters.y
+  };
+}
+
 const SCROLL_STAGE_VIEWS = [
   {
     center: CANAL_CENTER,
@@ -1552,15 +1702,17 @@ function addZoningEnvelopeModel() {
     ZONING_MODEL_ALTITUDE
   );
   const placement = computeZoningModelPlacement();
+  const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+  const correctionMeters = { x: 0, y: 0 };
 
   const modelTransform = {
-    translateX: mercator.x,
-    translateY: mercator.y,
+    translateX: mercator.x + (correctionMeters.x * meterInMercator),
+    translateY: mercator.y - (correctionMeters.y * meterInMercator),
     translateZ: mercator.z,
     rotateX: ZONING_MODEL_ROTATION_X,
     rotateY: -placement.rotateZ,
     rotateZ: 0,
-    scale: mercator.meterInMercatorCoordinateUnits() * placement.scaleMeters
+    scale: meterInMercator * placement.scaleMeters
   };
 
   const customLayer = {
@@ -1589,6 +1741,13 @@ function addZoningEnvelopeModel() {
             0,
             -placement.sourceAnchor.y
           );
+
+          const centroidCorrection = computeZoningCentroidCorrectionMeters(gltf.scene, placement);
+          correctionMeters.x = centroidCorrection.x;
+          correctionMeters.y = centroidCorrection.y;
+          modelTransform.translateX = mercator.x + (correctionMeters.x * meterInMercator);
+          modelTransform.translateY = mercator.y - (correctionMeters.y * meterInMercator);
+
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
             node.material = new THREE.MeshStandardMaterial({
