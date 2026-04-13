@@ -61,7 +61,7 @@ async function initMap() {
     center: [-73.9895, 40.6745],
     zoom: 14.6,
     pitch: 0,
-    bearing: 90,
+    bearing: 0,
     antialias: true
   });
 
@@ -148,41 +148,30 @@ const stageContent = [
   }
 ];
 
+const CANAL_CENTER = [-73.9895, 40.6745];
+
 const SCROLL_STAGE_VIEWS = [
-  null,
   {
-    center: [-73.9895, 40.6745],
-    zoom: 16.1,
-    pitch: 58,
-    bearing: -42
+    center: CANAL_CENTER,
+    zoom: 14.6,
+    pitch: 0,
+    bearing: 0
   },
   {
-    center: [-73.9895, 40.6745],
+    center: CANAL_CENTER,
     zoom: 16.1,
     pitch: 58,
-    bearing: -42
+    bearing: 0
+  },
+  {
+    center: CANAL_CENTER,
+    zoom: 16.1,
+    pitch: 58,
+    bearing: 0
   }
 ];
 
 function applyCameraForStage(stage, immediate = false) {
-  if (stage === 0) {
-    const duration = immediate ? 0 : 900;
-    map.fitBounds(
-      [
-        [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
-        [STUDY_BOUNDS.east, STUDY_BOUNDS.north]
-      ],
-      {
-        padding: { top: 70, right: 70, bottom: 70, left: 70 },
-        bearing: 90,
-        pitch: 0,
-        duration,
-        essential: true
-      }
-    );
-    return;
-  }
-
   const view = SCROLL_STAGE_VIEWS[stage] || SCROLL_STAGE_VIEWS[0];
   if (!view) return;
   if (immediate) {
