@@ -1311,6 +1311,30 @@ async function addBioswaleOpportunityLayer(floodData) {
     ]
   ];
 
+  const negatedCurbOffset = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    12,
+    ['match', ['get', 'class'],
+      'secondary', -3.4,
+      'tertiary', -3.0,
+      'residential', -2.8,
+      'service', -2.4,
+      'street', -2.8,
+      -2.8
+    ],
+    18,
+    ['match', ['get', 'class'],
+      'secondary', -9.2,
+      'tertiary', -8.0,
+      'residential', -7.4,
+      'service', -6.6,
+      'street', -7.2,
+      -7.2
+    ]
+  ];
+
   map.addLayer({
     id: 'bioswale-street-glow-right',
     type: 'line',
@@ -1371,7 +1395,7 @@ async function addBioswaleOpportunityLayer(floodData) {
     },
     paint: {
       'line-color': '#bef264',
-      'line-offset': ['*', -1, curbOffset],
+      'line-offset': negatedCurbOffset,
       'line-width': [
         'interpolate',
         ['linear'],
@@ -1395,7 +1419,7 @@ async function addBioswaleOpportunityLayer(floodData) {
     },
     paint: {
       'line-color': '#4d7c0f',
-      'line-offset': ['*', -1, curbOffset],
+      'line-offset': negatedCurbOffset,
       'line-width': [
         'interpolate',
         ['linear'],
