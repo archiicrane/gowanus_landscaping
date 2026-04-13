@@ -300,89 +300,35 @@ function addMapboxGroundParks() {
       'source-layer': 'landuse',
       filter: parksFilter,
       paint: {
-        'fill-color': '#b7d9ac',
-        'fill-opacity': 0.92
-      }
-    }, 'existing-buildings');
-  }
-
-  if (!map.getLayer('gowanus-parks-outline')) {
-    map.addLayer({
-      id: 'gowanus-parks-outline',
-      type: 'line',
-      source: 'composite',
-      'source-layer': 'landuse',
-      filter: parksFilter,
-      paint: {
-        'line-color': '#6f9a67',
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          12, 0.6,
-          16, 1.4
-        ],
-        'line-opacity': 0.9
+        'fill-color': '#8fbe7d',
+        'fill-opacity': 0.9
       }
     }, 'existing-buildings');
   }
 }
 
-function addMapboxRoadContext() {
-  if (!map.getLayer('gowanus-roads-minor')) {
-    map.addLayer({
-      id: 'gowanus-roads-minor',
-      type: 'line',
-      source: 'composite',
-      'source-layer': 'road',
-      minzoom: 12,
-      filter: [
-        'all',
-        ['!=', ['get', 'class'], 'motorway'],
-        ['!=', ['get', 'class'], 'motorway_link'],
-        ['!=', ['get', 'class'], 'trunk'],
-        ['!=', ['get', 'class'], 'primary']
-      ],
-      paint: {
-        'line-color': '#c8c2b8',
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          12, 0.6,
-          16, 1.2,
-          18, 2.0
-        ],
-        'line-opacity': 0.85
-      }
-    }, 'existing-buildings');
-  }
+function addMapboxGroundWater() {
+  const gowanusClipBounds = {
+    type: 'Polygon',
+    coordinates: [[
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+      [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+      [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+      [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+    ]]
+  };
 
-  if (!map.getLayer('gowanus-roads-major')) {
+  if (!map.getLayer('gowanus-water-ground')) {
     map.addLayer({
-      id: 'gowanus-roads-major',
-      type: 'line',
+      id: 'gowanus-water-ground',
+      type: 'fill',
       source: 'composite',
-      'source-layer': 'road',
-      minzoom: 10,
-      filter: [
-        'any',
-        ['==', ['get', 'class'], 'motorway'],
-        ['==', ['get', 'class'], 'motorway_link'],
-        ['==', ['get', 'class'], 'trunk'],
-        ['==', ['get', 'class'], 'primary']
-      ],
+      'source-layer': 'water',
+      filter: ['within', gowanusClipBounds],
       paint: {
-        'line-color': '#a89d8f',
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          10, 1.2,
-          14, 2.0,
-          17, 3.2
-        ],
-        'line-opacity': 0.9
+        'fill-color': '#77aee8',
+        'fill-opacity': 0.88
       }
     }, 'existing-buildings');
   }
@@ -707,8 +653,8 @@ function attachMapHandlers() {
         }
       });
 
+      addMapboxGroundWater();
       addMapboxGroundParks();
-      addMapboxRoadContext();
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
