@@ -6,6 +6,29 @@ const SITE_CONTROL_A = { lng: -73.99415, lat: 40.67590 };
 const SITE_CONTROL_B = { lng: -73.990722, lat: 40.675821 };
 const SITE_CONTROL_C = { lng: -73.994018, lat: 40.676209 };
 
+// Three target site footprints derived from the user's red markup.
+// Order: north-west parcel, south parcel, north-east parcel.
+const SITE_SEGMENT_QUADS = [
+  [
+    [SITE_CONTROL_C.lng - 0.00120, SITE_CONTROL_C.lat + 0.00002],
+    [SITE_CONTROL_C.lng + 0.00195, SITE_CONTROL_C.lat - 0.00002],
+    [SITE_CONTROL_A.lng + 0.00195, SITE_CONTROL_A.lat - 0.00002],
+    [SITE_CONTROL_A.lng - 0.00135, SITE_CONTROL_A.lat - 0.00020]
+  ],
+  [
+    [SITE_CONTROL_A.lng + 0.00062, SITE_CONTROL_A.lat + 0.00002],
+    [SITE_CONTROL_B.lng - 0.00008, SITE_CONTROL_B.lat + 0.00001],
+    [SITE_CONTROL_B.lng - 0.00005, SITE_CONTROL_B.lat - 0.00052],
+    [SITE_CONTROL_A.lng + 0.00055, SITE_CONTROL_A.lat - 0.00048]
+  ],
+  [
+    [SITE_CONTROL_B.lng - 0.00062, SITE_CONTROL_B.lat + 0.00040],
+    [SITE_CONTROL_B.lng + 0.00005, SITE_CONTROL_B.lat + 0.00036],
+    [SITE_CONTROL_B.lng + 0.00002, SITE_CONTROL_B.lat + 0.00002],
+    [SITE_CONTROL_B.lng - 0.00072, SITE_CONTROL_B.lat + 0.00007]
+  ]
+];
+
 async function resolveMapboxToken() {
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
   if (windowToken) return windowToken;
@@ -313,20 +336,6 @@ function addMapboxGroundWater() {
   }
 }
 
-function computeSiteOverlayCoordsFromControlPoints() {
-  // Derive the 4th corner D from A, B, C (parallelogram): D = B + A - C.
-  const dLng = SITE_CONTROL_B.lng + SITE_CONTROL_A.lng - SITE_CONTROL_C.lng;
-  const dLat = SITE_CONTROL_B.lat + SITE_CONTROL_A.lat - SITE_CONTROL_C.lat;
-
-  // Image source coordinate order: top-left, top-right, bottom-right, bottom-left
-  return [
-    [SITE_CONTROL_C.lng, SITE_CONTROL_C.lat],
-    [SITE_CONTROL_B.lng, SITE_CONTROL_B.lat],
-    [dLng, dLat],
-    [SITE_CONTROL_A.lng, SITE_CONTROL_A.lat]
-  ];
-}
-
 function parseSiteSegments(rawText) {
   return rawText
     .split(/\bnone\b/gi)
@@ -379,35 +388,38 @@ async function addSiteLinesFromText() {
     throw new Error('No coordinate segments found in site text.');
   }
 
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  for (const segment of segments) {
+  const segmentOrder = [2, 0, 1];
+
+  const features = segmentOrder.map((segmentIndex, zoneIndex) => {
+    const segment = segments[segmentIndex];
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
     for (const [x, y] of segment) {
       minX = Math.min(minX, x);
       maxX = Math.max(maxX, x);
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
     }
-  }
 
-  const bounds = {
-    minX,
-    minY,
-    dx: Math.max(maxX - minX, 1),
-    dy: Math.max(maxY - minY, 1)
-  };
-  const quad = computeSiteOverlayCoordsFromControlPoints();
+    const bounds = {
+      minX,
+      minY,
+      dx: Math.max(maxX - minX, 1),
+      dy: Math.max(maxY - minY, 1)
+    };
 
-  const features = segments.map((segment) => ({
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'LineString',
-      coordinates: segment.map((point) => localToLngLat(point, bounds, quad))
-    }
-  }));
+    return {
+      type: 'Feature',
+      properties: { zone: zoneIndex + 1 },
+      geometry: {
+        type: 'LineString',
+        coordinates: segment.map((point) => localToLngLat(point, bounds, SITE_SEGMENT_QUADS[zoneIndex]))
+      }
+    };
+  });
 
   if (!map.getSource('site-lines')) {
     map.addSource('site-lines', {
