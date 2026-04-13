@@ -701,7 +701,7 @@ function selectBestBioswaleSegments(segments) {
 }
 
 async function addBioswaleOpportunityLayer(floodData) {
-  if (map.getLayer('bioswale-street-core')) return;
+  if (map.getLayer('bioswale-street-core-right')) return;
 
   await new Promise((resolve) => map.once('idle', resolve));
 
@@ -786,8 +786,32 @@ async function addBioswaleOpportunityLayer(floodData) {
     }
   });
 
+  const curbOffset = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    12,
+    ['match', ['get', 'class'],
+      'secondary', 3.4,
+      'tertiary', 3.0,
+      'residential', 2.8,
+      'service', 2.4,
+      'street', 2.8,
+      2.8
+    ],
+    18,
+    ['match', ['get', 'class'],
+      'secondary', 9.2,
+      'tertiary', 8.0,
+      'residential', 7.4,
+      'service', 6.6,
+      'street', 7.2,
+      7.2
+    ]
+  ];
+
   map.addLayer({
-    id: 'bioswale-street-glow',
+    id: 'bioswale-street-glow-right',
     type: 'line',
     source: 'bioswale-streets',
     layout: {
@@ -797,20 +821,21 @@ async function addBioswaleOpportunityLayer(floodData) {
     },
     paint: {
       'line-color': '#bef264',
+      'line-offset': curbOffset,
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
-        12, 5,
-        15, 9,
-        18, 16
+        12, 3.4,
+        15, 5.4,
+        18, 8.2
       ],
-      'line-opacity': 0.42
+      'line-opacity': 0.48
     }
   });
 
   map.addLayer({
-    id: 'bioswale-street-core',
+    id: 'bioswale-street-core-right',
     type: 'line',
     source: 'bioswale-streets',
     layout: {
@@ -820,13 +845,63 @@ async function addBioswaleOpportunityLayer(floodData) {
     },
     paint: {
       'line-color': '#4d7c0f',
+      'line-offset': curbOffset,
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
-        12, 1.6,
-        15, 2.8,
-        18, 4.4
+        12, 1.25,
+        15, 2.1,
+        18, 3.2
+      ],
+      'line-dasharray': [1.2, 0.8],
+      'line-opacity': 1
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-glow-left',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#bef264',
+      'line-offset': ['*', -1, curbOffset],
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 3.4,
+        15, 5.4,
+        18, 8.2
+      ],
+      'line-opacity': 0.48
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-core-left',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#4d7c0f',
+      'line-offset': ['*', -1, curbOffset],
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 1.25,
+        15, 2.1,
+        18, 3.2
       ],
       'line-dasharray': [1.2, 0.8],
       'line-opacity': 1
@@ -837,11 +912,17 @@ async function addBioswaleOpportunityLayer(floodData) {
 }
 
 function moveBioswaleLayersToTop() {
-  if (map.getLayer('bioswale-street-glow')) {
-    map.moveLayer('bioswale-street-glow');
+  if (map.getLayer('bioswale-street-glow-right')) {
+    map.moveLayer('bioswale-street-glow-right');
   }
-  if (map.getLayer('bioswale-street-core')) {
-    map.moveLayer('bioswale-street-core');
+  if (map.getLayer('bioswale-street-core-right')) {
+    map.moveLayer('bioswale-street-core-right');
+  }
+  if (map.getLayer('bioswale-street-glow-left')) {
+    map.moveLayer('bioswale-street-glow-left');
+  }
+  if (map.getLayer('bioswale-street-core-left')) {
+    map.moveLayer('bioswale-street-core-left');
   }
 }
 
@@ -875,11 +956,17 @@ function setupLayerToggles() {
 
   bioswaleToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('bioswale-street-glow')) {
-      map.setLayoutProperty('bioswale-street-glow', 'visibility', visibility);
+    if (map.getLayer('bioswale-street-glow-right')) {
+      map.setLayoutProperty('bioswale-street-glow-right', 'visibility', visibility);
     }
-    if (map.getLayer('bioswale-street-core')) {
-      map.setLayoutProperty('bioswale-street-core', 'visibility', visibility);
+    if (map.getLayer('bioswale-street-core-right')) {
+      map.setLayoutProperty('bioswale-street-core-right', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-street-glow-left')) {
+      map.setLayoutProperty('bioswale-street-glow-left', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-street-core-left')) {
+      map.setLayoutProperty('bioswale-street-core-left', 'visibility', visibility);
     }
   });
 
