@@ -1615,6 +1615,8 @@ async function addZoningBuildingsLayer() {
       'fill-extrusion-height': ['get', 'height'],
       'fill-extrusion-base': 0,
       'fill-extrusion-opacity': 0.85
+    }
+  });
 
       map.addLayer({
         id: 'zoning-buildings-outline',
@@ -1631,8 +1633,6 @@ async function addZoningBuildingsLayer() {
           'line-opacity': 0.7
         }
       });
-    }
-  });
 }
 
 function moveBioswaleLayersToTop() {
