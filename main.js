@@ -154,7 +154,7 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
-const ZONING_MODEL_ORIGIN = [-73.99021944172654, 40.6763766911124];
+const ZONING_MODEL_ORIGIN = [-73.99049693123331, 40.67592049971637];
 const ZONING_MODEL_ALTITUDE = 0;
 const ZONING_MODEL_ROTATION = [Math.PI / 2, 0, 0];
 const ZONING_MODEL_SCALE_METERS = 1;
@@ -1553,6 +1553,17 @@ function addZoningEnvelopeModel() {
       loader.load(
         './models/zoning_envelopes.gltf',
         (gltf) => {
+          gltf.scene.traverse((node) => {
+            if (!node.isMesh) return;
+            node.material = new THREE.MeshStandardMaterial({
+              color: 0xffd60a,
+              emissive: 0x5a4a00,
+              metalness: 0.05,
+              roughness: 0.78,
+              transparent: true,
+              opacity: 0.95
+            });
+          });
           this.scene.add(gltf.scene);
         },
         undefined,
