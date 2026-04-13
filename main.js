@@ -154,6 +154,10 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
+const ZONING_MODEL_ORIGIN = [-73.99021944172654, 40.6763766911124];
+const ZONING_MODEL_ALTITUDE = 0;
+const ZONING_MODEL_ROTATION = [Math.PI / 2, 0, 0];
+const ZONING_MODEL_SCALE_METERS = 1;
 const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
@@ -1507,6 +1511,105 @@ async function addElevatedRailExtrusion() {
   });
 }
 
+function addZoningEnvelopeModel() {
+  if (map.getLayer('zoning-envelopes-3d')) return;
+
+  if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+    console.warn('Three.js or GLTFLoader not available; zoning envelope model skipped.');
+    return;
+  }
+
+  const mercator = mapboxgl.MercatorCoordinate.fromLngLat(
+    ZONING_MODEL_ORIGIN,
+    ZONING_MODEL_ALTITUDE
+  );
+
+  const modelTransform = {
+    translateX: mercator.x,
+    translateY: mercator.y,
+    translateZ: mercator.z,
+    rotateX: ZONING_MODEL_ROTATION[0],
+    rotateY: ZONING_MODEL_ROTATION[1],
+    rotateZ: ZONING_MODEL_ROTATION[2],
+    scale: mercator.meterInMercatorCoordinateUnits() * ZONING_MODEL_SCALE_METERS
+  };
+
+  const customLayer = {
+    id: 'zoning-envelopes-3d',
+    type: 'custom',
+    renderingMode: '3d',
+    onAdd: function onAdd(mapInstance, gl) {
+      this.camera = new THREE.Camera();
+      this.scene = new THREE.Scene();
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+      this.scene.add(ambientLight);
+
+      const directional = new THREE.DirectionalLight(0xffffff, 0.7);
+      directional.position.set(0, -70, 100).normalize();
+      this.scene.add(directional);
+
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        './models/zoning_envelopes.gltf',
+        (gltf) => {
+          this.scene.add(gltf.scene);
+        },
+        undefined,
+        (err) => {
+          console.error('Failed to load zoning_envelopes.gltf:', err);
+        }
+      );
+
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: mapInstance.getCanvas(),
+        context: gl,
+        antialias: true
+      });
+      this.renderer.autoClear = false;
+    },
+    render: function render(gl, matrix) {
+      const rotationX = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(1, 0, 0),
+        modelTransform.rotateX
+      );
+      const rotationY = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 1, 0),
+        modelTransform.rotateY
+      );
+      const rotationZ = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 0, 1),
+        modelTransform.rotateZ
+      );
+
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(
+          modelTransform.translateX,
+          modelTransform.translateY,
+          modelTransform.translateZ
+        )
+        .scale(
+          new THREE.Vector3(
+            modelTransform.scale,
+            -modelTransform.scale,
+            modelTransform.scale
+          )
+        )
+        .multiply(rotationX)
+        .multiply(rotationY)
+        .multiply(rotationZ);
+
+      this.camera.projectionMatrix = m.multiply(l);
+      this.renderer.resetState();
+      this.renderer.render(this.scene, this.camera);
+      map.triggerRepaint();
+    }
+  };
+
+  map.addLayer(customLayer);
+}
+
 function moveBioswaleLayersToTop() {
   if (map.getLayer('bioswale-street-glow-right')) {
     map.moveLayer('bioswale-street-glow-right');
@@ -1831,6 +1934,7 @@ function attachMapHandlers() {
       addMapboxGroundParks();
         await addParkOutline();
         await addElevatedRailExtrusion();
+      addZoningEnvelopeModel();
       await addBioswaleOpportunityLayer(floodData);
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
