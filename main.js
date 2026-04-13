@@ -154,8 +154,10 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
-const SITE_LINE_SOURCE_ANCHOR = [-73.995096177, 40.675844663];
-const SITE_LINE_TARGET_ANCHOR = [-73.994155, 40.675902];
+const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
+const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
+const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
+const SITE_POINT_B_TARGET = [-73.99071172722226, 40.675863969717426];
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -529,8 +531,17 @@ async function addSiteLinesFromText() {
     throw new Error('No geographic coordinate segments found in site2_geographic_coordinates.json.');
   }
 
-  const deltaLng = SITE_LINE_TARGET_ANCHOR[0] - SITE_LINE_SOURCE_ANCHOR[0];
-  const deltaLat = SITE_LINE_TARGET_ANCHOR[1] - SITE_LINE_SOURCE_ANCHOR[1];
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((SITE_POINT_A_TARGET[1] * Math.PI) / 180);
+
+  const currentDx = (SITE_POINT_B_SOURCE[0] - SITE_POINT_A_SOURCE[0]) * metersPerDegLng;
+  const currentDy = (SITE_POINT_B_SOURCE[1] - SITE_POINT_A_SOURCE[1]) * metersPerDegLat;
+  const desiredDx = (SITE_POINT_B_TARGET[0] - SITE_POINT_A_TARGET[0]) * metersPerDegLng;
+  const desiredDy = (SITE_POINT_B_TARGET[1] - SITE_POINT_A_TARGET[1]) * metersPerDegLat;
+
+  const currentDistance = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
+  const desiredDistance = Math.sqrt(desiredDx * desiredDx + desiredDy * desiredDy);
+  const scaleFactor = currentDistance > 0 ? desiredDistance / currentDistance : 1;
 
   const features = segments
     .map((segment, index) => ({ segment, index }))
@@ -543,8 +554,8 @@ async function addSiteLinesFromText() {
         coordinates: segment
           .filter((point) => Array.isArray(point) && point.length >= 2)
           .map((point) => [
-            Number(point[0]) + deltaLng,
-            Number(point[1]) + deltaLat
+            SITE_POINT_A_TARGET[0] + (Number(point[0]) - SITE_POINT_A_SOURCE[0]) * scaleFactor,
+            SITE_POINT_A_TARGET[1] + (Number(point[1]) - SITE_POINT_A_SOURCE[1]) * scaleFactor
           ])
       }
     }))
