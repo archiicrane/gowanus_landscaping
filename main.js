@@ -933,6 +933,79 @@ function clipLineToStudyBounds(coords) {
   return segments;
 }
 
+function pointInStudyBoundingBox(point) {
+  return (
+    point[0] >= STUDY_BOUNDS.west &&
+    point[0] <= STUDY_BOUNDS.east &&
+    point[1] >= STUDY_BOUNDS.south &&
+    point[1] <= STUDY_BOUNDS.north
+  );
+}
+
+function clipLineToStudyBoundingBox(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInStudyBoundingBox(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
+function bufferLineToPolygon(coords, halfWidthMeters = 4.2) {
+  if (!Array.isArray(coords) || coords.length < 2) return null;
+
+  const meanLat = coords.reduce((sum, p) => sum + p[1], 0) / coords.length;
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((meanLat * Math.PI) / 180);
+
+  const toMeters = ([lng, lat]) => [lng * metersPerDegLng, lat * metersPerDegLat];
+  const toLngLat = ([x, y]) => [x / metersPerDegLng, y / metersPerDegLat];
+
+  const meters = coords.map(toMeters);
+  const left = [];
+  const right = [];
+
+  for (let i = 0; i < meters.length; i += 1) {
+    const prev = meters[Math.max(0, i - 1)];
+    const next = meters[Math.min(meters.length - 1, i + 1)];
+
+    const dx = next[0] - prev[0];
+    const dy = next[1] - prev[1];
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 1e-6) continue;
+
+    const nx = -dy / len;
+    const ny = dx / len;
+    const p = meters[i];
+
+    left.push(toLngLat([p[0] + nx * halfWidthMeters, p[1] + ny * halfWidthMeters]));
+    right.push(toLngLat([p[0] - nx * halfWidthMeters, p[1] - ny * halfWidthMeters]));
+  }
+
+  if (left.length < 2 || right.length < 2) return null;
+
+  const ring = [...left, ...right.reverse()];
+  ring.push(ring[0]);
+
+  return {
+    type: 'Polygon',
+    coordinates: [ring]
+  };
+}
+
 function getLineSamplePoints(coords, sampleCount = 7) {
   if (coords.length <= sampleCount) return coords;
 
@@ -1215,6 +1288,88 @@ async function addBioswaleOpportunityLayer(floodData) {
   });
 
   moveBioswaleLayersToTop();
+}
+
+async function addElevatedRailExtrusion() {
+  if (map.getLayer('elevated-rail-extrusion')) return;
+
+  await new Promise((resolve) => map.once('idle', resolve));
+
+  let railFeatures = [];
+  try {
+    railFeatures = map.querySourceFeatures('composite', {
+      sourceLayer: 'road',
+      filter: [
+        'any',
+        ['==', ['get', 'class'], 'major_rail'],
+        ['==', ['get', 'class'], 'rail'],
+        ['==', ['get', 'class'], 'transit']
+      ]
+    });
+  } catch (err) {
+    console.warn('Rail query failed:', err);
+  }
+
+  const unique = new Set();
+  const extrusions = [];
+
+  for (const feature of railFeatures) {
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    for (const lineCoords of lineGroups) {
+      const clippedSegments = clipLineToStudyBoundingBox(lineCoords);
+      for (const coords of clippedSegments) {
+        if (coords.length < 2) continue;
+        if (roughLineLength(coords) < 0.0002) continue;
+
+        const key = buildSegmentKey(
+          coords,
+          feature.properties?.class || 'rail',
+          feature.properties?.name || ''
+        );
+        if (unique.has(key)) continue;
+        unique.add(key);
+
+        const polygon = bufferLineToPolygon(coords, 4.6);
+        if (!polygon) continue;
+
+        extrusions.push({
+          type: 'Feature',
+          properties: {
+            class: feature.properties?.class || 'rail'
+          },
+          geometry: polygon
+        });
+      }
+    }
+  }
+
+  if (!extrusions.length) {
+    console.warn('No elevated rail segments found in study bounding box.');
+    return;
+  }
+
+  map.addSource('elevated-rail', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: extrusions
+    }
+  });
+
+  map.addLayer({
+    id: 'elevated-rail-extrusion',
+    type: 'fill-extrusion',
+    source: 'elevated-rail',
+    layout: {
+      visibility: 'visible'
+    },
+    paint: {
+      'fill-extrusion-color': '#3f3f46',
+      'fill-extrusion-base': 7.5,
+      'fill-extrusion-height': 11.8,
+      'fill-extrusion-opacity': 0.96
+    }
+  });
 }
 
 function moveBioswaleLayersToTop() {
@@ -1547,7 +1702,8 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
-  await addParkOutline();
+        await addParkOutline();
+        await addElevatedRailExtrusion();
       await addSiteLinesFromText();
       await addBioswaleOpportunityLayer(floodData);
 
