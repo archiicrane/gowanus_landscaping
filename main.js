@@ -58,15 +58,17 @@ async function initMap() {
   map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v11',
-    center: [-73.9895, 40.6745],
-    zoom: 14.6,
-    pitch: 0,
-    bearing: 0,
+    center: PRESENTATION_CENTER,
+    zoom: 15.25,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING,
     antialias: true
   });
 
   map.addControl(new mapboxgl.NavigationControl());
   map.scrollZoom.disable();
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
 
   attachMapHandlers();
 }
@@ -148,26 +150,29 @@ const stageContent = [
   }
 ];
 
-const CANAL_CENTER = [-73.9895, 40.6745];
+const PRESENTATION_CENTER = [-73.9895, 40.6745];
+const CANAL_CENTER = PRESENTATION_CENTER;
+const PRESENTATION_BEARING = -42;
+const PRESENTATION_PITCH = 58;
 
 const SCROLL_STAGE_VIEWS = [
   {
     center: CANAL_CENTER,
-    zoom: 14.6,
-    pitch: 0,
-    bearing: 0
+    zoom: 15.25,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
   },
   {
     center: CANAL_CENTER,
-    zoom: 16.1,
-    pitch: 58,
-    bearing: 0
+    zoom: 15.7,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
   },
   {
     center: CANAL_CENTER,
-    zoom: 16.1,
-    pitch: 58,
-    bearing: 0
+    zoom: 15.7,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
   }
 ];
 
