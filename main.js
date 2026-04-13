@@ -1541,31 +1541,96 @@ async function addZoningBuildingsLayer() {
 
   const buildingsData = await response.json();
 
+  // Heights by building layer (extracted from B_heights.gltf)
+  const layerHeights = {
+    '408_CARROLL_ST': 34.5,
+    '261_BOND_STREET': 42.3,
+    '417___498_CARROLL_STREET': 58.8,
+    '317_BOND_ST': 38.0,
+    '335_BOND_ST': 47.7,
+    '395_CARROL_ST': 52.3,
+    '363_BOND_ST': 74.2,
+    '141_2ND_ST': 83.3,
+    '498_SACKETT_ST': 71.6,
+    '488_DEGRAW_ST': 68.1,
+    '205_UNION_ST': 77.8
+  };
+
+  // Group features by layer and convert line segments to polygon footprints
+  const footprints = [];
+  const featuresByLayer = {};
+  
+  for (const feature of buildingsData.features) {
+    const layer = feature.properties.Layer;
+    if (!featuresByLayer[layer]) {
+      featuresByLayer[layer] = [];
+    }
+    featuresByLayer[layer].push(feature);
+  }
+
+  for (const [layer, features] of Object.entries(featuresByLayer)) {
+    const coords = [];
+    for (const feature of features) {
+      if (feature.geometry.type === 'LineString') {
+        coords.push(...feature.geometry.coordinates.slice(0, -1));
+      }
+    }
+    
+    if (coords.length > 2) {
+      const uniqueCoords = coords.filter((c, i, arr) => 
+        i === 0 || c[0] !== arr[i-1][0] || c[1] !== arr[i-1][1]
+      );
+      
+      footprints.push({
+        type: 'Feature',
+        properties: {
+          layer: layer,
+          height: layerHeights[layer] || 50
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [uniqueCoords]
+        }
+      });
+    }
+  }
+
   map.addSource('zoning-buildings', {
     type: 'geojson',
-    data: buildingsData
+    data: {
+      type: 'FeatureCollection',
+      features: footprints
+    }
   });
 
   map.addLayer({
     id: 'zoning-buildings',
-    type: 'line',
+    type: 'fill-extrusion',
     source: 'zoning-buildings',
     layout: {
-      visibility: 'visible',
-      'line-join': 'round',
-      'line-cap': 'round'
+      visibility: 'visible'
     },
     paint: {
-      'line-color': '#fbbf24',
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        13, 1.2,
-        15, 1.8,
-        17, 2.6
-      ],
-      'line-opacity': 0.9
+      'fill-extrusion-color': '#fbbf24',
+      'fill-extrusion-height': ['get', 'height'],
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': 0.85
+
+      map.addLayer({
+        id: 'zoning-buildings-outline',
+        type: 'line',
+        source: 'zoning-buildings',
+        layout: {
+          visibility: 'visible',
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#ca8a04',
+          'line-width': 1.2,
+          'line-opacity': 0.7
+        }
+      });
     }
   });
 }
