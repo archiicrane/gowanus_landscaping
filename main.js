@@ -1584,6 +1584,13 @@ function addZoningEnvelopeModel() {
       loader.load(
         './models/zoning.gltf',
         (gltf) => {
+          const bounds = new THREE.Box3().setFromObject(gltf.scene);
+          if (!bounds.isEmpty()) {
+            const center = new THREE.Vector3();
+            bounds.getCenter(center);
+            gltf.scene.position.set(-center.x, -center.y, -center.z);
+          }
+
           gltf.scene.traverse((node) => {
             if (!node.isMesh) return;
             node.material = new THREE.MeshStandardMaterial({
