@@ -434,6 +434,16 @@ function addMapboxGroundWater() {
 }
 
 function hideBasemapLabels() {
+  const style = map.getStyle();
+  const layers = style?.layers || [];
+
+  for (const layer of layers) {
+    if (layer.type !== 'symbol') continue;
+    if (map.getLayer(layer.id)) {
+      map.setLayoutProperty(layer.id, 'visibility', 'none');
+    }
+  }
+}
 
 async function addParkOutline() {
   const response = await fetch('./models/park.geojson');
@@ -491,16 +501,6 @@ async function addParkOutline() {
     18, 3.6
   ]);
   map.setPaintProperty('park-outline', 'line-opacity', 0.96);
-}
-  const style = map.getStyle();
-  const layers = style?.layers || [];
-
-  for (const layer of layers) {
-    if (layer.type !== 'symbol') continue;
-    if (map.getLayer(layer.id)) {
-      map.setLayoutProperty(layer.id, 'visibility', 'none');
-    }
-  }
 }
 
 function addGowanusFocusMask() {
