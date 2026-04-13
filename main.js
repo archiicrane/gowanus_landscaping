@@ -1531,108 +1531,189 @@ async function addElevatedRailExtrusion() {
   });
 }
 
-async function addZoningBuildingsLayer() {
-  if (map.getLayer('zoning-buildings')) return;
+function centroidFromLineFeatures(features) {
+  let sumLng = 0;
+  let sumLat = 0;
+  let count = 0;
 
-  const response = await fetch('./models/buildings.geojson');
-  if (!response.ok) {
-    throw new Error(`Failed to load buildings.geojson: ${response.status} ${response.statusText}`);
-  }
+  for (const feature of features || []) {
+    const geom = feature?.geometry;
+    if (!geom) continue;
 
-  const buildingsData = await response.json();
-
-  // Heights by building layer (extracted from B_heights.gltf)
-  const layerHeights = {
-    '408_CARROLL_ST': 34.5,
-    '261_BOND_STREET': 42.3,
-    '417___498_CARROLL_STREET': 58.8,
-    '317_BOND_ST': 38.0,
-    '335_BOND_ST': 47.7,
-    '395_CARROL_ST': 52.3,
-    '363_BOND_ST': 74.2,
-    '141_2ND_ST': 83.3,
-    '498_SACKETT_ST': 71.6,
-    '488_DEGRAW_ST': 68.1,
-    '205_UNION_ST': 77.8
-  };
-
-  // Group features by layer and convert line segments to polygon footprints
-  const footprints = [];
-  const featuresByLayer = {};
-  
-  for (const feature of buildingsData.features) {
-    const layer = feature.properties.Layer;
-    if (!featuresByLayer[layer]) {
-      featuresByLayer[layer] = [];
+    if (geom.type === 'LineString') {
+      for (const coord of geom.coordinates || []) {
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+        sumLng += coord[0];
+        sumLat += coord[1];
+        count += 1;
+      }
+      continue;
     }
-    featuresByLayer[layer].push(feature);
-  }
 
-  for (const [layer, features] of Object.entries(featuresByLayer)) {
-    const coords = [];
-    for (const feature of features) {
-      if (feature.geometry.type === 'LineString') {
-        coords.push(...feature.geometry.coordinates.slice(0, -1));
+    if (geom.type === 'MultiLineString') {
+      for (const line of geom.coordinates || []) {
+        for (const coord of line || []) {
+          if (!Array.isArray(coord) || coord.length < 2) continue;
+          sumLng += coord[0];
+          sumLat += coord[1];
+          count += 1;
+        }
       }
     }
-    
-    if (coords.length > 2) {
-      const uniqueCoords = coords.filter((c, i, arr) => 
-        i === 0 || c[0] !== arr[i-1][0] || c[1] !== arr[i-1][1]
-      );
-      
-      footprints.push({
-        type: 'Feature',
-        properties: {
-          layer: layer,
-          height: layerHeights[layer] || 50
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [uniqueCoords]
-        }
-      });
-    }
   }
 
-  map.addSource('zoning-buildings', {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features: footprints
+  if (!count) return PRESENTATION_CENTER;
+  return [sumLng / count, sumLat / count];
+}
+
+function addBHeightsModelOnFootprints(anchorLngLat) {
+  if (map.getLayer('b-heights-model')) return;
+
+  if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+    console.warn('Three.js or GLTFLoader not available; B_heights model skipped.');
+    return;
+  }
+
+  const mercator = mapboxgl.MercatorCoordinate.fromLngLat(anchorLngLat, 0);
+  const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+
+  const modelTransform = {
+    translateX: mercator.x,
+    translateY: mercator.y,
+    translateZ: mercator.z,
+    rotateX: Math.PI / 2,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: meterInMercator
+  };
+
+  const customLayer = {
+    id: 'b-heights-model',
+    type: 'custom',
+    renderingMode: '3d',
+    onAdd: function onAdd(mapInstance, gl) {
+      this.camera = new THREE.Camera();
+      this.scene = new THREE.Scene();
+
+      this.scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+      const directional = new THREE.DirectionalLight(0xffffff, 0.68);
+      directional.position.set(40, -80, 120).normalize();
+      this.scene.add(directional);
+
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        './models/B_heights.gltf',
+        (gltf) => {
+          const bounds = new THREE.Box3().setFromObject(gltf.scene);
+          if (!bounds.isEmpty()) {
+            const center = new THREE.Vector3();
+            bounds.getCenter(center);
+            gltf.scene.position.set(-center.x, -bounds.min.y, -center.z);
+          }
+
+          gltf.scene.traverse((node) => {
+            if (!node.isMesh) return;
+            node.material = new THREE.MeshStandardMaterial({
+              color: 0xfacc15,
+              emissive: 0x5a4a00,
+              metalness: 0.04,
+              roughness: 0.8,
+              transparent: true,
+              opacity: 0.92
+            });
+          });
+
+          this.scene.add(gltf.scene);
+        },
+        undefined,
+        (err) => {
+          console.error('Failed to load B_heights.gltf:', err);
+        }
+      );
+
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: mapInstance.getCanvas(),
+        context: gl,
+        antialias: true
+      });
+      this.renderer.autoClear = false;
+    },
+    render: function render(gl, matrix) {
+      const rotationX = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(1, 0, 0),
+        modelTransform.rotateX
+      );
+      const rotationY = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 1, 0),
+        modelTransform.rotateY
+      );
+      const rotationZ = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 0, 1),
+        modelTransform.rotateZ
+      );
+
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(
+          modelTransform.translateX,
+          modelTransform.translateY,
+          modelTransform.translateZ
+        )
+        .scale(new THREE.Vector3(modelTransform.scale, -modelTransform.scale, modelTransform.scale))
+        .multiply(rotationX)
+        .multiply(rotationY)
+        .multiply(rotationZ);
+
+      this.camera.projectionMatrix = m.multiply(l);
+      this.renderer.resetState();
+      this.renderer.render(this.scene, this.camera);
+      map.triggerRepaint();
     }
+  };
+
+  map.addLayer(customLayer);
+}
+
+async function addZoningBuildingsLayer() {
+  if (map.getLayer('zoning-footprints')) return;
+
+  const response = await fetch('./models/footprints.geojson');
+  if (!response.ok) {
+    throw new Error(`Failed to load footprints.geojson: ${response.status} ${response.statusText}`);
+  }
+
+  const footprintsData = await response.json();
+
+  map.addSource('zoning-footprints', {
+    type: 'geojson',
+    data: footprintsData
   });
 
   map.addLayer({
-    id: 'zoning-buildings',
-    type: 'fill-extrusion',
-    source: 'zoning-buildings',
+    id: 'zoning-footprints',
+    type: 'line',
+    source: 'zoning-footprints',
     layout: {
-      visibility: 'visible'
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
     },
     paint: {
-      'fill-extrusion-color': '#fbbf24',
-      'fill-extrusion-height': ['get', 'height'],
-      'fill-extrusion-base': 0,
-      'fill-extrusion-opacity': 0.85
+      'line-color': '#f59e0b',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        13, 1.0,
+        15, 1.6,
+        17, 2.4
+      ],
+      'line-opacity': 0.9
     }
   });
 
-      map.addLayer({
-        id: 'zoning-buildings-outline',
-        type: 'line',
-        source: 'zoning-buildings',
-        layout: {
-          visibility: 'visible',
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#ca8a04',
-          'line-width': 1.2,
-          'line-opacity': 0.7
-        }
-      });
+  const anchorLngLat = centroidFromLineFeatures(footprintsData.features || []);
+  addBHeightsModelOnFootprints(anchorLngLat);
 }
 
 function moveBioswaleLayersToTop() {
