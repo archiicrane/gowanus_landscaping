@@ -332,6 +332,57 @@ function addMapboxGroundWater() {
   }
 }
 
+function addGowanusFocusMask() {
+  if (map.getLayer('gowanus-focus-mask')) return;
+
+  if (!map.getSource('gowanus-focus-mask')) {
+    map.addSource('gowanus-focus-mask', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-180, -85],
+                  [180, -85],
+                  [180, 85],
+                  [-180, 85],
+                  [-180, -85]
+                ],
+                [
+                  [STUDY_BOUNDS.west, STUDY_BOUNDS.south],
+                  [STUDY_BOUNDS.west, STUDY_BOUNDS.north],
+                  [STUDY_BOUNDS.east, STUDY_BOUNDS.north],
+                  [STUDY_BOUNDS.east, STUDY_BOUNDS.south],
+                  [STUDY_BOUNDS.west, STUDY_BOUNDS.south]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    });
+  }
+
+  map.addLayer({
+    id: 'gowanus-focus-mask',
+    type: 'fill',
+    source: 'gowanus-focus-mask',
+    paint: {
+      'fill-color': '#d1d5db',
+      'fill-opacity': 0.28
+    },
+    layout: {
+      visibility: 'visible'
+    }
+  });
+}
+
 function parseSiteSegments(rawText) {
   return rawText
     .split(/\bnone\b/gi)
@@ -1183,6 +1234,8 @@ function attachMapHandlers() {
       setupLayerToggles();
       await window.TreeRenderer?.initTrees?.(map);
       moveBioswaleLayersToTop();
+      addGowanusFocusMask();
+      map.moveLayer('gowanus-focus-mask');
 
       setStageInstant(0);
       setupStoryScrollytelling();
