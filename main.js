@@ -154,45 +154,11 @@ const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
 const PRESENTATION_PITCH = 58;
-const ZONING_POINT_A_SOURCE = { x: -1053.241, y: 825.915 };
-const ZONING_POINT_B_SOURCE = { x: -1157.140, y: 692.560 };
-const ZONING_POINT_A_TARGET = [-73.99049693123331, 40.67592049971637];
-const ZONING_POINT_B_TARGET = [-73.99021944172654, 40.6763766911124];
-const ZONING_MODEL_ORIGIN = ZONING_POINT_A_TARGET;
-const ZONING_MODEL_ALTITUDE = 0;
-const ZONING_MODEL_ROTATION_X = Math.PI / 2;
-const ZONING_MODEL_OFFSET_EAST_METERS = -14;
-const ZONING_MODEL_OFFSET_NORTH_METERS = -36;
 const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
 const SITE_POINT_B_TARGET = [-73.99071172722226, 40.675863969717426];
 const SITE_LINE_FINE_SCALE = 0.965;
-
-function computeZoningModelPlacement() {
-  const meanLat = (ZONING_POINT_A_TARGET[1] + ZONING_POINT_B_TARGET[1]) * 0.5;
-  const metersPerDegLat = 110540;
-  const metersPerDegLng = 111320 * Math.cos((meanLat * Math.PI) / 180);
-
-  const srcDx = ZONING_POINT_B_SOURCE.x - ZONING_POINT_A_SOURCE.x;
-  const srcDy = ZONING_POINT_B_SOURCE.y - ZONING_POINT_A_SOURCE.y;
-  const sourceDist = Math.sqrt(srcDx * srcDx + srcDy * srcDy);
-  const sourceAngle = Math.atan2(srcDy, srcDx);
-
-  const dstDx = (ZONING_POINT_B_TARGET[0] - ZONING_POINT_A_TARGET[0]) * metersPerDegLng;
-  const dstDy = (ZONING_POINT_B_TARGET[1] - ZONING_POINT_A_TARGET[1]) * metersPerDegLat;
-  const targetDist = Math.sqrt(dstDx * dstDx + dstDy * dstDy);
-  const targetAngle = Math.atan2(dstDy, dstDx);
-
-  const scaleMeters = sourceDist > 0 ? targetDist / sourceDist : 1;
-  const rotateZ = targetAngle - sourceAngle;
-
-  return {
-    scaleMeters,
-    rotateZ,
-    sourceAnchor: ZONING_POINT_A_SOURCE
-  };
-}
 
 const SCROLL_STAGE_VIEWS = [
   {
@@ -1541,122 +1507,43 @@ async function addElevatedRailExtrusion() {
   });
 }
 
-function addZoningEnvelopeModel() {
-  if (map.getLayer('zoning-envelopes-3d')) return;
+async function addZoningBuildingsLayer() {
+  if (map.getLayer('zoning-buildings-lines')) return;
 
-  if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
-    console.warn('Three.js or GLTFLoader not available; zoning envelope model skipped.');
-    return;
+  const response = await fetch('./models/buildings.geojson');
+  if (!response.ok) {
+    throw new Error(`Failed to load buildings.geojson: ${response.status} ${response.statusText}`);
   }
 
-  const mercator = mapboxgl.MercatorCoordinate.fromLngLat(
-    ZONING_MODEL_ORIGIN,
-    ZONING_MODEL_ALTITUDE
-  );
-  const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+  const buildingsData = await response.json();
 
-  const modelTransform = {
-    translateX: mercator.x + (ZONING_MODEL_OFFSET_EAST_METERS * meterInMercator),
-    translateY: mercator.y + (-ZONING_MODEL_OFFSET_NORTH_METERS * meterInMercator),
-    translateZ: mercator.z,
-    rotateX: ZONING_MODEL_ROTATION_X,
-    rotateY: 0,
-    rotateZ: 0,
-    scale: meterInMercator
-  };
+  map.addSource('zoning-buildings', {
+    type: 'geojson',
+    data: buildingsData
+  });
 
-  const customLayer = {
-    id: 'zoning-envelopes-3d',
-    type: 'custom',
-    renderingMode: '3d',
-    onAdd: function onAdd(mapInstance, gl) {
-      this.camera = new THREE.Camera();
-      this.scene = new THREE.Scene();
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-      this.scene.add(ambientLight);
-
-      const directional = new THREE.DirectionalLight(0xffffff, 0.7);
-      directional.position.set(0, -70, 100).normalize();
-      this.scene.add(directional);
-
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        './models/zoning.gltf',
-        (gltf) => {
-          const bounds = new THREE.Box3().setFromObject(gltf.scene);
-          if (!bounds.isEmpty()) {
-            const center = new THREE.Vector3();
-            bounds.getCenter(center);
-            gltf.scene.position.set(-center.x, -center.y, -center.z);
-          }
-
-          gltf.scene.traverse((node) => {
-            if (!node.isMesh) return;
-            node.material = new THREE.MeshStandardMaterial({
-              color: 0xffd60a,
-              emissive: 0x5a4a00,
-              metalness: 0.05,
-              roughness: 0.78,
-              transparent: true,
-              opacity: 0.95
-            });
-          });
-          this.scene.add(gltf.scene);
-        },
-        undefined,
-        (err) => {
-          console.error('Failed to load zoning.gltf:', err);
-        }
-      );
-
-      this.renderer = new THREE.WebGLRenderer({
-        canvas: mapInstance.getCanvas(),
-        context: gl,
-        antialias: true
-      });
-      this.renderer.autoClear = false;
+  map.addLayer({
+    id: 'zoning-buildings-lines',
+    type: 'line',
+    source: 'zoning-buildings',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
     },
-    render: function render(gl, matrix) {
-      const rotationX = new THREE.Matrix4().makeRotationAxis(
-        new THREE.Vector3(1, 0, 0),
-        modelTransform.rotateX
-      );
-      const rotationY = new THREE.Matrix4().makeRotationAxis(
-        new THREE.Vector3(0, 1, 0),
-        modelTransform.rotateY
-      );
-      const rotationZ = new THREE.Matrix4().makeRotationAxis(
-        new THREE.Vector3(0, 0, 1),
-        modelTransform.rotateZ
-      );
-
-      const m = new THREE.Matrix4().fromArray(matrix);
-      const l = new THREE.Matrix4()
-        .makeTranslation(
-          modelTransform.translateX,
-          modelTransform.translateY,
-          modelTransform.translateZ
-        )
-        .scale(
-          new THREE.Vector3(
-            modelTransform.scale,
-            -modelTransform.scale,
-            modelTransform.scale
-          )
-        )
-        .multiply(rotationX)
-        .multiply(rotationY)
-        .multiply(rotationZ);
-
-      this.camera.projectionMatrix = m.multiply(l);
-      this.renderer.resetState();
-      this.renderer.render(this.scene, this.camera);
-      map.triggerRepaint();
+    paint: {
+      'line-color': '#facc15',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        13, 0.8,
+        15, 1.4,
+        17, 2.4
+      ],
+      'line-opacity': 0.95
     }
-  };
-
-  map.addLayer(customLayer);
+  });
 }
 
 function moveBioswaleLayersToTop() {
@@ -1981,9 +1868,9 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
-        await addParkOutline();
-        await addElevatedRailExtrusion();
-      addZoningEnvelopeModel();
+      await addParkOutline();
+      await addElevatedRailExtrusion();
+      await addZoningBuildingsLayer();
       await addBioswaleOpportunityLayer(floodData);
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
