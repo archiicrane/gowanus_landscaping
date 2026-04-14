@@ -1543,14 +1543,14 @@ async function addElevatedRailExtrusion() {
 async function addClippedContourLines() {
   if (map.getLayer('study-contour-lines')) return;
 
-  const response = await fetch('./models/con_lines.geojson');
+  const response = await fetch('./models/con_lines_gowanus.geojson');
   if (!response.ok) {
-    throw new Error(`Failed to load con_lines.geojson: ${response.status} ${response.statusText}`);
+    throw new Error(`Failed to load con_lines_gowanus.geojson: ${response.status} ${response.statusText}`);
   }
 
   const rawText = await response.text();
   if (rawText.startsWith('version https://git-lfs.github.com/spec/v1')) {
-    console.warn('con_lines.geojson is being served as a Git LFS pointer on this deployment; contour layer skipped.');
+    console.warn('con_lines_gowanus.geojson is being served as a Git LFS pointer on this deployment; contour layer skipped.');
     return;
   }
 
@@ -1558,7 +1558,7 @@ async function addClippedContourLines() {
   try {
     contourData = JSON.parse(rawText);
   } catch (err) {
-    console.warn('Failed to parse con_lines.geojson; contour layer skipped.', err);
+    console.warn('Failed to parse con_lines_gowanus.geojson; contour layer skipped.', err);
     return;
   }
 
