@@ -1576,6 +1576,67 @@ function centroidFromLineFeatures(features) {
   return [(minLng + maxLng) * 0.5, (minLat + maxLat) * 0.5];
 }
 
+function footprintBoundsPolygon(features) {
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+
+  for (const feature of features || []) {
+    const geom = feature?.geometry;
+    if (!geom) continue;
+
+    const lines = geom.type === 'LineString'
+      ? [geom.coordinates || []]
+      : (geom.type === 'MultiLineString' ? (geom.coordinates || []) : []);
+
+    for (const line of lines) {
+      for (const coord of line) {
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+        const lng = coord[0];
+        const lat = coord[1];
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+      }
+    }
+  }
+
+  if (!Number.isFinite(minLng) || !Number.isFinite(minLat) || !Number.isFinite(maxLng) || !Number.isFinite(maxLat)) {
+    return null;
+  }
+
+  return {
+    type: 'Polygon',
+    coordinates: [[
+      [minLng, minLat],
+      [maxLng, minLat],
+      [maxLng, maxLat],
+      [minLng, maxLat],
+      [minLng, minLat]
+    ]]
+  };
+}
+
+function applyGrayBuildingMask(maskPolygon) {
+  if (!maskPolygon || !map.getLayer('existing-buildings') || !map.getLayer('existing-building-outline')) {
+    return;
+  }
+
+  map.setPaintProperty(
+    'existing-buildings',
+    'fill-extrusion-opacity',
+    ['case', ['within', maskPolygon], 0, 0.92]
+  );
+
+  map.setPaintProperty(
+    'existing-building-outline',
+    'line-opacity',
+    ['case', ['within', maskPolygon], 0, 1]
+  );
+}
+
 function addBHeightsModelOnFootprints(anchorLngLat) {
   if (map.getLayer('b-heights-model')) return;
 
@@ -1586,6 +1647,15 @@ function addBHeightsModelOnFootprints(anchorLngLat) {
 
   const mercator = mapboxgl.MercatorCoordinate.fromLngLat(anchorLngLat, 0);
   const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+
+  function getTerrainElevationMeters(mapInstance) {
+    if (!mapInstance || typeof mapInstance.queryTerrainElevation !== 'function') {
+      return 0;
+    }
+
+    const elevation = mapInstance.queryTerrainElevation(anchorLngLat, { exaggerated: true });
+    return Number.isFinite(elevation) ? elevation : 0;
+  }
 
   const modelTransform = {
     translateX: mercator.x,
@@ -1649,6 +1719,9 @@ function addBHeightsModelOnFootprints(anchorLngLat) {
       this.renderer.autoClear = false;
     },
     render: function render(gl, matrix) {
+      const terrainElevationMeters = getTerrainElevationMeters(map);
+      modelTransform.translateZ = mercator.z + (terrainElevationMeters * meterInMercator);
+
       const rotationX = new THREE.Matrix4().makeRotationAxis(
         new THREE.Vector3(1, 0, 0),
         modelTransform.rotateX
@@ -1724,6 +1797,9 @@ async function addZoningBuildingsLayer() {
 
   const anchorLngLat = centroidFromLineFeatures(footprintsData.features || []);
   addBHeightsModelOnFootprints(anchorLngLat);
+
+  const maskPolygon = footprintBoundsPolygon(footprintsData.features || []);
+  applyGrayBuildingMask(maskPolygon);
 }
 
 function moveBioswaleLayersToTop() {
@@ -1981,7 +2057,7 @@ function attachMapHandlers() {
           'fill-extrusion-color': '#9fb3c8',
           'fill-extrusion-base': 0,
           'fill-extrusion-height': 0,
-          'fill-extrusion-opacity': 0
+          'fill-extrusion-opacity': 0.92
         }
       });
 
@@ -2003,7 +2079,7 @@ function attachMapHandlers() {
             16, 1.5,
             18, 2.2
           ],
-          'line-opacity': 0
+          'line-opacity': 1.0
         }
       });
 
