@@ -1624,17 +1624,8 @@ function applyGrayBuildingMask(maskPolygon) {
     return;
   }
 
-  map.setPaintProperty(
-    'existing-buildings',
-    'fill-extrusion-opacity',
-    ['case', ['within', maskPolygon], 0, 0.92]
-  );
-
-  map.setPaintProperty(
-    'existing-building-outline',
-    'line-opacity',
-    ['case', ['within', maskPolygon], 0, 1]
-  );
+  map.setFilter('existing-buildings', ['!', ['within', maskPolygon]]);
+  map.setFilter('existing-building-outline', ['!', ['within', maskPolygon]]);
 }
 
 function addBHeightsModelOnFootprints(anchorLngLat) {
