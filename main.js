@@ -1531,6 +1531,76 @@ async function addElevatedRailExtrusion() {
   });
 }
 
+async function addClippedContourLines() {
+  if (map.getLayer('study-contour-lines')) return;
+
+  const response = await fetch('./models/con_lines.geojson');
+  if (!response.ok) {
+    throw new Error(`Failed to load con_lines.geojson: ${response.status} ${response.statusText}`);
+  }
+
+  const contourData = await response.json();
+  const clippedFeatures = [];
+
+  for (const feature of contourData.features || []) {
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    const clippedGroups = [];
+
+    for (const lineCoords of lineGroups) {
+      const segments = clipLineToStudyBoundingBox(lineCoords);
+      for (const segment of segments) {
+        if (segment.length < 2) continue;
+        clippedGroups.push(segment);
+      }
+    }
+
+    if (!clippedGroups.length) continue;
+
+    clippedFeatures.push({
+      type: 'Feature',
+      properties: {
+        ...feature.properties,
+        elev_m: Number(feature.properties?.ELEV ?? 0)
+      },
+      geometry: clippedGroups.length === 1
+        ? { type: 'LineString', coordinates: clippedGroups[0] }
+        : { type: 'MultiLineString', coordinates: clippedGroups }
+    });
+  }
+
+  map.addSource('study-contour-lines', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: clippedFeatures
+    }
+  });
+
+  map.addLayer({
+    id: 'study-contour-lines',
+    type: 'line',
+    source: 'study-contour-lines',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#94a3b8',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12,
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.8, 0.45],
+        16,
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.5, 0.8]
+      ],
+      'line-opacity': 0.8
+    }
+  });
+}
+
 function centroidFromLineFeatures(features) {
   let minLng = Infinity;
   let minLat = Infinity;
@@ -1821,6 +1891,9 @@ function setupLayerToggles() {
     const visibility = event.target.checked ? 'visible' : 'none';
     if (map.getLayer('terrain-contours')) {
       map.setLayoutProperty('terrain-contours', 'visibility', visibility);
+    }
+    if (map.getLayer('study-contour-lines')) {
+      map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
     }
     if (map.getLayer('terrain-hillshade')) {
       map.setLayoutProperty('terrain-hillshade', 'visibility', visibility);
@@ -2115,6 +2188,7 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
+      await addClippedContourLines();
       await addParkOutline();
       await addElevatedRailExtrusion();
       await addZoningBuildingsLayer();
