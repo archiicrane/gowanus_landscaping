@@ -324,6 +324,15 @@ function addMapboxTerrainAndContours() {
     });
   }
 
+  if (!map.getSource('mapbox-dem-hillshade')) {
+    map.addSource('mapbox-dem-hillshade', {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+      tileSize: 512,
+      maxzoom: 14
+    });
+  }
+
   map.setTerrain({
     source: 'mapbox-dem',
     exaggeration: 1.35
@@ -333,7 +342,7 @@ function addMapboxTerrainAndContours() {
     map.addLayer({
       id: 'terrain-hillshade',
       type: 'hillshade',
-      source: 'mapbox-dem',
+      source: 'mapbox-dem-hillshade',
       layout: {
         visibility: 'visible'
       },
@@ -1539,7 +1548,20 @@ async function addClippedContourLines() {
     throw new Error(`Failed to load con_lines.geojson: ${response.status} ${response.statusText}`);
   }
 
-  const contourData = await response.json();
+  const rawText = await response.text();
+  if (rawText.startsWith('version https://git-lfs.github.com/spec/v1')) {
+    console.warn('con_lines.geojson is being served as a Git LFS pointer on this deployment; contour layer skipped.');
+    return;
+  }
+
+  let contourData;
+  try {
+    contourData = JSON.parse(rawText);
+  } catch (err) {
+    console.warn('Failed to parse con_lines.geojson; contour layer skipped.', err);
+    return;
+  }
+
   const clippedFeatures = [];
 
   for (const feature of contourData.features || []) {
