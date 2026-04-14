@@ -1981,7 +1981,7 @@ function attachMapHandlers() {
           'fill-extrusion-color': '#9fb3c8',
           'fill-extrusion-base': 0,
           'fill-extrusion-height': 0,
-          'fill-extrusion-opacity': 0.92
+          'fill-extrusion-opacity': 0
         }
       });
 
@@ -2003,7 +2003,7 @@ function attachMapHandlers() {
             16, 1.5,
             18, 2.2
           ],
-          'line-opacity': 1.0
+          'line-opacity': 0
         }
       });
 
