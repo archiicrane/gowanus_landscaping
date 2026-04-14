@@ -105,6 +105,24 @@ const STUDY_BOUNDS = {
   north: Math.max(...STUDY_RING.map(([, lat]) => lat))
 };
 
+const CONTOUR_LINES_URL = 'https://studio-sp26.s3.us-east-1.amazonaws.com/con_lines.geojson';
+const CONTOUR_COORDINATES_LAT_LNG = [
+  [40.683945676183654, -73.98963594611494],
+  [40.680669969224006, -73.98084416376932],
+  [40.665495232798115, -73.99274143083169],
+  [40.667988596328655, -73.99607305804426],
+  [40.67260255106102, -73.99889524234268],
+  [40.67744610487334, -73.9964465299067],
+  [40.67663528353369, -73.99461997552936]
+];
+
+const CONTOUR_BOUNDS = {
+  west: Math.min(...CONTOUR_COORDINATES_LAT_LNG.map(([, lng]) => lng)),
+  south: Math.min(...CONTOUR_COORDINATES_LAT_LNG.map(([lat]) => lat)),
+  east: Math.max(...CONTOUR_COORDINATES_LAT_LNG.map(([, lng]) => lng)),
+  north: Math.max(...CONTOUR_COORDINATES_LAT_LNG.map(([lat]) => lat))
+};
+
 function getStudyClipFeature() {
   return {
     type: 'Feature',
@@ -443,34 +461,26 @@ function addMapboxGroundWater() {
 
   if (!map.hasImage('water-hatch-blue')) {
     const hatchCanvas = document.createElement('canvas');
-    hatchCanvas.width = 24;
-    hatchCanvas.height = 24;
+    hatchCanvas.width = 32;
+    hatchCanvas.height = 32;
     const ctx = hatchCanvas.getContext('2d');
 
     if (ctx) {
-      ctx.clearRect(0, 0, 24, 24);
-      ctx.strokeStyle = 'rgba(255,255,255,0.36)';
-      ctx.lineWidth = 1.6;
+      ctx.clearRect(0, 0, 32, 32);
+      ctx.strokeStyle = 'rgba(42,70,114,0.45)';
+      ctx.lineWidth = 1.2;
 
-      ctx.beginPath();
-      ctx.moveTo(-6, 20);
-      ctx.lineTo(8, 6);
-      ctx.moveTo(0, 26);
-      ctx.lineTo(14, 12);
-      ctx.moveTo(6, 32);
-      ctx.lineTo(20, 18);
-      ctx.stroke();
+      const radius = 8;
+      for (let y = 4; y <= 36; y += 8) {
+        const xOffset = (Math.floor(y / 8) % 2) * radius;
+        for (let x = -16 + xOffset; x <= 48; x += 16) {
+          ctx.beginPath();
+          ctx.arc(x + radius, y, radius, Math.PI, 0);
+          ctx.stroke();
+        }
+      }
 
-      ctx.strokeStyle = 'rgba(56,105,172,0.22)';
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(8, -2);
-      ctx.lineTo(24, 14);
-      ctx.moveTo(2, 4);
-      ctx.lineTo(18, 20);
-      ctx.stroke();
-
-      map.addImage('water-hatch-blue', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+      map.addImage('water-hatch-blue', ctx.getImageData(0, 0, 32, 32), { pixelRatio: 2 });
     }
   }
 
@@ -1166,6 +1176,37 @@ function clipLineToStudyBoundingBox(coords) {
   return segments;
 }
 
+function pointInContourBoundingBox(point) {
+  return (
+    point[0] >= CONTOUR_BOUNDS.west &&
+    point[0] <= CONTOUR_BOUNDS.east &&
+    point[1] >= CONTOUR_BOUNDS.south &&
+    point[1] <= CONTOUR_BOUNDS.north
+  );
+}
+
+function clipLineToContourBoundingBox(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInContourBoundingBox(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
 function bufferLineToPolygon(coords, halfWidthMeters = 4.2) {
   if (!Array.isArray(coords) || coords.length < 2) return null;
 
@@ -1614,22 +1655,19 @@ async function addElevatedRailExtrusion() {
 async function addClippedContourLines() {
   if (map.getLayer('study-contour-lines')) return;
 
-  const response = await fetch('./models/con_lines_gowanus.geojson');
+  const response = await fetch(CONTOUR_LINES_URL);
   if (!response.ok) {
-    throw new Error(`Failed to load con_lines_gowanus.geojson: ${response.status} ${response.statusText}`);
+    console.warn(`Failed to load contour lines from AWS: ${response.status} ${response.statusText}`);
+    return;
   }
 
   const rawText = await response.text();
-  if (rawText.startsWith('version https://git-lfs.github.com/spec/v1')) {
-    console.warn('con_lines_gowanus.geojson is being served as a Git LFS pointer on this deployment; contour layer skipped.');
-    return;
-  }
 
   let contourData;
   try {
     contourData = JSON.parse(rawText);
   } catch (err) {
-    console.warn('Failed to parse con_lines_gowanus.geojson; contour layer skipped.', err);
+    console.warn('Failed to parse contour lines from AWS; contour layer skipped.', err);
     return;
   }
 
@@ -1640,7 +1678,7 @@ async function addClippedContourLines() {
     const clippedGroups = [];
 
     for (const lineCoords of lineGroups) {
-      const segments = clipLineToStudyBoundingBox(lineCoords);
+      const segments = clipLineToContourBoundingBox(lineCoords);
       for (const segment of segments) {
         if (segment.length < 2) continue;
         clippedGroups.push(segment);
