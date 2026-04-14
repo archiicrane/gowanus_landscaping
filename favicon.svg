@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Rewilding Gowanus">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b3d2e"/>
+      <stop offset="100%" stop-color="#1c7c54"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d4f7cf"/>
+      <stop offset="100%" stop-color="#74c69d"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#bg)"/>
+  <path d="M17 41c10-2 18-8 24-19 6 11 3 23-8 28-8 3-14-2-16-9z" fill="url(#leaf)"/>
+  <path d="M23 45c7-5 13-11 19-21" stroke="#eefbe7" stroke-width="3" stroke-linecap="round"/>
+</svg>
