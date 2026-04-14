@@ -106,6 +106,7 @@ const STUDY_BOUNDS = {
 };
 
 const CONTOUR_LINES_URL = 'https://studio-sp26.s3.us-east-1.amazonaws.com/con_lines.geojson';
+const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus.geojson';
 const CONTOUR_COORDINATES_LAT_LNG = [
   [40.683945676183654, -73.98963594611494],
   [40.680669969224006, -73.98084416376932],
@@ -1655,20 +1656,42 @@ async function addElevatedRailExtrusion() {
 async function addClippedContourLines() {
   if (map.getLayer('study-contour-lines')) return;
 
-  const response = await fetch(CONTOUR_LINES_URL);
-  if (!response.ok) {
-    console.warn(`Failed to load contour lines from AWS: ${response.status} ${response.statusText}`);
-    return;
-  }
+  async function fetchContourData(url, label) {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`${label} failed: ${response.status} ${response.statusText}`);
+    }
 
-  const rawText = await response.text();
+    const rawText = await response.text();
+    if (!rawText || !rawText.trim()) {
+      throw new Error(`${label} returned an empty response body.`);
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch (err) {
+      throw new Error(`${label} JSON parse failed: ${err.message}`);
+    }
+
+    if (parsed?.type !== 'FeatureCollection' || !Array.isArray(parsed.features)) {
+      throw new Error(`${label} is not a GeoJSON FeatureCollection.`);
+    }
+
+    return parsed;
+  }
 
   let contourData;
   try {
-    contourData = JSON.parse(rawText);
-  } catch (err) {
-    console.warn('Failed to parse contour lines from AWS; contour layer skipped.', err);
-    return;
+    contourData = await fetchContourData(CONTOUR_LINES_URL, 'AWS contour file');
+  } catch (awsErr) {
+    console.warn('AWS contour fetch failed; trying local fallback.', awsErr);
+    try {
+      contourData = await fetchContourData(CONTOUR_LINES_FALLBACK_URL, 'Local contour fallback');
+    } catch (fallbackErr) {
+      console.warn('Both AWS and local contour sources failed; contour layer skipped.', fallbackErr);
+      return;
+    }
   }
 
   const clippedFeatures = [];
