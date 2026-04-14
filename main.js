@@ -440,6 +440,77 @@ function addMapboxGroundWater() {
       }
     }, 'existing-buildings');
   }
+
+  if (!map.hasImage('water-hatch-blue')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 24;
+    hatchCanvas.height = 24;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 24, 24);
+      ctx.strokeStyle = 'rgba(255,255,255,0.36)';
+      ctx.lineWidth = 1.6;
+
+      ctx.beginPath();
+      ctx.moveTo(-6, 20);
+      ctx.lineTo(8, 6);
+      ctx.moveTo(0, 26);
+      ctx.lineTo(14, 12);
+      ctx.moveTo(6, 32);
+      ctx.lineTo(20, 18);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(56,105,172,0.22)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(8, -2);
+      ctx.lineTo(24, 14);
+      ctx.moveTo(2, 4);
+      ctx.lineTo(18, 20);
+      ctx.stroke();
+
+      map.addImage('water-hatch-blue', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('gowanus-water-hatch')) {
+    map.addLayer({
+      id: 'gowanus-water-hatch',
+      type: 'fill',
+      source: 'composite',
+      'source-layer': 'water',
+      paint: {
+        'fill-pattern': 'water-hatch-blue',
+        'fill-opacity': 0.72
+      }
+    }, 'existing-buildings');
+  }
+
+  if (!map.getLayer('gowanus-water-outline')) {
+    map.addLayer({
+      id: 'gowanus-water-outline',
+      type: 'line',
+      source: 'composite',
+      'source-layer': 'water',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#3b82f6',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12, 0.7,
+          15, 1.2,
+          18, 2.0
+        ],
+        'line-opacity': 0.9
+      }
+    }, 'existing-buildings');
+  }
 }
 
 function hideBasemapLabels() {
