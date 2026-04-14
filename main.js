@@ -105,7 +105,7 @@ const STUDY_BOUNDS = {
   north: Math.max(...STUDY_RING.map(([, lat]) => lat))
 };
 
-const CONTOUR_LINES_URL = 'https://studio-sp26.s3.us-east-1.amazonaws.com/con_lines.geojson';
+const CONTOUR_LINES_URL = 'models/con_lines_gowanus_lite.geojson';
 const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus.geojson';
 const CONTOUR_COORDINATES_LAT_LNG = [
   [40.683945676183654, -73.98963594611494],
@@ -1657,7 +1657,7 @@ async function addClippedContourLines() {
   if (map.getLayer('study-contour-lines')) return;
 
   async function fetchContourData(url, label) {
-    const response = await fetch(url, { cache: 'no-store' });
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`${label} failed: ${response.status} ${response.statusText}`);
     }
@@ -2342,24 +2342,36 @@ function attachMapHandlers() {
 
       addMapboxGroundWater();
       addMapboxGroundParks();
-      await addClippedContourLines();
-      await addParkOutline();
-      await addElevatedRailExtrusion();
-      await addZoningBuildingsLayer();
-      await addBioswaleOpportunityLayer(floodData);
 
       map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
       map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
 
       setupLayerToggles();
-      await window.TreeRenderer?.initTrees?.(map);
-      if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
-      moveBioswaleLayersToTop();
       addGowanusFocusMask();
       map.moveLayer('gowanus-focus-mask');
 
       setStageInstant(0);
       applyCameraForStage(0, true);
+
+      // Defer heavier overlays so base map becomes interactive faster.
+      setTimeout(async () => {
+        try {
+          if (document.getElementById('toggle-topo')?.checked) {
+            await addClippedContourLines();
+          }
+          await addParkOutline();
+          await addElevatedRailExtrusion();
+          await addZoningBuildingsLayer();
+          await addBioswaleOpportunityLayer(floodData);
+          await window.TreeRenderer?.initTrees?.(map);
+
+          if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
+          moveBioswaleLayersToTop();
+          if (map.getLayer('gowanus-focus-mask')) map.moveLayer('gowanus-focus-mask');
+        } catch (deferredErr) {
+          console.warn('Deferred map overlay load failed:', deferredErr);
+        }
+      }, 0);
     } catch (err) {
       console.error('MAP LOAD ERROR:', err);
     }
