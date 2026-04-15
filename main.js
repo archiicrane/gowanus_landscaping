@@ -1696,13 +1696,11 @@ async function addClippedContourLines() {
   try {
     contourData = await fetchContourData(CONTOUR_LINES_URL, 'Primary contour file');
     usingPreclippedContourData = true;
-  } catch (primaryErr) {
-    console.warn(`Primary contour file failed; trying fallback. ${primaryErr.message || primaryErr}`);
+  } catch (_primaryErr) {
     try {
       contourData = await fetchContourData(CONTOUR_LINES_FALLBACK_URL, 'Local contour fallback');
       usingPreclippedContourData = true;
-    } catch (fallbackErr) {
-      console.warn(`Primary and first fallback contour files failed; trying secondary fallback. ${fallbackErr.message || fallbackErr}`);
+    } catch (_fallbackErr) {
       try {
         contourData = await fetchContourData(CONTOUR_LINES_SECONDARY_FALLBACK_URL, 'Secondary contour fallback');
       } catch (secondaryFallbackErr) {
