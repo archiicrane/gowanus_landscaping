@@ -1394,117 +1394,71 @@ function interpolateColorRamp(stops, t) {
   return { r: tail[0], g: tail[1], b: tail[2] };
 }
 
-const FEET_PER_METER = 3.28084;
-const TOPO_OVERLAY_STEP_FEET = 1;
-const TOPO_OVERLAY_ALPHA = 178;
-const TOPO_OVERLAY_OPACITY = 0.62;
+const TOPO_OVERLAY_ALPHA = 142;
+const TOPO_OVERLAY_OPACITY = 0.56;
 
-function adjustColorTone(color, delta) {
-  return {
-    r: clamp(Math.round(color.r + delta), 0, 255),
-    g: clamp(Math.round(color.g + delta), 0, 255),
-    b: clamp(Math.round(color.b + delta), 0, 255)
-  };
+function bilinearSampleGrid(values, cols, rows, gx, gy) {
+  const x = clamp(gx, 0, cols - 1);
+  const y = clamp(gy, 0, rows - 1);
+
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const x1 = Math.min(cols - 1, x0 + 1);
+  const y1 = Math.min(rows - 1, y0 + 1);
+  const tx = x - x0;
+  const ty = y - y0;
+
+  const q00 = values[y0 * cols + x0];
+  const q10 = values[y0 * cols + x1];
+  const q01 = values[y1 * cols + x0];
+  const q11 = values[y1 * cols + x1];
+
+  if (!Number.isFinite(q00) || !Number.isFinite(q10) || !Number.isFinite(q01) || !Number.isFinite(q11)) {
+    return null;
+  }
+
+  const top = q00 * (1 - tx) + q10 * tx;
+  const bottom = q01 * (1 - tx) + q11 * tx;
+  return top * (1 - ty) + bottom * ty;
 }
 
-function buildMapboxTerrainRasterDataUrl() {
-  if (!map || typeof map.queryTerrainElevation !== 'function') return null;
+function buildContourControlGrid(index, cols, rows) {
+  const values = new Float32Array(cols * rows);
+  const mask = new Uint8Array(cols * rows);
 
-  const width = 420;
-  const height = 420;
-  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
-  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  const image = ctx.createImageData(width, height);
-  const data = image.data;
-  const rawElev = new Float32Array(width * height);
-  const mask = new Uint8Array(width * height);
-
-  let minElev = Infinity;
-  let maxElev = -Infinity;
-
-  for (let py = 0; py < height; py += 1) {
-    const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
-    for (let px = 0; px < width; px += 1) {
-      const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
-      const idx1d = py * width + px;
+  for (let y = 0; y < rows; y += 1) {
+    const lat = CONTOUR_BOUNDS.north - (y / (rows - 1)) * (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south);
+    for (let x = 0; x < cols; x += 1) {
+      const lng = CONTOUR_BOUNDS.west + (x / (cols - 1)) * (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west);
+      const idx = y * cols + x;
 
       if (!pointInStudyBounds([lng, lat])) continue;
 
-      const elev = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
+      const elev = estimateElevationFromIndex(lng, lat, index);
       if (!Number.isFinite(elev)) continue;
 
-      rawElev[idx1d] = elev;
-      mask[idx1d] = 1;
-      if (elev < minElev) minElev = elev;
-      if (elev > maxElev) maxElev = elev;
+      values[idx] = elev;
+      mask[idx] = 1;
     }
   }
 
-  if (!Number.isFinite(minElev) || !Number.isFinite(maxElev)) return null;
-
-  const minElevFeet = minElev * FEET_PER_METER;
-  const maxElevFeet = maxElev * FEET_PER_METER;
-  const elevRangeFeet = Math.max(1e-6, maxElevFeet - minElevFeet);
-  const bandCount = Math.max(1, Math.floor(elevRangeFeet / TOPO_OVERLAY_STEP_FEET));
-  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 1);
-
-  const colorStops = [
-    { t: 0.0, c: [198, 223, 255] },
-    { t: 0.28, c: [148, 191, 242] },
-    { t: 0.54, c: [232, 236, 240] },
-    { t: 0.8, c: [223, 155, 86] },
-    { t: 1.0, c: [128, 72, 28] }
-  ];
-
-  for (let py = 0; py < height; py += 1) {
-    for (let px = 0; px < width; px += 1) {
-      const idx1d = py * width + px;
-      const idx = idx1d * 4;
-
-      if (!mask[idx1d]) {
-        data[idx + 3] = 0;
-        continue;
-      }
-
-      const elevFeet = smoothedElev[idx1d] * FEET_PER_METER;
-      const normalized = (elevFeet - minElevFeet) / elevRangeFeet;
-      const bandIndex = Math.round(normalized * bandCount);
-      const banded = clamp(bandIndex / bandCount, 0, 1);
-      const baseTone = interpolateColorRamp(colorStops, banded);
-
-      // Make each 1-foot interval visibly distinct while preserving overall cool->warm progression.
-      const intervalDelta = (bandIndex % 2 === 0) ? 7 : -7;
-      const majorDelta = (bandIndex % 5 === 0) ? -9 : 0;
-      const tone = adjustColorTone(baseTone, intervalDelta + majorDelta);
-
-      data[idx] = tone.r;
-      data[idx + 1] = tone.g;
-      data[idx + 2] = tone.b;
-      data[idx + 3] = TOPO_OVERLAY_ALPHA;
-    }
-  }
-
-  ctx.putImageData(image, 0, 0);
-  return canvas.toDataURL('image/png');
+  return { values, mask };
 }
 
 function buildTopographyRasterDataUrl(contourFeatures) {
   const index = buildContourElevationIndex(contourFeatures);
   if (!index) return null;
 
-  const width = 420;
-  const height = 420;
+  const width = 640;
+  const height = 640;
   const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
   const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
   const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
-  const bandCount = Math.max(1, Math.floor(elevRange / TOPO_OVERLAY_STEP_FEET));
+
+  const controlCols = 112;
+  const controlRows = 112;
+  const control = buildContourControlGrid(index, controlCols, controlRows);
+  const smoothedControl = smoothMaskedElevationGrid(control.values, control.mask, controlCols, controlRows, 2);
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -1514,59 +1468,37 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 
   const image = ctx.createImageData(width, height);
   const data = image.data;
-  const rawElev = new Float32Array(width * height);
-  const mask = new Uint8Array(width * height);
 
-  // Cool low elevations to warmer highs, kept muted for architectural readability.
+  // Subtle analytical ramp: low cool, mid neutral, high warm.
   const colorStops = [
-    { t: 0.0, c: [198, 223, 255] },
-    { t: 0.28, c: [148, 191, 242] },
-    { t: 0.54, c: [232, 236, 240] },
-    { t: 0.8, c: [223, 155, 86] },
-    { t: 1.0, c: [128, 72, 28] }
+    { t: 0.0, c: [219, 236, 255] },
+    { t: 0.25, c: [184, 214, 246] },
+    { t: 0.5, c: [228, 231, 234] },
+    { t: 0.75, c: [225, 186, 142] },
+    { t: 1.0, c: [149, 104, 64] }
   ];
 
   for (let py = 0; py < height; py += 1) {
     const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
     for (let px = 0; px < width; px += 1) {
       const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
-      const idx1d = py * width + px;
+      const idx = (py * width + px) * 4;
 
       if (!pointInStudyBounds([lng, lat])) {
-        continue;
-      }
-
-      const elev = estimateElevationFromIndex(lng, lat, index);
-      if (!Number.isFinite(elev)) {
-        continue;
-      }
-
-      rawElev[idx1d] = elev;
-      mask[idx1d] = 1;
-    }
-  }
-
-  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 1);
-
-  for (let py = 0; py < height; py += 1) {
-    for (let px = 0; px < width; px += 1) {
-      const idx1d = py * width + px;
-      const idx = idx1d * 4;
-
-      if (!mask[idx1d]) {
         data[idx + 3] = 0;
         continue;
       }
 
-      const normalized = (smoothedElev[idx1d] - index.minElev) / elevRange;
-      const bandIndex = Math.round(normalized * bandCount);
-      const banded = clamp(bandIndex / bandCount, 0, 1);
-      const baseTone = interpolateColorRamp(colorStops, banded);
+      const gx = (px / (width - 1)) * (controlCols - 1);
+      const gy = (py / (height - 1)) * (controlRows - 1);
+      const elev = bilinearSampleGrid(smoothedControl, controlCols, controlRows, gx, gy);
+      if (!Number.isFinite(elev)) {
+        data[idx + 3] = 0;
+        continue;
+      }
 
-      // Make each 1-foot interval visibly distinct while preserving overall cool->warm progression.
-      const intervalDelta = (bandIndex % 2 === 0) ? 7 : -7;
-      const majorDelta = (bandIndex % 5 === 0) ? -9 : 0;
-      const tone = adjustColorTone(baseTone, intervalDelta + majorDelta);
+      const normalized = clamp((elev - index.minElev) / elevRange, 0, 1);
+      const tone = interpolateColorRamp(colorStops, normalized);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
@@ -1580,8 +1512,7 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 }
 
 function addTopographyElevationOverlay(contourFeatures) {
-  // Prioritize contour-derived 1-foot filled bands; fallback to terrain sampling only if needed.
-  const imageUrl = buildTopographyRasterDataUrl(contourFeatures) || buildMapboxTerrainRasterDataUrl();
+  const imageUrl = buildTopographyRasterDataUrl(contourFeatures);
   if (!imageUrl) return;
 
   const coordinates = [
