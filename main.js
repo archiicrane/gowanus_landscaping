@@ -1399,6 +1399,14 @@ const TOPO_OVERLAY_STEP_FEET = 1;
 const TOPO_OVERLAY_ALPHA = 178;
 const TOPO_OVERLAY_OPACITY = 0.62;
 
+function adjustColorTone(color, delta) {
+  return {
+    r: clamp(Math.round(color.r + delta), 0, 255),
+    g: clamp(Math.round(color.g + delta), 0, 255),
+    b: clamp(Math.round(color.b + delta), 0, 255)
+  };
+}
+
 function buildMapboxTerrainRasterDataUrl() {
   if (!map || typeof map.queryTerrainElevation !== 'function') return null;
 
@@ -1467,8 +1475,14 @@ function buildMapboxTerrainRasterDataUrl() {
 
       const elevFeet = smoothedElev[idx1d] * FEET_PER_METER;
       const normalized = (elevFeet - minElevFeet) / elevRangeFeet;
-      const banded = Math.round(normalized * bandCount) / bandCount;
-      const tone = interpolateColorRamp(colorStops, banded);
+      const bandIndex = Math.round(normalized * bandCount);
+      const banded = clamp(bandIndex / bandCount, 0, 1);
+      const baseTone = interpolateColorRamp(colorStops, banded);
+
+      // Make each 1-foot interval visibly distinct while preserving overall cool->warm progression.
+      const intervalDelta = (bandIndex % 2 === 0) ? 7 : -7;
+      const majorDelta = (bandIndex % 5 === 0) ? -9 : 0;
+      const tone = adjustColorTone(baseTone, intervalDelta + majorDelta);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
@@ -1545,8 +1559,14 @@ function buildTopographyRasterDataUrl(contourFeatures) {
       }
 
       const normalized = (smoothedElev[idx1d] - index.minElev) / elevRange;
-      const banded = Math.round(normalized * bandCount) / bandCount;
-      const tone = interpolateColorRamp(colorStops, banded);
+      const bandIndex = Math.round(normalized * bandCount);
+      const banded = clamp(bandIndex / bandCount, 0, 1);
+      const baseTone = interpolateColorRamp(colorStops, banded);
+
+      // Make each 1-foot interval visibly distinct while preserving overall cool->warm progression.
+      const intervalDelta = (bandIndex % 2 === 0) ? 7 : -7;
+      const majorDelta = (bandIndex % 5 === 0) ? -9 : 0;
+      const tone = adjustColorTone(baseTone, intervalDelta + majorDelta);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
