@@ -125,6 +125,8 @@ const CONTOUR_BOUNDS = {
   north: Math.max(...CONTOUR_COORDINATES_LAT_LNG.map(([lat]) => lat))
 };
 
+let cachedStudyContourFeatures = [];
+
 function getStudyClipFeature() {
   return {
     type: 'Feature',
@@ -1238,6 +1240,24 @@ function getLineTerrainStats(coords) {
   return { avg, relief };
 }
 
+function getLineContourStats(coords, contourIndex) {
+  if (!contourIndex) return null;
+
+  const samples = getLineSamplePoints(coords, 9);
+  const elevations = [];
+
+  for (const [lng, lat] of samples) {
+    const value = estimateElevationFromIndex(lng, lat, contourIndex);
+    if (Number.isFinite(value)) elevations.push(value);
+  }
+
+  if (elevations.length < 4) return null;
+
+  const avg = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
+  const relief = Math.max(...elevations) - Math.min(...elevations);
+  return { avg, relief };
+}
+
 function getFeatureLineCoordinates(geometry) {
   if (!geometry) return [];
   if (geometry.type === 'LineString') return [geometry.coordinates];
@@ -1640,14 +1660,17 @@ function buildSegmentKey(coords, roadClass, roadName = '') {
 function selectBestBioswaleSegments(segments) {
   const ranked = [...segments].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
+    if (a.avgContourElevation !== b.avgContourElevation) {
+      return a.avgContourElevation - b.avgContourElevation;
+    }
     if (a.avgElevation !== b.avgElevation) return a.avgElevation - b.avgElevation;
     return a.relief - b.relief;
   });
 
-  const strict = ranked.filter((segment) => segment.score >= 5);
-  if (strict.length >= 18) return strict.slice(0, 95);
+  const strict = ranked.filter((segment) => segment.score >= 6.1);
+  if (strict.length >= 20) return strict.slice(0, 110);
 
-  return ranked.filter((segment) => segment.score >= 4).slice(0, 95);
+  return ranked.filter((segment) => segment.score >= 5.2).slice(0, 110);
 }
 
 async function addBioswaleOpportunityLayer(floodData) {
@@ -1662,6 +1685,12 @@ async function addBioswaleOpportunityLayer(floodData) {
   });
 
   const floodPriorityBounds = buildFloodPriorityBounds(floodData);
+  const contourIndex = cachedStudyContourFeatures.length
+    ? buildContourElevationIndex(cachedStudyContourFeatures)
+    : null;
+  const contourRange = contourIndex
+    ? Math.max(1e-6, contourIndex.maxElev - contourIndex.minElev)
+    : 1;
   const unique = new Set();
   const candidates = [];
 
@@ -1682,19 +1711,31 @@ async function addBioswaleOpportunityLayer(floodData) {
         const terrainStats = getLineTerrainStats(coords);
         if (!terrainStats) continue;
 
-        const floodNearby = floodPriorityBounds.some((floodBounds) => boundsOverlap(bounds, floodBounds, 0.0003));
-        const lowElevation = terrainStats.avg <= 8.8;
-        const moderateElevation = terrainStats.avg <= 10.2;
-        const gentleSlope = terrainStats.relief <= 1.25;
-        const moderateSlope = terrainStats.relief <= 2.1;
+        const contourStats = getLineContourStats(coords, contourIndex);
 
-        let score = 0;
-        if (floodNearby) score += 2;
-        if (lowElevation) score += 2;
-        else if (moderateElevation) score += 1;
-        if (gentleSlope) score += 2;
-        else if (moderateSlope) score += 1;
-        if (roadClass === 'residential' || roadClass === 'street') score += 1;
+        const floodNearby = floodPriorityBounds.some((floodBounds) => boundsOverlap(bounds, floodBounds, 0.0003));
+
+        const contourLowPriority = contourStats
+          ? clamp((contourIndex.maxElev - contourStats.avg) / contourRange, 0, 1)
+          : 0;
+        const terrainLowPriority = clamp((11 - terrainStats.avg) / 8, 0, 1);
+
+        const contourSlopeScore = contourStats
+          ? (1 - clamp(contourStats.relief / Math.max(1.2, contourRange * 0.09), 0, 1))
+          : 0.5;
+        const terrainSlopeScore = 1 - clamp(terrainStats.relief / 2.6, 0, 1);
+        const slopeStability = clamp((contourSlopeScore * 0.6) + (terrainSlopeScore * 0.4), 0, 1);
+
+        const roadClassSuitability =
+          (roadClass === 'residential' || roadClass === 'street') ? 1 :
+            (roadClass === 'tertiary' ? 0.72 : 0.48);
+
+        const score =
+          (floodNearby ? 3.1 : 0) +
+          (contourLowPriority * 3.0) +
+          (terrainLowPriority * 2.1) +
+          (slopeStability * 1.5) +
+          roadClassSuitability;
 
         const key = buildSegmentKey(coords, roadClass, roadName);
         if (unique.has(key)) continue;
@@ -1705,9 +1746,14 @@ async function addBioswaleOpportunityLayer(floodData) {
           properties: {
             class: roadClass,
             name: roadName,
-            score,
+            score: Number(score.toFixed(2)),
             avg_elev_m: Number(terrainStats.avg.toFixed(2)),
             relief_m: Number(terrainStats.relief.toFixed(2)),
+            contour_avg_ft: contourStats ? Number(contourStats.avg.toFixed(2)) : null,
+            contour_relief_ft: contourStats ? Number(contourStats.relief.toFixed(2)) : null,
+            contour_low_priority: Number(contourLowPriority.toFixed(3)),
+            terrain_low_priority: Number(terrainLowPriority.toFixed(3)),
+            slope_stability: Number(slopeStability.toFixed(3)),
             flood_nearby: floodNearby ? 1 : 0
           },
           geometry: {
@@ -1715,6 +1761,7 @@ async function addBioswaleOpportunityLayer(floodData) {
             coordinates: coords
           },
           score,
+          avgContourElevation: contourStats ? contourStats.avg : Infinity,
           avgElevation: terrainStats.avg,
           relief: terrainStats.relief
         });
@@ -2073,6 +2120,8 @@ async function addClippedContourLines() {
 
         return features;
       })();
+
+  cachedStudyContourFeatures = clippedFeatures;
 
   map.addSource('study-contour-lines', {
     type: 'geojson',
