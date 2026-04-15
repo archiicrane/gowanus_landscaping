@@ -1395,7 +1395,7 @@ function interpolateColorRamp(stops, t) {
 }
 
 const FEET_PER_METER = 3.28084;
-const TOPO_OVERLAY_STEP_FEET = 1 / 12;
+const TOPO_OVERLAY_STEP_FEET = 1;
 const TOPO_OVERLAY_ALPHA = 178;
 const TOPO_OVERLAY_OPACITY = 0.62;
 
@@ -1560,8 +1560,8 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 }
 
 function addTopographyElevationOverlay(contourFeatures) {
-  // Prefer Mapbox terrain-derived elevations for the topography heat surface.
-  const imageUrl = buildMapboxTerrainRasterDataUrl() || buildTopographyRasterDataUrl(contourFeatures);
+  // Prioritize contour-derived 1-foot filled bands; fallback to terrain sampling only if needed.
+  const imageUrl = buildTopographyRasterDataUrl(contourFeatures) || buildMapboxTerrainRasterDataUrl();
   if (!imageUrl) return;
 
   const coordinates = [
