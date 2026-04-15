@@ -173,7 +173,7 @@ const stageContent = [
 const PRESENTATION_CENTER = [-73.9895, 40.6745];
 const CANAL_CENTER = PRESENTATION_CENTER;
 const PRESENTATION_BEARING = -42;
-const PRESENTATION_PITCH = 58;
+const PRESENTATION_PITCH = 0;
 const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
 const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
 const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
@@ -2587,6 +2587,14 @@ function setupStoryScrollytelling() {
 function attachMapHandlers() {
   map.on('load', async () => {
     try {
+      map.easeTo({
+        center: PRESENTATION_CENTER,
+        bearing: PRESENTATION_BEARING,
+        pitch: PRESENTATION_PITCH,
+        duration: 900,
+        essential: true
+      });
+
       const [existingResponse, proposedResponse, floodResponse] = await Promise.all([
         fetch('./data/gowanus-buildings.geojson'),
         fetch('./data/rezoning-buildings.geojson'),
