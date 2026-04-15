@@ -1394,6 +1394,11 @@ function interpolateColorRamp(stops, t) {
   return { r: tail[0], g: tail[1], b: tail[2] };
 }
 
+const FEET_PER_METER = 3.28084;
+const TOPO_OVERLAY_STEP_FEET = 1;
+const TOPO_OVERLAY_ALPHA = 152;
+const TOPO_OVERLAY_OPACITY = 0.52;
+
 function buildMapboxTerrainRasterDataUrl() {
   if (!map || typeof map.queryTerrainElevation !== 'function') return null;
 
@@ -1436,15 +1441,18 @@ function buildMapboxTerrainRasterDataUrl() {
 
   if (!Number.isFinite(minElev) || !Number.isFinite(maxElev)) return null;
 
-  const elevRange = Math.max(1e-6, maxElev - minElev);
+  const minElevFeet = minElev * FEET_PER_METER;
+  const maxElevFeet = maxElev * FEET_PER_METER;
+  const elevRangeFeet = Math.max(1e-6, maxElevFeet - minElevFeet);
+  const bandCount = Math.max(1, Math.floor(elevRangeFeet / TOPO_OVERLAY_STEP_FEET));
   const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 2);
 
   const colorStops = [
-    { t: 0.0, c: [231, 242, 255] },
-    { t: 0.3, c: [194, 219, 241] },
-    { t: 0.55, c: [221, 224, 226] },
-    { t: 0.8, c: [226, 191, 146] },
-    { t: 1.0, c: [168, 120, 76] }
+    { t: 0.0, c: [214, 232, 255] },
+    { t: 0.28, c: [177, 208, 241] },
+    { t: 0.54, c: [232, 236, 240] },
+    { t: 0.8, c: [214, 164, 106] },
+    { t: 1.0, c: [138, 84, 37] }
   ];
 
   for (let py = 0; py < height; py += 1) {
@@ -1457,13 +1465,15 @@ function buildMapboxTerrainRasterDataUrl() {
         continue;
       }
 
-      const normalized = (smoothedElev[idx1d] - minElev) / elevRange;
-      const tone = interpolateColorRamp(colorStops, normalized);
+      const elevFeet = smoothedElev[idx1d] * FEET_PER_METER;
+      const normalized = (elevFeet - minElevFeet) / elevRangeFeet;
+      const banded = Math.round(normalized * bandCount) / bandCount;
+      const tone = interpolateColorRamp(colorStops, banded);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
       data[idx + 2] = tone.b;
-      data[idx + 3] = 108;
+      data[idx + 3] = TOPO_OVERLAY_ALPHA;
     }
   }
 
@@ -1480,6 +1490,7 @@ function buildTopographyRasterDataUrl(contourFeatures) {
   const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
   const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
   const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
+  const bandCount = Math.max(1, Math.floor(elevRange / TOPO_OVERLAY_STEP_FEET));
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -1494,11 +1505,11 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 
   // Cool low elevations to warmer highs, kept muted for architectural readability.
   const colorStops = [
-    { t: 0.0, c: [231, 242, 255] },
-    { t: 0.3, c: [194, 219, 241] },
-    { t: 0.55, c: [221, 224, 226] },
-    { t: 0.8, c: [226, 191, 146] },
-    { t: 1.0, c: [168, 120, 76] }
+    { t: 0.0, c: [214, 232, 255] },
+    { t: 0.28, c: [177, 208, 241] },
+    { t: 0.54, c: [232, 236, 240] },
+    { t: 0.8, c: [214, 164, 106] },
+    { t: 1.0, c: [138, 84, 37] }
   ];
 
   for (let py = 0; py < height; py += 1) {
@@ -1534,12 +1545,13 @@ function buildTopographyRasterDataUrl(contourFeatures) {
       }
 
       const normalized = (smoothedElev[idx1d] - index.minElev) / elevRange;
-      const tone = interpolateColorRamp(colorStops, normalized);
+      const banded = Math.round(normalized * bandCount) / bandCount;
+      const tone = interpolateColorRamp(colorStops, banded);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
       data[idx + 2] = tone.b;
-      data[idx + 3] = 108;
+      data[idx + 3] = TOPO_OVERLAY_ALPHA;
     }
   }
 
@@ -1578,7 +1590,7 @@ function addTopographyElevationOverlay(contourFeatures) {
       type: 'raster',
       source: 'topography-elevation-image',
       paint: {
-        'raster-opacity': 0.34,
+        'raster-opacity': TOPO_OVERLAY_OPACITY,
         'raster-resampling': 'linear'
       },
       layout: {
