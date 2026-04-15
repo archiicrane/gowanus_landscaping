@@ -1932,101 +1932,6 @@ async function addBioswaleOpportunityLayer(floodData) {
   moveBioswaleLayersToTop();
 }
 
-async function addElevatedRailExtrusion() {
-  if (map.getLayer('elevated-rail-extrusion')) return;
-
-  await new Promise((resolve) => map.once('idle', resolve));
-
-  let railFeatures = [];
-  try {
-    railFeatures = map.querySourceFeatures('composite', {
-      sourceLayer: 'road',
-      filter: [
-        'any',
-        ['==', ['get', 'class'], 'major_rail'],
-        ['==', ['get', 'class'], 'rail'],
-        ['==', ['get', 'class'], 'transit']
-      ]
-    });
-  } catch (err) {
-    console.warn('Rail query failed:', err);
-  }
-
-  const unique = new Set();
-  const extrusions = [];
-
-  for (const feature of railFeatures) {
-    const structure = String(feature.properties?.structure || '').toLowerCase();
-    const brunnel = String(feature.properties?.brunnel || '').toLowerCase();
-    const layerValue = Number(feature.properties?.layer ?? 0);
-
-    const isElevated =
-      structure === 'bridge' ||
-      structure === 'elevated' ||
-      structure === 'viaduct' ||
-      brunnel === 'bridge' ||
-      layerValue > 0;
-
-    if (!isElevated) continue;
-
-    const lineGroups = getFeatureLineCoordinates(feature.geometry);
-    for (const lineCoords of lineGroups) {
-      const clippedSegments = clipLineToStudyBoundingBox(lineCoords);
-      for (const coords of clippedSegments) {
-        if (coords.length < 2) continue;
-        if (roughLineLength(coords) < 0.0002) continue;
-
-        const key = buildSegmentKey(
-          coords,
-          feature.properties?.class || 'rail',
-          feature.properties?.name || ''
-        );
-        if (unique.has(key)) continue;
-        unique.add(key);
-
-        const polygon = bufferLineToPolygon(coords, 2.4);
-        if (!polygon) continue;
-
-        extrusions.push({
-          type: 'Feature',
-          properties: {
-            class: feature.properties?.class || 'rail'
-          },
-          geometry: polygon
-        });
-      }
-    }
-  }
-
-  if (!extrusions.length) {
-    console.warn('No elevated rail segments found in study bounding box.');
-    return;
-  }
-
-  map.addSource('elevated-rail', {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features: extrusions
-    }
-  });
-
-  map.addLayer({
-    id: 'elevated-rail-extrusion',
-    type: 'fill-extrusion',
-    source: 'elevated-rail',
-    layout: {
-      visibility: 'visible'
-    },
-    paint: {
-      'fill-extrusion-color': '#3f3f46',
-      'fill-extrusion-base': 9.5,
-      'fill-extrusion-height': 13.5,
-      'fill-extrusion-opacity': 0.96
-    }
-  });
-}
-
 async function addClippedContourLines() {
   if (map.getLayer('study-contour-lines')) return;
 
@@ -2782,7 +2687,6 @@ function attachMapHandlers() {
             await addClippedContourLines();
           }
           await addParkOutline();
-          await addElevatedRailExtrusion();
           await addZoningBuildingsLayer();
           await addBioswaleOpportunityLayer(floodData);
           await window.TreeRenderer?.initTrees?.(map);
