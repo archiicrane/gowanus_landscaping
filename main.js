@@ -2592,19 +2592,33 @@ function attachMapHandlers() {
         // Only polygons
         if (featureA.geometry.type !== 'Polygon' && featureA.geometry.type !== 'MultiPolygon') return false;
         if (featureB.geometry.type !== 'Polygon' && featureB.geometry.type !== 'MultiPolygon') return false;
-        // Use booleanOverlap for stricter overlap (not just touching)
+        // Buffer yellow building by 0.1 meters to catch near-overlaps
+        let bufferedB;
         try {
-          return turf.booleanOverlap(featureA, featureB);
+          bufferedB = turf.buffer(featureB, 0.1, { units: 'meters' });
         } catch (e) {
-          // If turf errors, assume no overlap
-          return false;
+          bufferedB = featureB;
         }
+        // Try booleanOverlap first, fallback to booleanIntersects
+        try {
+          if (turf.booleanOverlap(featureA, bufferedB)) return true;
+        } catch (e) {}
+        try {
+          if (turf.booleanIntersects(featureA, bufferedB)) return true;
+        } catch (e) {}
+        return false;
       }
 
+      // For debugging: collect filtered out gray buildings
+      let filteredOut = [];
       let filteredGrayBuildings = existingData.features.filter(grayFeature => {
-        return !proposedData.features.some(yellowFeature => featuresOverlap(grayFeature, yellowFeature));
+        const overlaps = proposedData.features.some(yellowFeature => featuresOverlap(grayFeature, yellowFeature));
+        if (overlaps) filteredOut.push(grayFeature);
+        return !overlaps;
       });
-      console.log(`Filtered out ${existingData.features.length - filteredGrayBuildings.length} gray buildings due to overlap with yellow buildings.`);
+      console.log(`Filtered out ${filteredOut.length} gray buildings due to overlap with yellow buildings.`);
+      // Uncomment below to log filtered out building IDs for further debugging
+      // console.log('Filtered out gray building IDs:', filteredOut.map(f => f.properties && (f.properties["@id"] || f.properties.id)));
       const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
 
       hideBasemapLabels();
