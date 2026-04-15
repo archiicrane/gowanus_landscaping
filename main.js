@@ -1394,6 +1394,83 @@ function interpolateColorRamp(stops, t) {
   return { r: tail[0], g: tail[1], b: tail[2] };
 }
 
+function buildMapboxTerrainRasterDataUrl() {
+  if (!map || typeof map.queryTerrainElevation !== 'function') return null;
+
+  const width = 420;
+  const height = 420;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const image = ctx.createImageData(width, height);
+  const data = image.data;
+  const rawElev = new Float32Array(width * height);
+  const mask = new Uint8Array(width * height);
+
+  let minElev = Infinity;
+  let maxElev = -Infinity;
+
+  for (let py = 0; py < height; py += 1) {
+    const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
+    for (let px = 0; px < width; px += 1) {
+      const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
+      const idx1d = py * width + px;
+
+      if (!pointInStudyBounds([lng, lat])) continue;
+
+      const elev = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
+      if (!Number.isFinite(elev)) continue;
+
+      rawElev[idx1d] = elev;
+      mask[idx1d] = 1;
+      if (elev < minElev) minElev = elev;
+      if (elev > maxElev) maxElev = elev;
+    }
+  }
+
+  if (!Number.isFinite(minElev) || !Number.isFinite(maxElev)) return null;
+
+  const elevRange = Math.max(1e-6, maxElev - minElev);
+  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 2);
+
+  const colorStops = [
+    { t: 0.0, c: [231, 242, 255] },
+    { t: 0.3, c: [194, 219, 241] },
+    { t: 0.55, c: [221, 224, 226] },
+    { t: 0.8, c: [226, 191, 146] },
+    { t: 1.0, c: [168, 120, 76] }
+  ];
+
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const idx1d = py * width + px;
+      const idx = idx1d * 4;
+
+      if (!mask[idx1d]) {
+        data[idx + 3] = 0;
+        continue;
+      }
+
+      const normalized = (smoothedElev[idx1d] - minElev) / elevRange;
+      const tone = interpolateColorRamp(colorStops, normalized);
+
+      data[idx] = tone.r;
+      data[idx + 1] = tone.g;
+      data[idx + 2] = tone.b;
+      data[idx + 3] = 108;
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
 function buildTopographyRasterDataUrl(contourFeatures) {
   const index = buildContourElevationIndex(contourFeatures);
   if (!index) return null;
@@ -1471,7 +1548,8 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 }
 
 function addTopographyElevationOverlay(contourFeatures) {
-  const imageUrl = buildTopographyRasterDataUrl(contourFeatures);
+  // Prefer Mapbox terrain-derived elevations for the topography heat surface.
+  const imageUrl = buildMapboxTerrainRasterDataUrl() || buildTopographyRasterDataUrl(contourFeatures);
   if (!imageUrl) return;
 
   const coordinates = [
