@@ -375,50 +375,6 @@ function addMapboxTerrainAndContours() {
     });
   }
 
-  if (!map.getSource('mapbox-contours')) {
-    map.addSource('mapbox-contours', {
-      type: 'vector',
-      url: 'mapbox://mapbox.mapbox-terrain-v2'
-    });
-  }
-
-  if (!map.getLayer('terrain-contours')) {
-    map.addLayer({
-      id: 'terrain-contours',
-      type: 'line',
-      source: 'mapbox-contours',
-      'source-layer': 'contour',
-      minzoom: 10,
-      layout: {
-        'line-join': 'round',
-        'line-cap': 'round',
-        visibility: 'visible'
-      },
-      paint: {
-        'line-color': '#64748b',
-        'line-width': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11, [
-            'case',
-            ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            0.95,
-            0.58
-          ],
-          16, [
-            'case',
-            ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            1.7,
-            1.0
-          ]
-        ],
-        'line-dasharray': [1.2, 1.2],
-        'line-opacity': 0.72
-      }
-    });
-  }
-
   moveTopographyLayersToTop();
 }
 
@@ -1768,16 +1724,17 @@ async function addClippedContourLines() {
       'line-cap': 'round'
     },
     paint: {
-      'line-color': '#475569',
+      'line-color': '#9ca3af',
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
         12,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.85, 0.5],
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.9, 0.52],
         16,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.45, 0.82]
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.5, 0.86]
       ],
+      'line-dasharray': [1.25, 1.15],
       'line-opacity': 0.76
     }
   });
@@ -2066,9 +2023,6 @@ function moveTopographyLayersToTop() {
   if (map.getLayer('terrain-hillshade')) {
     map.moveLayer('terrain-hillshade');
   }
-  if (map.getLayer('terrain-contours')) {
-    map.moveLayer('terrain-contours');
-  }
   if (map.getLayer('study-contour-lines')) {
     map.moveLayer('study-contour-lines');
   }
@@ -2085,9 +2039,6 @@ function setupLayerToggles() {
 
   topoToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('terrain-contours')) {
-      map.setLayoutProperty('terrain-contours', 'visibility', visibility);
-    }
     if (map.getLayer('study-contour-lines')) {
       map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
     }
