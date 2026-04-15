@@ -394,7 +394,7 @@ function addMapboxTerrainAndContours() {
         visibility: 'visible'
       },
       paint: {
-        'line-color': '#e2e8f0',
+        'line-color': '#64748b',
         'line-width': [
           'interpolate',
           ['linear'],
@@ -402,18 +402,18 @@ function addMapboxTerrainAndContours() {
           11, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            1.05,
-            0.7
+            0.95,
+            0.58
           ],
           16, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            2.1,
-            1.3
+            1.7,
+            1.0
           ]
         ],
         'line-dasharray': [1.2, 1.2],
-        'line-opacity': 0.97
+        'line-opacity': 0.72
       }
     });
   }
@@ -1756,17 +1756,17 @@ async function addClippedContourLines() {
       'line-cap': 'round'
     },
     paint: {
-      'line-color': '#f1f5f9',
+      'line-color': '#475569',
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
         12,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.0, 0.62],
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.85, 0.5],
         16,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.9, 1.1]
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.45, 0.82]
       ],
-      'line-opacity': 0.96
+      'line-opacity': 0.76
     }
   });
 
