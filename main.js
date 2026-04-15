@@ -394,7 +394,7 @@ function addMapboxTerrainAndContours() {
         visibility: 'visible'
       },
       paint: {
-        'line-color': '#c6cbd2',
+        'line-color': '#e2e8f0',
         'line-width': [
           'interpolate',
           ['linear'],
@@ -402,21 +402,23 @@ function addMapboxTerrainAndContours() {
           11, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            0.95,
-            0.55
+            1.05,
+            0.7
           ],
           16, [
             'case',
             ['==', ['%', ['to-number', ['get', 'ele']], 50], 0],
-            1.75,
-            1.0
+            2.1,
+            1.3
           ]
         ],
         'line-dasharray': [1.2, 1.2],
-        'line-opacity': 0.84
+        'line-opacity': 0.97
       }
     });
   }
+
+  moveTopographyLayersToTop();
 }
 
 function addMapboxGroundParks() {
@@ -1754,19 +1756,21 @@ async function addClippedContourLines() {
       'line-cap': 'round'
     },
     paint: {
-      'line-color': '#94a3b8',
+      'line-color': '#f1f5f9',
       'line-width': [
         'interpolate',
         ['linear'],
         ['zoom'],
         12,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.8, 0.45],
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.0, 0.62],
         16,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.5, 0.8]
+        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.9, 1.1]
       ],
-      'line-opacity': 0.8
+      'line-opacity': 0.96
     }
   });
+
+  moveTopographyLayersToTop();
 }
 
 function centroidFromLineFeatures(features) {
@@ -2046,6 +2050,18 @@ function moveBioswaleLayersToTop() {
   }
 }
 
+function moveTopographyLayersToTop() {
+  if (map.getLayer('terrain-hillshade')) {
+    map.moveLayer('terrain-hillshade');
+  }
+  if (map.getLayer('terrain-contours')) {
+    map.moveLayer('terrain-contours');
+  }
+  if (map.getLayer('study-contour-lines')) {
+    map.moveLayer('study-contour-lines');
+  }
+}
+
 function setupLayerToggles() {
   const topoToggle = document.getElementById('toggle-topo');
   const floodToggle = document.getElementById('toggle-flood');
@@ -2065,6 +2081,10 @@ function setupLayerToggles() {
     }
     if (map.getLayer('terrain-hillshade')) {
       map.setLayoutProperty('terrain-hillshade', 'visibility', visibility);
+    }
+
+    if (visibility === 'visible') {
+      moveTopographyLayersToTop();
     }
   });
 
@@ -2381,6 +2401,7 @@ function attachMapHandlers() {
 
           if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
           moveBioswaleLayersToTop();
+          moveTopographyLayersToTop();
           if (map.getLayer('gowanus-focus-mask')) map.moveLayer('gowanus-focus-mask');
         } catch (deferredErr) {
           console.warn('Deferred map overlay load failed:', deferredErr);
