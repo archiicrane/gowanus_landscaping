@@ -7,8 +7,8 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Turf.js for spatial operations -->
-  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
+  <!-- Turf.js for spatial operations (local) -->
+  <script src="vendor/turf.min.js"></script>
 </head>
 <body>
   <nav class="top-bar">
@@ -42,11 +42,10 @@
   </div>
 
   <!-- Main JS (after Turf.js) -->
-  <script src="main.js"></script>
-
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
   <script src="vendor/three/three.min.js"></script>
   <script src="vendor/three/GLTFLoader.js"></script>
+  <script src="vendor/turf.min.js"></script>
   <script src="trees.js"></script>
   <script src="main.js"></script>
 </body>
