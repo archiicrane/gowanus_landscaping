@@ -1247,7 +1247,7 @@ function getFeatureLineCoordinates(geometry) {
 
 function buildContourElevationIndex(contourFeatures) {
   const samples = [];
-  const bucketSize = 0.00035;
+  const bucketSize = 0.00028;
   const buckets = new Map();
   let minElev = Infinity;
   let maxElev = -Infinity;
@@ -1260,7 +1260,7 @@ function buildContourElevationIndex(contourFeatures) {
     for (const coords of lineGroups) {
       if (!Array.isArray(coords) || coords.length < 2) continue;
 
-      const stride = Math.max(1, Math.floor(coords.length / 9));
+      const stride = Math.max(1, Math.floor(coords.length / 8));
       for (let i = 0; i < coords.length; i += stride) {
         const coord = coords[i];
         if (!Array.isArray(coord) || coord.length < 2) continue;
@@ -1297,7 +1297,7 @@ function estimateElevationFromIndex(lng, lat, index) {
   const cy = Math.floor(lat / bucketSize);
 
   const candidates = [];
-  for (let r = 0; r <= 2 && candidates.length < 20; r += 1) {
+  for (let r = 0; r <= 3 && candidates.length < 32; r += 1) {
     for (let dx = -r; dx <= r; dx += 1) {
       for (let dy = -r; dy <= r; dy += 1) {
         const key = `${cx + dx}:${cy + dy}`;
@@ -1324,92 +1324,122 @@ function estimateElevationFromIndex(lng, lat, index) {
   return weightSum > 0 ? (elevSum / weightSum) : null;
 }
 
-function buildStaticTopographyGridFeatures(contourFeatures) {
+function interpolateColorRamp(stops, t) {
+  const clamped = clamp(t, 0, 1);
+
+  for (let i = 1; i < stops.length; i += 1) {
+    const a = stops[i - 1];
+    const b = stops[i];
+    if (clamped > b.t) continue;
+
+    const span = Math.max(1e-6, b.t - a.t);
+    const localT = (clamped - a.t) / span;
+
+    return {
+      r: Math.round(a.c[0] + (b.c[0] - a.c[0]) * localT),
+      g: Math.round(a.c[1] + (b.c[1] - a.c[1]) * localT),
+      b: Math.round(a.c[2] + (b.c[2] - a.c[2]) * localT)
+    };
+  }
+
+  const tail = stops[stops.length - 1].c;
+  return { r: tail[0], g: tail[1], b: tail[2] };
+}
+
+function buildTopographyRasterDataUrl(contourFeatures) {
   const index = buildContourElevationIndex(contourFeatures);
-  if (!index) return [];
+  if (!index) return null;
 
-  const cols = 56;
-  const rows = 56;
-  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / cols;
-  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / rows;
+  const width = 340;
+  const height = 340;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
   const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
-  const features = [];
+  const bandStepFeet = 2;
+  const bandCount = Math.max(1, Math.floor(elevRange / bandStepFeet));
 
-  for (let x = 0; x < cols; x += 1) {
-    for (let y = 0; y < rows; y += 1) {
-      const west = CONTOUR_BOUNDS.west + x * dx;
-      const east = west + dx;
-      const south = CONTOUR_BOUNDS.south + y * dy;
-      const north = south + dy;
-      const centerLng = (west + east) * 0.5;
-      const centerLat = (south + north) * 0.5;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
 
-      if (!pointInStudyBounds([centerLng, centerLat])) continue;
+  const image = ctx.createImageData(width, height);
+  const data = image.data;
 
-      const elev = estimateElevationFromIndex(centerLng, centerLat, index);
-      if (!Number.isFinite(elev)) continue;
+  // Cool low elevations to warm highs, restrained for architectural readability.
+  const colorStops = [
+    { t: 0.0, c: [224, 242, 254] },
+    { t: 0.25, c: [186, 230, 253] },
+    { t: 0.5, c: [229, 231, 235] },
+    { t: 0.75, c: [251, 191, 132] },
+    { t: 1.0, c: [180, 83, 9] }
+  ];
 
-      const t = Math.max(0, Math.min(1, (elev - index.minElev) / elevRange));
+  for (let py = 0; py < height; py += 1) {
+    const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
+    for (let px = 0; px < width; px += 1) {
+      const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
+      const idx = (py * width + px) * 4;
 
-      features.push({
-        type: 'Feature',
-        properties: {
-          elev_m: Number(elev.toFixed(2)),
-          elev_norm: Number(t.toFixed(4))
-        },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [west, south],
-            [east, south],
-            [east, north],
-            [west, north],
-            [west, south]
-          ]]
-        }
-      });
+      if (!pointInStudyBounds([lng, lat])) {
+        data[idx + 3] = 0;
+        continue;
+      }
+
+      const elev = estimateElevationFromIndex(lng, lat, index);
+      if (!Number.isFinite(elev)) {
+        data[idx + 3] = 0;
+        continue;
+      }
+
+      const normalized = (elev - index.minElev) / elevRange;
+      const banded = Math.round(normalized * bandCount) / bandCount;
+      const tone = interpolateColorRamp(colorStops, banded);
+
+      data[idx] = tone.r;
+      data[idx + 1] = tone.g;
+      data[idx + 2] = tone.b;
+      data[idx + 3] = 120;
     }
   }
 
-  return features;
+  ctx.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
 }
 
-function addTopographyStaticElevationMap(contourFeatures) {
-  const gridFeatures = buildStaticTopographyGridFeatures(contourFeatures);
-  if (!gridFeatures.length) return;
+function addTopographyElevationOverlay(contourFeatures) {
+  const imageUrl = buildTopographyRasterDataUrl(contourFeatures);
+  if (!imageUrl) return;
 
-  const gridData = {
-    type: 'FeatureCollection',
-    features: gridFeatures
-  };
+  const coordinates = [
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.south],
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.south]
+  ];
 
-  if (!map.getSource('topography-static-grid')) {
-    map.addSource('topography-static-grid', {
-      type: 'geojson',
-      data: gridData
+  if (!map.getSource('topography-elevation-image')) {
+    map.addSource('topography-elevation-image', {
+      type: 'image',
+      url: imageUrl,
+      coordinates
     });
   } else {
-    map.getSource('topography-static-grid').setData(gridData);
+    map.getSource('topography-elevation-image').updateImage({
+      url: imageUrl,
+      coordinates
+    });
   }
 
-  if (!map.getLayer('topography-static-elevation')) {
+  if (!map.getLayer('topography-elevation-raster')) {
     map.addLayer({
-      id: 'topography-static-elevation',
-      type: 'fill',
-      source: 'topography-static-grid',
+      id: 'topography-elevation-raster',
+      type: 'raster',
+      source: 'topography-elevation-image',
       paint: {
-        'fill-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'elev_norm'],
-          0.0, '#0ea5e9',
-          0.2, '#38bdf8',
-          0.4, '#cbd5e1',
-          0.6, '#fde68a',
-          0.8, '#f59e0b',
-          1.0, '#dc2626'
-        ],
-        'fill-opacity': 0.5
+        'raster-opacity': 0.36,
+        'raster-resampling': 'linear'
       },
       layout: {
         visibility: 'visible'
@@ -1904,7 +1934,7 @@ async function addClippedContourLines() {
     }
   });
 
-  addTopographyStaticElevationMap(clippedFeatures);
+  addTopographyElevationOverlay(clippedFeatures);
 
   moveTopographyLayersToTop();
 }
@@ -2190,8 +2220,8 @@ function moveTopographyLayersToTop() {
   if (map.getLayer('terrain-hillshade')) {
     map.moveLayer('terrain-hillshade');
   }
-  if (map.getLayer('topography-static-elevation')) {
-    map.moveLayer('topography-static-elevation');
+  if (map.getLayer('topography-elevation-raster')) {
+    map.moveLayer('topography-elevation-raster');
   }
   if (map.getLayer('study-contour-lines')) {
     map.moveLayer('study-contour-lines');
@@ -2209,8 +2239,8 @@ function setupLayerToggles() {
 
   topoToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('topography-static-elevation')) {
-      map.setLayoutProperty('topography-static-elevation', 'visibility', visibility);
+    if (map.getLayer('topography-elevation-raster')) {
+      map.setLayoutProperty('topography-elevation-raster', 'visibility', visibility);
     }
     if (map.getLayer('study-contour-lines')) {
       map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
