@@ -1334,13 +1334,7 @@ function addTopographyHeatmap(contourFeatures) {
       maxzoom: 19,
       paint: {
         'heatmap-weight': ['get', 'low_weight'],
-        'heatmap-intensity': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11, 0.55,
-          16, 1.35
-        ],
+        'heatmap-intensity': 0.95,
         'heatmap-color': [
           'interpolate',
           ['linear'],
@@ -1351,13 +1345,7 @@ function addTopographyHeatmap(contourFeatures) {
           0.75, 'rgba(14,165,233,0.65)',
           1, 'rgba(2,132,199,0.85)'
         ],
-        'heatmap-radius': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11, 14,
-          16, 32
-        ],
+        'heatmap-radius': 24,
         'heatmap-opacity': 0.5
       },
       layout: {
@@ -1374,13 +1362,7 @@ function addTopographyHeatmap(contourFeatures) {
       maxzoom: 19,
       paint: {
         'heatmap-weight': ['get', 'high_weight'],
-        'heatmap-intensity': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11, 0.55,
-          16, 1.35
-        ],
+        'heatmap-intensity': 0.95,
         'heatmap-color': [
           'interpolate',
           ['linear'],
@@ -1391,13 +1373,7 @@ function addTopographyHeatmap(contourFeatures) {
           0.75, 'rgba(249,115,22,0.68)',
           1, 'rgba(220,38,38,0.85)'
         ],
-        'heatmap-radius': [
-          'interpolate',
-          ['linear'],
-          ['zoom'],
-          11, 14,
-          16, 32
-        ],
+        'heatmap-radius': 24,
         'heatmap-opacity': 0.42
       },
       layout: {
@@ -1887,15 +1863,7 @@ async function addClippedContourLines() {
     },
     paint: {
       'line-color': '#9ca3af',
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        12,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 0.9, 0.52],
-        16,
-        ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.5, 0.86]
-      ],
+      'line-width': ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.2, 0.72],
       'line-dasharray': [1.25, 1.15],
       'line-opacity': 0.76
     }
