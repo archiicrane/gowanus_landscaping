@@ -105,8 +105,8 @@ const STUDY_BOUNDS = {
   north: Math.max(...STUDY_RING.map(([, lat]) => lat))
 };
 
-const CONTOUR_LINES_URL = 'models/con_lines_gowanus_full_detail.geojson';
-const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus_lite.geojson';
+const CONTOUR_LINES_URL = 'models/con_lines_gowanus_study_full.geojson';
+const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus.geojson';
 const CONTOUR_COORDINATES_LAT_LNG = [
   [40.683945676183654, -73.98963594611494],
   [40.680669969224006, -73.98084416376932],
@@ -1682,45 +1682,59 @@ async function addClippedContourLines() {
   }
 
   let contourData;
+  let usingPreclippedContourData = false;
   try {
-    contourData = await fetchContourData(CONTOUR_LINES_URL, 'AWS contour file');
-  } catch (awsErr) {
-    console.warn('AWS contour fetch failed; trying local fallback.', awsErr);
+    contourData = await fetchContourData(CONTOUR_LINES_URL, 'Primary contour file');
+    usingPreclippedContourData = true;
+  } catch (primaryErr) {
+    console.warn('Primary contour file failed; trying local fallback.', primaryErr);
     try {
       contourData = await fetchContourData(CONTOUR_LINES_FALLBACK_URL, 'Local contour fallback');
     } catch (fallbackErr) {
-      console.warn('Both AWS and local contour sources failed; contour layer skipped.', fallbackErr);
+      console.warn('Both primary and fallback contour sources failed; contour layer skipped.', fallbackErr);
       return;
     }
   }
 
-  const clippedFeatures = [];
+  const clippedFeatures = usingPreclippedContourData
+    ? (contourData.features || []).map((feature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          elev_m: Number(feature.properties?.ELEV ?? 0)
+        }
+      }))
+    : (() => {
+        const features = [];
 
-  for (const feature of contourData.features || []) {
-    const lineGroups = getFeatureLineCoordinates(feature.geometry);
-    const clippedGroups = [];
+        for (const feature of contourData.features || []) {
+          const lineGroups = getFeatureLineCoordinates(feature.geometry);
+          const clippedGroups = [];
 
-    for (const lineCoords of lineGroups) {
-      const segments = clipLineToContourBoundingBox(lineCoords);
-      for (const segment of segments) {
-        if (segment.length < 2) continue;
-        clippedGroups.push(segment);
-      }
-    }
+          for (const lineCoords of lineGroups) {
+            const segments = clipLineToStudyBounds(lineCoords);
+            for (const segment of segments) {
+              if (segment.length < 2) continue;
+              clippedGroups.push(segment);
+            }
+          }
 
-    if (!clippedGroups.length) continue;
+          if (!clippedGroups.length) continue;
 
-    clippedFeatures.push({
-      type: 'Feature',
-      properties: {
-        ...feature.properties,
-        elev_m: Number(feature.properties?.ELEV ?? 0)
-      },
-      geometry: clippedGroups.length === 1
-        ? { type: 'LineString', coordinates: clippedGroups[0] }
-        : { type: 'MultiLineString', coordinates: clippedGroups }
-    });
-  }
+          features.push({
+            type: 'Feature',
+            properties: {
+              ...feature.properties,
+              elev_m: Number(feature.properties?.ELEV ?? 0)
+            },
+            geometry: clippedGroups.length === 1
+              ? { type: 'LineString', coordinates: clippedGroups[0] }
+              : { type: 'MultiLineString', coordinates: clippedGroups }
+          });
+        }
+
+        return features;
+      })();
 
   map.addSource('study-contour-lines', {
     type: 'geojson',
