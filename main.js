@@ -1511,66 +1511,105 @@ function buildTopographyRasterDataUrl(contourFeatures) {
   return canvas.toDataURL('image/png');
 }
 
-function addTopographyHeatmap(contourFeatures) {
-  const points = [];
+function buildMapboxTerrainRasterDataUrl() {
+  const width = 240;
+  const height = 240;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / (width - 1);
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / (height - 1);
+
+  const elevGrid = new Float32Array(width * height);
+  const mask = new Uint8Array(width * height);
+  let validCount = 0;
   let minElev = Infinity;
   let maxElev = -Infinity;
 
-  for (const feature of contourFeatures || []) {
-    const elev = Number(feature?.properties?.elev_m ?? feature?.properties?.ELEV);
-    if (!Number.isFinite(elev)) continue;
-    if (elev < minElev) minElev = elev;
-    if (elev > maxElev) maxElev = elev;
+  for (let y = 0; y < height; y += 1) {
+    const lat = CONTOUR_BOUNDS.north - y * dy;
+    for (let x = 0; x < width; x += 1) {
+      const lng = CONTOUR_BOUNDS.west + x * dx;
+      const idx = y * width + x;
 
-    // One point per feature (midpoint) to avoid saturating heatmap density
-    const lineGroups = getFeatureLineCoordinates(feature.geometry);
-    for (const coords of lineGroups) {
-      if (!Array.isArray(coords) || coords.length < 2) continue;
-      const mid = coords[Math.floor(coords.length / 2)];
-      if (!Array.isArray(mid) || mid.length < 2) continue;
-      points.push({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [mid[0], mid[1]] },
-        properties: { elev }
-      });
+      if (!pointInStudyBounds([lng, lat])) continue;
+
+      const elev = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
+      if (!Number.isFinite(elev)) continue;
+
+      elevGrid[idx] = elev;
+      mask[idx] = 1;
+      validCount += 1;
+      if (elev < minElev) minElev = elev;
+      if (elev > maxElev) maxElev = elev;
     }
   }
 
-  if (!points.length) return;
+  if (validCount < 80) return null;
 
-  const geojson = { type: 'FeatureCollection', features: points };
+  const smoothed = smoothMaskedElevationGrid(elevGrid, mask, width, height, 2);
 
-  if (!map.getSource('topography-heatmap-source')) {
-    map.addSource('topography-heatmap-source', { type: 'geojson', data: geojson });
-  } else {
-    map.getSource('topography-heatmap-source').setData(geojson);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const image = ctx.createImageData(width, height);
+  const data = image.data;
+  const elevRange = Math.max(1e-6, maxElev - minElev);
+
+  const colorStops = [
+    { t: 0.0,  c: [219, 236, 255] },
+    { t: 0.25, c: [184, 214, 246] },
+    { t: 0.5,  c: [228, 231, 234] },
+    { t: 0.75, c: [225, 186, 142] },
+    { t: 1.0,  c: [149, 104,  64] }
+  ];
+
+  for (let i = 0; i < width * height; i += 1) {
+    const pi = i * 4;
+    if (!mask[i]) { data[pi + 3] = 0; continue; }
+    const normalized = clamp((smoothed[i] - minElev) / elevRange, 0, 1);
+    const tone = interpolateColorRamp(colorStops, normalized);
+    data[pi]     = tone.r;
+    data[pi + 1] = tone.g;
+    data[pi + 2] = tone.b;
+    data[pi + 3] = TOPO_OVERLAY_ALPHA;
   }
 
-  if (!map.getLayer('topography-heatmap')) {
+  ctx.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+function addTopographyElevationOverlay() {
+  const imageUrl = buildMapboxTerrainRasterDataUrl();
+
+  if (!imageUrl) {
+    // Terrain tiles not yet loaded — retry after a short delay.
+    setTimeout(() => addTopographyElevationOverlay(), 1500);
+    return;
+  }
+
+  const coordinates = [
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.south],
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.south]
+  ];
+
+  if (!map.getSource('topography-elevation-image')) {
+    map.addSource('topography-elevation-image', { type: 'image', url: imageUrl, coordinates });
+  } else {
+    map.getSource('topography-elevation-image').updateImage({ url: imageUrl, coordinates });
+  }
+
+  if (!map.getLayer('topography-elevation-raster')) {
     map.addLayer({
-      id: 'topography-heatmap',
-      type: 'heatmap',
-      source: 'topography-heatmap-source',
-      paint: {
-        'heatmap-weight': [
-          'interpolate', ['linear'], ['get', 'elev'],
-          minElev, 0,
-          maxElev, 1
-        ],
-        'heatmap-intensity': 1.0,
-        'heatmap-radius': 6,
-        'heatmap-opacity': 0.75,
-        'heatmap-color': [
-          'interpolate', ['linear'], ['heatmap-density'],
-          0,   'rgba(219,236,255,0)',
-          0.2, 'rgba(184,214,246,0.7)',
-          0.5, 'rgba(228,231,234,0.85)',
-          0.8, 'rgba(225,186,142,0.95)',
-          1.0, 'rgba(149,104,64,1)'
-        ]
-      },
+      id: 'topography-elevation-raster',
+      type: 'raster',
+      source: 'topography-elevation-image',
+      paint: { 'raster-opacity': TOPO_OVERLAY_OPACITY, 'raster-resampling': 'linear' },
       layout: { visibility: 'visible' }
     });
+    moveTopographyLayersToTop();
   }
 }
 
@@ -2060,7 +2099,7 @@ async function addClippedContourLines() {
     }
   });
 
-  addTopographyHeatmap(clippedFeatures);
+  addTopographyElevationOverlay();
 
   moveTopographyLayersToTop();
 }
@@ -2346,8 +2385,8 @@ function moveTopographyLayersToTop() {
   if (map.getLayer('terrain-hillshade')) {
     map.moveLayer('terrain-hillshade');
   }
-  if (map.getLayer('topography-heatmap')) {
-    map.moveLayer('topography-heatmap');
+  if (map.getLayer('topography-elevation-raster')) {
+    map.moveLayer('topography-elevation-raster');
   }
   if (map.getLayer('study-contour-lines')) {
     map.moveLayer('study-contour-lines');
@@ -2365,8 +2404,8 @@ function setupLayerToggles() {
 
   topoToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('topography-heatmap')) {
-      map.setLayoutProperty('topography-heatmap', 'visibility', visibility);
+    if (map.getLayer('topography-elevation-raster')) {
+      map.setLayoutProperty('topography-elevation-raster', 'visibility', visibility);
     }
     if (map.getLayer('study-contour-lines')) {
       map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
