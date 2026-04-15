@@ -1670,6 +1670,13 @@ async function addClippedContourLines() {
       throw new Error(`${label} returned an empty response body.`);
     }
 
+    // Git LFS pointer files begin with this line when large assets are not pulled locally.
+    if (rawText.startsWith('version https://git-lfs.github.com/spec/v1')) {
+      throw new Error(
+        `${label} is a Git LFS pointer file, not GeoJSON. Run "git lfs pull" to download full data.`
+      );
+    }
+
     let parsed;
     try {
       parsed = JSON.parse(rawText);
@@ -1690,16 +1697,16 @@ async function addClippedContourLines() {
     contourData = await fetchContourData(CONTOUR_LINES_URL, 'Primary contour file');
     usingPreclippedContourData = true;
   } catch (primaryErr) {
-    console.warn('Primary contour file failed; trying fallback.', primaryErr);
+    console.warn(`Primary contour file failed; trying fallback. ${primaryErr.message || primaryErr}`);
     try {
       contourData = await fetchContourData(CONTOUR_LINES_FALLBACK_URL, 'Local contour fallback');
       usingPreclippedContourData = true;
     } catch (fallbackErr) {
-      console.warn('Primary and first fallback contour files failed; trying secondary fallback.', fallbackErr);
+      console.warn(`Primary and first fallback contour files failed; trying secondary fallback. ${fallbackErr.message || fallbackErr}`);
       try {
         contourData = await fetchContourData(CONTOUR_LINES_SECONDARY_FALLBACK_URL, 'Secondary contour fallback');
       } catch (secondaryFallbackErr) {
-        console.warn('All contour sources failed; contour layer skipped.', secondaryFallbackErr);
+        console.warn(`All contour sources failed; contour layer skipped. ${secondaryFallbackErr.message || secondaryFallbackErr}`);
         return;
       }
     }
