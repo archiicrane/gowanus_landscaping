@@ -1260,7 +1260,7 @@ function buildContourElevationIndex(contourFeatures) {
     for (const coords of lineGroups) {
       if (!Array.isArray(coords) || coords.length < 2) continue;
 
-      const stride = Math.max(1, Math.floor(coords.length / 8));
+      const stride = Math.max(1, Math.floor(coords.length / 4));
       for (let i = 0; i < coords.length; i += stride) {
         const coord = coords[i];
         if (!Array.isArray(coord) || coord.length < 2) continue;
@@ -1324,6 +1324,54 @@ function estimateElevationFromIndex(lng, lat, index) {
   return weightSum > 0 ? (elevSum / weightSum) : null;
 }
 
+function smoothMaskedElevationGrid(values, mask, width, height, passes = 2) {
+  let src = values;
+  let dst = new Float32Array(values.length);
+
+  // Lightweight gaussian-style smoothing to avoid pixel block artifacts while preserving masked boundary.
+  const kernel = [
+    [1, 2, 1],
+    [2, 4, 2],
+    [1, 2, 1]
+  ];
+
+  for (let pass = 0; pass < passes; pass += 1) {
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const idx = y * width + x;
+        if (!mask[idx]) {
+          dst[idx] = src[idx];
+          continue;
+        }
+
+        let sum = 0;
+        let wsum = 0;
+        for (let ky = -1; ky <= 1; ky += 1) {
+          for (let kx = -1; kx <= 1; kx += 1) {
+            const nx = x + kx;
+            const ny = y + ky;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            const nIdx = ny * width + nx;
+            if (!mask[nIdx]) continue;
+
+            const w = kernel[ky + 1][kx + 1];
+            sum += src[nIdx] * w;
+            wsum += w;
+          }
+        }
+
+        dst[idx] = wsum > 0 ? (sum / wsum) : src[idx];
+      }
+    }
+
+    const swap = src;
+    src = dst;
+    dst = swap;
+  }
+
+  return src;
+}
+
 function interpolateColorRamp(stops, t) {
   const clamped = clamp(t, 0, 1);
 
@@ -1350,13 +1398,11 @@ function buildTopographyRasterDataUrl(contourFeatures) {
   const index = buildContourElevationIndex(contourFeatures);
   if (!index) return null;
 
-  const width = 340;
-  const height = 340;
+  const width = 420;
+  const height = 420;
   const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
   const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
   const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
-  const bandStepFeet = 2;
-  const bandCount = Math.max(1, Math.floor(elevRange / bandStepFeet));
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -1366,41 +1412,57 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 
   const image = ctx.createImageData(width, height);
   const data = image.data;
+  const rawElev = new Float32Array(width * height);
+  const mask = new Uint8Array(width * height);
 
-  // Cool low elevations to warm highs, restrained for architectural readability.
+  // Cool low elevations to warmer highs, kept muted for architectural readability.
   const colorStops = [
-    { t: 0.0, c: [224, 242, 254] },
-    { t: 0.25, c: [186, 230, 253] },
-    { t: 0.5, c: [229, 231, 235] },
-    { t: 0.75, c: [251, 191, 132] },
-    { t: 1.0, c: [180, 83, 9] }
+    { t: 0.0, c: [231, 242, 255] },
+    { t: 0.3, c: [194, 219, 241] },
+    { t: 0.55, c: [221, 224, 226] },
+    { t: 0.8, c: [226, 191, 146] },
+    { t: 1.0, c: [168, 120, 76] }
   ];
 
   for (let py = 0; py < height; py += 1) {
     const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
     for (let px = 0; px < width; px += 1) {
       const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
-      const idx = (py * width + px) * 4;
+      const idx1d = py * width + px;
 
       if (!pointInStudyBounds([lng, lat])) {
-        data[idx + 3] = 0;
         continue;
       }
 
       const elev = estimateElevationFromIndex(lng, lat, index);
       if (!Number.isFinite(elev)) {
+        continue;
+      }
+
+      rawElev[idx1d] = elev;
+      mask[idx1d] = 1;
+    }
+  }
+
+  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 2);
+
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const idx1d = py * width + px;
+      const idx = idx1d * 4;
+
+      if (!mask[idx1d]) {
         data[idx + 3] = 0;
         continue;
       }
 
-      const normalized = (elev - index.minElev) / elevRange;
-      const banded = Math.round(normalized * bandCount) / bandCount;
-      const tone = interpolateColorRamp(colorStops, banded);
+      const normalized = (smoothedElev[idx1d] - index.minElev) / elevRange;
+      const tone = interpolateColorRamp(colorStops, normalized);
 
       data[idx] = tone.r;
       data[idx + 1] = tone.g;
       data[idx + 2] = tone.b;
-      data[idx + 3] = 120;
+      data[idx + 3] = 108;
     }
   }
 
@@ -1438,7 +1500,7 @@ function addTopographyElevationOverlay(contourFeatures) {
       type: 'raster',
       source: 'topography-elevation-image',
       paint: {
-        'raster-opacity': 0.36,
+        'raster-opacity': 0.34,
         'raster-resampling': 'linear'
       },
       layout: {
