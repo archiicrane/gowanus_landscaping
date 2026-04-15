@@ -1245,136 +1245,171 @@ function getFeatureLineCoordinates(geometry) {
   return [];
 }
 
-function buildTopographyHeatPointFeatures(contourFeatures) {
-  const prepared = [];
+function buildContourElevationIndex(contourFeatures) {
+  const samples = [];
+  const bucketSize = 0.00035;
+  const buckets = new Map();
   let minElev = Infinity;
   let maxElev = -Infinity;
 
   for (const feature of contourFeatures || []) {
     const elev = Number(feature?.properties?.elev_m ?? feature?.properties?.ELEV);
     if (!Number.isFinite(elev)) continue;
-    prepared.push({ feature, elev });
+
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    for (const coords of lineGroups) {
+      if (!Array.isArray(coords) || coords.length < 2) continue;
+
+      const stride = Math.max(1, Math.floor(coords.length / 9));
+      for (let i = 0; i < coords.length; i += stride) {
+        const coord = coords[i];
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+
+        const sample = { lng: coord[0], lat: coord[1], elev };
+        const idx = samples.push(sample) - 1;
+
+        const bx = Math.floor(sample.lng / bucketSize);
+        const by = Math.floor(sample.lat / bucketSize);
+        const key = `${bx}:${by}`;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(idx);
+      }
+    }
+
     if (elev < minElev) minElev = elev;
     if (elev > maxElev) maxElev = elev;
   }
 
-  if (!prepared.length || !Number.isFinite(minElev) || !Number.isFinite(maxElev)) {
-    return [];
-  }
+  if (!samples.length) return null;
 
-  const elevRange = Math.max(1e-6, maxElev - minElev);
-  const points = [];
+  return {
+    samples,
+    buckets,
+    bucketSize,
+    minElev,
+    maxElev
+  };
+}
 
-  for (const entry of prepared) {
-    const lineGroups = getFeatureLineCoordinates(entry.feature.geometry);
-    const t = (entry.elev - minElev) / elevRange;
-    const lowWeight = Math.pow(1 - t, 1.8);
-    const highWeight = Math.pow(t, 1.8);
+function estimateElevationFromIndex(lng, lat, index) {
+  const { samples, buckets, bucketSize } = index;
+  const cx = Math.floor(lng / bucketSize);
+  const cy = Math.floor(lat / bucketSize);
 
-    for (const coords of lineGroups) {
-      if (!Array.isArray(coords) || coords.length < 2) continue;
-
-      const sampleIndices = [
-        0,
-        Math.floor((coords.length - 1) * 0.5),
-        coords.length - 1
-      ];
-
-      const seen = new Set();
-      for (const rawIdx of sampleIndices) {
-        const idx = Math.max(0, Math.min(coords.length - 1, rawIdx));
-        if (seen.has(idx)) continue;
-        seen.add(idx);
-
-        const coord = coords[idx];
-        if (!Array.isArray(coord) || coord.length < 2) continue;
-
-        points.push({
-          type: 'Feature',
-          properties: {
-            elev_m: Number(entry.elev.toFixed(2)),
-            low_weight: Number(lowWeight.toFixed(4)),
-            high_weight: Number(highWeight.toFixed(4))
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: [coord[0], coord[1]]
-          }
-        });
+  const candidates = [];
+  for (let r = 0; r <= 2 && candidates.length < 20; r += 1) {
+    for (let dx = -r; dx <= r; dx += 1) {
+      for (let dy = -r; dy <= r; dy += 1) {
+        const key = `${cx + dx}:${cy + dy}`;
+        const indices = buckets.get(key);
+        if (!indices) continue;
+        for (const idx of indices) candidates.push(samples[idx]);
       }
     }
   }
 
-  return points;
+  if (!candidates.length) return null;
+
+  let weightSum = 0;
+  let elevSum = 0;
+  for (const sample of candidates) {
+    const dx = sample.lng - lng;
+    const dy = sample.lat - lat;
+    const d2 = dx * dx + dy * dy;
+    const w = 1 / Math.max(d2, 1e-12);
+    weightSum += w;
+    elevSum += sample.elev * w;
+  }
+
+  return weightSum > 0 ? (elevSum / weightSum) : null;
 }
 
-function addTopographyHeatmap(contourFeatures) {
-  const heatPoints = buildTopographyHeatPointFeatures(contourFeatures);
-  if (!heatPoints.length) return;
+function buildStaticTopographyGridFeatures(contourFeatures) {
+  const index = buildContourElevationIndex(contourFeatures);
+  if (!index) return [];
 
-  const heatData = {
+  const cols = 56;
+  const rows = 56;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / cols;
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / rows;
+  const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
+  const features = [];
+
+  for (let x = 0; x < cols; x += 1) {
+    for (let y = 0; y < rows; y += 1) {
+      const west = CONTOUR_BOUNDS.west + x * dx;
+      const east = west + dx;
+      const south = CONTOUR_BOUNDS.south + y * dy;
+      const north = south + dy;
+      const centerLng = (west + east) * 0.5;
+      const centerLat = (south + north) * 0.5;
+
+      if (!pointInStudyBounds([centerLng, centerLat])) continue;
+
+      const elev = estimateElevationFromIndex(centerLng, centerLat, index);
+      if (!Number.isFinite(elev)) continue;
+
+      const t = Math.max(0, Math.min(1, (elev - index.minElev) / elevRange));
+
+      features.push({
+        type: 'Feature',
+        properties: {
+          elev_m: Number(elev.toFixed(2)),
+          elev_norm: Number(t.toFixed(4))
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [west, south],
+            [east, south],
+            [east, north],
+            [west, north],
+            [west, south]
+          ]]
+        }
+      });
+    }
+  }
+
+  return features;
+}
+
+function addTopographyStaticElevationMap(contourFeatures) {
+  const gridFeatures = buildStaticTopographyGridFeatures(contourFeatures);
+  if (!gridFeatures.length) return;
+
+  const gridData = {
     type: 'FeatureCollection',
-    features: heatPoints
+    features: gridFeatures
   };
 
-  if (!map.getSource('topography-heat-points')) {
-    map.addSource('topography-heat-points', {
+  if (!map.getSource('topography-static-grid')) {
+    map.addSource('topography-static-grid', {
       type: 'geojson',
-      data: heatData
+      data: gridData
     });
   } else {
-    map.getSource('topography-heat-points').setData(heatData);
+    map.getSource('topography-static-grid').setData(gridData);
   }
 
-  if (!map.getLayer('topography-low-heat')) {
+  if (!map.getLayer('topography-static-elevation')) {
     map.addLayer({
-      id: 'topography-low-heat',
-      type: 'heatmap',
-      source: 'topography-heat-points',
-      maxzoom: 19,
+      id: 'topography-static-elevation',
+      type: 'fill',
+      source: 'topography-static-grid',
       paint: {
-        'heatmap-weight': ['get', 'low_weight'],
-        'heatmap-intensity': 0.95,
-        'heatmap-color': [
+        'fill-color': [
           'interpolate',
           ['linear'],
-          ['heatmap-density'],
-          0, 'rgba(0,0,0,0)',
-          0.25, 'rgba(125,211,252,0.2)',
-          0.5, 'rgba(56,189,248,0.45)',
-          0.75, 'rgba(14,165,233,0.65)',
-          1, 'rgba(2,132,199,0.85)'
+          ['get', 'elev_norm'],
+          0.0, '#0ea5e9',
+          0.2, '#38bdf8',
+          0.4, '#cbd5e1',
+          0.6, '#fde68a',
+          0.8, '#f59e0b',
+          1.0, '#dc2626'
         ],
-        'heatmap-radius': 24,
-        'heatmap-opacity': 0.5
-      },
-      layout: {
-        visibility: 'visible'
-      }
-    });
-  }
-
-  if (!map.getLayer('topography-high-heat')) {
-    map.addLayer({
-      id: 'topography-high-heat',
-      type: 'heatmap',
-      source: 'topography-heat-points',
-      maxzoom: 19,
-      paint: {
-        'heatmap-weight': ['get', 'high_weight'],
-        'heatmap-intensity': 0.95,
-        'heatmap-color': [
-          'interpolate',
-          ['linear'],
-          ['heatmap-density'],
-          0, 'rgba(0,0,0,0)',
-          0.25, 'rgba(253,224,71,0.2)',
-          0.5, 'rgba(251,191,36,0.45)',
-          0.75, 'rgba(249,115,22,0.68)',
-          1, 'rgba(220,38,38,0.85)'
-        ],
-        'heatmap-radius': 24,
-        'heatmap-opacity': 0.42
+        'fill-opacity': 0.5
       },
       layout: {
         visibility: 'visible'
@@ -1869,7 +1904,7 @@ async function addClippedContourLines() {
     }
   });
 
-  addTopographyHeatmap(clippedFeatures);
+  addTopographyStaticElevationMap(clippedFeatures);
 
   moveTopographyLayersToTop();
 }
@@ -2155,11 +2190,8 @@ function moveTopographyLayersToTop() {
   if (map.getLayer('terrain-hillshade')) {
     map.moveLayer('terrain-hillshade');
   }
-  if (map.getLayer('topography-low-heat')) {
-    map.moveLayer('topography-low-heat');
-  }
-  if (map.getLayer('topography-high-heat')) {
-    map.moveLayer('topography-high-heat');
+  if (map.getLayer('topography-static-elevation')) {
+    map.moveLayer('topography-static-elevation');
   }
   if (map.getLayer('study-contour-lines')) {
     map.moveLayer('study-contour-lines');
@@ -2177,11 +2209,8 @@ function setupLayerToggles() {
 
   topoToggle?.addEventListener('change', (event) => {
     const visibility = event.target.checked ? 'visible' : 'none';
-    if (map.getLayer('topography-low-heat')) {
-      map.setLayoutProperty('topography-low-heat', 'visibility', visibility);
-    }
-    if (map.getLayer('topography-high-heat')) {
-      map.setLayoutProperty('topography-high-heat', 'visibility', visibility);
+    if (map.getLayer('topography-static-elevation')) {
+      map.setLayoutProperty('topography-static-elevation', 'visibility', visibility);
     }
     if (map.getLayer('study-contour-lines')) {
       map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
