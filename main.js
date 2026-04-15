@@ -2580,9 +2580,24 @@ function attachMapHandlers() {
         throw new Error(`Flood data fetch failed: ${floodResponse.status} ${floodResponse.statusText}`);
       }
 
+
       const existingData = await existingResponse.json();
       const proposedData = await proposedResponse.json();
       const floodData = await floodResponse.json();
+
+      // --- FILTER OUT GRAY BUILDINGS THAT OVERLAP YELLOW BUILDINGS ---
+      // Requires turf.js (should be included in your HTML for Mapbox projects)
+      function featuresOverlap(featureA, featureB) {
+        // Only polygons
+        if (featureA.geometry.type !== 'Polygon' && featureA.geometry.type !== 'MultiPolygon') return false;
+        if (featureB.geometry.type !== 'Polygon' && featureB.geometry.type !== 'MultiPolygon') return false;
+        return turf.booleanIntersects(featureA, featureB);
+      }
+
+      let filteredGrayBuildings = existingData.features.filter(grayFeature => {
+        return !proposedData.features.some(yellowFeature => featuresOverlap(grayFeature, yellowFeature));
+      });
+      const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
 
       hideBasemapLabels();
 
@@ -2591,7 +2606,7 @@ function attachMapHandlers() {
 
       map.addSource('existing', {
         type: 'geojson',
-        data: existingData
+        data: filteredExistingData
       });
 
       map.addLayer({
