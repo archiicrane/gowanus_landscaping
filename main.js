@@ -1415,7 +1415,7 @@ function interpolateColorRamp(stops, t) {
 }
 
 const TOPO_OVERLAY_ALPHA = 142;
-const TOPO_OVERLAY_OPACITY = 0.56;
+const TOPO_OVERLAY_OPACITY = 0.72;
 
 function bilinearSampleGrid(values, cols, rows, gx, gy) {
   const x = clamp(gx, 0, cols - 1);
