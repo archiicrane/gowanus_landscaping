@@ -2588,44 +2588,8 @@ function attachMapHandlers() {
       // --- FILTER OUT GRAY BUILDINGS THAT OVERLAP YELLOW BUILDINGS ---
       // Requires turf.js (should be included in your HTML for Mapbox projects)
 
-      function featuresOverlap(featureA, featureB) {
-        // Only polygons
-        if (!featureA || !featureA.geometry || !featureB || !featureB.geometry) return false;
-        const validTypes = ['Polygon', 'MultiPolygon'];
-        if (!validTypes.includes(featureA.geometry.type) || !validTypes.includes(featureB.geometry.type)) return false;
-        // Buffer yellow building by 0.1 meters to catch near-overlaps
-        let bufferedB = featureB;
-        try {
-          bufferedB = turf.buffer(featureB, 0.1, { units: 'meters' });
-        } catch (e) {
-          console.warn('Buffer failed for featureB', featureB, e);
-          bufferedB = featureB;
-        }
-        // Try booleanOverlap first, fallback to booleanIntersects
-        try {
-          if (turf.booleanOverlap(featureA, bufferedB)) return true;
-        } catch (e) {
-          console.warn('booleanOverlap failed', featureA, bufferedB, e);
-        }
-        try {
-          if (turf.booleanIntersects(featureA, bufferedB)) return true;
-        } catch (e) {
-          console.warn('booleanIntersects failed', featureA, bufferedB, e);
-        }
-        return false;
-      }
-
-      // For debugging: collect filtered out gray buildings
-      let filteredOut = [];
-      let filteredGrayBuildings = existingData.features.filter(grayFeature => {
-        const overlaps = proposedData.features.some(yellowFeature => featuresOverlap(grayFeature, yellowFeature));
-        if (overlaps) filteredOut.push(grayFeature);
-        return !overlaps;
-      });
-      console.log(`Filtered out ${filteredOut.length} gray buildings due to overlap with yellow buildings.`);
-      // Uncomment below to log filtered out building IDs for further debugging
-      // console.log('Filtered out gray building IDs:', filteredOut.map(f => f.properties && (f.properties["@id"] || f.properties.id)));
-      const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
+      // TEMP: Disable gray building filtering for debugging site load
+      const filteredExistingData = existingData;
 
       hideBasemapLabels();
 
