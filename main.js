@@ -1395,9 +1395,9 @@ function interpolateColorRamp(stops, t) {
 }
 
 const FEET_PER_METER = 3.28084;
-const TOPO_OVERLAY_STEP_FEET = 1;
-const TOPO_OVERLAY_ALPHA = 152;
-const TOPO_OVERLAY_OPACITY = 0.52;
+const TOPO_OVERLAY_STEP_FEET = 1 / 12;
+const TOPO_OVERLAY_ALPHA = 178;
+const TOPO_OVERLAY_OPACITY = 0.62;
 
 function buildMapboxTerrainRasterDataUrl() {
   if (!map || typeof map.queryTerrainElevation !== 'function') return null;
@@ -1445,14 +1445,14 @@ function buildMapboxTerrainRasterDataUrl() {
   const maxElevFeet = maxElev * FEET_PER_METER;
   const elevRangeFeet = Math.max(1e-6, maxElevFeet - minElevFeet);
   const bandCount = Math.max(1, Math.floor(elevRangeFeet / TOPO_OVERLAY_STEP_FEET));
-  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 2);
+  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 1);
 
   const colorStops = [
-    { t: 0.0, c: [214, 232, 255] },
-    { t: 0.28, c: [177, 208, 241] },
+    { t: 0.0, c: [198, 223, 255] },
+    { t: 0.28, c: [148, 191, 242] },
     { t: 0.54, c: [232, 236, 240] },
-    { t: 0.8, c: [214, 164, 106] },
-    { t: 1.0, c: [138, 84, 37] }
+    { t: 0.8, c: [223, 155, 86] },
+    { t: 1.0, c: [128, 72, 28] }
   ];
 
   for (let py = 0; py < height; py += 1) {
@@ -1505,11 +1505,11 @@ function buildTopographyRasterDataUrl(contourFeatures) {
 
   // Cool low elevations to warmer highs, kept muted for architectural readability.
   const colorStops = [
-    { t: 0.0, c: [214, 232, 255] },
-    { t: 0.28, c: [177, 208, 241] },
+    { t: 0.0, c: [198, 223, 255] },
+    { t: 0.28, c: [148, 191, 242] },
     { t: 0.54, c: [232, 236, 240] },
-    { t: 0.8, c: [214, 164, 106] },
-    { t: 1.0, c: [138, 84, 37] }
+    { t: 0.8, c: [223, 155, 86] },
+    { t: 1.0, c: [128, 72, 28] }
   ];
 
   for (let py = 0; py < height; py += 1) {
@@ -1532,7 +1532,7 @@ function buildTopographyRasterDataUrl(contourFeatures) {
     }
   }
 
-  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 2);
+  const smoothedElev = smoothMaskedElevationGrid(rawElev, mask, width, height, 1);
 
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
