@@ -2587,16 +2587,24 @@ function attachMapHandlers() {
 
       // --- FILTER OUT GRAY BUILDINGS THAT OVERLAP YELLOW BUILDINGS ---
       // Requires turf.js (should be included in your HTML for Mapbox projects)
+
       function featuresOverlap(featureA, featureB) {
         // Only polygons
         if (featureA.geometry.type !== 'Polygon' && featureA.geometry.type !== 'MultiPolygon') return false;
         if (featureB.geometry.type !== 'Polygon' && featureB.geometry.type !== 'MultiPolygon') return false;
-        return turf.booleanIntersects(featureA, featureB);
+        // Use booleanOverlap for stricter overlap (not just touching)
+        try {
+          return turf.booleanOverlap(featureA, featureB);
+        } catch (e) {
+          // If turf errors, assume no overlap
+          return false;
+        }
       }
 
       let filteredGrayBuildings = existingData.features.filter(grayFeature => {
         return !proposedData.features.some(yellowFeature => featuresOverlap(grayFeature, yellowFeature));
       });
+      console.log(`Filtered out ${existingData.features.length - filteredGrayBuildings.length} gray buildings due to overlap with yellow buildings.`);
       const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
 
       hideBasemapLabels();
