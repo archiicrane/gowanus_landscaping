@@ -2206,7 +2206,10 @@ function addBHeightsModelOnFootprints(anchorLngLat) {
           if (!bounds.isEmpty()) {
             const center = new THREE.Vector3();
             bounds.getCenter(center);
-            gltf.scene.position.set(-center.x, -bounds.min.y, -center.z);
+            // Set Y so the model base sits at y=0 (flush with ground)
+            // Subtract a small epsilon to ensure the model sits exactly on the ground
+            const epsilon = 0.05;
+            gltf.scene.position.set(-center.x, -epsilon, -center.z);
           }
 
           gltf.scene.traverse((node) => {
@@ -2237,8 +2240,8 @@ function addBHeightsModelOnFootprints(anchorLngLat) {
       this.renderer.autoClear = false;
     },
     render: function render(gl, matrix) {
-      const terrainElevationMeters = getTerrainElevationMeters(map);
-      modelTransform.translateZ = mercator.z + (terrainElevationMeters * meterInMercator);
+      // Ignore terrain elevation; force models to sit on footprint lines
+      modelTransform.translateZ = mercator.z;
 
       const rotationX = new THREE.Matrix4().makeRotationAxis(
         new THREE.Vector3(1, 0, 0),
@@ -2562,34 +2565,65 @@ function attachMapHandlers() {
         essential: true
       });
 
-      const [existingResponse, proposedResponse, floodResponse] = await Promise.all([
+
+      // Load gray buildings, footprints (yellow), and flood data
+      const [existingResponse, footprintsResponse, floodResponse] = await Promise.all([
         fetch('./data/gowanus-buildings.geojson'),
-        fetch('./data/rezoning-buildings.geojson'),
+        fetch('./models/footprints.geojson'),
         fetch('./data/flood-vulnerability.geojson')
       ]);
 
       if (!existingResponse.ok) {
         throw new Error(`Existing buildings fetch failed: ${existingResponse.status} ${existingResponse.statusText}`);
       }
-
-      if (!proposedResponse.ok) {
-        throw new Error(`Proposed buildings fetch failed: ${proposedResponse.status} ${proposedResponse.statusText}`);
+      if (!footprintsResponse.ok) {
+        throw new Error(`Footprints fetch failed: ${footprintsResponse.status} ${footprintsResponse.statusText}`);
       }
-
       if (!floodResponse.ok) {
         throw new Error(`Flood data fetch failed: ${floodResponse.status} ${floodResponse.statusText}`);
       }
 
-
       const existingData = await existingResponse.json();
-      const proposedData = await proposedResponse.json();
+      const footprintsData = await footprintsResponse.json();
       const floodData = await floodResponse.json();
 
       // --- FILTER OUT GRAY BUILDINGS THAT OVERLAP YELLOW BUILDINGS ---
       // Requires turf.js (should be included in your HTML for Mapbox projects)
 
-      // TEMP: Disable gray building filtering for debugging site load
-      const filteredExistingData = existingData;
+      // Debug: Log feature counts and geometry types
+      console.log('Gray buildings:', existingData.features.length);
+      console.log('Yellow buildings (from footprints):', footprintsData.features.length);
+      if (existingData.features.length > 0) {
+        console.log('First gray building geometry:', existingData.features[0].geometry.type);
+      }
+      if (footprintsData.features.length > 0) {
+        console.log('First yellow building geometry:', footprintsData.features[0].geometry.type);
+      }
+
+      // Only remove gray buildings fully contained within a yellow building
+      let filteredOut = [];
+      let filteredGrayBuildings = existingData.features.filter(grayFeature => {
+        if (!grayFeature || !grayFeature.geometry) return true;
+        const overlaps = footprintsData.features.some(yellowFeature => {
+          try {
+            return turf.booleanIntersects(yellowFeature, grayFeature);
+          } catch (e) {
+            return false;
+          }
+        });
+        if (overlaps) filteredOut.push(grayFeature);
+        return !overlaps;
+      });
+      console.log(`Filtered out ${filteredOut.length} gray buildings that overlap yellow footprints.`);
+      // Log the IDs of the first 10 filtered gray buildings for inspection
+      console.log('First 10 filtered gray building IDs:', filteredOut.slice(0, 10).map(f => f.properties && (f.properties["@id"] || f.properties.id)));
+
+      // Fallback: If all gray buildings are filtered, show all
+      if (filteredGrayBuildings.length === 0) {
+        console.warn('All gray buildings were filtered out. Showing all gray buildings for debugging.');
+        filteredGrayBuildings = existingData.features;
+      }
+      const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
 
       hideBasemapLabels();
 
@@ -2637,7 +2671,7 @@ function attachMapHandlers() {
 
       map.addSource('proposed', {
         type: 'geojson',
-        data: proposedData
+        data: footprintsData
       });
 
       map.addLayer({
