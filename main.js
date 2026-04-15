@@ -105,8 +105,8 @@ const STUDY_BOUNDS = {
   north: Math.max(...STUDY_RING.map(([, lat]) => lat))
 };
 
-const CONTOUR_LINES_URL = 'models/con_lines_gowanus_lite.geojson';
-const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus.geojson';
+const CONTOUR_LINES_URL = 'models/con_lines_gowanus_full_detail.geojson';
+const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus_lite.geojson';
 const CONTOUR_COORDINATES_LAT_LNG = [
   [40.683945676183654, -73.98963594611494],
   [40.680669969224006, -73.98084416376932],
