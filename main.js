@@ -1522,19 +1522,17 @@ function addTopographyHeatmap(contourFeatures) {
     if (elev < minElev) minElev = elev;
     if (elev > maxElev) maxElev = elev;
 
+    // One point per feature (midpoint) to avoid saturating heatmap density
     const lineGroups = getFeatureLineCoordinates(feature.geometry);
     for (const coords of lineGroups) {
       if (!Array.isArray(coords) || coords.length < 2) continue;
-      const stride = Math.max(1, Math.floor(coords.length / 4));
-      for (let i = 0; i < coords.length; i += stride) {
-        const coord = coords[i];
-        if (!Array.isArray(coord) || coord.length < 2) continue;
-        points.push({
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: [coord[0], coord[1]] },
-          properties: { elev }
-        });
-      }
+      const mid = coords[Math.floor(coords.length / 2)];
+      if (!Array.isArray(mid) || mid.length < 2) continue;
+      points.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [mid[0], mid[1]] },
+        properties: { elev }
+      });
     }
   }
 
@@ -1559,15 +1557,15 @@ function addTopographyHeatmap(contourFeatures) {
           minElev, 0,
           maxElev, 1
         ],
-        'heatmap-intensity': 1.2,
-        'heatmap-radius': 18,
-        'heatmap-opacity': 0.72,
+        'heatmap-intensity': 1.0,
+        'heatmap-radius': 6,
+        'heatmap-opacity': 0.75,
         'heatmap-color': [
           'interpolate', ['linear'], ['heatmap-density'],
           0,   'rgba(219,236,255,0)',
-          0.2, 'rgba(184,214,246,0.6)',
+          0.2, 'rgba(184,214,246,0.7)',
           0.5, 'rgba(228,231,234,0.85)',
-          0.8, 'rgba(225,186,142,0.9)',
+          0.8, 'rgba(225,186,142,0.95)',
           1.0, 'rgba(149,104,64,1)'
         ]
       },
