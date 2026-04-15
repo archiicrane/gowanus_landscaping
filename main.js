@@ -2590,22 +2590,28 @@ function attachMapHandlers() {
 
       function featuresOverlap(featureA, featureB) {
         // Only polygons
-        if (featureA.geometry.type !== 'Polygon' && featureA.geometry.type !== 'MultiPolygon') return false;
-        if (featureB.geometry.type !== 'Polygon' && featureB.geometry.type !== 'MultiPolygon') return false;
+        if (!featureA || !featureA.geometry || !featureB || !featureB.geometry) return false;
+        const validTypes = ['Polygon', 'MultiPolygon'];
+        if (!validTypes.includes(featureA.geometry.type) || !validTypes.includes(featureB.geometry.type)) return false;
         // Buffer yellow building by 0.1 meters to catch near-overlaps
-        let bufferedB;
+        let bufferedB = featureB;
         try {
           bufferedB = turf.buffer(featureB, 0.1, { units: 'meters' });
         } catch (e) {
+          console.warn('Buffer failed for featureB', featureB, e);
           bufferedB = featureB;
         }
         // Try booleanOverlap first, fallback to booleanIntersects
         try {
           if (turf.booleanOverlap(featureA, bufferedB)) return true;
-        } catch (e) {}
+        } catch (e) {
+          console.warn('booleanOverlap failed', featureA, bufferedB, e);
+        }
         try {
           if (turf.booleanIntersects(featureA, bufferedB)) return true;
-        } catch (e) {}
+        } catch (e) {
+          console.warn('booleanIntersects failed', featureA, bufferedB, e);
+        }
         return false;
       }
 
