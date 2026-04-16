@@ -1,3 +1,60 @@
+// --- Three.js custom layer for upright honeylocust trees ---
+async function addUprightHoneylocustTrees() {
+  if (map.getLayer('honeylocust-billboards')) return;
+  if (typeof THREE === 'undefined') {
+    console.warn('Three.js not available; honeylocust billboards skipped.');
+    return;
+  }
+
+  // Load honeylocust tree locations from gowanus_trees.json
+  const response = await fetch('./data/gowanus_trees.json');
+  if (!response.ok) return;
+  const trees = await response.json();
+  const honeylocusts = trees.filter(t => (t.species || '').toLowerCase() === 'honeylocust' && t.lat && t.lon);
+  if (!honeylocusts.length) return;
+
+  // Load honey.svg as a texture
+  const loader = new THREE.TextureLoader();
+  loader.load('./models/honey.svg', (texture) => {
+    const mercators = honeylocusts.map(t => mapboxgl.MercatorCoordinate.fromLngLat({lng: t.lon, lat: t.lat}, 0));
+    const meterInMercator = mercators[0].meterInMercatorCoordinateUnits();
+    const planeSize = 12 * meterInMercator; // 12 meters tall
+
+    const customLayer = {
+      id: 'honeylocust-billboards',
+      type: 'custom',
+      renderingMode: '3d',
+      onAdd: function(mapInstance, gl) {
+        this.camera = new THREE.Camera();
+        this.scene = new THREE.Scene();
+        this.renderer = new THREE.WebGLRenderer({canvas: mapInstance.getCanvas(), context: gl, antialias: true});
+        this.renderer.autoClear = false;
+
+        // Add billboards
+        for (const merc of mercators) {
+          const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
+          const material = new THREE.MeshBasicMaterial({map: texture, transparent: true, side: THREE.DoubleSide});
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(merc.x, merc.y, merc.z + planeSize/2);
+          // Always face the camera (upright)
+          mesh.rotation.y = Math.PI;
+          this.scene.add(mesh);
+        }
+      },
+      render: function(gl, matrix) {
+        this.camera.projectionMatrix = new THREE.Matrix4().fromArray(matrix);
+        this.renderer.resetState();
+        this.renderer.render(this.scene, this.camera);
+        map.triggerRepaint();
+      }
+    };
+    map.addLayer(customLayer);
+  });
+}
+// Call this after map is loaded
+map.on('load', () => {
+  addUprightHoneylocustTrees();
+});
 let map;
 
 // Google control points provided by user for site placement.
