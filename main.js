@@ -1,56 +1,4 @@
-// --- Three.js custom layer for upright honeylocust trees ---
-async function addUprightHoneylocustTrees(mapInstance) {
-  if (mapInstance.getLayer('honeylocust-billboards')) return;
-  if (typeof THREE === 'undefined') {
-    console.warn('Three.js not available; honeylocust billboards skipped.');
-    return;
-  }
-
-  // Load honeylocust tree locations from gowanus_trees.json
-  const response = await fetch('./data/gowanus_trees.json');
-  if (!response.ok) return;
-  const trees = await response.json();
-  const honeylocusts = trees.filter(t => (t.species || '').toLowerCase() === 'honeylocust' && t.lat && t.lon);
-  if (!honeylocusts.length) return;
-
-  // Load honey.svg as a texture
-  const loader = new THREE.TextureLoader();
-  loader.load('./models/honey.svg', (texture) => {
-    const mercators = honeylocusts.map(t => mapboxgl.MercatorCoordinate.fromLngLat({lng: t.lon, lat: t.lat}, 0));
-    const meterInMercator = mercators[0].meterInMercatorCoordinateUnits();
-    const planeSize = 12 * meterInMercator; // 12 meters tall
-
-    const customLayer = {
-      id: 'honeylocust-billboards',
-      type: 'custom',
-      renderingMode: '3d',
-      onAdd: function(mapInstance, gl) {
-        this.camera = new THREE.Camera();
-        this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer({canvas: mapInstance.getCanvas(), context: gl, antialias: true});
-        this.renderer.autoClear = false;
-
-        // Add billboards
-        for (const merc of mercators) {
-          const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
-          const material = new THREE.MeshBasicMaterial({map: texture, transparent: true, side: THREE.DoubleSide});
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.position.set(merc.x, merc.y, merc.z + planeSize/2);
-          // Always face the camera (upright)
-          mesh.rotation.y = Math.PI;
-          this.scene.add(mesh);
-        }
-      },
-      render: function(gl, matrix) {
-        this.camera.projectionMatrix = new THREE.Matrix4().fromArray(matrix);
-        this.renderer.resetState();
-        this.renderer.render(this.scene, this.camera);
-        mapInstance.triggerRepaint();
-      }
-    };
-    mapInstance.addLayer(customLayer);
-  });
-}
+// (Removed Three.js honeylocust billboard logic)
 let map;
 
 // Google control points provided by user for site placement.
@@ -125,9 +73,55 @@ async function initMap() {
 
   attachMapHandlers();
 
-  // Add upright honeylocust trees after map is loaded
+  // Add all trees as colored dots after map is loaded
   map.on('load', () => {
-    addUprightHoneylocustTrees(map);
+    window.TreeRenderer?.initTrees?.(map);
+    // Add popup on tree dot click
+    map.on('click', 'trees-layer', async (e) => {
+      const feature = e.features && e.features[0];
+      if (!feature) return;
+      const species = feature.properties.species || 'Unknown';
+      // Fetch SVG for this species if available
+      let svgHtml = '';
+      try {
+        const svgPath = `./models/${species.replace(/\s+/g, '_').toLowerCase()}.svg`;
+        const res = await fetch(svgPath);
+        if (res.ok) {
+          svgHtml = await res.text();
+        }
+      } catch {}
+      // Example species info (should be replaced with real data)
+      const speciesInfo = {
+        'honeylocust': {
+          canopy: '40-70 ft',
+          animals: 'Birds, squirrels',
+          water: 'High retention',
+        },
+        'kentucky coffeetree': {
+          canopy: '60-75 ft',
+          animals: 'Birds',
+          water: 'Medium retention',
+        },
+        // Add more species info here...
+      };
+      const info = speciesInfo[species.toLowerCase()] || {canopy: 'Unknown', animals: 'Unknown', water: 'Unknown'};
+      const html = `
+        <div style=\"min-width:180px;max-width:260px;\">
+          <div style=\"text-align:center;\">${svgHtml ? svgHtml : `<div style='font-size:48px;'>🌳</div>`}</div>
+          <h3 style=\"margin:8px 0 4px 0;\">${species}</h3>
+          <div><b>Estimated canopy:</b> ${info.canopy}</div>
+          <div><b>Wildlife supported:</b> ${info.animals}</div>
+          <div><b>Water retention:</b> ${info.water}</div>
+        </div>
+      `;
+      new mapboxgl.Popup()
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(html)
+        .addTo(map);
+    });
+    // Change cursor on hover
+    map.on('mouseenter', 'trees-layer', () => { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'trees-layer', () => { map.getCanvas().style.cursor = ''; });
   });
 }
 
