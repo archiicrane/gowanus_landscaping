@@ -200,49 +200,84 @@ window.TreeRenderer = {
       // Combine all features
       const features = [...treeFeatures, ...honeylocustFeatures];
 
-      if (map.getLayer('trees-layer')) map.removeLayer('trees-layer');
-      if (map.getSource('trees')) map.removeSource('trees');
 
-      map.addSource('trees', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features }
-      });
-
-
-
-      // Add the trees layer as simple colored circles
-      map.addLayer({
-        id: 'trees-layer',
-        type: 'circle',
-        source: 'trees',
-        paint: {
-          'circle-radius': 7,
-          'circle-color': [
-            'match',
-            ['downcase', ['get', 'species']],
-            'kentucky coffeetree', SPECIES_COLORS['kentucky coffeetree'],
-            'honeylocust', SPECIES_COLORS['honeylocust'],
-            'london planetree', SPECIES_COLORS['london planetree'],
-            'japanese zelkova', SPECIES_COLORS['japanese zelkova'],
-            'littleleaf linden', SPECIES_COLORS['littleleaf linden'],
-            'callery pear', SPECIES_COLORS['callery pear'],
-            'pin oak', SPECIES_COLORS['pin oak'],
-            'ginkgo', SPECIES_COLORS['ginkgo'],
-            'bald cypress', SPECIES_COLORS['bald cypress'],
-            'cornelian cherry', SPECIES_COLORS['cornelian cherry'],
-            'black walnut', SPECIES_COLORS['black walnut'],
-            'japanese tree lilac', SPECIES_COLORS['japanese tree lilac'],
-            'red maple', SPECIES_COLORS['red maple'],
-            'norway maple', SPECIES_COLORS['norway maple'],
-            DEFAULT_TREE_COLOR
-          ],
-          'circle-stroke-color': '#2f2a24',
-          'circle-stroke-width': 1.2,
-          'circle-opacity': 0.85
+      // Remove all layers using 'trees' before removing the source, then add new source/layer
+      function removeAllTreeLayersAndSourceThenAdd(retries = 20) {
+        // Always try to remove highlight layer first if present
+        if (map.getLayer('trees-highlight')) {
+          try {
+            map.removeLayer('trees-highlight');
+          } catch (e) {
+            console.warn('Could not remove trees-highlight:', e);
+          }
         }
-      });
-
-      console.log('🌳 Trees layer added with all species, count:', features.length);
+        if (!map.getSource('trees')) {
+          // Now safe to add new source and layer
+          map.addSource('trees', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features }
+          });
+          map.addLayer({
+            id: 'trees-layer',
+            type: 'circle',
+            source: 'trees',
+            paint: {
+              'circle-radius': 7,
+              'circle-color': [
+                'match',
+                ['downcase', ['get', 'species']],
+                'kentucky coffeetree', SPECIES_COLORS['kentucky coffeetree'],
+                'honeylocust', SPECIES_COLORS['honeylocust'],
+                'london planetree', SPECIES_COLORS['london planetree'],
+                'japanese zelkova', SPECIES_COLORS['japanese zelkova'],
+                'littleleaf linden', SPECIES_COLORS['littleleaf linden'],
+                'callery pear', SPECIES_COLORS['callery pear'],
+                'pin oak', SPECIES_COLORS['pin oak'],
+                'ginkgo', SPECIES_COLORS['ginkgo'],
+                'bald cypress', SPECIES_COLORS['bald cypress'],
+                'cornelian cherry', SPECIES_COLORS['cornelian cherry'],
+                'black walnut', SPECIES_COLORS['black walnut'],
+                'japanese tree lilac', SPECIES_COLORS['japanese tree lilac'],
+                'red maple', SPECIES_COLORS['red maple'],
+                'norway maple', SPECIES_COLORS['norway maple'],
+                DEFAULT_TREE_COLOR
+              ],
+              'circle-stroke-color': '#2f2a24',
+              'circle-stroke-width': 1.2,
+              'circle-opacity': 0.85
+            }
+          });
+          console.log('🌳 Trees layer added with all species, count:', features.length);
+          return;
+        }
+        const layers = map.getStyle().layers || [];
+        let removedAny = false;
+        for (const layer of layers) {
+          if (layer.source === 'trees' && map.getLayer(layer.id)) {
+            try {
+              map.removeLayer(layer.id);
+              removedAny = true;
+            } catch (e) {
+              console.warn('Could not remove layer', layer.id, e);
+            }
+          }
+        }
+        if (removedAny && retries > 0) {
+          setTimeout(() => removeAllTreeLayersAndSourceThenAdd(retries - 1), 10);
+        } else {
+          try {
+            map.removeSource('trees');
+            setTimeout(() => removeAllTreeLayersAndSourceThenAdd(retries - 1), 10);
+          } catch (e) {
+            if (retries > 0) {
+              setTimeout(() => removeAllTreeLayersAndSourceThenAdd(retries - 1), 10);
+            } else {
+              console.warn('Could not remove source trees after retries:', e);
+            }
+          }
+        }
+      }
+      removeAllTreeLayersAndSourceThenAdd();
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }

@@ -51,32 +51,266 @@ async function resolveMapboxToken() {
   return apiToken;
 }
 
+
 async function initMap() {
-  const token = await resolveMapboxToken();
+  console.log('[DEBUG] initMap() started');
+  try {
+    const token = await resolveMapboxToken();
+    console.log('[DEBUG] Mapbox token resolved:', token);
 
-  mapboxgl.accessToken = token;
+    mapboxgl.accessToken = token;
 
-  map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/light-v11',
-    center: PRESENTATION_CENTER,
-    zoom: 15.25,
-    pitch: PRESENTATION_PITCH,
-    bearing: PRESENTATION_BEARING,
-    antialias: true
+    map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: PRESENTATION_CENTER,
+      zoom: 15.25,
+      pitch: PRESENTATION_PITCH,
+      bearing: PRESENTATION_BEARING,
+      antialias: true
+    });
+    console.log('[DEBUG] Mapbox map object created:', map);
+
+    map.addControl(new mapboxgl.NavigationControl());
+    map.scrollZoom.disable();
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
+
+    attachMapHandlers();
+
+    // Add all trees as colored dots after map is loaded
+    map.on('load', () => {
+      console.log('[DEBUG] Mapbox map loaded event fired');
+      window.TreeRenderer?.initTrees?.(map);
+
+      // (Highlight layer removed as requested)
+
+      // Add popup and info panel on tree dot click (no highlight)
+      map.on('click', 'trees-layer', (e) => {
+        const feature = e.features && e.features[0];
+        if (!feature) return;
+        const species = (feature.properties.species || 'Unknown').toLowerCase();
+
+        // Find all features of this species
+        const allFeatures = map.querySourceFeatures('trees', { sourceLayer: undefined });
+        const speciesFeatures = allFeatures.filter(f => (f.properties.species || '').toLowerCase() === species);
+        // Compute center of all trees of this species
+        let center = feature.geometry.coordinates;
+        if (speciesFeatures.length > 1) {
+          let sumLng = 0, sumLat = 0;
+          for (const f of speciesFeatures) {
+            sumLng += f.geometry.coordinates[0];
+            sumLat += f.geometry.coordinates[1];
+          }
+          center = [sumLng / speciesFeatures.length, sumLat / speciesFeatures.length];
+        }
+
+        // Show the right-side info panel
+        const panel = document.getElementById('tree-info-panel');
+        const content = document.getElementById('tree-info-content');
+        if (panel && content) {
+          panel.classList.add('active');
+          content.innerHTML = `<div style=\"padding:8px 0;\">Loading info for <b>${species}</b>...</div>`;
+          fetchTreeSpeciesInfo(species, speciesFeatures, content);
+        }
+
+        // Optionally, still show a popup at the centroid (can be removed if not needed)
+        /*
+        new mapboxgl.Popup()
+          .setLngLat(center)
+          .setHTML(`<div style=\\"min-width:180px;max-width:260px;\\"><b>${species}</b></div>`)
+          .addTo(map);
+        */
+      });
+    }); // <-- Close map.on('load', ...) handler
+    console.log('[DEBUG] initMap() completed');
+  } catch (err) {
+    console.error('[DEBUG] initMap() error:', err);
+  }
+}
+
+// Fetch species info from metadata JSON and display in the panel
+async function fetchTreeSpeciesInfo(species, features, contentEl) {
+  // Load metadata JSON if not already loaded
+  if (!window._treeSpeciesMetadata) {
+    try {
+      const res = await fetch('data/tree_species_metadata.json');
+      window._treeSpeciesMetadata = await res.json();
+    } catch (err) {
+      window._treeSpeciesMetadata = {};
+    }
+  }
+  const meta = window._treeSpeciesMetadata || {};
+  const metaData = meta[species] || {};
+
+  // --- Helpers ---
+  function safe(val, placeholder = '-') {
+    if (val === undefined || val === null || val === '' || val === '-') return placeholder;
+    return val;
+  }
+
+  function normalizeValue(val) {
+    if (typeof val === 'string') {
+      const v = val.toLowerCase();
+      if (v.includes('low')) return 0.33;
+      if (v.includes('high')) return 1.0;
+      return 0.66;
+    }
+    if (typeof val === 'number') {
+      if (val <= 0.33) return 0.33;
+      if (val >= 0.9) return 1.0;
+      return 0.66;
+    }
+    return 0.33;
+  }
+
+  function canopyValue(canopy) {
+    if (!canopy) return 0.33;
+    const match = /([\d.]+)/.exec(canopy);
+    if (!match) return 0.33;
+    const val = parseFloat(match[1]);
+    if (val < 25) return 0.33;
+    if (val > 60) return 1.0;
+    return 0.66;
+  }
+
+  function biodiversityScore(metaData) {
+    let n = 0;
+    if (metaData.animals && metaData.animals !== '-') n++;
+    if (metaData.birds && metaData.birds !== '-') n++;
+    if ((metaData.pollinators && metaData.pollinators !== '-') || (metaData.flowers && metaData.flowers.toLowerCase().includes('fragrant'))) n++;
+    return n / 3;
+  }
+
+  // --- SVG Icon System ---
+  function renderIcon(type, label) {
+    // All icons use currentColor for palette tint
+    if (type === 'flower') return `<span class="icon-svg icon-flower" title="Bloom"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="2.5" fill="#fffbe6"/><path d="M11 3v3M11 16v3M3 11h3M16 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1"/></svg></span>`;
+    if (type === 'paw') return `<span class="icon-svg icon-paw" title="Mammals"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="13" rx="1.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="15" cy="13" rx="1.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="11" cy="17" rx="2.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="9" cy="9" rx="1" ry="1.3" fill="#e3f2fd"/><ellipse cx="13" cy="9" rx="1" ry="1.3" fill="#e3f2fd"/></svg></span>`;
+    return '';
+  }
+
+  function renderIconRow(metaData) {
+    let icons = [];
+    if (metaData.pollinators && metaData.pollinators !== '-') icons.push(renderIcon('bee', 'Pollinators'));
+    if (metaData.birds && metaData.birds !== '-') icons.push(renderIcon('bird', 'Birds'));
+    if (metaData.leaf_type && metaData.leaf_type !== '-') icons.push(renderIcon('leaf', 'Leaf type'));
+    return `<div class="icon-row">${icons.join('')}</div>`;
+  }
+
+  function renderBar(label, value, color) {
+    const percent = normalizeValue(value) * 100;
+    let display = 'Medium';
+    if (percent <= 34) display = 'Low';
+    else if (percent >= 90) display = 'High';
+    // Palette colors
+    let barColor = '';
+    let bgColor = '';
+    if (color === 'blue') { barColor = 'linear-gradient(90deg,#7ec7e6,#3a8fd9)'; bgColor = 'rgba(58,143,217,0.10)'; }
+    if (color === 'green') { barColor = 'linear-gradient(90deg,#a8e6a3,#4caf50)'; bgColor = 'rgba(76,175,80,0.10)'; }
+    if (color === 'yellow') { barColor = 'linear-gradient(90deg,#ffe082,#ffd600)'; bgColor = 'rgba(255,214,0,0.10)'; }
+    if (color === 'muted') { barColor = 'linear-gradient(90deg,#cbeed6,#a8e6a3)'; bgColor = 'rgba(168,230,163,0.10)'; }
+    return `<div class="bar-row">
+      <span class="bar-label">${label}</span>
+      <div class="bar-track" style="background:${bgColor}"><div class="bar-fill" style="width:${percent}%;background:${barColor};"></div></div>
+      <span class="bar-value">${display}</span>
+    </div>`;
+  }
+
+  // --- Ecological Score ---
+  function ecologicalScore(metaData) {
+    const vals = [metaData.water_retention, metaData.wildlife_value, canopyValue(metaData.canopy), biodiversityScore(metaData)];
+    const avg = vals.map(normalizeValue).reduce((a, b) => a + b, 0) / vals.length;
+    return avg;
+  }
+  // SVG placeholders (could be replaced with actual SVGs)
+  const svgPlaceholder = '<div class="svg-icon"><!-- TREE SVG PLACEHOLDER --></div>';
+  const animalSvg = '<div class="svg-icon"><!-- ANIMAL SVG PLACEHOLDER --></div>';
+  const birdSvg = '<div class="svg-icon"><!-- BIRD SVG PLACEHOLDER --></div>';
+  const leafSvg = '<div class="svg-icon"><!-- LEAF SVG PLACEHOLDER --></div>';
+  const flowerSvg = '<div class="svg-icon"><!-- FLOWER SVG PLACEHOLDER --></div>';
+
+  const count = features.length;
+  let html = '';
+  // --- Header Band ---
+  html += `<div class="tree-popup-header-band">
+    <div class="tree-popup-header-content">
+      <div class="tree-popup-header-text">
+        <div class="tree-popup-title">${safe(metaData.common_name || species.charAt(0).toUpperCase() + species.slice(1))}</div>
+        ${metaData.latin_name ? `<div class="tree-popup-latin">${safe(metaData.latin_name)}</div>` : ''}
+      </div>
+      <div class="tree-popup-header-right">
+        <span class="count-badge">${count}</span>
+        <button class="tree-popup-close-btn" onclick="document.getElementById('tree-info-panel').classList.remove('active')" title="Close">&times;</button>
+      </div>
+    </div>
+  </div>`;
+  // --- Body Section ---
+  html += `<div class="tree-popup-body">
+    <div class="eco-score-row">
+      <span class="eco-score-label">Ecological Score</span>
+      <span class="eco-score-circle" title="Overall ecological performance">
+        <svg width="38" height="38"><circle cx="19" cy="19" r="16" stroke="#a8e6a3" stroke-width="4" fill="none"/><circle cx="19" cy="19" r="16" stroke="#4caf50" stroke-width="4" fill="none" stroke-dasharray="100" stroke-dashoffset="${100 - Math.round(ecologicalScore(metaData)*100)}" style="transition:stroke-dashoffset 0.7s cubic-bezier(.6,.2,.3,1)"/><text x="19" y="24" text-anchor="middle" font-size="15" fill="#4caf50" font-weight="bold">${Math.round(ecologicalScore(metaData)*100)}</text></svg>
+      </span>
+    </div>
+    <div class="tree-fact-section performance-section">
+      <div class="tree-fact-section-title">Ecology & Performance</div>
+      ${renderBar('Water Retention', metaData.water_retention, 'blue')}
+      ${renderBar('Wildlife Value', metaData.wildlife_value, 'green')}
+      ${renderBar('Canopy Size', canopyValue(metaData.canopy), 'yellow')}
+      ${renderBar('Biodiversity', biodiversityScore(metaData), 'muted')}
+    </div>
+    <div class="tree-fact-section secondary-section">
+      <div class="tree-fact-section-title">Ecological Relationships</div>
+      <div class="ecology-band-diagram-wrap">
+        ${renderEcologyBandDiagram(metaData)}
+      </div>
+    </div>`;
+
+
+// --- Horizontal Ecological Band Diagram ---
+function renderEcologyBandDiagram(metaData) {
+  // Categories and color mapping
+  const categories = [
+    { key: 'pollinators', label: 'Pollinators', class: 'ecology', value: metaData.pollinators },
+    { key: 'birds', label: 'Bird Support', class: 'ecology', value: metaData.birds },
+    { key: 'mammals', label: 'Mammals', class: 'ecology', value: metaData.animals },
+    { key: 'water', label: 'Water Retention', class: 'water', value: metaData.water_retention },
+    { key: 'canopy', label: 'Canopy / Shade', class: 'canopy', value: metaData.canopy },
+  ];
+  // Helper to map value to percent
+  function bandPercent(val) {
+    if (!val || val === '-') return 0;
+    const v = typeof val === 'string' ? val.toLowerCase() : val;
+    if (v.includes?.('high') || v > 0.8) return 100;
+    if (v.includes?.('low') || v < 0.4) return 33;
+    return 66;
+  }
+  // Render bands
+  let html = '<div class="eco-band-diagram">';
+  let hasData = false;
+  categories.forEach(cat => {
+    const percent = bandPercent(cat.value);
+    if (percent > 0) {
+      hasData = true;
+      html += `<div class="eco-band-row"><span class="eco-band-label">${cat.label}</span><span class="eco-band-bar-wrap"><span class="eco-band-bar-bg"></span><span class="eco-band-bar ${cat.class}" style="width:${percent}%"></span></span></div>`;
+    }
   });
-
-  map.addControl(new mapboxgl.NavigationControl());
-  map.scrollZoom.disable();
-  map.dragRotate.disable();
-  map.touchZoomRotate.disableRotation();
-
-  attachMapHandlers();
-
-  // Add all trees as colored dots after map is loaded
-  map.on('load', () => {
-    window.TreeRenderer?.initTrees?.(map);
-  });
+  html += '</div>';
+  if (!hasData) return '<div style="text-align:center;color:#aaa;font-size:0.98rem;">No ecological data</div>';
+  return html;
+}
+    if (metaData.description) {
+      html += `<div class="tree-fact tree-desc">${safe(metaData.description).split('.').slice(0,2).join('. ')}.</div>`;
+    }
+  html += `</div>`;
+  contentEl.innerHTML = html;
+  // Remove any legacy close button injected by Mapbox or previous code
+  const panel = document.getElementById('tree-info-panel');
+  if (panel) {
+    const legacyClose = panel.querySelector('.close-btn, .mapboxgl-popup-close-button');
+    if (legacyClose) legacyClose.remove();
+  }
 }
 
 let currentStage = 0;
@@ -2792,3 +3026,4 @@ window.addEventListener('keyup', (event) => {
 initMap().catch((err) => {
   console.error('MAP INIT ERROR:', err);
 });
+// End of main.js

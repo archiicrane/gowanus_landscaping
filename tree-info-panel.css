@@ -1,0 +1,70 @@
+/* Tree Info Panel Styles */
+#tree-info-panel {
+  position: absolute;
+  top: 112px;
+  right: 32px;
+  width: min(420px, 92vw);
+  min-width: 260px;
+  max-width: 98vw;
+  min-height: 180px;
+  max-height: calc(100vh - 140px);
+  background: rgba(246, 241, 233, 0.97);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(82, 69, 49, 0.18);
+  border: 1.5px solid rgba(86, 73, 53, 0.13);
+  z-index: 3000;
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none;
+  transition: box-shadow 0.18s, opacity 0.18s;
+  box-sizing: border-box;
+}
+/* Dashboard popup micro-interactions */
+#tree-info-panel.active {
+  display: block;
+  animation: fadeSlideInPanel 0.38s cubic-bezier(.4,1.4,.6,1) 1;
+}
+@keyframes fadeSlideInPanel {
+  from { right: -60px; opacity: 0; }
+  to { right: 32px; opacity: 1; }
+}
+
+.bar-fill {
+  animation: barGrow 0.42s cubic-bezier(.6,.2,.3,1);
+}
+@keyframes barGrow {
+  from { width: 0; }
+  to { width: var(--bar-width, 100%); }
+}
+
+.icon-svg {
+  transition: transform 0.18s, opacity 0.18s;
+}
+.icon-svg:hover {
+  opacity: 1;
+  transform: scale(1.13);
+}
+}
+#tree-info-panel .tree-popup-header-band {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  border-bottom: 1.5px solid rgba(76,175,80,0.10);
+  background: #fff;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+#tree-info-panel .tree-popup-body {
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  background: #f2eee7;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+#tree-info-panel .tree-fact {
+  margin: 12px 0;
+  font-size: 1rem;
+  color: #3b3a2f;
+}

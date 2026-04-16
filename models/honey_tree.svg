@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="256" height="256">
+  <g stroke="#b7e1c2" stroke-width="12" fill="#e6f7ed" fill-opacity="0.7">
+    <!-- Path generated from honey_tree.txt coordinates (scaled and centered) -->
+    <path d="M 420 180 L 430 220 L 440 300 L 440 340 L 440 380 L 460 380 L 480 380 L 500 380 L 520 380 L 540 380 L 560 380 L 580 380 L 600 380 L 620 380 L 640 380 L 660 380 L 680 380 L 700 380 L 720 380 L 740 380 L 760 380 L 780 380 L 800 380 L 820 380 L 840 380 L 860 380 L 880 380 L 900 380 L 920 380 L 940 380 L 960 380 L 980 380" />
+    <!-- Add more paths here if you want to represent more polygons from the txt file -->
+  </g>
+</svg>

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Add your Mapbox token below -->
+    <meta name="mapbox-token" content="REDACTED_FOR_GITHUB" />
   <meta charset="utf-8" />
   <title>Rewilding Gowanus</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="tree-info-panel.css" />
   <!-- Turf.js for spatial operations (local) -->
   <script src="vendor/turf.min.js"></script>
 </head>
@@ -20,6 +23,11 @@
   </nav>
 
   <div id="map"></div>
+  <div id="tree-info-panel">
+    <div id="tree-info-content">
+      <!-- Tree info will be injected here -->
+    </div>
+  </div>
 
   <div class="layer-panel ui-panel" id="layer-panel">
     <label class="layer-toggle"><input type="checkbox" id="toggle-topo" checked /> <span>Topo</span></label>
