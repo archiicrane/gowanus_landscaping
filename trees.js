@@ -208,9 +208,46 @@ window.TreeRenderer = {
         data: { type: 'FeatureCollection', features }
       });
 
-      // Register icons for each species
+
+      // Register icons for each species, but use honey_tree.svg for honeylocust
       const speciesSet = new Set(features.map(f => (f.properties.species || '').toLowerCase()));
+      let honeyTreeImageData = null;
+      if (!map.hasImage('tree-icon-honeylocust')) {
+        // Load SVG and convert to ImageData
+        try {
+          const svgPath = encodeURI('./models/honey_tree.svg');
+          const svgResponse = await fetch(svgPath);
+          if (svgResponse.ok) {
+            const svgText = await svgResponse.text();
+            const blob = new Blob([svgText], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const loadPromise = new Promise((resolve, reject) => {
+              const img = new window.Image();
+              img.onload = () => {
+                try {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 256;
+                  canvas.height = 256;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, 256, 256);
+                  honeyTreeImageData = ctx.getImageData(0, 0, 256, 256);
+                  map.addImage('tree-icon-honeylocust', honeyTreeImageData, { pixelRatio: 2 });
+                  resolve();
+                } catch (e) { reject(e); }
+              };
+              img.onerror = reject;
+              img.src = url;
+            });
+            await loadPromise;
+            URL.revokeObjectURL(url);
+          }
+        } catch (e) {
+          console.warn('Could not load honey_tree.svg:', e);
+        }
+      }
+
       for (const species of speciesSet) {
+        if (species === 'honeylocust') continue; // Already handled
         const color = SPECIES_COLORS[species] || DEFAULT_TREE_COLOR;
         const outline = color;
         const fill = lighten(color, 0.22);
@@ -249,6 +286,7 @@ window.TreeRenderer = {
       }
 
       // Add the trees layer
+
       map.addLayer({
         id: 'trees-layer',
         type: 'symbol',
@@ -257,6 +295,8 @@ window.TreeRenderer = {
           visibility: 'visible',
           'icon-image': [
             'case',
+            ['==', ['downcase', ['get', 'species']], 'honeylocust'],
+            'tree-icon-honeylocust',
             ['has', 'species'],
             ['concat', 'tree-icon-', ['downcase', ['get', 'species']]],
             'tree-icon-unknown'
