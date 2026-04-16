@@ -211,38 +211,66 @@ window.TreeRenderer = {
 
       // Register icons for each species, but use honey_tree.svg for honeylocust
       const speciesSet = new Set(features.map(f => (f.properties.species || '').toLowerCase()));
-      let honeyTreeImageData = null;
+
+      // --- Honeylocust SVG icon from honey_tree.txt geometry ---
       if (!map.hasImage('tree-icon-honeylocust')) {
-        // Load SVG and convert to ImageData
         try {
-          const svgPath = encodeURI('./models/honey_tree.svg');
-          const svgResponse = await fetch(svgPath);
-          if (svgResponse.ok) {
-            const svgText = await svgResponse.text();
-            const blob = new Blob([svgText], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            const loadPromise = new Promise((resolve, reject) => {
-              const img = new window.Image();
-              img.onload = () => {
-                try {
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 256;
-                  canvas.height = 256;
-                  const ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, 0, 0, 256, 256);
-                  honeyTreeImageData = ctx.getImageData(0, 0, 256, 256);
-                  map.addImage('tree-icon-honeylocust', honeyTreeImageData, { pixelRatio: 2 });
-                  resolve();
-                } catch (e) { reject(e); }
-              };
-              img.onerror = reject;
-              img.src = url;
-            });
-            await loadPromise;
-            URL.revokeObjectURL(url);
+          const honeyTxt = await fetch('./models/honey_tree.txt');
+          if (honeyTxt.ok) {
+            const honeyText = await honeyTxt.text();
+            // Parse polygons
+            const lines = honeyText.split(/\r?\n/);
+            let paths = [];
+            for (const line of lines) {
+              if (/none/i.test(line) || !line.trim()) continue;
+              const coords = line.trim().split(/\s+/).map(pair => {
+                const [lng, lat] = pair.split(',').map(Number);
+                return [lng, lat];
+              });
+              if (coords.length > 1) paths.push(coords);
+            }
+            // Project to SVG space (simple normalization)
+            let flat = paths.flat();
+            let minX = Math.min(...flat.map(c => c[0]));
+            let maxX = Math.max(...flat.map(c => c[0]));
+            let minY = Math.min(...flat.map(c => c[1]));
+            let maxY = Math.max(...flat.map(c => c[1]));
+            let w = maxX - minX;
+            let h = maxY - minY;
+            let pad = 0.05 * Math.max(w, h);
+            // SVG size
+            const size = 256;
+            // Draw to canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            ctx.save();
+            ctx.translate(size/2, size/2);
+            ctx.scale(size/(w+2*pad), -size/(h+2*pad));
+            ctx.translate(-(minX+maxX)/2, -(minY+maxY)/2);
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#b7e1c2';
+            ctx.lineWidth = (w+h)/2 * 0.01;
+            ctx.fillStyle = 'rgba(183,225,194,0.18)';
+            for (const poly of paths) {
+              ctx.beginPath();
+              for (let i=0; i<poly.length; ++i) {
+                const [x, y] = poly[i];
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+            }
+            ctx.restore();
+            map.addImage('tree-icon-honeylocust', ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
           }
         } catch (e) {
-          console.warn('Could not load honey_tree.svg:', e);
+          console.warn('Could not generate honeylocust SVG icon:', e);
         }
       }
 
