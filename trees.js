@@ -209,103 +209,41 @@ window.TreeRenderer = {
       });
 
 
-      // Register icons for each species, but use honey_tree.svg for honeylocust
-      const speciesSet = new Set(features.map(f => (f.properties.species || '').toLowerCase()));
 
-      // --- Use honey.svg as the honeylocust icon ---
-      if (!map.hasImage('tree-icon-honeylocust')) {
-        try {
-          const svgPath = encodeURI('./models/honey.svg');
-          const svgResponse = await fetch(svgPath);
-          if (svgResponse.ok) {
-            const svgText = await svgResponse.text();
-            const blob = new Blob([svgText], { type: 'image/svg+xml' });
-            const url = URL.createObjectURL(blob);
-            const loadPromise = new Promise((resolve, reject) => {
-              const img = new window.Image();
-              img.onload = () => {
-                try {
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 256;
-                  canvas.height = 256;
-                  const ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, 0, 0, 256, 256);
-                  map.addImage('tree-icon-honeylocust', ctx.getImageData(0, 0, 256, 256), { pixelRatio: 2 });
-                  resolve();
-                } catch (e) { reject(e); }
-              };
-              img.onerror = reject;
-              img.src = url;
-            });
-            await loadPromise;
-            URL.revokeObjectURL(url);
-          }
-        } catch (e) {
-          console.warn('Could not load honey.svg:', e);
-        }
-      }
-
-      for (const species of speciesSet) {
-        if (species === 'honeylocust') continue; // Already handled
-        const color = SPECIES_COLORS[species] || DEFAULT_TREE_COLOR;
-        const outline = color;
-        const fill = lighten(color, 0.22);
-        // Create a canvas icon with outline and hatched fill
-        const size = 72;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        // Outline
-        ctx.beginPath();
-        ctx.arc(size/2, size/2, size*0.36, 0, Math.PI*2);
-        ctx.strokeStyle = outline;
-        ctx.lineWidth = 6;
-        ctx.stroke();
-        // Hatched fill (simulate with lighter fill and diagonal lines)
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(size/2, size/2, size*0.34, 0, Math.PI*2);
-        ctx.clip();
-        ctx.fillStyle = fill;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-        for (let i = -size; i < size*2; i += 8) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i - size, size);
-          ctx.stroke();
-        }
-        ctx.restore();
-        // Register icon
-        const id = iconId(species);
-        if (!map.hasImage(id)) {
-          map.addImage(id, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
-        }
-      }
-
-      // Add the trees layer
-
+      // Add the trees layer as simple colored circles
       map.addLayer({
         id: 'trees-layer',
-        type: 'symbol',
+        type: 'circle',
         source: 'trees',
-        layout: {
-          visibility: 'visible',
-          'icon-image': [
+        paint: {
+          'circle-radius': 7,
+          'circle-color': [
             'case',
-            ['==', ['downcase', ['get', 'species']], 'honeylocust'],
-            'tree-icon-honeylocust',
-            ['has', 'species'],
-            ['concat', 'tree-icon-', ['downcase', ['get', 'species']]],
-            'tree-icon-unknown'
+            ['has', ['downcase', ['get', 'species']], ['literal', Object.keys(SPECIES_COLORS)]],
+            [
+              'match',
+              ['downcase', ['get', 'species']],
+              'kentucky coffeetree', SPECIES_COLORS['kentucky coffeetree'],
+              'honeylocust', SPECIES_COLORS['honeylocust'],
+              'london planetree', SPECIES_COLORS['london planetree'],
+              'japanese zelkova', SPECIES_COLORS['japanese zelkova'],
+              'littleleaf linden', SPECIES_COLORS['littleleaf linden'],
+              'callery pear', SPECIES_COLORS['callery pear'],
+              'pin oak', SPECIES_COLORS['pin oak'],
+              'ginkgo', SPECIES_COLORS['ginkgo'],
+              'bald cypress', SPECIES_COLORS['bald cypress'],
+              'cornelian cherry', SPECIES_COLORS['cornelian cherry'],
+              'black walnut', SPECIES_COLORS['black walnut'],
+              'japanese tree lilac', SPECIES_COLORS['japanese tree lilac'],
+              'red maple', SPECIES_COLORS['red maple'],
+              'norway maple', SPECIES_COLORS['norway maple'],
+              DEFAULT_TREE_COLOR
+            ],
+            DEFAULT_TREE_COLOR
           ],
-          'icon-size': 0.8,
-          'icon-allow-overlap': true,
-          'icon-ignore-placement': true,
-          // Anchor icons to the map so they don't move with pitch/zoom
-          'icon-rotation-alignment': 'map',
-          'icon-pitch-alignment': 'map'
+          'circle-stroke-color': '#2f2a24',
+          'circle-stroke-width': 1.2,
+          'circle-opacity': 0.85
         }
       });
 
