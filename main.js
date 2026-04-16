@@ -128,6 +128,11 @@ async function initMap() {
   map.touchZoomRotate.disableRotation();
 
   attachMapHandlers();
+
+  // Add upright honeylocust trees after map is loaded
+  map.on('load', () => {
+    addUprightHoneylocustTrees();
+  });
 }
 
 let currentStage = 0;
