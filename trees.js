@@ -148,116 +148,129 @@ function iconId(species) {
 window.TreeRenderer = {
   async initTrees(map) {
     try {
+      // Load main tree data
       const response = await fetch('./data/gowanus_trees.json');
-      if (!response.ok) {
-        throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
-      }
-
-      const rawText    = await response.text();
+      if (!response.ok) throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
+      const rawText = await response.text();
       const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
-      const rawData    = JSON.parse(cleanedText);
+      const rawData = JSON.parse(cleanedText);
 
-      // Load swamp white oak SVG and convert to ImageData
-      let swampWhiteOakImage = null;
+      // Load honeylocust tree geometry from honey_tree.txt
+      let honeylocustFeatures = [];
       try {
-        const svgPath = encodeURI('./models/swamp-white-oak-tree.svg');
-        const svgResponse = await fetch(svgPath);
-        if (!svgResponse.ok) {
-          throw new Error(`SVG fetch failed: ${svgResponse.status}`);
-        }
-        
-        const svgText = await svgResponse.text();
-        const blob = new Blob([svgText], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(blob);
-        
-        const loadPromise = new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            try {
-              // Draw to a canvas matching the SVG's aspect ratio, then resize
-              const canvas = document.createElement('canvas');
-              canvas.width = img.naturalWidth || 512;
-              canvas.height = img.naturalHeight || 512;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0);
-              
-              // Resize to 256x256 using canvas
-              const finalCanvas = document.createElement('canvas');
-              finalCanvas.width = 256;
-              finalCanvas.height = 256;
-              const finalCtx = finalCanvas.getContext('2d');
-              finalCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 256, 256);
-              
-              swampWhiteOakImage = finalCtx.getImageData(0, 0, 256, 256);
-              console.log('? Swamp white oak SVG loaded and converted to ImageData');
-              resolve();
-            } catch (e) {
-              console.error('Error converting SVG to canvas:', e);
-              reject(e);
+        const honeyTxt = await fetch('./models/honey_tree.txt');
+        if (honeyTxt.ok) {
+          const honeyText = await honeyTxt.text();
+          // Each line with coordinates is a polygon for a honeylocust tree
+          const lines = honeyText.split(/\r?\n/);
+          for (const line of lines) {
+            if (/none/i.test(line) || !line.trim()) continue;
+            // Format: lng,lat lng,lat ...
+            const coords = line.trim().split(/\s+/).map(pair => {
+              const [lng, lat] = pair.split(',').map(Number);
+              return [lng, lat];
+            });
+            if (coords.length > 1) {
+              honeylocustFeatures.push({
+                type: 'Feature',
+                geometry: { type: 'Polygon', coordinates: [coords] },
+                properties: { species: 'honeylocust', isHoneyTree: true }
+              });
             }
-          };
-          img.onerror = (e) => {
-            console.error('SVG image failed to load:', e);
-            reject(e);
-          };
-          img.src = url;
-        });
-        
-        await loadPromise;
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error('Failed to load swamp white oak SVG:', err.message);
-        throw new Error('SVG tree rendering requires swamp white oak SVG file');
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load honey_tree.txt:', e);
       }
 
-      // Filter to only swamp white oak trees
-      const features = rawData
-        .filter((t) => t.lat != null && t.lon != null && (t.species || '').toLowerCase() === 'swamp white oak')
-        .map((t) => ({
+      // All trees as points
+      const treeFeatures = rawData
+        .filter(t => t.lat != null && t.lon != null && t.species)
+        .map(t => ({
           type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [Number(t.lon), Number(t.lat)]
-          },
+          geometry: { type: 'Point', coordinates: [Number(t.lon), Number(t.lat)] },
           properties: {
             tree_id: t.tree_id ?? null,
-            species: t.species  ?? 'Unknown',
-            health:  t.health   ?? 'Unknown'
+            species: t.species ?? 'Unknown',
+            health: t.health ?? 'Unknown',
+            isHoneyTree: false
           }
         }));
 
+      // Combine all features
+      const features = [...treeFeatures, ...honeylocustFeatures];
+
       if (map.getLayer('trees-layer')) map.removeLayer('trees-layer');
-      if (map.getSource('trees'))      map.removeSource('trees');
+      if (map.getSource('trees')) map.removeSource('trees');
 
       map.addSource('trees', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features }
       });
 
-      // Register swamp white oak SVG icon
-      const oakIconId = 'tree-icon-swamp-white-oak';
-      if (!map.hasImage(oakIconId)) {
-        map.addImage(oakIconId, swampWhiteOakImage);
-        console.log('? Registered swamp white oak SVG icon');
+      // Register icons for each species
+      const speciesSet = new Set(features.map(f => (f.properties.species || '').toLowerCase()));
+      for (const species of speciesSet) {
+        const color = SPECIES_COLORS[species] || DEFAULT_TREE_COLOR;
+        const outline = color;
+        const fill = lighten(color, 0.22);
+        // Create a canvas icon with outline and hatched fill
+        const size = 72;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Outline
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size*0.36, 0, Math.PI*2);
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        // Hatched fill (simulate with lighter fill and diagonal lines)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size*0.34, 0, Math.PI*2);
+        ctx.clip();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        for (let i = -size; i < size*2; i += 8) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i - size, size);
+          ctx.stroke();
+        }
+        ctx.restore();
+        // Register icon
+        const id = iconId(species);
+        if (!map.hasImage(id)) {
+          map.addImage(id, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 });
+        }
       }
 
+      // Add the trees layer
       map.addLayer({
         id: 'trees-layer',
         type: 'symbol',
         source: 'trees',
         layout: {
-          visibility: 'none',
-          'icon-image': oakIconId,
+          visibility: 'visible',
+          'icon-image': [
+            'case',
+            ['has', 'species'],
+            ['concat', 'tree-icon-', ['downcase', ['get', 'species']]],
+            'tree-icon-unknown'
+          ],
           'icon-size': 0.8,
-          'icon-allow-overlap':    true,
+          'icon-allow-overlap': true,
           'icon-ignore-placement': true,
-          // Billboard icons on pitched map.
-          'icon-rotation-alignment': 'viewport',
-          'icon-pitch-alignment':    'viewport'
+          // Anchor icons to the map so they don't move with pitch/zoom
+          'icon-rotation-alignment': 'map',
+          'icon-pitch-alignment': 'map'
         }
       });
 
-      console.log('? Trees layer added with SVG trees, count:', features.length);
+      console.log('🌳 Trees layer added with all species, count:', features.length);
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
