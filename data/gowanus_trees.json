@@ -129,9 +129,9 @@
   },
   {
     "tree_id": 215926,
-    "species": NaN,
+    "species": null,
     "dbh": null,
-    "health": NaN,
+    "health": null,
     "lat": 40.6765936,
     "lon": -73.98520106
   },
