@@ -1,6 +1,6 @@
 // --- Three.js custom layer for upright honeylocust trees ---
-async function addUprightHoneylocustTrees() {
-  if (map.getLayer('honeylocust-billboards')) return;
+async function addUprightHoneylocustTrees(mapInstance) {
+  if (mapInstance.getLayer('honeylocust-billboards')) return;
   if (typeof THREE === 'undefined') {
     console.warn('Three.js not available; honeylocust billboards skipped.');
     return;
@@ -45,16 +45,12 @@ async function addUprightHoneylocustTrees() {
         this.camera.projectionMatrix = new THREE.Matrix4().fromArray(matrix);
         this.renderer.resetState();
         this.renderer.render(this.scene, this.camera);
-        map.triggerRepaint();
+        mapInstance.triggerRepaint();
       }
     };
-    map.addLayer(customLayer);
+    mapInstance.addLayer(customLayer);
   });
 }
-// Call this after map is loaded
-map.on('load', () => {
-  addUprightHoneylocustTrees();
-});
 let map;
 
 // Google control points provided by user for site placement.
@@ -131,7 +127,7 @@ async function initMap() {
 
   // Add upright honeylocust trees after map is loaded
   map.on('load', () => {
-    addUprightHoneylocustTrees();
+    addUprightHoneylocustTrees(map);
   });
 }
 
