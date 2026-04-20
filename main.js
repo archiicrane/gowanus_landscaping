@@ -1,34 +1,6 @@
 // (Removed Three.js honeylocust billboard logic; all trees will be rendered as colored dots)
 let map;
 
-// Google control points provided by user for site placement.
-// A: south-west-ish, B: east, C: north-west-ish
-const SITE_CONTROL_A = { lng: -73.99415, lat: 40.67590 };
-const SITE_CONTROL_B = { lng: -73.990722, lat: 40.675821 };
-const SITE_CONTROL_C = { lng: -73.994018, lat: 40.676209 };
-
-// Three target site footprints derived from the user's red markup.
-// Order: north-west parcel, south parcel, north-east parcel.
-const SITE_SEGMENT_QUADS = [
-  [
-    [SITE_CONTROL_C.lng - 0.00135, SITE_CONTROL_C.lat + 0.00010],
-    [SITE_CONTROL_C.lng - 0.00010, SITE_CONTROL_C.lat + 0.00002],
-    [SITE_CONTROL_A.lng + 0.00002, SITE_CONTROL_A.lat - 0.00002],
-    [SITE_CONTROL_A.lng - 0.00145, SITE_CONTROL_A.lat - 0.00016]
-  ],
-  [
-    [SITE_CONTROL_A.lng + 0.00055, SITE_CONTROL_A.lat + 0.00002],
-    [SITE_CONTROL_B.lng - 0.00022, SITE_CONTROL_B.lat - 0.00001],
-    [SITE_CONTROL_B.lng - 0.00018, SITE_CONTROL_B.lat - 0.00036],
-    [SITE_CONTROL_A.lng + 0.00048, SITE_CONTROL_A.lat - 0.00030]
-  ],
-  [
-    [SITE_CONTROL_B.lng - 0.00120, SITE_CONTROL_B.lat + 0.00038],
-    [SITE_CONTROL_B.lng - 0.00010, SITE_CONTROL_B.lat + 0.00034],
-    [SITE_CONTROL_B.lng - 0.00008, SITE_CONTROL_B.lat + 0.00010],
-    [SITE_CONTROL_B.lng - 0.00130, SITE_CONTROL_B.lat + 0.00008]
-  ]
-];
 
 async function resolveMapboxToken() {
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
@@ -49,18 +21,18 @@ async function resolveMapboxToken() {
   }
 
   return apiToken;
+let map;
 }
 
 
 async function initMap() {
-  console.log('[DEBUG] initMap() started');
-  try {
-    const token = await resolveMapboxToken();
-    console.log('[DEBUG] Mapbox token resolved:', token);
+  
+  
   // NOTE: Mapbox token must be a public token (pk.)
   // It must allow Styles API access and the domain gowanus-landscaping.vercel.app
   // Do not use secret tokens (sk.) in frontend code!
   console.log('[DEBUG] initMap() started');
+  
   try {
     const token = await resolveMapboxToken();
     if (!token || !token.startsWith('pk.')) {
@@ -293,12 +265,14 @@ async function initMap() {
           fetchTreeSpeciesInfo(species, speciesFeatures, content);
         }
       });
+
     }); // <-- Close map.on('load', ...) handler
     console.log('[DEBUG] initMap() completed');
   } catch (err) {
     console.error('[DEBUG] initMap() error:', err);
   }
 }
+
 
 // Fetch species info from metadata JSON and display in the panel
 async function fetchTreeSpeciesInfo(species, features, contentEl) {
