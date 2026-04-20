@@ -81,20 +81,185 @@ async function initMap() {
     // Add all trees as colored dots after map is loaded
     map.on('load', () => {
       console.log('[DEBUG] Mapbox map loaded event fired');
+
+      // 1. Hide all Mapbox default labels, POIs, and color noise
+      const style = map.getStyle();
+      style.layers.forEach(layer => {
+        if (!map.getLayer(layer.id)) return;
+        if (layer.id === 'trees-layer') return; // Do not override the trees layer
+        try {
+          if (
+            layer.type === 'symbol' ||
+            layer.id.includes('label') ||
+            layer.id.includes('poi') ||
+            layer.id.includes('road-label') ||
+            layer.id.includes('transit')
+          ) {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        } catch (e) {}
+        try {
+          // Remove color from landuse, parks, etc.
+          if (layer.type === 'fill' && (layer.id.includes('landuse') || layer.id.includes('park'))) {
+            map.setPaintProperty(layer.id, 'fill-color', '#f7f7f7');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Water: subtle blue
+          if (layer.id.includes('water')) {
+            map.setPaintProperty(layer.id, 'fill-color', '#e6f0fa');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Buildings: light gray
+          if (layer.id.includes('building')) {
+            map.setPaintProperty(layer.id, 'fill-color', '#e0e0e0');
+            map.setPaintProperty(layer.id, 'fill-outline-color', '#bdbdbd');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Roads: thin white/gray lines, no fill
+          if (layer.type === 'line' && layer.id.includes('road')) {
+            map.setPaintProperty(layer.id, 'line-color', '#f7f7f7');
+            map.setPaintProperty(layer.id, 'line-width', 1.2);
+            map.setPaintProperty(layer.id, 'line-opacity', 1);
+          }
+        } catch (e) {}
+      });
+
+      // 2. Add custom architectural layers (buildings, roads, blocks) from GeoJSON
+      // Buildings (yellow = darker gray)
+      map.addSource('arch-buildings', {
+        type: 'geojson',
+        data: 'models/footprints.geojson'
+      });
+      map.addLayer({
+        id: 'arch-buildings-fill',
+        type: 'fill',
+        source: 'arch-buildings',
+        paint: {
+          // If feature property 'yellow' is true, use darker gray, else light gray
+          'fill-color': [
+            'case',
+              ['boolean', ['get', 'yellow'], false],
+              '#b0b0b0', // darker gray for yellow buildings
+              '#e0e0e0'  // default light gray
+          ],
+          'fill-opacity': 1
+        }
+      }, 'waterway-label');
+      map.addLayer({
+        id: 'arch-buildings-outline',
+        type: 'line',
+        source: 'arch-buildings',
+        paint: {
+          'line-color': '#bdbdbd',
+          'line-width': 1.1
+        }
+      }, 'arch-buildings-fill');
+
+      // 2b. Add flood vulnerability layer (clipped to Gowanus)
+      map.addSource('flood-vulnerability', {
+        type: 'geojson',
+        data: 'data/flood-vulnerability.geojson'
+      });
+      map.addLayer({
+        id: 'flood-vulnerability-fill',
+        type: 'fill',
+        source: 'flood-vulnerability',
+        paint: {
+          'fill-color': '#4fc3f7',
+          'fill-opacity': 0.28
+        },
+        filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }]
+      }, 'arch-buildings-outline');
+
+
+      // 2c. CSO outfalls (filtered to Gowanus)
+      fetch('models/Citywide_Outfalls_20260416.geojson')
+        .then(res => res.json())
+        .then(citywideCSO => {
+          // Filter to only those within the study area
+          const filtered = citywideCSO.features.filter(f => {
+            if (!f.geometry || f.geometry.type !== 'Point') return false;
+            return pointInStudyPolygon(f.geometry.coordinates);
+          });
+          const gowanusCSO = {
+            type: 'FeatureCollection',
+            features: filtered
+          };
+          map.addSource('cso-outfalls', {
+            type: 'geojson',
+            data: gowanusCSO
+          });
+          map.addLayer({
+            id: 'cso-outfalls-circle',
+            type: 'circle',
+            source: 'cso-outfalls',
+            paint: {
+              'circle-radius': 7,
+              'circle-color': '#ff9800',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#fff',
+              'circle-opacity': 0.95
+            }
+          }, 'flood-vulnerability-fill');
+
+          // Popup on click
+          map.on('click', 'cso-outfalls-circle', (e) => {
+            const feature = e.features && e.features[0];
+            if (!feature) return;
+            const props = feature.properties || {};
+            const html = `
+              <div style="min-width:180px">
+                <b>CSO Outfall</b><br>
+                <b>Type:</b> ${props.outfall_ty || '-'}<br>
+                <b>ID:</b> ${props.unitid || '-'}<br>
+                <b>Location:</b> ${props.location || '-'}<br>
+                <b>Receiving:</b> ${props.receiving_ || '-'}
+              </div>
+            `;
+            new mapboxgl.Popup()
+              .setLngLat(feature.geometry.coordinates)
+              .setHTML(html)
+              .addTo(map);
+          });
+          map.on('mouseenter', 'cso-outfalls-circle', () => {
+            map.getCanvas().style.cursor = 'pointer';
+          });
+          map.on('mouseleave', 'cso-outfalls-circle', () => {
+            map.getCanvas().style.cursor = '';
+          });
+        });
+
+      // Roads (if you have a roads GeoJSON, otherwise skip)
+      // map.addSource('arch-roads', {
+      //   type: 'geojson',
+      //   data: 'models/roads.geojson'
+      // });
+      // map.addLayer({
+      //   id: 'arch-roads-line',
+      //   type: 'line',
+      //   source: 'arch-roads',
+      //   paint: {
+      //     'line-color': '#f7f7f7',
+      //     'line-width': 1.2
+      //   }
+      // }, 'arch-buildings-outline');
+
+      // 3. TODO: Add Gowanus boundary clipping, flood overlay, CSO, trees, and hierarchy
+
+      // 4. Restore tree click popup logic
       window.TreeRenderer?.initTrees?.(map);
-
-      // (Highlight layer removed as requested)
-
-      // Add popup and info panel on tree dot click (no highlight)
       map.on('click', 'trees-layer', (e) => {
         const feature = e.features && e.features[0];
         if (!feature) return;
         const species = (feature.properties.species || 'Unknown').toLowerCase();
-
-        // Find all features of this species
         const allFeatures = map.querySourceFeatures('trees', { sourceLayer: undefined });
         const speciesFeatures = allFeatures.filter(f => (f.properties.species || '').toLowerCase() === species);
-        // Compute center of all trees of this species
         let center = feature.geometry.coordinates;
         if (speciesFeatures.length > 1) {
           let sumLng = 0, sumLat = 0;
@@ -104,8 +269,6 @@ async function initMap() {
           }
           center = [sumLng / speciesFeatures.length, sumLat / speciesFeatures.length];
         }
-
-        // Show the right-side info panel
         const panel = document.getElementById('tree-info-panel');
         const content = document.getElementById('tree-info-content');
         if (panel && content) {
@@ -113,14 +276,6 @@ async function initMap() {
           content.innerHTML = `<div style=\"padding:8px 0;\">Loading info for <b>${species}</b>...</div>`;
           fetchTreeSpeciesInfo(species, speciesFeatures, content);
         }
-
-        // Optionally, still show a popup at the centroid (can be removed if not needed)
-        /*
-        new mapboxgl.Popup()
-          .setLngLat(center)
-          .setHTML(`<div style=\\"min-width:180px;max-width:260px;\\"><b>${species}</b></div>`)
-          .addTo(map);
-        */
       });
     }); // <-- Close map.on('load', ...) handler
     console.log('[DEBUG] initMap() completed');
