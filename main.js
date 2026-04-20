@@ -2,47 +2,40 @@
 let map;
 
 
-async function resolveMapboxToken() {
-  const windowToken = (window.MAPBOX_TOKEN || '').trim();
-  if (windowToken) return windowToken;
 
-  const metaToken = (document.querySelector('meta[name="mapbox-token"]')?.content || '').trim();
-  if (metaToken) return metaToken;
-
-  const res = await fetch('/api/mapbox-token');
-  if (!res.ok) {
-    throw new Error(`Mapbox token fetch failed: ${res.status} ${res.statusText}`);
-  }
-
-  const data = await res.json();
-  const apiToken = (data?.token || '').trim();
-  if (!apiToken) {
-    throw new Error('Mapbox token is missing from /api/mapbox-token response.');
-  }
-
-  return apiToken;
-let map;
-}
 
 
 async function initMap() {
-  
-  
-  // NOTE: Mapbox token must be a public token (pk.)
-  // It must allow Styles API access and the domain gowanus-landscaping.vercel.app
-  // Do not use secret tokens (sk.) in frontend code!
-  console.log('[DEBUG] initMap() started');
-  
+  let token;
   try {
-    const token = await resolveMapboxToken();
-    if (!token || !token.startsWith('pk.')) {
-      console.error('[ERROR] Mapbox token is missing or invalid:', token);
-      alert('Mapbox token is missing or invalid. Map will not load.');
-      return;
-    }
-    console.log('[DEBUG] Mapbox token resolved:', token);
-    mapboxgl.accessToken = token;
+    token = await (async function resolveMapboxToken() {
+      const local = (window.APP_CONFIG && window.APP_CONFIG.mapboxToken) || "";
+      if (local && !local.includes("YOUR_MAPBOX")) return local;
+      try {
+        const res = await fetch("/api/mapbox-token");
+        if (res.ok) {
+          const cfg = await res.json();
+          const token = (cfg && cfg.token) || "";
+          if (token) return token;
+        }
+      } catch {}
+      // Fallback for local dev: put your token here if needed
+      return "YOUR_MAPBOX_TOKEN_HERE";
+    })();
+  } catch (err) {
+    alert(String(err));
+    return;
+  }
 
+  if (!token || !token.startsWith('pk.')) {
+    console.error('[ERROR] Mapbox token is missing or invalid:', token);
+    alert('Mapbox token is missing or invalid. Map will not load.');
+    return;
+  }
+  console.log('[DEBUG] Mapbox token resolved:', token);
+  mapboxgl.accessToken = token;
+
+  try {
     map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/light-v11',
@@ -271,7 +264,7 @@ async function initMap() {
   } catch (err) {
     console.error('[DEBUG] initMap() error:', err);
   }
-}
+
 
 
 // Fetch species info from metadata JSON and display in the panel
@@ -3172,3 +3165,4 @@ initMap().catch((err) => {
   console.error('MAP INIT ERROR:', err);
 });
 // End of main.js
+}
