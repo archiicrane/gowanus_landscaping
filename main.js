@@ -57,7 +57,18 @@ async function initMap() {
   try {
     const token = await resolveMapboxToken();
     console.log('[DEBUG] Mapbox token resolved:', token);
-
+  // NOTE: Mapbox token must be a public token (pk.)
+  // It must allow Styles API access and the domain gowanus-landscaping.vercel.app
+  // Do not use secret tokens (sk.) in frontend code!
+  console.log('[DEBUG] initMap() started');
+  try {
+    const token = await resolveMapboxToken();
+    if (!token || !token.startsWith('pk.')) {
+      console.error('[ERROR] Mapbox token is missing or invalid:', token);
+      alert('Mapbox token is missing or invalid. Map will not load.');
+      return;
+    }
+    console.log('[DEBUG] Mapbox token resolved:', token);
     mapboxgl.accessToken = token;
 
     map = new mapboxgl.Map({
@@ -70,6 +81,14 @@ async function initMap() {
       antialias: true
     });
     console.log('[DEBUG] Mapbox map object created:', map);
+
+    map.on('error', (e) => {
+      if (e && e.error && e.error.status === 401) {
+        console.error('[ERROR] Mapbox style load failed: Unauthorized (401). Check your token and domain restrictions.');
+      } else {
+        console.error('[ERROR] Mapbox map error:', e);
+      }
+    });
 
     map.addControl(new mapboxgl.NavigationControl());
     map.scrollZoom.disable();
@@ -176,9 +195,6 @@ async function initMap() {
         },
         filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }]
       }, 'arch-buildings-outline');
-
-
-      // 2c. CSO outfalls (filtered to Gowanus)
       fetch('models/Citywide_Outfalls_20260416.geojson')
         .then(res => res.json())
         .then(citywideCSO => {
