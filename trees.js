@@ -79,15 +79,13 @@ window.TreeRenderer = {
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
-  }
-
-  // showTrees and hideTrees methods should be inside the same object
+    }
+  },
   showTrees(map) {
     if (map.getLayer('trees-layer')) {
       map.setLayoutProperty('trees-layer', 'visibility', 'visible');
     }
   },
-
   hideTrees(map) {
     if (map.getLayer('trees-layer')) {
       map.setLayoutProperty('trees-layer', 'visibility', 'none');
