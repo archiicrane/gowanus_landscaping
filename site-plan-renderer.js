@@ -40,9 +40,21 @@ export class SitePlanRenderer {
     ground.position.set(0, 0, -0.1);
     this.scene.add(ground);
 
-    // Draw parks/planted areas
+    // Draw parks/planted areas (only polygons)
     this.data.parks.forEach(park => {
-      this.drawPolygon(park.polygon, SitePlanStyle.planted, 0.01);
+      // Only draw if coordinates are array of arrays (Polygon or MultiPolygon)
+      if (Array.isArray(park.polygon) && Array.isArray(park.polygon[0]) && Array.isArray(park.polygon[0][0])) {
+        // Polygon: [ [ [x, y], ... ] ]
+        this.drawPolygon(park.polygon, SitePlanStyle.planted, 0.01);
+      } else if (Array.isArray(park.polygon) && Array.isArray(park.polygon[0]) && typeof park.polygon[0][0] === 'number') {
+        // MultiPolygon: [ [ [ [x, y], ... ] ], ... ]
+        park.polygon.forEach(poly => {
+          if (Array.isArray(poly) && Array.isArray(poly[0])) {
+            this.drawPolygon([poly], SitePlanStyle.planted, 0.01);
+          }
+        });
+      }
+      // Skip LineString and other types
     });
 
     // Draw buildings
