@@ -8,6 +8,7 @@ function randRange(min, max) {
 
 // Draw a stylized tree canopy as overlapping blobs
 export function drawArchitecturalTree(scene, tree, style) {
+  // tree.position must already be in plan-space coordinates (x, y)
   const [x, y] = tree.position;
   const baseRadius = (tree.canopy || style.treeCanopyBaseRadius) * randRange(0.92, 1.08);
   const layers = style.treeCanopyLayers || 3;
