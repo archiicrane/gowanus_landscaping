@@ -4,7 +4,7 @@
 // Data sources
 const BUILDINGS_URL = 'models/buildings.geojson';
 const PARK_URL = 'models/park.geojson';
-const TREES_URL = 'data/gowanus_trees.json';
+const TREES_URL = 'data/gowanus_trees_clean.json';
 
 // Helper: fetch and parse JSON
 async function fetchJSON(url) {
