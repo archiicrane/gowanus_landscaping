@@ -51,6 +51,60 @@ export async function initMap() {
 
     map.on('load', () => {
       console.log('[MAP EVENT] Map loaded');
+      // --- RESTORE MAP LAYERS AND UI ---
+      // Add overlays, buildings, topography, flood, bioswale, etc.
+      // Example: load buildings geojson
+      fetch('./models/footprints.geojson')
+        .then(r => r.json())
+        .then(footprintsData => {
+          map.addSource('zoning-footprints', {
+            type: 'geojson',
+            data: footprintsData
+          });
+          map.addLayer({
+            id: 'zoning-footprints',
+            type: 'line',
+            source: 'zoning-footprints',
+            layout: {
+              visibility: 'visible',
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            paint: {
+              'line-color': '#f59e0b',
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                13, 1.0,
+                15, 1.6,
+                17, 2.4
+              ],
+              'line-opacity': 0.9
+            }
+          });
+        });
+      // Add more overlays as needed (topography, flood, bioswale, etc.)
+      // Initialize trees overlay if available
+      if (window.TreeRenderer && window.TreeRenderer.initTrees) {
+        window.TreeRenderer.initTrees(map);
+      }
+      // Restore layer toggles
+      const topoToggle = document.getElementById('toggle-topo');
+      const treesToggle = document.getElementById('toggle-trees');
+      topoToggle?.addEventListener('change', (event) => {
+        const visibility = event.target.checked ? 'visible' : 'none';
+        if (map.getLayer('zoning-footprints')) {
+          map.setLayoutProperty('zoning-footprints', 'visibility', visibility);
+        }
+      });
+      treesToggle?.addEventListener('change', (event) => {
+        if (event.target.checked) {
+          window.TreeRenderer?.showTrees?.(map);
+        } else {
+          window.TreeRenderer?.hideTrees?.(map);
+        }
+      });
     });
     map.on('style.load', () => {
       console.log('[MAP EVENT] Style loaded');
@@ -58,9 +112,6 @@ export async function initMap() {
     map.on('error', (e) => {
       console.error('[MAP EVENT] Map error:', e);
     });
-
-    // TODO: Import and call setupLayers(map) from layers.js
-    // TODO: Import and call attachMapHandlers(map) from utils.js
 
   } catch (err) {
     console.error('[MAP INIT] Map creation error:', err);
