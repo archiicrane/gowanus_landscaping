@@ -18,26 +18,11 @@ export async function resolveMapboxToken() {
   } catch (err) {
     console.error("[MAP INIT] Error fetching /api/mapbox-token:", err);
   }
-  // Fallback for local dev: put your token here if needed
-  return "YOUR_MAPBOX_TOKEN_HERE";
-}
-
-// Also support meta tag and window.MAPBOX_TOKEN for legacy compatibility
-// (Moved inside the function to avoid illegal return)
-
-// Patch: Add legacy token support inside the function
-// (This must be after all async/await logic)
-
-// ...existing code...
-
-// Patch: Add legacy token support
-export async function resolveMapboxToken() {
-  // ...existing code...
-  // Fallback for local dev: put your token here if needed
-  // (Legacy: check window and meta)
+  // Legacy: check window and meta
   const windowToken = (window.MAPBOX_TOKEN || '').trim();
   if (windowToken) return windowToken;
   const metaToken = (document.querySelector('meta[name="mapbox-token"]')?.content || '').trim();
   if (metaToken) return metaToken;
+  // Fallback for local dev: put your token here if needed
   return "YOUR_MAPBOX_TOKEN_HERE";
 }
