@@ -33,16 +33,31 @@ async function loadParks() {
   }));
 }
 
-// Normalize trees
+
+// Normalize trees (supports both array and GeoJSON FeatureCollection)
 async function loadTrees() {
   const data = await fetchJSON(TREES_URL);
-  return data.features.map(f => ({
-    id: f.id || f.properties?.tree_id || null,
-    species: f.properties?.spc_common || 'Tree',
-    position: f.geometry.coordinates,
-    canopy: f.properties?.canopy_diameter || 7,
-    properties: f.properties || {},
-  }));
+  if (Array.isArray(data)) {
+    // Plain array format (your current format)
+    return data.map(tree => ({
+      id: tree.tree_id || null,
+      species: tree.species || 'Tree',
+      position: [tree.lon, tree.lat],
+      canopy: tree.canopy_diameter || 7,
+      properties: tree,
+    }));
+  } else if (data.features) {
+    // GeoJSON FeatureCollection
+    return data.features.map(f => ({
+      id: f.id || f.properties?.tree_id || null,
+      species: f.properties?.spc_common || f.properties?.species || 'Tree',
+      position: f.geometry.coordinates,
+      canopy: f.properties?.canopy_diameter || 7,
+      properties: f.properties || {},
+    }));
+  } else {
+    throw new Error('Unrecognized tree data format');
+  }
 }
 
 // Main loader
