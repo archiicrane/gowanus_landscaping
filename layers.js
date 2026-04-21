@@ -1,5 +1,38 @@
 // layers.js - All map overlays and sources
 
+// --- Ensure STUDY_RING and pointInStudyPolygon are defined on window ---
+if (!window.STUDY_RING) {
+  // Coordinates from main_pre_split_utf8.js (lng, lat pairs)
+  window.STUDY_RING = [
+    [-73.98963594611494, 40.683945676183654],
+    [-73.98084416376932, 40.680669969224006],
+    [-73.98368161027763, 40.67628724578089],
+    [-73.99274143083169, 40.665495232798115],
+    [-73.99607305804426, 40.667988596328655],
+    [-73.99889524234268, 40.67260255106102],
+    [-73.9964465299067, 40.67744610487334],
+    [-73.99461997552936, 40.67663528353369],
+    [-73.98963594611494, 40.683945676183654]
+  ];
+}
+
+if (!window.pointInStudyPolygon) {
+  window.pointInStudyPolygon = function(point) {
+    const x = point[0];
+    const y = point[1];
+    const ring = window.STUDY_RING;
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1];
+      const xj = ring[j][0], yj = ring[j][1];
+      const intersects = ((yi > y) !== (yj > y)) &&
+        (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+      if (intersects) inside = !inside;
+    }
+    return inside;
+  };
+}
+
 export function setupMapLayers(map) {
   // --- Hide default Mapbox labels, POIs, and color noise ---
   const style = map.getStyle();
