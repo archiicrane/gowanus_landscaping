@@ -1,4 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
 // site-plan-main.js
 // Entry point for the Site Plan page
 
