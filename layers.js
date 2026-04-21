@@ -34,50 +34,129 @@ if (!window.pointInStudyPolygon) {
 }
 
 export function setupMapLayers(map) {
-      // --- Building Heights Overlay (b_heights.geojson) ---
-      (async () => {
-        try {
-          const res = await fetch('./models/b_heights.geojson');
-          if (!res.ok) throw new Error(`b_heights.geojson fetch failed: ${res.status} ${res.statusText}`);
-          const bHeightsData = await res.json();
-          if (!map.getSource('b-heights')) {
-            map.addSource('b-heights', { type: 'geojson', data: bHeightsData });
-          } else {
-            map.getSource('b-heights').setData(bHeightsData);
+  // --- Add B_heights GLTF 3D Model using Three.js ---
+  (async () => {
+    // Wait for map to load and Three.js to be available
+    if (!window.THREE || !window.THREE.GLTFLoader) {
+      console.warn('Three.js or GLTFLoader not available; B_heights model skipped.');
+      return;
+    }
+    // Find anchor point: use centroid of footprints.geojson as in old main.js
+    try {
+      const res = await fetch('./models/footprints.geojson');
+      if (!res.ok) throw new Error('Failed to load footprints.geojson');
+      const data = await res.json();
+      let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+      for (const feature of data.features || []) {
+        const geom = feature?.geometry;
+        if (!geom) continue;
+        const lines = geom.type === 'LineString' ? [geom.coordinates || []] : (geom.type === 'MultiLineString' ? (geom.coordinates || []) : []);
+        for (const line of lines) {
+          for (const coord of line) {
+            if (!Array.isArray(coord) || coord.length < 2) continue;
+            const lng = coord[0];
+            const lat = coord[1];
+            if (lng < minLng) minLng = lng;
+            if (lng > maxLng) maxLng = lng;
+            if (lat < minLat) minLat = lat;
+            if (lat > maxLat) maxLat = lat;
           }
-          if (!map.getLayer('b-heights-fill')) {
-            map.addLayer({
-              id: 'b-heights-fill',
-              type: 'fill',
-              source: 'b-heights',
-              paint: {
-                'fill-color': [
-                  'interpolate', ['linear'], ['get', 'height'],
-                  0, '#e0e0e0',
-                  10, '#b0b0b0',
-                  20, '#888888',
-                  30, '#555555',
-                  40, '#222222'
-                ],
-                'fill-opacity': 0.5
-              }
-            });
-          }
-          if (!map.getLayer('b-heights-outline')) {
-            map.addLayer({
-              id: 'b-heights-outline',
-              type: 'line',
-              source: 'b-heights',
-              paint: {
-                'line-color': '#222',
-                'line-width': 1.1
-              }
-            });
-          }
-        } catch (err) {
-          console.error('[LAYERS] b_heights error:', err);
         }
-      })();
+      }
+      if (!Number.isFinite(minLng) || !Number.isFinite(minLat) || !Number.isFinite(maxLng) || !Number.isFinite(maxLat)) return;
+      const anchorLngLat = [(minLng + maxLng) * 0.5, (minLat + maxLat) * 0.5];
+      // Add the custom Three.js layer
+      if (!map.getLayer('b-heights-model')) {
+        const mercator = mapboxgl.MercatorCoordinate.fromLngLat(anchorLngLat, 0);
+        const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+        const modelTransform = {
+          translateX: mercator.x,
+          translateY: mercator.y,
+          translateZ: mercator.z,
+          rotateX: Math.PI / 2,
+          rotateY: 0,
+          rotateZ: 0,
+          scale: meterInMercator
+        };
+        const customLayer = {
+          id: 'b-heights-model',
+          type: 'custom',
+          renderingMode: '3d',
+          onAdd: function(mapInstance, gl) {
+            this.camera = new window.THREE.Camera();
+            this.scene = new window.THREE.Scene();
+            this.scene.add(new window.THREE.AmbientLight(0xffffff, 0.78));
+            const directional = new window.THREE.DirectionalLight(0xffffff, 0.68);
+            directional.position.set(40, -80, 120).normalize();
+            this.scene.add(directional);
+            const loader = new window.THREE.GLTFLoader();
+            loader.load(
+              './models/B_heights.gltf',
+              (gltf) => {
+                const bounds = new window.THREE.Box3().setFromObject(gltf.scene);
+                if (!bounds.isEmpty()) {
+                  const center = new window.THREE.Vector3();
+                  bounds.getCenter(center);
+                  const epsilon = 0.05;
+                  gltf.scene.position.set(-center.x, -epsilon, -center.z);
+                }
+                gltf.scene.traverse((node) => {
+                  if (!node.isMesh) return;
+                  node.material = new window.THREE.MeshStandardMaterial({
+                    color: 0xfacc15,
+                    emissive: 0x5a4a00,
+                    metalness: 0.04,
+                    roughness: 0.8,
+                    transparent: true,
+                    opacity: 0.92
+                  });
+                });
+                this.scene.add(gltf.scene);
+              },
+              undefined,
+              (err) => { console.error('Failed to load B_heights.gltf:', err); }
+            );
+            this.renderer = new window.THREE.WebGLRenderer({
+              canvas: mapInstance.getCanvas(),
+              context: gl,
+              antialias: true
+            });
+            this.renderer.autoClear = false;
+          },
+          render: function(gl, matrix) {
+            modelTransform.translateZ = mercator.z;
+            const rotationX = new window.THREE.Matrix4().makeRotationAxis(
+              new window.THREE.Vector3(1, 0, 0), modelTransform.rotateX
+            );
+            const rotationY = new window.THREE.Matrix4().makeRotationAxis(
+              new window.THREE.Vector3(0, 1, 0), modelTransform.rotateY
+            );
+            const rotationZ = new window.THREE.Matrix4().makeRotationAxis(
+              new window.THREE.Vector3(0, 0, 1), modelTransform.rotateZ
+            );
+            const m = new window.THREE.Matrix4().fromArray(matrix);
+            const l = new window.THREE.Matrix4()
+              .makeTranslation(
+                modelTransform.translateX,
+                modelTransform.translateY,
+                modelTransform.translateZ
+              )
+              .scale(new window.THREE.Vector3(modelTransform.scale, -modelTransform.scale, modelTransform.scale))
+              .multiply(rotationX)
+              .multiply(rotationY)
+              .multiply(rotationZ);
+            this.camera.projectionMatrix = m.multiply(l);
+            this.renderer.resetState();
+            this.renderer.render(this.scene, this.camera);
+            map.triggerRepaint();
+          }
+        };
+        map.addLayer(customLayer);
+      }
+    } catch (err) {
+      console.error('[LAYERS] B_heights GLTF error:', err);
+    }
+  })();
 
       // --- Contour Lines Overlay (con_lines_gowanus_1ft.geojson) ---
       (async () => {
