@@ -337,6 +337,48 @@ export function setupMapLayers(map) {
       }
     } catch (e) {}
   });
+    const style = map.getStyle();
+    style.layers.forEach(layer => {
+      if (!map.getLayer(layer.id)) return;
+      if (layer.id === 'trees-layer') return;
+      try {
+        if (
+          layer.type === 'symbol' ||
+          layer.id.includes('label') ||
+          layer.id.includes('poi') ||
+          layer.id.includes('road-label') ||
+          layer.id.includes('transit')
+        ) {
+          map.setLayoutProperty(layer.id, 'visibility', 'none');
+        }
+      } catch (e) {}
+      try {
+        if (layer.type === 'fill' && (layer.id.includes('landuse') || layer.id.includes('park'))) {
+          map.setPaintProperty(layer.id, 'fill-color', currentTheme.background);
+          map.setPaintProperty(layer.id, 'fill-opacity', 1);
+        }
+      } catch (e) {}
+      try {
+        if (layer.id.includes('water')) {
+          map.setPaintProperty(layer.id, 'fill-color', currentTheme.background);
+          map.setPaintProperty(layer.id, 'fill-opacity', 1);
+        }
+      } catch (e) {}
+      try {
+        if (layer.id.includes('building')) {
+          map.setPaintProperty(layer.id, 'fill-color', currentTheme.building);
+          map.setPaintProperty(layer.id, 'fill-outline-color', currentTheme.buildingOutline);
+          map.setPaintProperty(layer.id, 'fill-opacity', 1);
+        }
+      } catch (e) {}
+      try {
+        if (layer.type === 'line' && layer.id.includes('road')) {
+          map.setPaintProperty(layer.id, 'line-color', currentTheme.road);
+          map.setPaintProperty(layer.id, 'line-width', 1.2);
+          map.setPaintProperty(layer.id, 'line-opacity', 1);
+        }
+      } catch (e) {}
+    });
 
   // --- Add custom architectural layers (buildings, roads, blocks) ---
   map.addSource('arch-buildings', {
@@ -348,12 +390,7 @@ export function setupMapLayers(map) {
     type: 'fill',
     source: 'arch-buildings',
     paint: {
-      'fill-color': [
-        'case',
-          ['boolean', ['get', 'yellow'], false],
-          '#b0b0b0',
-          '#e0e0e0'
-      ],
+        'fill-color': currentTheme.building,
       'fill-opacity': 1
     }
   }, 'waterway-label');
@@ -362,7 +399,7 @@ export function setupMapLayers(map) {
     type: 'line',
     source: 'arch-buildings',
     paint: {
-      'line-color': '#bdbdbd',
+        'line-color': currentTheme.buildingOutline,
       'line-width': 1.1
     }
   }, 'arch-buildings-fill');

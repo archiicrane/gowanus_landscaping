@@ -10,21 +10,15 @@
 .eco-band-row {
   display: grid;
   grid-template-columns: 140px 1fr;
+  background: rgba(255,255,255,0.92);
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  padding: 7px 0 7px 0;
+  display: flex;
   align-items: center;
-  column-gap: 16px;
-  width: 100%;
-}
-
-.eco-band-label {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #6f675b;
-  white-space: nowrap;
-}
-
-.eco-band-bar-wrap {
-  width: 100%;
+  justify-content: space-between;
+  position: relative;
+  z-index: 20;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -53,6 +47,69 @@
   background: linear-gradient(90deg, #a8d894 0%, #66b85d 100%);
 }
 .eco-band-bar.canopy {
+  /* Minimal, elegant mode toggle */
+  #mode-toggle {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    background: rgba(255,255,255,0.82);
+    border-radius: 18px;
+    padding: 5px 18px 5px 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    font-size: 15px;
+    color: #6b6b6b;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #mode-toggle label {
+    font-weight: 500;
+    margin: 0 2px;
+    cursor: pointer;
+  }
+  #mode-toggle input[type="radio"] {
+    accent-color: #bdbdbd;
+    margin-right: 4px;
+  }
+
+  /* Minimal top bar */
+  .top-bar {
+    background: rgba(255,255,255,0.92);
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    padding: 7px 0 7px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 20;
+  }
+  .brand {
+    font-family: 'Georgia', serif;
+    font-size: 1.25rem;
+    color: #7a7a7a;
+    font-weight: 600;
+    margin-left: 22px;
+  }
+  .nav-links {
+    margin-right: 18px;
+  }
+  .nav-btn {
+    color: #8a8a8a;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    padding: 4px 12px;
+    border-radius: 7px;
+    transition: background 0.18s;
+    text-decoration: none;
+  }
+  .nav-btn.active, .nav-btn:hover {
+    background: #ecebe7;
+    color: #444;
+  }
   background: linear-gradient(90deg, #efd86a 0%, #f0cb35 100%);
 }
 .eco-band-bar.biodiversity {
@@ -491,6 +548,22 @@ body {
   background: #eae7df;
 }
 
+/* Map container background and paper texture overlay */
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--map-bg, #f7f6f3);
+}
+
+#map.paper-texture {
+  background-image: url('./vendor/paper-texture.png');
+  background-size: cover;
+  background-blend-mode: multiply;
+  opacity: 0.98;
+}
 .ui-panel {
   position: absolute;
   z-index: 100;

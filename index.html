@@ -14,15 +14,19 @@
   <script src="vendor/turf.min.js"></script>
 </head>
 <body>
-  <nav class="top-bar">
-    <div class="brand">Rewilding Gowanus</div>
-    <div class="nav-links">
+  <div class="top-bar">
+    <span class="brand">Rewilding Gowanus</span>
+    <span class="nav-links">
       <a href="index.html" class="nav-btn active">Map</a>
       <a href="diagrams.html" class="nav-btn">Diagrams</a>
-    </div>
-  </nav>
+    </span>
+  </div>
 
   <div id="map"></div>
+  <div id="mode-toggle">
+    <label for="mode-plan"><input type="radio" id="mode-plan" name="mode" value="plan" checked>Rendered Plan</label>
+    <label for="mode-analysis"><input type="radio" id="mode-analysis" name="mode" value="analysis">Analysis</label>
+  </div>
   <div id="tree-info-panel">
     <div id="tree-info-content">
       <!-- Tree info will be injected here -->

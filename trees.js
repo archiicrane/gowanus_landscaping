@@ -1,3 +1,5 @@
+
+import { currentTheme } from './theme.js';
 console.log('trees.js loaded');
 
 // Species to canopy color mapping (matches original dot colors)
@@ -22,65 +24,65 @@ const DEFAULT_TREE_COLOR = '#b9d8b6';
 /**
  * Parse a hex colour into [r, g, b] integers.
  */
-function hexToRgb(hex) {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
+window.TreeRenderer = {
+  async initTrees(map) {
+    try {
+      // Load main tree data
+      const response = await fetch('./data/gowanus_trees.json');
+      if (!response.ok) throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
+      const rawText = await response.text();
+      const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
+      const rawData = JSON.parse(cleanedText);
 
-function lighten(hex, amount = 0.22) {
-  const [r, g, b] = hexToRgb(hex);
-  const l = (c) => Math.min(255, Math.round(c + (255 - c) * amount));
-  return `rgb(${l(r)},${l(g)},${l(b)})`;
-}
+      // All trees as points
+      const treeFeatures = rawData
+        .filter(t => t.lat != null && t.lon != null && t.species)
+        .map(t => ({
+          lon: Number(t.lon),
+          lat: Number(t.lat),
+          species: t.species ?? 'Unknown'
+        }));
 
-function darken(hex, amount = 0.28) {
-  const [r, g, b] = hexToRgb(hex);
-  const d = (c) => Math.max(0, Math.round(c * (1 - amount)));
-  return `rgb(${d(r)},${d(g)},${d(b)})`;
-}
-
-/**
- * Draws a detailed organic tree icon onto a canvas:
- * multi-cluster leafy canopy, trunk, drop shadow, per-cluster shading.
- * Returns raw ImageData for map.addImage().
- */
-function createTreeIcon(canopyColor, size = 72) {
-  const canvas = document.createElement('canvas');
-  canvas.width  = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  const cx = size / 2;
-  const cy = size * 0.42;
-  const R  = size * 0.30; // base canopy radius
-
-  // Leaf cluster layout: [dx, dy, radius] relative to canopy centre
-  const clusters = [
-    [  0,        0,       R        ],  // centre body
-    [ -R * 0.50, -R * 0.40, R * 0.68 ],  // top-left lobe
-    [  R * 0.48, -R * 0.38, R * 0.65 ],  // top-right lobe
-    [ -R * 0.55,  R * 0.32, R * 0.58 ],  // bottom-left lobe
-    [  R * 0.50,  R * 0.30, R * 0.56 ],  // bottom-right lobe
-    [  0,        -R * 0.60, R * 0.50 ],  // top crown
-  ];
-
-  // --- Ground shadow ---
-  ctx.beginPath();
-  ctx.ellipse(cx + 2, size * 0.87, R * 0.62, R * 0.18, 0, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,0.28)';
-  ctx.fill();
-
-  // --- Trunk ---
-  const tw = size * 0.09;
-  const trunkTop    = cy + R * 0.55;
-  const trunkBottom = size * 0.87;
-  const grad = ctx.createLinearGradient(cx - tw, 0, cx + tw, 0);
-  grad.addColorStop(0,   '#5a3010');
-  grad.addColorStop(0.4, '#8b5c2a');
-  grad.addColorStop(1,   '#4a2808');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.moveTo(cx - tw * 0.6, trunkBottom);
+      // Remove old canvas if present
+      let canvas = document.getElementById('tree-canopy-canvas');
+      if (canvas) canvas.remove();
+      canvas = document.createElement('canvas');
+      canvas.id = 'tree-canopy-canvas';
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.pointerEvents = 'none';
+      canvas.width = map.getContainer().offsetWidth;
+      canvas.height = map.getContainer().offsetHeight;
+      map.getContainer().appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      // Project and draw each tree
+      for (const tree of treeFeatures) {
+        const pt = map.project([tree.lon, tree.lat]);
+        // Vary size slightly by species or random
+        const r = 13 + Math.random() * 7;
+        // Use theme color
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = currentTheme.treeCanopy;
+        ctx.globalAlpha = 1;
+        ctx.shadowColor = currentTheme.treeCanopy;
+        ctx.shadowBlur = r * 0.5;
+        ctx.fill();
+        // Trunk dot
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, r * 0.18, 0, 2 * Math.PI);
+        ctx.fillStyle = currentTheme.treeTrunk;
+        ctx.globalAlpha = 0.7;
+        ctx.shadowBlur = 0;
+        ctx.fill();
+        ctx.restore();
+      }
+    } catch (err) {
+      console.error('TREE LOAD ERROR:', err);
+    }
+  },
   ctx.lineTo(cx - tw,       trunkTop);
   ctx.lineTo(cx + tw,       trunkTop);
   ctx.lineTo(cx + tw * 0.6, trunkBottom);
