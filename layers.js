@@ -161,8 +161,8 @@ export function setupMapLayers(map) {
       // --- Contour Lines Overlay (con_lines_gowanus_1ft.geojson) ---
       (async () => {
         try {
-          const res = await fetch('./models/con_lines_gowanus_1ft.geojson');
-          if (!res.ok) throw new Error(`con_lines_gowanus_1ft.geojson fetch failed: ${res.status} ${res.statusText}`);
+          const res = await fetch('./models/con_lines_gowanus_lite.geojson');
+          if (!res.ok) throw new Error(`con_lines_gowanus_lite.geojson fetch failed: ${res.status} ${res.statusText}`);
           const contourData = await res.json();
           if (!map.getSource('contour-lines')) {
             map.addSource('contour-lines', { type: 'geojson', data: contourData });
