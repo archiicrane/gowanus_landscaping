@@ -21,3 +21,9 @@ export async function resolveMapboxToken() {
   // Fallback for local dev: put your token here if needed
   return "YOUR_MAPBOX_TOKEN_HERE";
 }
+
+// Also support meta tag and window.MAPBOX_TOKEN for legacy compatibility
+const windowToken = (window.MAPBOX_TOKEN || '').trim();
+if (windowToken) return windowToken;
+const metaToken = (document.querySelector('meta[name="mapbox-token"]')?.content || '').trim();
+if (metaToken) return metaToken;

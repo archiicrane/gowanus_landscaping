@@ -1,5 +1,8 @@
 // map-init.js - Handles Mapbox map creation and event wiring
+
 import { resolveMapboxToken } from './token.js';
+import { setupMapLayers } from './layers.js';
+import { setupMapHandlers } from './handlers.js';
 
 export async function initMap() {
   console.log('[MAP INIT] initMap() called');
@@ -51,123 +54,8 @@ export async function initMap() {
 
     map.on('load', () => {
       console.log('[MAP EVENT] Map loaded');
-      // --- RESTORE EXISTING (GRAY) AND PROPOSED (YELLOW/BLUE) BUILDINGS ---
-      Promise.all([
-        fetch('./data/gowanus-buildings.geojson').then(r => r.json()),
-        fetch('./models/footprints.geojson').then(r => r.json())
-      ]).then(([existingData, footprintsData]) => {
-        // Existing buildings (gray extrusions)
-        map.addSource('existing', {
-          type: 'geojson',
-          data: existingData
-        });
-        map.addLayer({
-          id: 'existing-buildings',
-          type: 'fill-extrusion',
-          source: 'existing',
-          paint: {
-            'fill-extrusion-color': '#b7c0c8',
-            'fill-extrusion-base': 0,
-            'fill-extrusion-height': 0,
-            'fill-extrusion-opacity': 0.92
-          }
-        });
-        map.addLayer({
-          id: 'existing-building-outline',
-          type: 'line',
-          source: 'existing',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': '#2d3748',
-            'line-width': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              13, 0.8,
-              16, 1.5,
-              18, 2.2
-            ],
-            'line-opacity': 1.0
-          }
-        });
-        // Proposed buildings (yellow/blue extrusions)
-        map.addSource('proposed', {
-          type: 'geojson',
-          data: footprintsData
-        });
-        map.addLayer({
-          id: 'proposed-buildings',
-          type: 'fill-extrusion',
-          source: 'proposed',
-          paint: {
-            'fill-extrusion-color': '#3b82f6',
-            'fill-extrusion-base': 0,
-            'fill-extrusion-height': 0,
-            'fill-extrusion-opacity': 0
-          }
-        });
-        map.addLayer({
-          id: 'proposed-building-outline',
-          type: 'line',
-          source: 'proposed',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': '#2d3748',
-            'line-width': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              13, 0.8,
-              16, 1.5,
-              18, 2.2
-            ],
-            'line-opacity': 0
-          }
-        });
-      });
-      // --- RESTORE PARK OUTLINE AND FILL ---
-      fetch('./models/park.geojson')
-        .then(r => r.json())
-        .then(parkData => {
-          map.addSource('park', {
-            type: 'geojson',
-            data: parkData
-          });
-          map.addLayer({
-            id: 'park-hatch-fill',
-            type: 'fill',
-            source: 'park',
-            paint: {
-              'fill-color': '#e6f7e6',
-              'fill-opacity': 0.45
-            }
-          });
-        });
-      fetch('./models/park_outline.geojson')
-        .then(r => r.json())
-        .then(parkOutlineData => {
-          map.addSource('park-outline', {
-            type: 'geojson',
-            data: parkOutlineData
-          });
-          map.addLayer({
-            id: 'park-outline',
-            type: 'line',
-            source: 'park-outline',
-            paint: {
-              'line-color': '#15803d',
-              'line-width': 2.2,
-              'line-opacity': 0.85
-            }
-          });
-        });
-      // Add more overlays as needed (topography, flood, bioswale, etc.)
+      setupMapLayers(map);
+      setupMapHandlers(map);
       // Initialize trees overlay if available
       if (window.TreeRenderer && window.TreeRenderer.initTrees) {
         window.TreeRenderer.initTrees(map);

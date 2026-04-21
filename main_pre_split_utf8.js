@@ -1,0 +1,3200 @@
+﻿// (Removed Three.js honeylocust billboard logic; all trees will be rendered as colored dots)
+let map;
+
+// Google control points provided by user for site placement.
+// A: south-west-ish, B: east, C: north-west-ish
+const SITE_CONTROL_A = { lng: -73.99415, lat: 40.67590 };
+const SITE_CONTROL_B = { lng: -73.990722, lat: 40.675821 };
+const SITE_CONTROL_C = { lng: -73.994018, lat: 40.676209 };
+
+// Three target site footprints derived from the user's red markup.
+// Order: north-west parcel, south parcel, north-east parcel.
+const SITE_SEGMENT_QUADS = [
+  [
+    [SITE_CONTROL_C.lng - 0.00135, SITE_CONTROL_C.lat + 0.00010],
+    [SITE_CONTROL_C.lng - 0.00010, SITE_CONTROL_C.lat + 0.00002],
+    [SITE_CONTROL_A.lng + 0.00002, SITE_CONTROL_A.lat - 0.00002],
+    [SITE_CONTROL_A.lng - 0.00145, SITE_CONTROL_A.lat - 0.00016]
+  ],
+  [
+    [SITE_CONTROL_A.lng + 0.00055, SITE_CONTROL_A.lat + 0.00002],
+    [SITE_CONTROL_B.lng - 0.00022, SITE_CONTROL_B.lat - 0.00001],
+    [SITE_CONTROL_B.lng - 0.00018, SITE_CONTROL_B.lat - 0.00036],
+    [SITE_CONTROL_A.lng + 0.00048, SITE_CONTROL_A.lat - 0.00030]
+  ],
+  [
+    [SITE_CONTROL_B.lng - 0.00120, SITE_CONTROL_B.lat + 0.00038],
+    [SITE_CONTROL_B.lng - 0.00010, SITE_CONTROL_B.lat + 0.00034],
+    [SITE_CONTROL_B.lng - 0.00008, SITE_CONTROL_B.lat + 0.00010],
+    [SITE_CONTROL_B.lng - 0.00130, SITE_CONTROL_B.lat + 0.00008]
+  ]
+];
+
+async function resolveMapboxToken() {
+  const windowToken = (window.MAPBOX_TOKEN || '').trim();
+  if (windowToken) return windowToken;
+
+  const metaToken = (document.querySelector('meta[name="mapbox-token"]')?.content || '').trim();
+  if (metaToken) return metaToken;
+
+  const res = await fetch('/api/mapbox-token');
+  if (!res.ok) {
+    throw new Error(`Mapbox token fetch failed: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  const apiToken = (data?.token || '').trim();
+  if (!apiToken) {
+    throw new Error('Mapbox token is missing from /api/mapbox-token response.');
+  }
+
+  return apiToken;
+}
+
+
+async function initMap() {
+  console.log('[DEBUG] initMap() started');
+  try {
+    const token = await resolveMapboxToken();
+    console.log('[DEBUG] Mapbox token resolved:', token);
+  // NOTE: Mapbox token must be a public token (pk.)
+  // It must allow Styles API access and the domain gowanus-landscaping.vercel.app
+  // Do not use secret tokens (sk.) in frontend code!
+  console.log('[DEBUG] initMap() started');
+  try {
+    const token = await resolveMapboxToken();
+    if (!token || !token.startsWith('pk.')) {
+      console.error('[ERROR] Mapbox token is missing or invalid:', token);
+      alert('Mapbox token is missing or invalid. Map will not load.');
+      return;
+    }
+    console.log('[DEBUG] Mapbox token resolved:', token);
+    mapboxgl.accessToken = token;
+
+    map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: PRESENTATION_CENTER,
+      zoom: 15.25,
+      pitch: PRESENTATION_PITCH,
+      bearing: PRESENTATION_BEARING,
+      antialias: true
+    });
+    console.log('[DEBUG] Mapbox map object created:', map);
+
+    map.on('error', (e) => {
+      if (e && e.error && e.error.status === 401) {
+        console.error('[ERROR] Mapbox style load failed: Unauthorized (401). Check your token and domain restrictions.');
+      } else {
+        console.error('[ERROR] Mapbox map error:', e);
+      }
+    });
+
+    map.addControl(new mapboxgl.NavigationControl());
+    map.scrollZoom.disable();
+    map.dragRotate.disable();
+    map.touchZoomRotate.disableRotation();
+
+    attachMapHandlers();
+
+    // Add all trees as colored dots after map is loaded
+    map.on('load', () => {
+      console.log('[DEBUG] Mapbox map loaded event fired');
+
+      // 1. Hide all Mapbox default labels, POIs, and color noise
+      const style = map.getStyle();
+      style.layers.forEach(layer => {
+        if (!map.getLayer(layer.id)) return;
+        if (layer.id === 'trees-layer') return; // Do not override the trees layer
+        try {
+          if (
+            layer.type === 'symbol' ||
+            layer.id.includes('label') ||
+            layer.id.includes('poi') ||
+            layer.id.includes('road-label') ||
+            layer.id.includes('transit')
+          ) {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        } catch (e) {}
+        try {
+          // Remove color from landuse, parks, etc.
+          if (layer.type === 'fill' && (layer.id.includes('landuse') || layer.id.includes('park'))) {
+            map.setPaintProperty(layer.id, 'fill-color', '#f7f7f7');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Water: subtle blue
+          if (layer.id.includes('water')) {
+            map.setPaintProperty(layer.id, 'fill-color', '#e6f0fa');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Buildings: light gray
+          if (layer.id.includes('building')) {
+            map.setPaintProperty(layer.id, 'fill-color', '#e0e0e0');
+            map.setPaintProperty(layer.id, 'fill-outline-color', '#bdbdbd');
+            map.setPaintProperty(layer.id, 'fill-opacity', 1);
+          }
+        } catch (e) {}
+        try {
+          // Roads: thin white/gray lines, no fill
+          if (layer.type === 'line' && layer.id.includes('road')) {
+            map.setPaintProperty(layer.id, 'line-color', '#f7f7f7');
+            map.setPaintProperty(layer.id, 'line-width', 1.2);
+            map.setPaintProperty(layer.id, 'line-opacity', 1);
+          }
+        } catch (e) {}
+      });
+
+      // 2. Add custom architectural layers (buildings, roads, blocks) from GeoJSON
+      // Buildings (yellow = darker gray)
+      map.addSource('arch-buildings', {
+        type: 'geojson',
+        data: 'models/footprints.geojson'
+      });
+      map.addLayer({
+        id: 'arch-buildings-fill',
+        type: 'fill',
+        source: 'arch-buildings',
+        paint: {
+          // If feature property 'yellow' is true, use darker gray, else light gray
+          'fill-color': [
+            'case',
+              ['boolean', ['get', 'yellow'], false],
+              '#b0b0b0', // darker gray for yellow buildings
+              '#e0e0e0'  // default light gray
+          ],
+          'fill-opacity': 1
+        }
+      }, 'waterway-label');
+      map.addLayer({
+        id: 'arch-buildings-outline',
+        type: 'line',
+        source: 'arch-buildings',
+        paint: {
+          'line-color': '#bdbdbd',
+          'line-width': 1.1
+        }
+      }, 'arch-buildings-fill');
+
+      // 2b. Add flood vulnerability layer (clipped to Gowanus)
+      map.addSource('flood-vulnerability', {
+        type: 'geojson',
+        data: 'data/flood-vulnerability.geojson'
+      });
+      map.addLayer({
+        id: 'flood-vulnerability-fill',
+        type: 'fill',
+        source: 'flood-vulnerability',
+        paint: {
+          'fill-color': '#4fc3f7',
+          'fill-opacity': 0.28
+        },
+        filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }]
+      }, 'arch-buildings-outline');
+      fetch('models/Citywide_Outfalls_20260416.geojson')
+        .then(res => res.json())
+        .then(citywideCSO => {
+          // Filter to only those within the study area
+          const filtered = citywideCSO.features.filter(f => {
+            if (!f.geometry || f.geometry.type !== 'Point') return false;
+            return pointInStudyPolygon(f.geometry.coordinates);
+          });
+          const gowanusCSO = {
+            type: 'FeatureCollection',
+            features: filtered
+          };
+          map.addSource('cso-outfalls', {
+            type: 'geojson',
+            data: gowanusCSO
+          });
+          map.addLayer({
+            id: 'cso-outfalls-circle',
+            type: 'circle',
+            source: 'cso-outfalls',
+            paint: {
+              'circle-radius': 7,
+              'circle-color': '#ff9800',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#fff',
+              'circle-opacity': 0.95
+            }
+          }, 'flood-vulnerability-fill');
+
+          // Popup on click
+          map.on('click', 'cso-outfalls-circle', (e) => {
+            const feature = e.features && e.features[0];
+            if (!feature) return;
+            const props = feature.properties || {};
+            const html = `
+              <div style="min-width:180px">
+                <b>CSO Outfall</b><br>
+                <b>Type:</b> ${props.outfall_ty || '-'}<br>
+                <b>ID:</b> ${props.unitid || '-'}<br>
+                <b>Location:</b> ${props.location || '-'}<br>
+                <b>Receiving:</b> ${props.receiving_ || '-'}
+              </div>
+            `;
+            new mapboxgl.Popup()
+              .setLngLat(feature.geometry.coordinates)
+              .setHTML(html)
+              .addTo(map);
+          });
+          map.on('mouseenter', 'cso-outfalls-circle', () => {
+            map.getCanvas().style.cursor = 'pointer';
+          });
+          map.on('mouseleave', 'cso-outfalls-circle', () => {
+            map.getCanvas().style.cursor = '';
+          });
+        });
+
+      // Roads (if you have a roads GeoJSON, otherwise skip)
+      // map.addSource('arch-roads', {
+      //   type: 'geojson',
+      //   data: 'models/roads.geojson'
+      // });
+      // map.addLayer({
+      //   id: 'arch-roads-line',
+      //   type: 'line',
+      //   source: 'arch-roads',
+      //   paint: {
+      //     'line-color': '#f7f7f7',
+      //     'line-width': 1.2
+      //   }
+      // }, 'arch-buildings-outline');
+
+      // 3. TODO: Add Gowanus boundary clipping, flood overlay, CSO, trees, and hierarchy
+
+      // 4. Restore tree click popup logic
+      window.TreeRenderer?.initTrees?.(map);
+      map.on('click', 'trees-layer', (e) => {
+        const feature = e.features && e.features[0];
+        if (!feature) return;
+        const species = (feature.properties.species || 'Unknown').toLowerCase();
+        const allFeatures = map.querySourceFeatures('trees', { sourceLayer: undefined });
+        const speciesFeatures = allFeatures.filter(f => (f.properties.species || '').toLowerCase() === species);
+        let center = feature.geometry.coordinates;
+        if (speciesFeatures.length > 1) {
+          let sumLng = 0, sumLat = 0;
+          for (const f of speciesFeatures) {
+            sumLng += f.geometry.coordinates[0];
+            sumLat += f.geometry.coordinates[1];
+          }
+          center = [sumLng / speciesFeatures.length, sumLat / speciesFeatures.length];
+        }
+        const panel = document.getElementById('tree-info-panel');
+        const content = document.getElementById('tree-info-content');
+        if (panel && content) {
+          panel.classList.add('active');
+          content.innerHTML = `<div style=\"padding:8px 0;\">Loading info for <b>${species}</b>...</div>`;
+          fetchTreeSpeciesInfo(species, speciesFeatures, content);
+        }
+      });
+    }); // <-- Close map.on('load', ...) handler
+    console.log('[DEBUG] initMap() completed');
+  } catch (err) {
+    console.error('[DEBUG] initMap() error:', err);
+  }
+}
+
+// Fetch species info from metadata JSON and display in the panel
+async function fetchTreeSpeciesInfo(species, features, contentEl) {
+  // Load metadata JSON if not already loaded
+  if (!window._treeSpeciesMetadata) {
+    try {
+      const res = await fetch('data/tree_species_metadata.json');
+      window._treeSpeciesMetadata = await res.json();
+    } catch (err) {
+      window._treeSpeciesMetadata = {};
+    }
+  }
+  const meta = window._treeSpeciesMetadata || {};
+  const metaData = meta[species] || {};
+
+  // --- Helpers ---
+  function safe(val, placeholder = '-') {
+    if (val === undefined || val === null || val === '' || val === '-') return placeholder;
+    return val;
+  }
+
+  function normalizeValue(val) {
+    if (typeof val === 'string') {
+      const v = val.toLowerCase();
+      if (v.includes('low')) return 0.33;
+      if (v.includes('high')) return 1.0;
+      return 0.66;
+    }
+    if (typeof val === 'number') {
+      if (val <= 0.33) return 0.33;
+      if (val >= 0.9) return 1.0;
+      return 0.66;
+    }
+    return 0.33;
+  }
+
+  function canopyValue(canopy) {
+    if (!canopy) return 0.33;
+    const match = /([\d.]+)/.exec(canopy);
+    if (!match) return 0.33;
+    const val = parseFloat(match[1]);
+    if (val < 25) return 0.33;
+    if (val > 60) return 1.0;
+    return 0.66;
+  }
+
+  function biodiversityScore(metaData) {
+    let n = 0;
+    if (metaData.animals && metaData.animals !== '-') n++;
+    if (metaData.birds && metaData.birds !== '-') n++;
+    if ((metaData.pollinators && metaData.pollinators !== '-') || (metaData.flowers && metaData.flowers.toLowerCase().includes('fragrant'))) n++;
+    return n / 3;
+  }
+
+  // --- SVG Icon System ---
+  function renderIcon(type, label) {
+    // All icons use currentColor for palette tint
+    if (type === 'flower') return `<span class="icon-svg icon-flower" title="Bloom"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="2.5" fill="#fffbe6"/><path d="M11 3v3M11 16v3M3 11h3M16 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1"/></svg></span>`;
+    if (type === 'paw') return `<span class="icon-svg icon-paw" title="Mammals"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="13" rx="1.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="15" cy="13" rx="1.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="11" cy="17" rx="2.2" ry="1.7" fill="#e3f2fd"/><ellipse cx="9" cy="9" rx="1" ry="1.3" fill="#e3f2fd"/><ellipse cx="13" cy="9" rx="1" ry="1.3" fill="#e3f2fd"/></svg></span>`;
+    return '';
+  }
+
+  function renderIconRow(metaData) {
+    let icons = [];
+    if (metaData.pollinators && metaData.pollinators !== '-') icons.push(renderIcon('bee', 'Pollinators'));
+    if (metaData.birds && metaData.birds !== '-') icons.push(renderIcon('bird', 'Birds'));
+    if (metaData.leaf_type && metaData.leaf_type !== '-') icons.push(renderIcon('leaf', 'Leaf type'));
+    return `<div class="icon-row">${icons.join('')}</div>`;
+  }
+
+  function renderBar(label, value, color) {
+    const percent = normalizeValue(value) * 100;
+    let display = 'Medium';
+    if (percent <= 34) display = 'Low';
+    else if (percent >= 90) display = 'High';
+    // Palette colors
+    let barColor = '';
+    let bgColor = '';
+    if (color === 'blue') { barColor = 'linear-gradient(90deg,#7ec7e6,#3a8fd9)'; bgColor = 'rgba(58,143,217,0.10)'; }
+    if (color === 'green') { barColor = 'linear-gradient(90deg,#a8e6a3,#4caf50)'; bgColor = 'rgba(76,175,80,0.10)'; }
+    if (color === 'yellow') { barColor = 'linear-gradient(90deg,#ffe082,#ffd600)'; bgColor = 'rgba(255,214,0,0.10)'; }
+    if (color === 'muted') { barColor = 'linear-gradient(90deg,#cbeed6,#a8e6a3)'; bgColor = 'rgba(168,230,163,0.10)'; }
+    return `<div class="bar-row">
+      <span class="bar-label">${label}</span>
+      <div class="bar-track" style="background:${bgColor}"><div class="bar-fill" style="width:${percent}%;background:${barColor};"></div></div>
+      <span class="bar-value">${display}</span>
+    </div>`;
+  }
+
+  // --- Ecological Score ---
+  function ecologicalScore(metaData) {
+    const vals = [metaData.water_retention, metaData.wildlife_value, canopyValue(metaData.canopy), biodiversityScore(metaData)];
+    const avg = vals.map(normalizeValue).reduce((a, b) => a + b, 0) / vals.length;
+    return avg;
+  }
+  // SVG placeholders (could be replaced with actual SVGs)
+  const svgPlaceholder = '<div class="svg-icon"><!-- TREE SVG PLACEHOLDER --></div>';
+  const animalSvg = '<div class="svg-icon"><!-- ANIMAL SVG PLACEHOLDER --></div>';
+  const birdSvg = '<div class="svg-icon"><!-- BIRD SVG PLACEHOLDER --></div>';
+  const leafSvg = '<div class="svg-icon"><!-- LEAF SVG PLACEHOLDER --></div>';
+  const flowerSvg = '<div class="svg-icon"><!-- FLOWER SVG PLACEHOLDER --></div>';
+
+  const count = features.length;
+  let html = '';
+  // --- Header Band ---
+  html += `<div class="tree-popup-header-band">
+    <div class="tree-popup-header-content">
+      <div class="tree-popup-header-text">
+        <div class="tree-popup-title">${safe(metaData.common_name || species.charAt(0).toUpperCase() + species.slice(1))}</div>
+        ${metaData.latin_name ? `<div class="tree-popup-latin">${safe(metaData.latin_name)}</div>` : ''}
+      </div>
+      <div class="tree-popup-header-right">
+        <span class="count-badge">${count}</span>
+        <button class="tree-popup-close-btn" onclick="document.getElementById('tree-info-panel').classList.remove('active')" title="Close">&times;</button>
+      </div>
+    </div>
+  </div>`;
+  // --- Body Section ---
+  html += `<div class="tree-popup-body">
+    <div class="eco-score-row">
+      <span class="eco-score-label">Ecological Score</span>
+      <span class="eco-score-circle" title="Overall ecological performance">
+        <svg width="38" height="38"><circle cx="19" cy="19" r="16" stroke="#a8e6a3" stroke-width="4" fill="none"/><circle cx="19" cy="19" r="16" stroke="#4caf50" stroke-width="4" fill="none" stroke-dasharray="100" stroke-dashoffset="${100 - Math.round(ecologicalScore(metaData)*100)}" style="transition:stroke-dashoffset 0.7s cubic-bezier(.6,.2,.3,1)"/><text x="19" y="24" text-anchor="middle" font-size="15" fill="#4caf50" font-weight="bold">${Math.round(ecologicalScore(metaData)*100)}</text></svg>
+      </span>
+    </div>
+    <div class="tree-fact-section performance-section">
+      <div class="tree-fact-section-title">Ecology & Performance</div>
+      ${renderBar('Water Retention', metaData.water_retention, 'blue')}
+      ${renderBar('Wildlife Value', metaData.wildlife_value, 'green')}
+      ${renderBar('Canopy Size', canopyValue(metaData.canopy), 'yellow')}
+      ${renderBar('Biodiversity', biodiversityScore(metaData), 'muted')}
+    </div>
+    <div class="tree-fact-section secondary-section">
+      <div class="tree-fact-section-title">Ecological Relationships</div>
+      <div class="ecology-band-diagram-wrap">
+        ${renderEcologyBandDiagram(metaData)}
+      </div>
+    </div>`;
+
+
+// --- Horizontal Ecological Band Diagram ---
+function renderEcologyBandDiagram(metaData) {
+  // Categories and color mapping
+  const categories = [
+    { key: 'pollinators', label: 'Pollinators', class: 'ecology', value: metaData.pollinators },
+    { key: 'birds', label: 'Bird Support', class: 'ecology', value: metaData.birds },
+    { key: 'mammals', label: 'Mammals', class: 'ecology', value: metaData.animals },
+    { key: 'water', label: 'Water Retention', class: 'water', value: metaData.water_retention },
+    { key: 'canopy', label: 'Canopy / Shade', class: 'canopy', value: metaData.canopy },
+  ];
+  // Helper to map value to percent
+  function bandPercent(val) {
+    if (!val || val === '-') return 0;
+    const v = typeof val === 'string' ? val.toLowerCase() : val;
+    if (v.includes?.('high') || v > 0.8) return 100;
+    if (v.includes?.('low') || v < 0.4) return 33;
+    return 66;
+  }
+  // Render bands
+  let html = '<div class="eco-band-diagram">';
+  let hasData = false;
+  categories.forEach(cat => {
+    const percent = bandPercent(cat.value);
+    if (percent > 0) {
+      hasData = true;
+      html += `<div class="eco-band-row"><span class="eco-band-label">${cat.label}</span><span class="eco-band-bar-wrap"><span class="eco-band-bar-bg"></span><span class="eco-band-bar ${cat.class}" style="width:${percent}%"></span></span></div>`;
+    }
+  });
+  html += '</div>';
+  if (!hasData) return '<div style="text-align:center;color:#aaa;font-size:0.98rem;">No ecological data</div>';
+  return html;
+}
+    if (metaData.description) {
+      html += `<div class="tree-fact tree-desc">${safe(metaData.description).split('.').slice(0,2).join('. ')}.</div>`;
+    }
+  html += `</div>`;
+  contentEl.innerHTML = html;
+  // Remove any legacy close button injected by Mapbox or previous code
+  const panel = document.getElementById('tree-info-panel');
+  if (panel) {
+    const legacyClose = panel.querySelector('.close-btn, .mapboxgl-popup-close-button');
+    if (legacyClose) legacyClose.remove();
+  }
+}
+
+let currentStage = 0;
+let isAnimating = false;
+
+const STUDY_COORDINATES_LAT_LNG = [
+  [40.683945676183654, -73.98963594611494],
+  [40.680669969224006, -73.98084416376932],
+  [40.67628724578089, -73.98368161027763],
+  [40.665495232798115, -73.99274143083169],
+  [40.667988596328655, -73.99607305804426],
+  [40.67260255106102, -73.99889524234268],
+  [40.67744610487334, -73.9964465299067],
+  [40.67663528353369, -73.99461997552936]
+];
+
+const STUDY_RING = STUDY_COORDINATES_LAT_LNG.map(([lat, lng]) => [lng, lat]);
+
+if (
+  STUDY_RING.length && (
+    STUDY_RING[0][0] !== STUDY_RING[STUDY_RING.length - 1][0] ||
+    STUDY_RING[0][1] !== STUDY_RING[STUDY_RING.length - 1][1]
+  )
+) {
+  STUDY_RING.push([...STUDY_RING[0]]);
+}
+
+const STUDY_BOUNDS = {
+  west: Math.min(...STUDY_RING.map(([lng]) => lng)),
+  south: Math.min(...STUDY_RING.map(([, lat]) => lat)),
+  east: Math.max(...STUDY_RING.map(([lng]) => lng)),
+  north: Math.max(...STUDY_RING.map(([, lat]) => lat))
+};
+
+const CONTOUR_LINES_URL = 'models/con_lines_gowanus_1ft.geojson';
+const CONTOUR_LINES_FALLBACK_URL = 'models/con_lines_gowanus_study_full.geojson';
+const CONTOUR_LINES_SECONDARY_FALLBACK_URL = 'models/con_lines_gowanus.geojson';
+const CONTOUR_COORDINATES_LAT_LNG = [
+  [40.683945676183654, -73.98963594611494],
+  [40.680669969224006, -73.98084416376932],
+  [40.665495232798115, -73.99274143083169],
+  [40.667988596328655, -73.99607305804426],
+  [40.67260255106102, -73.99889524234268],
+  [40.67744610487334, -73.9964465299067],
+  [40.67663528353369, -73.99461997552936]
+];
+
+const CONTOUR_BOUNDS = {
+  west: Math.min(...CONTOUR_COORDINATES_LAT_LNG.map(([, lng]) => lng)),
+  south: Math.min(...CONTOUR_COORDINATES_LAT_LNG.map(([lat]) => lat)),
+  east: Math.max(...CONTOUR_COORDINATES_LAT_LNG.map(([, lng]) => lng)),
+  north: Math.max(...CONTOUR_COORDINATES_LAT_LNG.map(([lat]) => lat))
+};
+
+let cachedStudyContourFeatures = [];
+
+function getStudyClipFeature() {
+  return {
+    type: 'Feature',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [STUDY_RING]
+    }
+  };
+}
+
+function pointInStudyPolygon(point) {
+  const x = point[0];
+  const y = point[1];
+  let inside = false;
+
+  for (let i = 0, j = STUDY_RING.length - 1; i < STUDY_RING.length; j = i++) {
+    const xi = STUDY_RING[i][0];
+    const yi = STUDY_RING[i][1];
+    const xj = STUDY_RING[j][0];
+    const yj = STUDY_RING[j][1];
+
+    const intersects = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+
+    if (intersects) inside = !inside;
+  }
+
+  return inside;
+}
+
+const stageContent = [
+  {
+    title: 'Gowanus Canal',
+    desc: 'Scroll to move through the stages. Use the layer controls to toggle Mapbox terrain contours and flood vulnerability.'
+  },
+  {
+    title: 'Existing Density',
+    desc: 'Existing building footprints extrude using recorded height data over live Mapbox terrain.'
+  },
+  {
+    title: 'Street Trees',
+    desc: 'Street tree locations appear while existing buildings, terrain, contours, and flood layers stay active.'
+  }
+];
+
+const PRESENTATION_CENTER = [-73.9895, 40.6745];
+const CANAL_CENTER = PRESENTATION_CENTER;
+const PRESENTATION_BEARING = -42;
+const PRESENTATION_PITCH = 0;
+const SITE_POINT_A_SOURCE = [-73.995096177, 40.675844663];
+const SITE_POINT_A_TARGET = [-73.994155, 40.675902];
+const SITE_POINT_B_SOURCE = [-73.992624284, 40.675814489];
+const SITE_POINT_B_TARGET = [-73.99071172722226, 40.675863969717426];
+const SITE_LINE_FINE_SCALE = 0.965;
+
+const SCROLL_STAGE_VIEWS = [
+  {
+    center: CANAL_CENTER,
+    zoom: 15.25,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
+  },
+  {
+    center: CANAL_CENTER,
+    zoom: 15.7,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
+  },
+  {
+    center: CANAL_CENTER,
+    zoom: 15.7,
+    pitch: PRESENTATION_PITCH,
+    bearing: PRESENTATION_BEARING
+  }
+];
+
+function applyCameraForStage(stage, immediate = false) {
+  const view = SCROLL_STAGE_VIEWS[stage] || SCROLL_STAGE_VIEWS[0];
+  if (!view) return;
+  if (immediate) {
+    map.jumpTo(view);
+    return;
+  }
+
+  map.easeTo({
+    ...view,
+    duration: 900,
+    essential: true
+  });
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function updateStageUI(stage) {
+  const titleEl = document.getElementById('stage-title');
+  const descEl = document.getElementById('stage-desc');
+
+  if (titleEl) titleEl.innerText = stageContent[stage].title;
+  if (descEl) descEl.innerText = stageContent[stage].desc;
+}
+
+const existingHeightExpression = [
+  '*',
+  1.3,
+  ['coalesce',
+    ['to-number', ['get', 'height']],
+    ['*', 3.2, ['to-number', ['get', 'building:levels']]],
+    12
+  ]
+];
+
+const proposedHeightExpression = [
+  'coalesce',
+  ['to-number', ['get', 'proposed_height']],
+  0
+];
+
+function setStageInstant(stage) {
+  if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) {
+    return;
+  }
+
+  if (stage === 0) {
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+    window.TreeRenderer?.hideTrees?.(map);
+  }
+
+  if (stage === 1) {
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+    window.TreeRenderer?.hideTrees?.(map);
+  }
+
+  if (stage === 2) {
+    map.setPaintProperty('existing-buildings', 'fill-extrusion-height', existingHeightExpression);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+    map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+    window.TreeRenderer?.hideTrees?.(map);
+  }
+
+  updateStageUI(stage);
+}
+
+function animateStage(stage) {
+  if (isAnimating) return;
+  if (!map.getLayer('existing-buildings') || !map.getLayer('proposed-buildings')) return;
+
+  isAnimating = true;
+
+  const duration = 1000;
+  const startTime = performance.now();
+
+  function step(now) {
+    const raw = clamp((now - startTime) / duration, 0, 1);
+    const t = easeOutCubic(raw);
+
+    if (stage === 0) {
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', 1 - t, existingHeightExpression]
+      );
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+      window.TreeRenderer?.hideTrees?.(map);
+    }
+
+    if (stage === 1) {
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', 1 - t, existingHeightExpression]
+      );
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+      window.TreeRenderer?.hideTrees?.(map);
+    }
+
+    if (stage === 2) {
+      map.setPaintProperty(
+        'existing-buildings',
+        'fill-extrusion-height',
+        ['*', t, existingHeightExpression]
+      );
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-height', 0);
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-opacity', 0);
+      window.TreeRenderer?.hideTrees?.(map);
+    }
+
+    if (raw < 1) {
+      requestAnimationFrame(step);
+    } else {
+      setStageInstant(stage);
+      isAnimating = false;
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+function addMapboxTerrainAndContours() {
+  if (!map.getSource('mapbox-dem')) {
+    map.addSource('mapbox-dem', {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+      tileSize: 512,
+      maxzoom: 14
+    });
+  }
+
+  if (!map.getSource('mapbox-dem-hillshade')) {
+    map.addSource('mapbox-dem-hillshade', {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+      tileSize: 512,
+      maxzoom: 14
+    });
+  }
+
+  map.setTerrain({
+    source: 'mapbox-dem',
+    exaggeration: 1.35
+  });
+
+  if (!map.getLayer('terrain-hillshade')) {
+    map.addLayer({
+      id: 'terrain-hillshade',
+      type: 'hillshade',
+      source: 'mapbox-dem-hillshade',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'hillshade-shadow-color': '#020617',
+        'hillshade-highlight-color': '#334155',
+        'hillshade-accent-color': '#475569',
+        'hillshade-exaggeration': 0.5
+      }
+    });
+  }
+
+  moveTopographyLayersToTop();
+}
+
+function addMapboxGroundParks() {
+  const parksFilter = [
+    'any',
+    ['==', ['get', 'class'], 'park'],
+    ['==', ['get', 'class'], 'garden'],
+    ['==', ['get', 'class'], 'recreation_ground'],
+    ['==', ['get', 'class'], 'pitch'],
+    ['==', ['get', 'class'], 'grass'],
+    ['==', ['get', 'class'], 'golf_course'],
+    ['==', ['get', 'type'], 'park']
+  ];
+
+  if (!map.getLayer('gowanus-parks-ground')) {
+    map.addLayer({
+      id: 'gowanus-parks-ground',
+      type: 'fill',
+      source: 'composite',
+      'source-layer': 'landuse',
+      filter: parksFilter,
+      paint: {
+        'fill-color': '#8fbe7d',
+        'fill-opacity': 0.9
+      }
+    }, 'existing-buildings');
+  }
+}
+
+function addMapboxGroundWater() {
+  if (!map.getLayer('gowanus-water-ground')) {
+    map.addLayer({
+      id: 'gowanus-water-ground',
+      type: 'fill',
+      source: 'composite',
+      'source-layer': 'water',
+      paint: {
+        'fill-color': '#5fa4e8',
+        'fill-opacity': 0.92
+      }
+    }, 'existing-buildings');
+  }
+
+  if (!map.hasImage('water-hatch-blue')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 32;
+    hatchCanvas.height = 32;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 32, 32);
+      ctx.strokeStyle = 'rgba(42,70,114,0.45)';
+      ctx.lineWidth = 1.2;
+
+      const radius = 8;
+      for (let y = 4; y <= 36; y += 8) {
+        const xOffset = (Math.floor(y / 8) % 2) * radius;
+        for (let x = -16 + xOffset; x <= 48; x += 16) {
+          ctx.beginPath();
+          ctx.arc(x + radius, y, radius, Math.PI, 0);
+          ctx.stroke();
+        }
+      }
+
+      map.addImage('water-hatch-blue', ctx.getImageData(0, 0, 32, 32), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('gowanus-water-hatch')) {
+    map.addLayer({
+      id: 'gowanus-water-hatch',
+      type: 'fill',
+      source: 'composite',
+      'source-layer': 'water',
+      paint: {
+        'fill-pattern': 'water-hatch-blue',
+        'fill-opacity': 0.72
+      }
+    }, 'existing-buildings');
+  }
+
+  if (!map.getLayer('gowanus-water-outline')) {
+    map.addLayer({
+      id: 'gowanus-water-outline',
+      type: 'line',
+      source: 'composite',
+      'source-layer': 'water',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#3b82f6',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          12, 0.7,
+          15, 1.2,
+          18, 2.0
+        ],
+        'line-opacity': 0.9
+      }
+    }, 'existing-buildings');
+  }
+}
+
+function hideBasemapLabels() {
+  const style = map.getStyle();
+  const layers = style?.layers || [];
+
+  for (const layer of layers) {
+    if (layer.type !== 'symbol') continue;
+    if (map.getLayer(layer.id)) {
+      map.setLayoutProperty(layer.id, 'visibility', 'none');
+    }
+  }
+}
+
+async function addParkOutline() {
+  const response = await fetch('./models/park.geojson');
+  if (!response.ok) {
+    throw new Error(`Park outline fetch failed: ${response.status} ${response.statusText}`);
+  }
+
+  const parkData = await response.json();
+  const features = Array.isArray(parkData?.features) ? parkData.features : [];
+  if (!features.length) {
+    throw new Error('No park outline features found in park.geojson.');
+  }
+
+  const equalPoint = (a, b, eps = 1e-8) => (
+    Math.abs(a[0] - b[0]) < eps && Math.abs(a[1] - b[1]) < eps
+  );
+
+  const closeEnough = (a, b, eps = 1e-6) => (
+    Math.abs(a[0] - b[0]) < eps && Math.abs(a[1] - b[1]) < eps
+  );
+
+  const rings = [];
+  let current = [];
+
+  const finalizeCurrent = () => {
+    if (current.length < 4) {
+      current = [];
+      return;
+    }
+
+    const first = current[0];
+    const last = current[current.length - 1];
+    if (!equalPoint(first, last)) {
+      if (closeEnough(first, last)) {
+        current.push([first[0], first[1]]);
+      } else {
+        current = [];
+        return;
+      }
+    }
+
+    rings.push(current);
+    current = [];
+  };
+
+  for (const feature of features) {
+    const coords = feature?.geometry?.type === 'LineString' ? feature.geometry.coordinates : [];
+    if (coords.length < 2) continue;
+
+    const a = [Number(coords[0][0]), Number(coords[0][1])];
+    const b = [Number(coords[coords.length - 1][0]), Number(coords[coords.length - 1][1])];
+
+    if (!current.length) {
+      current = [a, b];
+      continue;
+    }
+
+    const tail = current[current.length - 1];
+    if (equalPoint(tail, a)) {
+      current.push(b);
+    } else if (equalPoint(tail, b)) {
+      current.push(a);
+    } else {
+      finalizeCurrent();
+      current = [a, b];
+    }
+  }
+  finalizeCurrent();
+
+  const parkAreaFeatures = rings.map((ring, index) => ({
+    type: 'Feature',
+    properties: { name: `park-area-${index + 1}` },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [ring]
+    }
+  }));
+
+  if (!map.getSource('park-outline')) {
+    map.addSource('park-outline', {
+      type: 'geojson',
+      data: parkData
+    });
+  } else {
+    map.getSource('park-outline').setData(parkData);
+  }
+
+  if (!map.getSource('park-area')) {
+    map.addSource('park-area', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: parkAreaFeatures
+      }
+    });
+  } else {
+    map.getSource('park-area').setData({
+      type: 'FeatureCollection',
+      features: parkAreaFeatures
+    });
+  }
+
+  if (!map.hasImage('park-hatch-red')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 24;
+    hatchCanvas.height = 24;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 24, 24);
+      ctx.strokeStyle = 'rgba(220,38,38,0.40)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 24);
+      ctx.lineTo(12, 6);
+      ctx.moveTo(0, 30);
+      ctx.lineTo(18, 12);
+      ctx.moveTo(6, 36);
+      ctx.lineTo(24, 18);
+      ctx.stroke();
+      map.addImage('park-hatch-red', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('park-hatch-fill')) {
+    map.addLayer({
+      id: 'park-hatch-fill',
+      type: 'fill',
+      source: 'park-area',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'fill-pattern': 'park-hatch-red',
+        'fill-opacity': 0.62
+      }
+    });
+  }
+
+  if (!map.getLayer('park-outline')) {
+    map.addLayer({
+      id: 'park-outline',
+      type: 'line',
+      source: 'park-outline',
+      layout: {
+        visibility: 'visible',
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#dc2626',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 1.6,
+          16, 2.6,
+          18, 3.9
+        ],
+        'line-dasharray': [1.4, 1.1],
+        'line-opacity': 0.96
+      }
+    });
+  }
+
+  map.setPaintProperty('park-hatch-fill', 'fill-pattern', 'park-hatch-red');
+  map.setPaintProperty('park-hatch-fill', 'fill-opacity', 0.62);
+
+  map.setPaintProperty('park-outline', 'line-color', '#dc2626');
+  map.setPaintProperty('park-outline', 'line-width', [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    14, 1.6,
+    16, 2.6,
+    18, 3.9
+  ]);
+  map.setPaintProperty('park-outline', 'line-dasharray', [1.4, 1.1]);
+  map.setPaintProperty('park-outline', 'line-opacity', 0.96);
+}
+
+function addGowanusFocusMask() {
+  if (map.getLayer('gowanus-focus-mask')) return;
+
+  if (!map.getSource('gowanus-focus-mask')) {
+    map.addSource('gowanus-focus-mask', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-180, -85],
+                  [180, -85],
+                  [180, 85],
+                  [-180, 85],
+                  [-180, -85]
+                ],
+                [
+                  ...STUDY_RING
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    });
+  }
+
+  map.addLayer({
+    id: 'gowanus-focus-mask',
+    type: 'fill',
+    source: 'gowanus-focus-mask',
+    paint: {
+      'fill-color': '#d1d5db',
+      'fill-opacity': 0.82
+    },
+    layout: {
+      visibility: 'visible'
+    }
+  });
+}
+
+function parseSiteSegments(rawText) {
+  return rawText
+    .split(/\bnone\b/gi)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean)
+    .map((chunk) => {
+      const points = [];
+      const matches = chunk.matchAll(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/g);
+      for (const match of matches) {
+        points.push([Number(match[1]), Number(match[2])]);
+      }
+      return points;
+    })
+    .filter((points) => points.length > 1);
+}
+
+function localToLngLat(point, bounds, quad) {
+  const [x, y] = point;
+  const u = (x - bounds.minX) / bounds.dx;
+  const v = 1 - (y - bounds.minY) / bounds.dy;
+
+  const [tl, tr, br, bl] = quad;
+
+  const lng =
+    (1 - u) * (1 - v) * tl[0] +
+    u * (1 - v) * tr[0] +
+    u * v * br[0] +
+    (1 - u) * v * bl[0];
+
+  const lat =
+    (1 - u) * (1 - v) * tl[1] +
+    u * (1 - v) * tr[1] +
+    u * v * br[1] +
+    (1 - u) * v * bl[1];
+
+  return [lng, lat];
+}
+
+async function addSiteLinesFromText() {
+  const response = await fetch('./models/site2_geographic_coordinates.json');
+  if (!response.ok) {
+    throw new Error(`Site coordinate fetch failed: ${response.status} ${response.statusText}`);
+  }
+
+  const siteGeo = await response.json();
+  const segments = Array.isArray(siteGeo?.segmentCoordinates) ? siteGeo.segmentCoordinates : [];
+  if (!segments.length) {
+    throw new Error('No geographic coordinate segments found in site2_geographic_coordinates.json.');
+  }
+
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((SITE_POINT_A_TARGET[1] * Math.PI) / 180);
+
+  const currentDx = (SITE_POINT_B_SOURCE[0] - SITE_POINT_A_SOURCE[0]) * metersPerDegLng;
+  const currentDy = (SITE_POINT_B_SOURCE[1] - SITE_POINT_A_SOURCE[1]) * metersPerDegLat;
+  const desiredDx = (SITE_POINT_B_TARGET[0] - SITE_POINT_A_TARGET[0]) * metersPerDegLng;
+  const desiredDy = (SITE_POINT_B_TARGET[1] - SITE_POINT_A_TARGET[1]) * metersPerDegLat;
+
+  const currentDistance = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
+  const desiredDistance = Math.sqrt(desiredDx * desiredDx + desiredDy * desiredDy);
+  const scaleFactor = currentDistance > 0 ? desiredDistance / currentDistance : 1;
+  const finalScale = scaleFactor * SITE_LINE_FINE_SCALE;
+
+  const features = segments
+    .map((segment, index) => ({ segment, index }))
+    .filter(({ segment }) => Array.isArray(segment) && segment.length > 1)
+    .map(({ segment, index }) => ({
+      type: 'Feature',
+      properties: { zone: index + 1 },
+      geometry: {
+        type: 'LineString',
+        coordinates: segment
+          .filter((point) => Array.isArray(point) && point.length >= 2)
+          .map((point) => [
+            SITE_POINT_A_TARGET[0] + (Number(point[0]) - SITE_POINT_A_SOURCE[0]) * finalScale,
+            SITE_POINT_A_TARGET[1] + (Number(point[1]) - SITE_POINT_A_SOURCE[1]) * finalScale
+          ])
+      }
+    }))
+    .filter((feature) => feature.geometry.coordinates.length > 1);
+
+  if (!features.length) {
+    throw new Error('No valid line features could be built from site2_geographic_coordinates.json.');
+  }
+
+  if (!map.getSource('site-lines')) {
+    map.addSource('site-lines', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features
+      }
+    });
+  } else {
+    map.getSource('site-lines').setData({
+      type: 'FeatureCollection',
+      features
+    });
+  }
+
+  const areaFeatures = features
+    .map((feature, index) => {
+      const ring = [...feature.geometry.coordinates];
+      if (ring.length < 4) return null;
+
+      const first = ring[0];
+      const last = ring[ring.length - 1];
+      if (first[0] !== last[0] || first[1] !== last[1]) {
+        ring.push([first[0], first[1]]);
+      }
+
+      return {
+        type: 'Feature',
+        properties: { zone: index + 1 },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [ring]
+        }
+      };
+    })
+    .filter(Boolean);
+
+  if (!map.getSource('site-areas')) {
+    map.addSource('site-areas', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: areaFeatures
+      }
+    });
+  } else {
+    map.getSource('site-areas').setData({
+      type: 'FeatureCollection',
+      features: areaFeatures
+    });
+  }
+
+  if (!map.hasImage('site-hatch-red')) {
+    const hatchCanvas = document.createElement('canvas');
+    hatchCanvas.width = 24;
+    hatchCanvas.height = 24;
+    const ctx = hatchCanvas.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, 24, 24);
+      ctx.strokeStyle = 'rgba(220,38,38,0.42)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 24);
+      ctx.lineTo(12, 6);
+      ctx.moveTo(0, 30);
+      ctx.lineTo(18, 12);
+      ctx.moveTo(6, 36);
+      ctx.lineTo(24, 18);
+      ctx.stroke();
+      map.addImage('site-hatch-red', ctx.getImageData(0, 0, 24, 24), { pixelRatio: 2 });
+    }
+  }
+
+  if (!map.getLayer('site-hatch-fill')) {
+    map.addLayer({
+      id: 'site-hatch-fill',
+      type: 'fill',
+      source: 'site-areas',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'fill-pattern': 'site-hatch-red',
+        'fill-opacity': 0.65
+      }
+    });
+  }
+  map.setPaintProperty('site-hatch-fill', 'fill-pattern', 'site-hatch-red');
+  map.setPaintProperty('site-hatch-fill', 'fill-opacity', 0.72);
+
+  if (!map.getLayer('site-lines')) {
+    map.addLayer({
+      id: 'site-lines',
+      type: 'line',
+      source: 'site-lines',
+      layout: {
+        visibility: 'visible',
+        'line-join': 'round',
+        'line-cap': 'round'
+      },
+      paint: {
+        'line-color': '#dc2626',
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 1.8,
+          16, 2.8,
+          18, 4.2
+        ],
+        'line-dasharray': [1.4, 1.1],
+        'line-opacity': 0.98
+      }
+    });
+  }
+
+  map.setPaintProperty('site-lines', 'line-color', '#dc2626');
+  map.setPaintProperty('site-lines', 'line-width', [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    14, 1.8,
+    16, 2.8,
+    18, 4.2
+  ]);
+  map.setPaintProperty('site-lines', 'line-dasharray', [1.4, 1.1]);
+  map.setPaintProperty('site-lines', 'line-opacity', 0.98);
+}
+
+function addFloodLayer(floodData) {
+  if (map.getSource('flood-vulnerability')) return;
+
+  map.addSource('flood-vulnerability', {
+    type: 'geojson',
+    data: floodData
+  });
+
+  const gowanusClipBounds = getStudyClipFeature();
+
+  map.addLayer({
+    id: 'flood-fill',
+    type: 'fill',
+    source: 'flood-vulnerability',
+    filter: ['within', gowanusClipBounds],
+    paint: {
+      'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['to-number', ['coalesce', ['get', 'fshri'], 0]],
+        0, 'rgba(30,41,59,0)',
+        1, '#1d4ed8',
+        2, '#2563eb',
+        3, '#0ea5e9',
+        4, '#f59e0b',
+        5, '#ef4444'
+      ],
+      'fill-opacity': 0.34
+    }
+  });
+
+  map.addLayer({
+    id: 'flood-outline',
+    type: 'line',
+    source: 'flood-vulnerability',
+    filter: ['within', gowanusClipBounds],
+    paint: {
+      'line-color': '#93c5fd',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        10, 0.4,
+        15, 1,
+        18, 1.6
+      ],
+      'line-opacity': 0.6
+    }
+  });
+
+  const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false });
+
+  map.on('mousemove', 'flood-fill', (e) => {
+    const feature = e.features?.[0];
+    if (!feature) return;
+
+    map.getCanvas().style.cursor = 'pointer';
+
+    const p = feature.properties || {};
+    const current = p.ss_cur ?? 'n/a';
+    const midCentury = p.ss_50s ?? 'n/a';
+    const lateCentury = p.ss_80s ?? 'n/a';
+    const tract = p.geoid ?? 'Unknown';
+    const index = p.fshri ?? 'n/a';
+
+    popup
+      .setLngLat(e.lngLat)
+      .setHTML(`
+        <div class="flood-popup">
+          <strong>Flood vulnerability</strong><br>
+          Census tract: ${tract}<br>
+          Index score: ${index}<br>
+          Current surge: ${current}<br>
+          2050s surge: ${midCentury}<br>
+          2080s surge: ${lateCentury}
+        </div>
+      `)
+      .addTo(map);
+  });
+
+  map.on('mouseleave', 'flood-fill', () => {
+    map.getCanvas().style.cursor = '';
+    popup.remove();
+  });
+}
+
+function getGeometryBounds(geometry) {
+  if (!geometry?.coordinates) return null;
+
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+
+  const visit = (node) => {
+    if (!Array.isArray(node)) return;
+    if (typeof node[0] === 'number' && typeof node[1] === 'number') {
+      const lng = node[0];
+      const lat = node[1];
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+      return;
+    }
+    for (const child of node) visit(child);
+  };
+
+  visit(geometry.coordinates);
+
+  if (!Number.isFinite(minLng) || !Number.isFinite(minLat)) return null;
+  return { minLng, maxLng, minLat, maxLat };
+}
+
+function pointInStudyBounds(point) {
+  if (
+    point[0] < STUDY_BOUNDS.west ||
+    point[0] > STUDY_BOUNDS.east ||
+    point[1] < STUDY_BOUNDS.south ||
+    point[1] > STUDY_BOUNDS.north
+  ) {
+    return false;
+  }
+
+  return pointInStudyPolygon(point);
+}
+
+function boundsOverlap(a, b, padding = 0) {
+  return !(
+    a.maxLng < (b.minLng - padding) ||
+    a.minLng > (b.maxLng + padding) ||
+    a.maxLat < (b.minLat - padding) ||
+    a.minLat > (b.maxLat + padding)
+  );
+}
+
+function roughLineLength(coords) {
+  let length = 0;
+  for (let i = 1; i < coords.length; i += 1) {
+    const dx = coords[i][0] - coords[i - 1][0];
+    const dy = coords[i][1] - coords[i - 1][1];
+    length += Math.sqrt(dx * dx + dy * dy);
+  }
+  return length;
+}
+
+function clipLineToStudyBounds(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInStudyBounds(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
+function pointInStudyBoundingBox(point) {
+  return (
+    point[0] >= STUDY_BOUNDS.west &&
+    point[0] <= STUDY_BOUNDS.east &&
+    point[1] >= STUDY_BOUNDS.south &&
+    point[1] <= STUDY_BOUNDS.north
+  );
+}
+
+function clipLineToStudyBoundingBox(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInStudyBoundingBox(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
+function pointInContourBoundingBox(point) {
+  return (
+    point[0] >= CONTOUR_BOUNDS.west &&
+    point[0] <= CONTOUR_BOUNDS.east &&
+    point[1] >= CONTOUR_BOUNDS.south &&
+    point[1] <= CONTOUR_BOUNDS.north
+  );
+}
+
+function clipLineToContourBoundingBox(coords) {
+  const segments = [];
+  let current = [];
+
+  for (const point of coords) {
+    if (pointInContourBoundingBox(point)) {
+      current.push(point);
+    } else if (current.length > 1) {
+      segments.push(current);
+      current = [];
+    } else {
+      current = [];
+    }
+  }
+
+  if (current.length > 1) {
+    segments.push(current);
+  }
+
+  return segments;
+}
+
+function bufferLineToPolygon(coords, halfWidthMeters = 4.2) {
+  if (!Array.isArray(coords) || coords.length < 2) return null;
+
+  const meanLat = coords.reduce((sum, p) => sum + p[1], 0) / coords.length;
+  const metersPerDegLat = 110540;
+  const metersPerDegLng = 111320 * Math.cos((meanLat * Math.PI) / 180);
+
+  const toMeters = ([lng, lat]) => [lng * metersPerDegLng, lat * metersPerDegLat];
+  const toLngLat = ([x, y]) => [x / metersPerDegLng, y / metersPerDegLat];
+
+  const meters = coords.map(toMeters);
+  const left = [];
+  const right = [];
+
+  for (let i = 0; i < meters.length; i += 1) {
+    const prev = meters[Math.max(0, i - 1)];
+    const next = meters[Math.min(meters.length - 1, i + 1)];
+
+    const dx = next[0] - prev[0];
+    const dy = next[1] - prev[1];
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 1e-6) continue;
+
+    const nx = -dy / len;
+    const ny = dx / len;
+    const p = meters[i];
+
+    left.push(toLngLat([p[0] + nx * halfWidthMeters, p[1] + ny * halfWidthMeters]));
+    right.push(toLngLat([p[0] - nx * halfWidthMeters, p[1] - ny * halfWidthMeters]));
+  }
+
+  if (left.length < 2 || right.length < 2) return null;
+
+  const ring = [...left, ...right.reverse()];
+  ring.push(ring[0]);
+
+  return {
+    type: 'Polygon',
+    coordinates: [ring]
+  };
+}
+
+function getLineSamplePoints(coords, sampleCount = 7) {
+  if (coords.length <= sampleCount) return coords;
+
+  const points = [];
+  for (let i = 0; i < sampleCount; i += 1) {
+    const idx = Math.round((i / (sampleCount - 1)) * (coords.length - 1));
+    points.push(coords[idx]);
+  }
+
+  return points;
+}
+
+function getLineTerrainStats(coords) {
+  const elevations = [];
+  const samples = getLineSamplePoints(coords, 7);
+
+  for (const [lng, lat] of samples) {
+    const value = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
+    if (Number.isFinite(value)) elevations.push(value);
+  }
+
+  if (elevations.length < 3) return null;
+
+  const avg = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
+  const relief = Math.max(...elevations) - Math.min(...elevations);
+
+  return { avg, relief };
+}
+
+function getLineContourStats(coords, contourIndex) {
+  if (!contourIndex) return null;
+
+  const samples = getLineSamplePoints(coords, 9);
+  const elevations = [];
+
+  for (const [lng, lat] of samples) {
+    const value = estimateElevationFromIndex(lng, lat, contourIndex);
+    if (Number.isFinite(value)) elevations.push(value);
+  }
+
+  if (elevations.length < 4) return null;
+
+  const avg = elevations.reduce((sum, value) => sum + value, 0) / elevations.length;
+  const relief = Math.max(...elevations) - Math.min(...elevations);
+  return { avg, relief };
+}
+
+function getFeatureLineCoordinates(geometry) {
+  if (!geometry) return [];
+  if (geometry.type === 'LineString') return [geometry.coordinates];
+  if (geometry.type === 'MultiLineString') return geometry.coordinates;
+  return [];
+}
+
+function buildContourElevationIndex(contourFeatures) {
+  const samples = [];
+  const bucketSize = 0.00028;
+  const buckets = new Map();
+  let minElev = Infinity;
+  let maxElev = -Infinity;
+
+  for (const feature of contourFeatures || []) {
+    const elev = Number(feature?.properties?.elev_m ?? feature?.properties?.ELEV);
+    if (!Number.isFinite(elev)) continue;
+
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    for (const coords of lineGroups) {
+      if (!Array.isArray(coords) || coords.length < 2) continue;
+
+      const stride = Math.max(1, Math.floor(coords.length / 4));
+      for (let i = 0; i < coords.length; i += stride) {
+        const coord = coords[i];
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+
+        const sample = { lng: coord[0], lat: coord[1], elev };
+        const idx = samples.push(sample) - 1;
+
+        const bx = Math.floor(sample.lng / bucketSize);
+        const by = Math.floor(sample.lat / bucketSize);
+        const key = `${bx}:${by}`;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(idx);
+      }
+    }
+
+    if (elev < minElev) minElev = elev;
+    if (elev > maxElev) maxElev = elev;
+  }
+
+  if (!samples.length) return null;
+
+  return {
+    samples,
+    buckets,
+    bucketSize,
+    minElev,
+    maxElev
+  };
+}
+
+function estimateElevationFromIndex(lng, lat, index) {
+  const { samples, buckets, bucketSize } = index;
+  const cx = Math.floor(lng / bucketSize);
+  const cy = Math.floor(lat / bucketSize);
+
+  const candidates = [];
+  for (let r = 0; r <= 3 && candidates.length < 32; r += 1) {
+    for (let dx = -r; dx <= r; dx += 1) {
+      for (let dy = -r; dy <= r; dy += 1) {
+        const key = `${cx + dx}:${cy + dy}`;
+        const indices = buckets.get(key);
+        if (!indices) continue;
+        for (const idx of indices) candidates.push(samples[idx]);
+      }
+    }
+  }
+
+  if (!candidates.length) return null;
+
+  let weightSum = 0;
+  let elevSum = 0;
+  for (const sample of candidates) {
+    const dx = sample.lng - lng;
+    const dy = sample.lat - lat;
+    const d2 = dx * dx + dy * dy;
+    const w = 1 / Math.max(d2, 1e-12);
+    weightSum += w;
+    elevSum += sample.elev * w;
+  }
+
+  return weightSum > 0 ? (elevSum / weightSum) : null;
+}
+
+function smoothMaskedElevationGrid(values, mask, width, height, passes = 2) {
+  let src = values;
+  let dst = new Float32Array(values.length);
+
+  // Lightweight gaussian-style smoothing to avoid pixel block artifacts while preserving masked boundary.
+  const kernel = [
+    [1, 2, 1],
+    [2, 4, 2],
+    [1, 2, 1]
+  ];
+
+  for (let pass = 0; pass < passes; pass += 1) {
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const idx = y * width + x;
+        if (!mask[idx]) {
+          dst[idx] = src[idx];
+          continue;
+        }
+
+        let sum = 0;
+        let wsum = 0;
+        for (let ky = -1; ky <= 1; ky += 1) {
+          for (let kx = -1; kx <= 1; kx += 1) {
+            const nx = x + kx;
+            const ny = y + ky;
+            if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+            const nIdx = ny * width + nx;
+            if (!mask[nIdx]) continue;
+
+            const w = kernel[ky + 1][kx + 1];
+            sum += src[nIdx] * w;
+            wsum += w;
+          }
+        }
+
+        dst[idx] = wsum > 0 ? (sum / wsum) : src[idx];
+      }
+    }
+
+    const swap = src;
+    src = dst;
+    dst = swap;
+  }
+
+  return src;
+}
+
+function interpolateColorRamp(stops, t) {
+  const clamped = clamp(t, 0, 1);
+
+  for (let i = 1; i < stops.length; i += 1) {
+    const a = stops[i - 1];
+    const b = stops[i];
+    if (clamped > b.t) continue;
+
+    const span = Math.max(1e-6, b.t - a.t);
+    const localT = (clamped - a.t) / span;
+
+    return {
+      r: Math.round(a.c[0] + (b.c[0] - a.c[0]) * localT),
+      g: Math.round(a.c[1] + (b.c[1] - a.c[1]) * localT),
+      b: Math.round(a.c[2] + (b.c[2] - a.c[2]) * localT)
+    };
+  }
+
+  const tail = stops[stops.length - 1].c;
+  return { r: tail[0], g: tail[1], b: tail[2] };
+}
+
+const TOPO_OVERLAY_ALPHA = 142;
+const TOPO_OVERLAY_OPACITY = 0.72;
+
+function bilinearSampleGrid(values, cols, rows, gx, gy) {
+  const x = clamp(gx, 0, cols - 1);
+  const y = clamp(gy, 0, rows - 1);
+
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const x1 = Math.min(cols - 1, x0 + 1);
+  const y1 = Math.min(rows - 1, y0 + 1);
+  const tx = x - x0;
+  const ty = y - y0;
+
+  const q00 = values[y0 * cols + x0];
+  const q10 = values[y0 * cols + x1];
+  const q01 = values[y1 * cols + x0];
+  const q11 = values[y1 * cols + x1];
+
+  if (!Number.isFinite(q00) || !Number.isFinite(q10) || !Number.isFinite(q01) || !Number.isFinite(q11)) {
+    return null;
+  }
+
+  const top = q00 * (1 - tx) + q10 * tx;
+  const bottom = q01 * (1 - tx) + q11 * tx;
+  return top * (1 - ty) + bottom * ty;
+}
+
+function buildContourControlGrid(index, cols, rows) {
+  const values = new Float32Array(cols * rows);
+  const mask = new Uint8Array(cols * rows);
+
+  for (let y = 0; y < rows; y += 1) {
+    const lat = CONTOUR_BOUNDS.north - (y / (rows - 1)) * (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south);
+    for (let x = 0; x < cols; x += 1) {
+      const lng = CONTOUR_BOUNDS.west + (x / (cols - 1)) * (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west);
+      const idx = y * cols + x;
+
+      if (!pointInStudyBounds([lng, lat])) continue;
+
+      const elev = estimateElevationFromIndex(lng, lat, index);
+      if (!Number.isFinite(elev)) continue;
+
+      values[idx] = elev;
+      mask[idx] = 1;
+    }
+  }
+
+  return { values, mask };
+}
+
+function buildTopographyRasterDataUrl(contourFeatures) {
+  const index = buildContourElevationIndex(contourFeatures);
+  if (!index) return null;
+
+  const width = 640;
+  const height = 640;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / width;
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / height;
+  const elevRange = Math.max(1e-6, index.maxElev - index.minElev);
+
+  const controlCols = 112;
+  const controlRows = 112;
+  const control = buildContourControlGrid(index, controlCols, controlRows);
+  const smoothedControl = smoothMaskedElevationGrid(control.values, control.mask, controlCols, controlRows, 2);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const image = ctx.createImageData(width, height);
+  const data = image.data;
+
+  // Subtle analytical ramp: low cool, mid neutral, high warm.
+  const colorStops = [
+    { t: 0.0, c: [219, 236, 255] },
+    { t: 0.25, c: [184, 214, 246] },
+    { t: 0.5, c: [228, 231, 234] },
+    { t: 0.75, c: [225, 186, 142] },
+    { t: 1.0, c: [149, 104, 64] }
+  ];
+
+  for (let py = 0; py < height; py += 1) {
+    const lat = CONTOUR_BOUNDS.north - (py + 0.5) * dy;
+    for (let px = 0; px < width; px += 1) {
+      const lng = CONTOUR_BOUNDS.west + (px + 0.5) * dx;
+      const idx = (py * width + px) * 4;
+
+      if (!pointInStudyBounds([lng, lat])) {
+        data[idx + 3] = 0;
+        continue;
+      }
+
+      const gx = (px / (width - 1)) * (controlCols - 1);
+      const gy = (py / (height - 1)) * (controlRows - 1);
+      const elev = bilinearSampleGrid(smoothedControl, controlCols, controlRows, gx, gy);
+      if (!Number.isFinite(elev)) {
+        data[idx + 3] = 0;
+        continue;
+      }
+
+      const normalized = clamp((elev - index.minElev) / elevRange, 0, 1);
+      const tone = interpolateColorRamp(colorStops, normalized);
+
+      data[idx] = tone.r;
+      data[idx + 1] = tone.g;
+      data[idx + 2] = tone.b;
+      data[idx + 3] = TOPO_OVERLAY_ALPHA;
+    }
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+function buildMapboxTerrainRasterDataUrl() {
+  const width = 240;
+  const height = 240;
+  const dx = (CONTOUR_BOUNDS.east - CONTOUR_BOUNDS.west) / (width - 1);
+  const dy = (CONTOUR_BOUNDS.north - CONTOUR_BOUNDS.south) / (height - 1);
+
+  const elevGrid = new Float32Array(width * height);
+  const mask = new Uint8Array(width * height);
+  let validCount = 0;
+  let minElev = Infinity;
+  let maxElev = -Infinity;
+
+  for (let y = 0; y < height; y += 1) {
+    const lat = CONTOUR_BOUNDS.north - y * dy;
+    for (let x = 0; x < width; x += 1) {
+      const lng = CONTOUR_BOUNDS.west + x * dx;
+      const idx = y * width + x;
+
+      if (!pointInStudyBounds([lng, lat])) continue;
+
+      const elev = map.queryTerrainElevation({ lng, lat }, { exaggerated: false });
+      if (!Number.isFinite(elev)) continue;
+
+      elevGrid[idx] = elev;
+      mask[idx] = 1;
+      validCount += 1;
+      if (elev < minElev) minElev = elev;
+      if (elev > maxElev) maxElev = elev;
+    }
+  }
+
+  if (validCount < 80) return null;
+
+  const smoothed = smoothMaskedElevationGrid(elevGrid, mask, width, height, 2);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const image = ctx.createImageData(width, height);
+  const data = image.data;
+  const elevRange = Math.max(1e-6, maxElev - minElev);
+
+  const colorStops = [
+    { t: 0.0,  c: [219, 236, 255] },
+    { t: 0.25, c: [184, 214, 246] },
+    { t: 0.5,  c: [228, 231, 234] },
+    { t: 0.75, c: [225, 186, 142] },
+    { t: 1.0,  c: [149, 104,  64] }
+  ];
+
+  for (let i = 0; i < width * height; i += 1) {
+    const pi = i * 4;
+    if (!mask[i]) { data[pi + 3] = 0; continue; }
+    const normalized = clamp((smoothed[i] - minElev) / elevRange, 0, 1);
+    const tone = interpolateColorRamp(colorStops, normalized);
+    data[pi]     = tone.r;
+    data[pi + 1] = tone.g;
+    data[pi + 2] = tone.b;
+    data[pi + 3] = TOPO_OVERLAY_ALPHA;
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+function addTopographyElevationOverlay() {
+  const imageUrl = buildMapboxTerrainRasterDataUrl();
+
+  if (!imageUrl) {
+    // Terrain tiles not yet loaded ΓÇö retry after a short delay.
+    setTimeout(() => addTopographyElevationOverlay(), 1500);
+    return;
+  }
+
+  const coordinates = [
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.north],
+    [CONTOUR_BOUNDS.east, CONTOUR_BOUNDS.south],
+    [CONTOUR_BOUNDS.west, CONTOUR_BOUNDS.south]
+  ];
+
+  if (!map.getSource('topography-elevation-image')) {
+    map.addSource('topography-elevation-image', { type: 'image', url: imageUrl, coordinates });
+  } else {
+    map.getSource('topography-elevation-image').updateImage({ url: imageUrl, coordinates });
+  }
+
+  if (!map.getLayer('topography-elevation-raster')) {
+    map.addLayer({
+      id: 'topography-elevation-raster',
+      type: 'raster',
+      source: 'topography-elevation-image',
+      paint: { 'raster-opacity': TOPO_OVERLAY_OPACITY, 'raster-resampling': 'linear' },
+      layout: { visibility: 'visible' }
+    });
+    moveTopographyLayersToTop();
+  }
+}
+
+function buildFloodPriorityBounds(floodData) {
+  if (!floodData?.features?.length) return [];
+
+  const bounds = [];
+  for (const feature of floodData.features) {
+    const floodScore = Number(feature.properties?.fshri ?? 0);
+    if (floodScore < 2) continue;
+
+    const featureBounds = getGeometryBounds(feature.geometry);
+    if (featureBounds) bounds.push(featureBounds);
+  }
+
+  return bounds;
+}
+
+function buildSegmentKey(coords, roadClass, roadName = '') {
+  const start = coords[0];
+  const end = coords[coords.length - 1];
+  const a = `${start[0].toFixed(5)}:${start[1].toFixed(5)}`;
+  const b = `${end[0].toFixed(5)}:${end[1].toFixed(5)}`;
+  const [u, v] = a < b ? [a, b] : [b, a];
+  return `${roadClass}|${roadName}|${u}|${v}`;
+}
+
+function selectBestBioswaleSegments(segments) {
+  const ranked = [...segments].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    if (a.avgContourElevation !== b.avgContourElevation) {
+      return a.avgContourElevation - b.avgContourElevation;
+    }
+    if (a.avgElevation !== b.avgElevation) return a.avgElevation - b.avgElevation;
+    return a.relief - b.relief;
+  });
+
+  const strict = ranked.filter((segment) => segment.score >= 6.1);
+  if (strict.length >= 20) return strict.slice(0, 110);
+
+  return ranked.filter((segment) => segment.score >= 5.2).slice(0, 110);
+}
+
+async function addBioswaleOpportunityLayer(floodData) {
+  if (map.getLayer('bioswale-street-core-right')) return;
+
+  await new Promise((resolve) => map.once('idle', resolve));
+
+  const targetRoadClasses = ['street', 'secondary', 'tertiary', 'residential', 'service'];
+  const roadFeatures = map.querySourceFeatures('composite', {
+    sourceLayer: 'road',
+    filter: ['match', ['get', 'class'], targetRoadClasses, true, false]
+  });
+
+  const floodPriorityBounds = buildFloodPriorityBounds(floodData);
+  const contourIndex = cachedStudyContourFeatures.length
+    ? buildContourElevationIndex(cachedStudyContourFeatures)
+    : null;
+  const contourRange = contourIndex
+    ? Math.max(1e-6, contourIndex.maxElev - contourIndex.minElev)
+    : 1;
+  const unique = new Set();
+  const candidates = [];
+
+  for (const feature of roadFeatures) {
+    const roadClass = feature.properties?.class || 'street';
+    const roadName = feature.properties?.name || '';
+
+    const lineGroups = getFeatureLineCoordinates(feature.geometry);
+    for (const lineCoords of lineGroups) {
+      const clippedSegments = clipLineToStudyBounds(lineCoords);
+      for (const coords of clippedSegments) {
+        if (coords.length < 4) continue;
+        if (roughLineLength(coords) < 0.00035) continue;
+
+        const bounds = getGeometryBounds({ coordinates: coords });
+        if (!bounds) continue;
+
+        const terrainStats = getLineTerrainStats(coords);
+        if (!terrainStats) continue;
+
+        const contourStats = getLineContourStats(coords, contourIndex);
+
+        const floodNearby = floodPriorityBounds.some((floodBounds) => boundsOverlap(bounds, floodBounds, 0.0003));
+
+        const contourLowPriority = contourStats
+          ? clamp((contourIndex.maxElev - contourStats.avg) / contourRange, 0, 1)
+          : 0;
+        const terrainLowPriority = clamp((11 - terrainStats.avg) / 8, 0, 1);
+
+        const contourSlopeScore = contourStats
+          ? (1 - clamp(contourStats.relief / Math.max(1.2, contourRange * 0.09), 0, 1))
+          : 0.5;
+        const terrainSlopeScore = 1 - clamp(terrainStats.relief / 2.6, 0, 1);
+        const slopeStability = clamp((contourSlopeScore * 0.6) + (terrainSlopeScore * 0.4), 0, 1);
+
+        const roadClassSuitability =
+          (roadClass === 'residential' || roadClass === 'street') ? 1 :
+            (roadClass === 'tertiary' ? 0.72 : 0.48);
+
+        const score =
+          (floodNearby ? 3.1 : 0) +
+          (contourLowPriority * 3.0) +
+          (terrainLowPriority * 2.1) +
+          (slopeStability * 1.5) +
+          roadClassSuitability;
+
+        const key = buildSegmentKey(coords, roadClass, roadName);
+        if (unique.has(key)) continue;
+        unique.add(key);
+
+        candidates.push({
+          type: 'Feature',
+          properties: {
+            class: roadClass,
+            name: roadName,
+            score: Number(score.toFixed(2)),
+            avg_elev_m: Number(terrainStats.avg.toFixed(2)),
+            relief_m: Number(terrainStats.relief.toFixed(2)),
+            contour_avg_ft: contourStats ? Number(contourStats.avg.toFixed(2)) : null,
+            contour_relief_ft: contourStats ? Number(contourStats.relief.toFixed(2)) : null,
+            contour_low_priority: Number(contourLowPriority.toFixed(3)),
+            terrain_low_priority: Number(terrainLowPriority.toFixed(3)),
+            slope_stability: Number(slopeStability.toFixed(3)),
+            flood_nearby: floodNearby ? 1 : 0
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: coords
+          },
+          score,
+          avgContourElevation: contourStats ? contourStats.avg : Infinity,
+          avgElevation: terrainStats.avg,
+          relief: terrainStats.relief
+        });
+      }
+    }
+  }
+
+  const selected = selectBestBioswaleSegments(candidates).map((feature) => ({
+    type: 'Feature',
+    properties: feature.properties,
+    geometry: feature.geometry
+  }));
+
+  map.addSource('bioswale-streets', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: selected
+    }
+  });
+
+  const curbOffset = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    12,
+    ['match', ['get', 'class'],
+      'secondary', 3.4,
+      'tertiary', 3.0,
+      'residential', 2.8,
+      'service', 2.4,
+      'street', 2.8,
+      2.8
+    ],
+    18,
+    ['match', ['get', 'class'],
+      'secondary', 9.2,
+      'tertiary', 8.0,
+      'residential', 7.4,
+      'service', 6.6,
+      'street', 7.2,
+      7.2
+    ]
+  ];
+
+  const negatedCurbOffset = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    12,
+    ['match', ['get', 'class'],
+      'secondary', -3.4,
+      'tertiary', -3.0,
+      'residential', -2.8,
+      'service', -2.4,
+      'street', -2.8,
+      -2.8
+    ],
+    18,
+    ['match', ['get', 'class'],
+      'secondary', -9.2,
+      'tertiary', -8.0,
+      'residential', -7.4,
+      'service', -6.6,
+      'street', -7.2,
+      -7.2
+    ]
+  ];
+
+  map.addLayer({
+    id: 'bioswale-street-glow-right',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#bef264',
+      'line-offset': curbOffset,
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 3.4,
+        15, 5.4,
+        18, 8.2
+      ],
+      'line-opacity': 0.48
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-core-right',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#4d7c0f',
+      'line-offset': curbOffset,
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 1.25,
+        15, 2.1,
+        18, 3.2
+      ],
+      'line-dasharray': [1.2, 0.8],
+      'line-opacity': 1
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-glow-left',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#bef264',
+      'line-offset': negatedCurbOffset,
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 3.4,
+        15, 5.4,
+        18, 8.2
+      ],
+      'line-opacity': 0.48
+    }
+  });
+
+  map.addLayer({
+    id: 'bioswale-street-core-left',
+    type: 'line',
+    source: 'bioswale-streets',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#4d7c0f',
+      'line-offset': negatedCurbOffset,
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        12, 1.25,
+        15, 2.1,
+        18, 3.2
+      ],
+      'line-dasharray': [1.2, 0.8],
+      'line-opacity': 1
+    }
+  });
+
+  moveBioswaleLayersToTop();
+}
+
+async function addClippedContourLines() {
+  if (map.getLayer('study-contour-lines')) return;
+
+  async function fetchContourData(url, label) {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`${label} failed: ${response.status} ${response.statusText}`);
+    }
+
+    const rawText = await response.text();
+    if (!rawText || !rawText.trim()) {
+      throw new Error(`${label} returned an empty response body.`);
+    }
+
+    // Git LFS pointer files begin with this line when large assets are not pulled locally.
+    if (rawText.startsWith('version https://git-lfs.github.com/spec/v1')) {
+      throw new Error(
+        `${label} is a Git LFS pointer file, not GeoJSON. Run "git lfs pull" to download full data.`
+      );
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch (err) {
+      throw new Error(`${label} JSON parse failed: ${err.message}`);
+    }
+
+    if (parsed?.type !== 'FeatureCollection' || !Array.isArray(parsed.features)) {
+      throw new Error(`${label} is not a GeoJSON FeatureCollection.`);
+    }
+
+    return parsed;
+  }
+
+  let contourData;
+  let usingPreclippedContourData = false;
+  try {
+    contourData = await fetchContourData(CONTOUR_LINES_URL, 'Primary contour file');
+    usingPreclippedContourData = true;
+  } catch (_primaryErr) {
+    try {
+      contourData = await fetchContourData(CONTOUR_LINES_FALLBACK_URL, 'Local contour fallback');
+      usingPreclippedContourData = true;
+    } catch (_fallbackErr) {
+      try {
+        contourData = await fetchContourData(CONTOUR_LINES_SECONDARY_FALLBACK_URL, 'Secondary contour fallback');
+      } catch (secondaryFallbackErr) {
+        console.warn(`All contour sources failed; contour layer skipped. ${secondaryFallbackErr.message || secondaryFallbackErr}`);
+        return;
+      }
+    }
+  }
+
+  const clippedFeatures = usingPreclippedContourData
+    ? (contourData.features || []).map((feature) => ({
+        ...feature,
+        properties: {
+          ...feature.properties,
+          elev_m: Number(feature.properties?.ELEV ?? 0)
+        }
+      }))
+    : (() => {
+        const features = [];
+
+        for (const feature of contourData.features || []) {
+          const lineGroups = getFeatureLineCoordinates(feature.geometry);
+          const clippedGroups = [];
+
+          for (const lineCoords of lineGroups) {
+            const segments = clipLineToStudyBounds(lineCoords);
+            for (const segment of segments) {
+              if (segment.length < 2) continue;
+              clippedGroups.push(segment);
+            }
+          }
+
+          if (!clippedGroups.length) continue;
+
+          features.push({
+            type: 'Feature',
+            properties: {
+              ...feature.properties,
+              elev_m: Number(feature.properties?.ELEV ?? 0)
+            },
+            geometry: clippedGroups.length === 1
+              ? { type: 'LineString', coordinates: clippedGroups[0] }
+              : { type: 'MultiLineString', coordinates: clippedGroups }
+          });
+        }
+
+        return features;
+      })();
+
+  cachedStudyContourFeatures = clippedFeatures;
+
+  map.addSource('study-contour-lines', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: clippedFeatures
+    }
+  });
+
+  map.addLayer({
+    id: 'study-contour-lines',
+    type: 'line',
+    source: 'study-contour-lines',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#9ca3af',
+      'line-width': ['case', ['==', ['%', ['round', ['get', 'elev_m']], 5], 0], 1.2, 0.72],
+      'line-dasharray': [1.25, 1.15],
+      'line-opacity': 0.76
+    }
+  });
+
+  addTopographyElevationOverlay();
+
+  moveTopographyLayersToTop();
+}
+
+function centroidFromLineFeatures(features) {
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+  let found = false;
+
+  for (const feature of features || []) {
+    const geom = feature?.geometry;
+    if (!geom) continue;
+
+    if (geom.type === 'LineString') {
+      for (const coord of geom.coordinates || []) {
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+        const lng = coord[0];
+        const lat = coord[1];
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+        found = true;
+      }
+      continue;
+    }
+
+    if (geom.type === 'MultiLineString') {
+      for (const line of geom.coordinates || []) {
+        for (const coord of line || []) {
+          if (!Array.isArray(coord) || coord.length < 2) continue;
+          const lng = coord[0];
+          const lat = coord[1];
+          if (lng < minLng) minLng = lng;
+          if (lng > maxLng) maxLng = lng;
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+          found = true;
+        }
+      }
+    }
+  }
+
+  if (!found) return PRESENTATION_CENTER;
+  return [(minLng + maxLng) * 0.5, (minLat + maxLat) * 0.5];
+}
+
+function footprintBoundsPolygon(features) {
+  let minLng = Infinity;
+  let minLat = Infinity;
+  let maxLng = -Infinity;
+  let maxLat = -Infinity;
+
+  for (const feature of features || []) {
+    const geom = feature?.geometry;
+    if (!geom) continue;
+
+    const lines = geom.type === 'LineString'
+      ? [geom.coordinates || []]
+      : (geom.type === 'MultiLineString' ? (geom.coordinates || []) : []);
+
+    for (const line of lines) {
+      for (const coord of line) {
+        if (!Array.isArray(coord) || coord.length < 2) continue;
+        const lng = coord[0];
+        const lat = coord[1];
+        if (lng < minLng) minLng = lng;
+        if (lng > maxLng) maxLng = lng;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+      }
+    }
+  }
+
+  if (!Number.isFinite(minLng) || !Number.isFinite(minLat) || !Number.isFinite(maxLng) || !Number.isFinite(maxLat)) {
+    return null;
+  }
+
+  return {
+    type: 'Polygon',
+    coordinates: [[
+      [minLng, minLat],
+      [maxLng, minLat],
+      [maxLng, maxLat],
+      [minLng, maxLat],
+      [minLng, minLat]
+    ]]
+  };
+}
+
+function applyGrayBuildingMask(maskPolygon) {
+  if (!maskPolygon || !map.getLayer('existing-buildings') || !map.getLayer('existing-building-outline')) {
+    return;
+  }
+
+  map.setFilter('existing-buildings', ['!', ['within', maskPolygon]]);
+  map.setFilter('existing-building-outline', ['!', ['within', maskPolygon]]);
+}
+
+function addBHeightsModelOnFootprints(anchorLngLat) {
+  if (map.getLayer('b-heights-model')) return;
+
+  if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+    console.warn('Three.js or GLTFLoader not available; B_heights model skipped.');
+    return;
+  }
+
+  const mercator = mapboxgl.MercatorCoordinate.fromLngLat(anchorLngLat, 0);
+  const meterInMercator = mercator.meterInMercatorCoordinateUnits();
+
+  function getTerrainElevationMeters(mapInstance) {
+    if (!mapInstance || typeof mapInstance.queryTerrainElevation !== 'function') {
+      return 0;
+    }
+
+    const elevation = mapInstance.queryTerrainElevation(anchorLngLat, { exaggerated: true });
+    return Number.isFinite(elevation) ? elevation : 0;
+  }
+
+  const modelTransform = {
+    translateX: mercator.x,
+    translateY: mercator.y,
+    translateZ: mercator.z,
+    rotateX: Math.PI / 2,
+    rotateY: 0,
+    rotateZ: 0,
+    scale: meterInMercator
+  };
+
+  const customLayer = {
+    id: 'b-heights-model',
+    type: 'custom',
+    renderingMode: '3d',
+    onAdd: function onAdd(mapInstance, gl) {
+      this.camera = new THREE.Camera();
+      this.scene = new THREE.Scene();
+
+      this.scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+      const directional = new THREE.DirectionalLight(0xffffff, 0.68);
+      directional.position.set(40, -80, 120).normalize();
+      this.scene.add(directional);
+
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        './models/B_heights.gltf',
+        (gltf) => {
+          const bounds = new THREE.Box3().setFromObject(gltf.scene);
+          if (!bounds.isEmpty()) {
+            const center = new THREE.Vector3();
+            bounds.getCenter(center);
+            // Set Y so the model base sits at y=0 (flush with ground)
+            // Subtract a small epsilon to ensure the model sits exactly on the ground
+            const epsilon = 0.05;
+            gltf.scene.position.set(-center.x, -epsilon, -center.z);
+          }
+
+          gltf.scene.traverse((node) => {
+            if (!node.isMesh) return;
+            node.material = new THREE.MeshStandardMaterial({
+              color: 0xfacc15,
+              emissive: 0x5a4a00,
+              metalness: 0.04,
+              roughness: 0.8,
+              transparent: true,
+              opacity: 0.92
+            });
+          });
+
+          this.scene.add(gltf.scene);
+        },
+        undefined,
+        (err) => {
+          console.error('Failed to load B_heights.gltf:', err);
+        }
+      );
+
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: mapInstance.getCanvas(),
+        context: gl,
+        antialias: true
+      });
+      this.renderer.autoClear = false;
+    },
+    render: function render(gl, matrix) {
+      // Ignore terrain elevation; force models to sit on footprint lines
+      modelTransform.translateZ = mercator.z;
+
+      const rotationX = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(1, 0, 0),
+        modelTransform.rotateX
+      );
+      const rotationY = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 1, 0),
+        modelTransform.rotateY
+      );
+      const rotationZ = new THREE.Matrix4().makeRotationAxis(
+        new THREE.Vector3(0, 0, 1),
+        modelTransform.rotateZ
+      );
+
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(
+          modelTransform.translateX,
+          modelTransform.translateY,
+          modelTransform.translateZ
+        )
+        .scale(new THREE.Vector3(modelTransform.scale, -modelTransform.scale, modelTransform.scale))
+        .multiply(rotationX)
+        .multiply(rotationY)
+        .multiply(rotationZ);
+
+      this.camera.projectionMatrix = m.multiply(l);
+      this.renderer.resetState();
+      this.renderer.render(this.scene, this.camera);
+      map.triggerRepaint();
+    }
+  };
+
+  map.addLayer(customLayer);
+}
+
+async function addZoningBuildingsLayer() {
+  if (map.getLayer('zoning-footprints')) return;
+
+  const response = await fetch('./models/footprints.geojson');
+  if (!response.ok) {
+    throw new Error(`Failed to load footprints.geojson: ${response.status} ${response.statusText}`);
+  }
+
+  const footprintsData = await response.json();
+
+  map.addSource('zoning-footprints', {
+    type: 'geojson',
+    data: footprintsData
+  });
+
+  map.addLayer({
+    id: 'zoning-footprints',
+    type: 'line',
+    source: 'zoning-footprints',
+    layout: {
+      visibility: 'visible',
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#f59e0b',
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        13, 1.0,
+        15, 1.6,
+        17, 2.4
+      ],
+      'line-opacity': 0.9
+    }
+  });
+
+  const anchorLngLat = centroidFromLineFeatures(footprintsData.features || []);
+  addBHeightsModelOnFootprints(anchorLngLat);
+
+  const maskPolygon = footprintBoundsPolygon(footprintsData.features || []);
+  applyGrayBuildingMask(maskPolygon);
+}
+
+function moveBioswaleLayersToTop() {
+  if (map.getLayer('bioswale-street-glow-right')) {
+    map.moveLayer('bioswale-street-glow-right');
+  }
+  if (map.getLayer('bioswale-street-core-right')) {
+    map.moveLayer('bioswale-street-core-right');
+  }
+  if (map.getLayer('bioswale-street-glow-left')) {
+    map.moveLayer('bioswale-street-glow-left');
+  }
+  if (map.getLayer('bioswale-street-core-left')) {
+    map.moveLayer('bioswale-street-core-left');
+  }
+}
+
+function moveTopographyLayersToTop() {
+  if (map.getLayer('terrain-hillshade')) {
+    map.moveLayer('terrain-hillshade');
+  }
+  if (map.getLayer('topography-elevation-raster')) {
+    map.moveLayer('topography-elevation-raster');
+  }
+  if (map.getLayer('study-contour-lines')) {
+    map.moveLayer('study-contour-lines');
+  }
+}
+
+function setupLayerToggles() {
+  const topoToggle = document.getElementById('toggle-topo');
+  const floodToggle = document.getElementById('toggle-flood');
+  const bioswaleToggle = document.getElementById('toggle-bioswale');
+  const parkToggle = document.getElementById('toggle-park');
+  const treesToggle = document.getElementById('toggle-trees');
+  const observableToggle = document.getElementById('toggle-observable');
+  const observableOverlay = document.getElementById('observable-overlay');
+
+  topoToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('topography-elevation-raster')) {
+      map.setLayoutProperty('topography-elevation-raster', 'visibility', visibility);
+    }
+    if (map.getLayer('study-contour-lines')) {
+      map.setLayoutProperty('study-contour-lines', 'visibility', visibility);
+    }
+    if (map.getLayer('terrain-hillshade')) {
+      map.setLayoutProperty('terrain-hillshade', 'visibility', visibility);
+    }
+
+    if (visibility === 'visible') {
+      moveTopographyLayersToTop();
+    }
+  });
+
+  floodToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('flood-fill')) {
+      map.setLayoutProperty('flood-fill', 'visibility', visibility);
+    }
+    if (map.getLayer('flood-outline')) {
+      map.setLayoutProperty('flood-outline', 'visibility', visibility);
+    }
+  });
+
+  bioswaleToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('bioswale-street-glow-right')) {
+      map.setLayoutProperty('bioswale-street-glow-right', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-street-core-right')) {
+      map.setLayoutProperty('bioswale-street-core-right', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-street-glow-left')) {
+      map.setLayoutProperty('bioswale-street-glow-left', 'visibility', visibility);
+    }
+    if (map.getLayer('bioswale-street-core-left')) {
+      map.setLayoutProperty('bioswale-street-core-left', 'visibility', visibility);
+    }
+  });
+
+  parkToggle?.addEventListener('change', (event) => {
+    const visibility = event.target.checked ? 'visible' : 'none';
+    if (map.getLayer('park-outline')) {
+      map.setLayoutProperty('park-outline', 'visibility', visibility);
+    }
+    if (map.getLayer('park-hatch-fill')) {
+      map.setLayoutProperty('park-hatch-fill', 'visibility', visibility);
+    }
+  });
+
+  treesToggle?.addEventListener('change', (event) => {
+    if (event.target.checked) {
+      window.TreeRenderer?.showTrees?.(map);
+      if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
+    } else {
+      window.TreeRenderer?.hideTrees?.(map);
+    }
+  });
+
+  observableToggle?.addEventListener('change', (event) => {
+    const isVisible = event.target.checked;
+    observableOverlay?.classList.toggle('hidden', !isVisible);
+  });
+}
+
+function applyStoryChapter(chapter) {
+  if (!map?.getLayer('existing-buildings') || !map?.getLayer('proposed-buildings')) return;
+
+  const chapters = {
+    intro: {
+      center: [-73.9895, 40.6745],
+      zoom: 16.1,
+      pitch: 60,
+      bearing: -45,
+      stage: 1,
+      proposalVisible: false,
+      floodVisible: true
+    },
+    flood: {
+      center: [-73.9952, 40.6705],
+      zoom: 16.0,
+      pitch: 58,
+      bearing: -28,
+      stage: 0,
+      proposalVisible: false,
+      floodVisible: true
+    },
+    density: {
+      center: [-73.9865, 40.6776],
+      zoom: 16.35,
+      pitch: 64,
+      bearing: -42,
+      stage: 1,
+      proposalVisible: false,
+      floodVisible: false
+    },
+    trees: {
+      center: [-73.9912, 40.6757],
+      zoom: 16.25,
+      pitch: 62,
+      bearing: -50,
+      stage: 2,
+      proposalVisible: false,
+      floodVisible: false
+    },
+    proposal: {
+      center: [-73.9895, 40.6745],
+      zoom: 16.2,
+      pitch: 64,
+      bearing: -45,
+      stage: 2,
+      proposalVisible: true,
+      floodVisible: false
+    }
+  };
+
+  const config = chapters[chapter] || chapters.intro;
+
+  map.easeTo({
+    center: config.center,
+    zoom: config.zoom,
+    pitch: config.pitch,
+    bearing: config.bearing,
+    duration: 1100,
+    essential: true
+  });
+
+  setStageInstant(config.stage);
+
+  map.setPaintProperty(
+    'proposed-buildings',
+    'fill-extrusion-height',
+    config.proposalVisible ? proposedHeightExpression : 0
+  );
+  map.setPaintProperty(
+    'proposed-buildings',
+    'fill-extrusion-opacity',
+    config.proposalVisible ? 0.72 : 0
+  );
+
+  const floodVisibility = config.floodVisible ? 'visible' : 'none';
+  if (map.getLayer('flood-fill')) {
+    map.setLayoutProperty('flood-fill', 'visibility', floodVisibility);
+  }
+  if (map.getLayer('flood-outline')) {
+    map.setLayoutProperty('flood-outline', 'visibility', floodVisibility);
+  }
+
+  const floodToggle = document.getElementById('toggle-flood');
+  if (floodToggle) {
+    floodToggle.checked = config.floodVisible;
+  }
+}
+
+function setupStoryScrollytelling() {
+  const storyPanel = document.getElementById('story-panel');
+  if (!storyPanel) return;
+
+  const steps = Array.from(storyPanel.querySelectorAll('.story-step'));
+  if (!steps.length) return;
+
+  let activeChapter = null;
+
+  const activateStep = (step) => {
+    const chapter = step.dataset.chapter;
+    if (!chapter || chapter === activeChapter) return;
+
+    activeChapter = chapter;
+    steps.forEach((el) => el.classList.toggle('active', el === step));
+    applyStoryChapter(chapter);
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) {
+        activateStep(visible.target);
+      }
+    },
+    {
+      root: null,
+      rootMargin: '-15% 0px -35% 0px',
+      threshold: [0.2, 0.45, 0.7]
+    }
+  );
+
+  steps.forEach((step) => observer.observe(step));
+  activateStep(steps[0]);
+}
+
+function attachMapHandlers() {
+  map.on('load', async () => {
+    try {
+      map.easeTo({
+        center: PRESENTATION_CENTER,
+        bearing: PRESENTATION_BEARING,
+        pitch: PRESENTATION_PITCH,
+        duration: 900,
+        essential: true
+      });
+
+
+      // Load gray buildings, footprints (yellow), and flood data
+      const [existingResponse, footprintsResponse, floodResponse] = await Promise.all([
+        fetch('./data/gowanus-buildings.geojson'),
+        fetch('./models/footprints.geojson'),
+        fetch('./data/flood-vulnerability.geojson')
+      ]);
+
+      if (!existingResponse.ok) {
+        throw new Error(`Existing buildings fetch failed: ${existingResponse.status} ${existingResponse.statusText}`);
+      }
+      if (!footprintsResponse.ok) {
+        throw new Error(`Footprints fetch failed: ${footprintsResponse.status} ${footprintsResponse.statusText}`);
+      }
+      if (!floodResponse.ok) {
+        throw new Error(`Flood data fetch failed: ${floodResponse.status} ${floodResponse.statusText}`);
+      }
+
+      const existingData = await existingResponse.json();
+      const footprintsData = await footprintsResponse.json();
+      const floodData = await floodResponse.json();
+
+      // --- FILTER OUT GRAY BUILDINGS THAT OVERLAP YELLOW BUILDINGS ---
+      // Requires turf.js (should be included in your HTML for Mapbox projects)
+
+      // Debug: Log feature counts and geometry types
+      console.log('Gray buildings:', existingData.features.length);
+      console.log('Yellow buildings (from footprints):', footprintsData.features.length);
+      if (existingData.features.length > 0) {
+        console.log('First gray building geometry:', existingData.features[0].geometry.type);
+      }
+      if (footprintsData.features.length > 0) {
+        console.log('First yellow building geometry:', footprintsData.features[0].geometry.type);
+      }
+
+      // Only remove gray buildings fully contained within a yellow building
+      let filteredOut = [];
+      let filteredGrayBuildings = existingData.features.filter(grayFeature => {
+        if (!grayFeature || !grayFeature.geometry) return true;
+        const overlaps = footprintsData.features.some(yellowFeature => {
+          try {
+            return turf.booleanIntersects(yellowFeature, grayFeature);
+          } catch (e) {
+            return false;
+          }
+        });
+        if (overlaps) filteredOut.push(grayFeature);
+        return !overlaps;
+      });
+      console.log(`Filtered out ${filteredOut.length} gray buildings that overlap yellow footprints.`);
+      // Log the IDs of the first 10 filtered gray buildings for inspection
+      console.log('First 10 filtered gray building IDs:', filteredOut.slice(0, 10).map(f => f.properties && (f.properties["@id"] || f.properties.id)));
+
+      // Fallback: If all gray buildings are filtered, show all
+      if (filteredGrayBuildings.length === 0) {
+        console.warn('All gray buildings were filtered out. Showing all gray buildings for debugging.');
+        filteredGrayBuildings = existingData.features;
+      }
+      const filteredExistingData = { ...existingData, features: filteredGrayBuildings };
+
+      hideBasemapLabels();
+
+      addMapboxTerrainAndContours();
+      addFloodLayer(floodData);
+
+      map.addSource('existing', {
+        type: 'geojson',
+        data: filteredExistingData
+      });
+
+      map.addLayer({
+        id: 'existing-buildings',
+        type: 'fill-extrusion',
+        source: 'existing',
+        paint: {
+          'fill-extrusion-color': '#9fb3c8',
+          'fill-extrusion-base': 0,
+          'fill-extrusion-height': 0,
+          'fill-extrusion-opacity': 0.92
+        }
+      });
+
+      map.addLayer({
+        id: 'existing-building-outline',
+        type: 'line',
+        source: 'existing',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#2d3748',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            13, 0.8,
+            16, 1.5,
+            18, 2.2
+          ],
+          'line-opacity': 1.0
+        }
+      });
+
+      map.addSource('proposed', {
+        type: 'geojson',
+        data: footprintsData
+      });
+
+      map.addLayer({
+        id: 'proposed-buildings',
+        type: 'fill-extrusion',
+        source: 'proposed',
+        paint: {
+          'fill-extrusion-color': '#3b82f6',
+          'fill-extrusion-base': 0,
+          'fill-extrusion-height': 0,
+          'fill-extrusion-opacity': 0
+        }
+      });
+
+      map.addLayer({
+        id: 'proposed-building-outline',
+        type: 'line',
+        source: 'proposed',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#2d3748',
+          'line-width': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            13, 0.8,
+            16, 1.5,
+            18, 2.2
+          ],
+          'line-opacity': 0
+        }
+      });
+
+      addMapboxGroundWater();
+      addMapboxGroundParks();
+
+      map.setPaintProperty('existing-buildings', 'fill-extrusion-color', '#b7c0c8');
+      map.setPaintProperty('proposed-buildings', 'fill-extrusion-color', '#a9b8ad');
+
+      setupLayerToggles();
+      addGowanusFocusMask();
+      map.moveLayer('gowanus-focus-mask');
+
+      setStageInstant(0);
+      applyCameraForStage(0, true);
+
+      // Defer heavier overlays so base map becomes interactive faster.
+      setTimeout(async () => {
+        try {
+          if (document.getElementById('toggle-topo')?.checked) {
+            await addClippedContourLines();
+          }
+          await addParkOutline();
+          await addZoningBuildingsLayer();
+          await addBioswaleOpportunityLayer(floodData);
+          await window.TreeRenderer?.initTrees?.(map);
+
+          if (map.getLayer('trees-layer')) map.moveLayer('trees-layer');
+          moveBioswaleLayersToTop();
+          moveTopographyLayersToTop();
+          if (map.getLayer('gowanus-focus-mask')) map.moveLayer('gowanus-focus-mask');
+        } catch (deferredErr) {
+          console.warn('Deferred map overlay load failed:', deferredErr);
+        }
+      }, 0);
+    } catch (err) {
+      console.error('MAP LOAD ERROR:', err);
+    }
+  });
+}
+
+window.addEventListener('wheel', (event) => {
+  if (!map) return;
+
+  if (event.altKey) {
+    map.scrollZoom.enable();
+    return;
+  }
+
+  map.scrollZoom.disable();
+  event.preventDefault();
+
+  if (isAnimating) return;
+
+  const previousStage = currentStage;
+
+  if (event.deltaY > 0) {
+    currentStage = clamp(currentStage + 1, 0, 2);
+  } else {
+    currentStage = clamp(currentStage - 1, 0, 2);
+  }
+
+  if (currentStage === previousStage) {
+    return;
+  }
+
+  applyCameraForStage(currentStage);
+  animateStage(currentStage);
+}, { passive: false });
+
+window.addEventListener('keyup', (event) => {
+  if (!map) return;
+
+  if (event.key === 'Alt') {
+    map.scrollZoom.disable();
+  }
+});
+
+initMap().catch((err) => {
+  console.error('MAP INIT ERROR:', err);
+});
+// End of main.js
