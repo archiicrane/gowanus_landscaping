@@ -103,10 +103,10 @@ export function setupMapLayers(map) {
                 gltf.scene.traverse((node) => {
                   if (!node.isMesh) return;
                   node.material = new window.THREE.MeshStandardMaterial({
-                    color: 0xfacc15,
-                    emissive: 0x5a4a00,
-                    metalness: 0.04,
-                    roughness: 0.8,
+                    color: 0x444444, // dark gray
+                    emissive: 0x111111,
+                    metalness: 0.08,
+                    roughness: 0.85,
                     transparent: true,
                     opacity: 0.92
                   });
