@@ -1,34 +1,8 @@
-  // Draw LineString or MultiLineString as lines
-  drawLineString(geometry, color = 0x888888, z = 0.2) {
-    if (!geometry || !geometry.type || !geometry.coordinates) return;
-    const material = new THREE.LineBasicMaterial({ color, linewidth: 2 });
-    if (geometry.type === 'LineString') {
-      const points = geometry.coordinates.map(([lon, lat]) => {
-        const [x, y] = projectLonLatToPlan(lon, lat);
-        return new THREE.Vector3(x, y, z);
-      });
-      const geo = new THREE.BufferGeometry().setFromPoints(points);
-      const line = new THREE.Line(geo, material);
-      this.scene.add(line);
-    } else if (geometry.type === 'MultiLineString') {
-      geometry.coordinates.forEach(lineCoords => {
-        const points = lineCoords.map(([lon, lat]) => {
-          const [x, y] = projectLonLatToPlan(lon, lat);
-          return new THREE.Vector3(x, y, z);
-        });
-        const geo = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(geo, material);
-        this.scene.add(line);
-      });
-    }
-  }
 // site-plan-renderer.js
 // Responsible for rendering the architectural site plan using Three.js
 
-
 import { SitePlanStyle } from './site-plan-style.js';
 import { drawArchitecturalTree } from './site-plan-trees.js';
-
 
 // Helper: Compute bounds from all features (buildings, parks, trees)
 function computeSiteBounds(data) {
@@ -50,6 +24,10 @@ function computeSiteBounds(data) {
       geom.coordinates.forEach(ring => ring.forEach(processCoord));
     } else if (geom.type === 'MultiPolygon') {
       geom.coordinates.forEach(poly => poly.forEach(ring => ring.forEach(processCoord)));
+    } else if (geom.type === 'LineString') {
+      geom.coordinates.forEach(processCoord);
+    } else if (geom.type === 'MultiLineString') {
+      geom.coordinates.forEach(line => line.forEach(processCoord));
     }
   });
   // Parks
@@ -83,59 +61,11 @@ export class SitePlanRenderer {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setClearColor(SitePlanStyle.paper);
     this.initLighting();
-    // Initial setup
+    this.contentGroup = new THREE.Group();
+    this.scene.add(this.contentGroup);
     this.updateSizeAndCamera();
     this.drawScene();
-    // Handle resize
-    window.addEventListener('resize', () => {
-      this.updateSizeAndCamera();
-      this.drawScene();
-    });
-  }
-
-  updateSizeAndCamera() {
-    // Always use actual pixel size
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
-    // Compute bounds from all geometry
-    this.bounds = computeSiteBounds(this.data);
-    const { minLon, minLat, maxLon, maxLat } = this.bounds;
-    // Compute center
-    _centerLon = (minLon + maxLon) / 2;
-    _centerLat = (minLat + maxLat) / 2;
-    // Compute scale to fit viewport with padding
-    const siteWidth = maxLon - minLon;
-    const siteHeight = maxLat - minLat;
-    const scaleX = (this.width * 0.9) / siteWidth;
-    const scaleY = (this.height * 0.9) / siteHeight;
-    _scale = Math.min(scaleX, scaleY);
-    // Camera setup: center at (0,0), fit viewport
-    if (!this.camera) {
-      this.camera = new THREE.OrthographicCamera(-this.width/2, this.width/2, this.height/2, -this.height/2, 0.1, 2000);
-    } else {
-      this.camera.left = -this.width/2;
-      this.camera.right = this.width/2;
-      this.camera.top = this.height/2;
-      this.camera.bottom = -this.height/2;
-      this.camera.updateProjectionMatrix();
-    }
-    this.camera.position.set(0, 0, 1000);
-    this.camera.lookAt(0, 0, 0);
-    this.renderer.setSize(this.width, this.height, false);
-    // Debug
-    console.log({ minLon, maxLon, minLat, maxLat, scale: _scale });
-  }
-
-  handleResize() {
-    this.width = this.canvas.clientWidth;
-    this.height = this.canvas.clientHeight;
-    this.camera.left = 0;
-    this.camera.right = this.width;
-    this.camera.top = this.height;
-    this.camera.bottom = 0;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.width, this.height, false);
-    this.drawScene();
+    window.addEventListener('resize', () => this.handleResize());
   }
 
   initLighting() {
@@ -146,9 +76,58 @@ export class SitePlanRenderer {
     this.scene.add(dir);
   }
 
+  updateSizeAndCamera() {
+    // Get actual display size
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
+    this.width = width;
+    this.height = height;
+    this.renderer.setSize(width, height, false);
+
+    // Compute bounds and transform
+    const { minLon, minLat, maxLon, maxLat } = computeSiteBounds(this.data);
+    _centerLon = (minLon + maxLon) / 2;
+    _centerLat = (minLat + maxLat) / 2;
+    const availableWidth = width - this.padding * 2;
+    const availableHeight = height - this.padding * 2;
+    const scaleX = availableWidth / Math.max(maxLon - minLon, 1e-9);
+    const scaleY = availableHeight / Math.max(maxLat - minLat, 1e-9);
+    _scale = Math.min(scaleX, scaleY);
+
+    // Centered orthographic camera
+    if (!this.camera) {
+      this.camera = new THREE.OrthographicCamera(
+        -width / 2, width / 2, height / 2, -height / 2, -1000, 2000
+      );
+    } else {
+      this.camera.left = -width / 2;
+      this.camera.right = width / 2;
+      this.camera.top = height / 2;
+      this.camera.bottom = -height / 2;
+      this.camera.near = -1000;
+      this.camera.far = 2000;
+      this.camera.updateProjectionMatrix();
+    }
+    this.camera.position.set(0, 0, 1000);
+    this.camera.lookAt(0, 0, 0);
+  }
+
+  handleResize() {
+    this.updateSizeAndCamera();
+    this.drawScene();
+  }
+
+  clearContent() {
+    // Remove all children from contentGroup only (preserve lights)
+    if (this.contentGroup) {
+      while (this.contentGroup.children.length > 0) {
+        this.contentGroup.remove(this.contentGroup.children[0]);
+      }
+    }
+  }
+
   drawScene() {
-    // Clear scene
-    while(this.scene.children.length > 0){ this.scene.remove(this.scene.children[0]); }
+    this.clearContent();
 
     // Draw parks/planted areas (only polygons)
     this.data.parks.forEach(park => {
@@ -178,7 +157,7 @@ export class SitePlanRenderer {
     this.data.trees.forEach(tree => {
       if (Array.isArray(tree.position)) {
         const [x, y] = projectLonLatToPlan(tree.position[0], tree.position[1]);
-        drawArchitecturalTree(this.scene, { ...tree, position: [x, y] }, SitePlanStyle);
+        drawArchitecturalTree(this.contentGroup, { ...tree, position: [x, y] }, SitePlanStyle);
       }
     });
 
@@ -187,7 +166,7 @@ export class SitePlanRenderer {
     const centerMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
     const center = new THREE.Mesh(centerGeom, centerMat);
     center.position.set(0, 0, 2);
-    this.scene.add(center);
+    this.contentGroup.add(center);
 
     // Log feature counts
     console.log('Buildings:', this.data.buildings.length, 'Parks:', this.data.parks.length, 'Trees:', this.data.trees.length);
@@ -196,22 +175,62 @@ export class SitePlanRenderer {
   }
 
   drawPolygon(coords, color, z = 0) {
-    coords.forEach(ring => {
-      const shape = new THREE.Shape();
-      ring.forEach(([lon, lat], i) => {
-        const [x, y] = projectLonLatToPlan(lon, lat);
-        if (i === 0) shape.moveTo(x, y);
-        else shape.lineTo(x, y);
-      });
-      const geometry = new THREE.ShapeGeometry(shape);
-      const material = new THREE.MeshBasicMaterial({ color });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.z = z;
-      this.scene.add(mesh);
+    if (!Array.isArray(coords) || coords.length === 0) return;
+    // Outer ring and holes
+    const shape = new THREE.Shape();
+    coords[0].forEach(([lon, lat], i) => {
+      if (typeof lon !== 'number' || typeof lat !== 'number') return;
+      const [x, y] = projectLonLatToPlan(lon, lat);
+      if (i === 0) shape.moveTo(x, y);
+      else shape.lineTo(x, y);
     });
+    for (let i = 1; i < coords.length; i++) {
+      const holePath = new THREE.Path();
+      coords[i].forEach(([lon, lat], j) => {
+        if (typeof lon !== 'number' || typeof lat !== 'number') return;
+        const [x, y] = projectLonLatToPlan(lon, lat);
+        if (j === 0) holePath.moveTo(x, y);
+        else holePath.lineTo(x, y);
+      });
+      shape.holes.push(holePath);
+    }
+    const geometry = new THREE.ShapeGeometry(shape);
+    const material = new THREE.MeshBasicMaterial({ color });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.z = z;
+    this.contentGroup.add(mesh);
   }
 
-  // Helper to normalize Polygon/MultiPolygon
+  drawLineString(geometry, color = 0x888888, z = 0.2) {
+    if (!geometry || !geometry.type || !geometry.coordinates) return;
+    const material = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+    if (geometry.type === 'LineString') {
+      const points = geometry.coordinates
+        .filter(coord => Array.isArray(coord) && coord.length >= 2)
+        .map(([lon, lat]) => {
+          const [x, y] = projectLonLatToPlan(lon, lat);
+          return new THREE.Vector3(x, y, z);
+        });
+      if (points.length < 2) return;
+      const geo = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geo, material);
+      this.contentGroup.add(line);
+    } else if (geometry.type === 'MultiLineString') {
+      geometry.coordinates.forEach(lineCoords => {
+        const points = lineCoords
+          .filter(coord => Array.isArray(coord) && coord.length >= 2)
+          .map(([lon, lat]) => {
+            const [x, y] = projectLonLatToPlan(lon, lat);
+            return new THREE.Vector3(x, y, z);
+          });
+        if (points.length < 2) return;
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geo, material);
+        this.contentGroup.add(line);
+      });
+    }
+  }
+
   getPolygonRings(geometry) {
     if (!geometry || !geometry.type || !geometry.coordinates) return [];
     if (geometry.type === "Polygon") {
@@ -227,29 +246,40 @@ export class SitePlanRenderer {
   drawBuilding(geometry) {
     const polygons = this.getPolygonRings(geometry);
     polygons.forEach(rings => {
-      rings.forEach(ring => {
-        if (!Array.isArray(ring)) return;
-        const shape = new THREE.Shape();
-        ring.forEach((coord, i) => {
+      if (!Array.isArray(rings) || rings.length === 0) return;
+      // Outer ring and holes
+      const shape = new THREE.Shape();
+      rings[0].forEach((coord, i) => {
+        if (!Array.isArray(coord) || coord.length < 2) return;
+        const [lon, lat] = coord;
+        const [x, y] = projectLonLatToPlan(lon, lat);
+        if (i === 0) shape.moveTo(x, y);
+        else shape.lineTo(x, y);
+      });
+      for (let i = 1; i < rings.length; i++) {
+        const holePath = new THREE.Path();
+        rings[i].forEach((coord, j) => {
           if (!Array.isArray(coord) || coord.length < 2) return;
           const [lon, lat] = coord;
           const [x, y] = projectLonLatToPlan(lon, lat);
-          if (i === 0) shape.moveTo(x, y);
-          else shape.lineTo(x, y);
+          if (j === 0) holePath.moveTo(x, y);
+          else holePath.lineTo(x, y);
         });
-        const extrudeSettings = {
-          depth: SitePlanStyle.buildingExtrude,
-          bevelEnabled: false
-        };
-        const geometry3 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshLambertMaterial({
-          color: SitePlanStyle.buildingTop,
-          flatShading: true
-        });
-        const mesh = new THREE.Mesh(geometry3, material);
-        mesh.position.z = 0.1;
-        this.scene.add(mesh);
+        shape.holes.push(holePath);
+      }
+      if (shape.getPoints().length < 3) return; // skip degenerate
+      const extrudeSettings = {
+        depth: SitePlanStyle.buildingExtrude,
+        bevelEnabled: false
+      };
+      const geometry3 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      const material = new THREE.MeshLambertMaterial({
+        color: SitePlanStyle.buildingTop,
+        flatShading: true
       });
+      const mesh = new THREE.Mesh(geometry3, material);
+      mesh.position.z = 0.1;
+      this.contentGroup.add(mesh);
     });
   }
 }
