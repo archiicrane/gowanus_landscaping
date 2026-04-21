@@ -417,47 +417,58 @@ export function setupMapLayers(map) {
   }
 
   // --- Flood vulnerability layer ---
-  map.addSource('flood-vulnerability', {
-    type: 'geojson',
-    data: 'data/flood-vulnerability.geojson'
-  });
-  map.addLayer({
-    id: 'flood-vulnerability-fill',
-    type: 'fill',
-    source: 'flood-vulnerability',
-    paint: {
-      'fill-color': '#4fc3f7',
-      'fill-opacity': 0.28
-    },
-    filter: ['within', { type: 'Polygon', coordinates: [window.STUDY_RING] }]
-  }, 'arch-buildings-outline');
-
-  // --- CSO Outfalls ---
-  fetch('models/Citywide_Outfalls_20260416.geojson')
-    .then(res => res.json())
-    .then(citywideCSO => {
-      const filtered = citywideCSO.features.filter(f => {
-        if (!f.geometry || f.geometry.type !== 'Point') return false;
-        return window.pointInStudyPolygon(f.geometry.coordinates);
-      });
-      const gowanusCSO = {
-        type: 'FeatureCollection',
-        features: filtered
-      };
-      map.addSource('cso-outfalls', {
+  if (map && typeof map.addSource === 'function' && typeof map.addLayer === 'function') {
+    if (!map.getSource('flood-vulnerability')) {
+      map.addSource('flood-vulnerability', {
         type: 'geojson',
-        data: gowanusCSO
+        data: 'data/flood-vulnerability.geojson'
       });
+    }
+    if (!map.getLayer('flood-vulnerability-fill')) {
       map.addLayer({
-        id: 'cso-outfalls-circle',
-        type: 'circle',
-        source: 'cso-outfalls',
+        id: 'flood-vulnerability-fill',
+        type: 'fill',
+        source: 'flood-vulnerability',
         paint: {
-          'circle-radius': 7,
-          'circle-color': '#ff9800',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#fff',
-          'circle-opacity': 0.95
+          'fill-color': '#4fc3f7',
+          'fill-opacity': 0.28
+        },
+        filter: ['within', { type: 'Polygon', coordinates: [window.STUDY_RING] }]
+      }, 'arch-buildings-outline');
+    }
+    // --- CSO Outfalls ---
+    fetch('models/Citywide_Outfalls_20260416.geojson')
+      .then(res => res.json())
+      .then(citywideCSO => {
+        const filtered = citywideCSO.features.filter(f => {
+          if (!f.geometry || f.geometry.type !== 'Point') return false;
+          return window.pointInStudyPolygon(f.geometry.coordinates);
+        });
+        const gowanusCSO = {
+          type: 'FeatureCollection',
+          features: filtered
+        };
+        if (!map.getSource('cso-outfalls')) {
+          map.addSource('cso-outfalls', {
+            type: 'geojson',
+            data: gowanusCSO
+          });
         }
-      }, 'flood-vulnerability-fill');
-    });
+        if (!map.getLayer('cso-outfalls-circle')) {
+          map.addLayer({
+            id: 'cso-outfalls-circle',
+            type: 'circle',
+            source: 'cso-outfalls',
+            paint: {
+              'circle-radius': 7,
+              'circle-color': '#ff9800',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#fff',
+              'circle-opacity': 0.95
+            }
+          }, 'flood-vulnerability-fill');
+        }
+      });
+  } else {
+    console.warn('Map object is invalid or missing addSource/addLayer methods at flood/CSO layers');
+  }
