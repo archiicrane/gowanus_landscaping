@@ -1,3 +1,27 @@
+  // Draw LineString or MultiLineString as lines
+  drawLineString(geometry, color = 0x888888, z = 0.2) {
+    if (!geometry || !geometry.type || !geometry.coordinates) return;
+    const material = new THREE.LineBasicMaterial({ color, linewidth: 2 });
+    if (geometry.type === 'LineString') {
+      const points = geometry.coordinates.map(([lon, lat]) => {
+        const [x, y] = projectLonLatToPlan(lon, lat);
+        return new THREE.Vector3(x, y, z);
+      });
+      const geo = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geo, material);
+      this.scene.add(line);
+    } else if (geometry.type === 'MultiLineString') {
+      geometry.coordinates.forEach(lineCoords => {
+        const points = lineCoords.map(([lon, lat]) => {
+          const [x, y] = projectLonLatToPlan(lon, lat);
+          return new THREE.Vector3(x, y, z);
+        });
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geo, material);
+        this.scene.add(line);
+      });
+    }
+  }
 // site-plan-renderer.js
 // Responsible for rendering the architectural site plan using Three.js
 
@@ -139,11 +163,14 @@ export class SitePlanRenderer {
       }
     });
 
-    // Draw buildings (only Polygon or MultiPolygon)
+    // Draw buildings (Polygon, MultiPolygon, LineString, MultiLineString)
     this.data.buildings.forEach(bldg => {
       const geom = bldg.geometry;
-      if (geom && (geom.type === "Polygon" || geom.type === "MultiPolygon")) {
+      if (!geom) return;
+      if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
         this.drawBuilding(geom);
+      } else if (geom.type === "LineString" || geom.type === "MultiLineString") {
+        this.drawLineString(geom, 0x888888, 0.2); // gray lines for buildings
       }
     });
 
