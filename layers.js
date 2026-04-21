@@ -451,4 +451,3 @@ export function setupMapLayers(map) {
         }
       }, 'flood-vulnerability-fill');
     });
-}
