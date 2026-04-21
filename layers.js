@@ -379,8 +379,8 @@ export function setupMapLayers(map) {
           map.setPaintProperty(layer.id, 'line-opacity', 1);
         }
       } catch (e) {}
-    });
-  }
+    };
+    
 
   // --- Add custom architectural layers (buildings, roads, blocks) ---
   map.addSource('arch-buildings', {
