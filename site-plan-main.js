@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Create and append the Three.js canvas
   const canvas = document.createElement('canvas');
   canvas.className = 'site-plan-canvas';
+  // Remove any fixed width/height attributes so CSS can control size
+  canvas.removeAttribute('width');
+  canvas.removeAttribute('height');
   container.appendChild(canvas);
 
   // Show loading message
