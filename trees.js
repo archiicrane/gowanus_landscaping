@@ -82,12 +82,7 @@ window.TreeRenderer = {
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
-  },
-  ctx.lineTo(cx - tw,       trunkTop);
-  ctx.lineTo(cx + tw,       trunkTop);
-  ctx.lineTo(cx + tw * 0.6, trunkBottom);
-  ctx.closePath();
-  ctx.fill();
+  }
 
   // --- Canopy: dark under-shadow pass ---
   for (const [dx, dy, r] of clusters) {

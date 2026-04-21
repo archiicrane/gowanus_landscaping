@@ -380,6 +380,7 @@ export function setupMapLayers(map) {
         }
       } catch (e) {}
     });
+  }
 
   // --- Add custom architectural layers (buildings, roads, blocks) ---
   map.addSource('arch-buildings', {
