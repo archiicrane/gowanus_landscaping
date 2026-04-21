@@ -1,5 +1,5 @@
 
-import { currentTheme } from './theme.js';
+// Use window.currentTheme instead of import for compatibility with classic script loading
 console.log('trees.js loaded');
 
 // Species to canopy color mapping (matches original dot colors)

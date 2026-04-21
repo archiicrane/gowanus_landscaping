@@ -295,6 +295,7 @@ export function setupMapLayers(map) {
       }
     })();
   // --- Hide default Mapbox labels, POIs, and color noise ---
+  // Hide default Mapbox labels, POIs, and color noise
   const style = map.getStyle();
   style.layers.forEach(layer => {
     if (!map.getLayer(layer.id)) return;
@@ -337,8 +338,8 @@ export function setupMapLayers(map) {
       }
     } catch (e) {}
   });
-    const style = map.getStyle();
-    style.layers.forEach(layer => {
+    // (Duplicate block removed: style already declared above)
+    // style.layers.forEach(layer => { ... });
       if (!map.getLayer(layer.id)) return;
       if (layer.id === 'trees-layer') return;
       try {
