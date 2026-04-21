@@ -59,7 +59,7 @@ export class SitePlanRenderer {
 
     // Draw buildings
     this.data.buildings.forEach(bldg => {
-      this.drawBuilding(bldg.polygon);
+      this.drawBuilding(bldg.geometry);
     });
 
     // Draw trees
@@ -85,25 +85,45 @@ export class SitePlanRenderer {
     });
   }
 
-  drawBuilding(coords) {
-    coords.forEach(ring => {
-      const shape = new THREE.Shape();
-      ring.forEach(([x, y], i) => {
-        if (i === 0) shape.moveTo(x, y);
-        else shape.lineTo(x, y);
+  // Helper to normalize Polygon/MultiPolygon
+  getPolygonRings(geometry) {
+    if (!geometry || !geometry.type || !geometry.coordinates) return [];
+    if (geometry.type === "Polygon") {
+      return [geometry.coordinates];
+    }
+    if (geometry.type === "MultiPolygon") {
+      return geometry.coordinates;
+    }
+    console.warn("Unsupported geometry type:", geometry.type, geometry);
+    return [];
+  }
+
+  drawBuilding(geometry) {
+    const polygons = this.getPolygonRings(geometry);
+    polygons.forEach(rings => {
+      rings.forEach(ring => {
+        if (!Array.isArray(ring)) return;
+        const shape = new THREE.Shape();
+        ring.forEach((coord, i) => {
+          if (!Array.isArray(coord) || coord.length < 2) return;
+          const [x, y] = coord;
+          if (typeof x !== 'number' || typeof y !== 'number') return;
+          if (i === 0) shape.moveTo(x, y);
+          else shape.lineTo(x, y);
+        });
+        const extrudeSettings = {
+          depth: SitePlanStyle.buildingExtrude,
+          bevelEnabled: false
+        };
+        const geometry3 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        const material = new THREE.MeshLambertMaterial({
+          color: SitePlanStyle.buildingTop,
+          flatShading: true
+        });
+        const mesh = new THREE.Mesh(geometry3, material);
+        mesh.position.z = 0.1;
+        this.scene.add(mesh);
       });
-      const extrudeSettings = {
-        depth: SitePlanStyle.buildingExtrude,
-        bevelEnabled: false
-      };
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-      const material = new THREE.MeshLambertMaterial({
-        color: SitePlanStyle.buildingTop,
-        flatShading: true
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.z = 0.1;
-      this.scene.add(mesh);
     });
   }
 }

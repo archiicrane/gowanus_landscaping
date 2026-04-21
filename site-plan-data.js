@@ -13,12 +13,12 @@ async function fetchJSON(url) {
   return await res.json();
 }
 
-// Normalize building footprints
+// Normalize building footprints (keep full geometry)
 async function loadBuildings() {
   const geojson = await fetchJSON(BUILDINGS_URL);
   return geojson.features.map(f => ({
     id: f.id || f.properties?.id || null,
-    polygon: f.geometry.coordinates,
+    geometry: f.geometry, // keep full geometry
     properties: f.properties || {},
   }));
 }
