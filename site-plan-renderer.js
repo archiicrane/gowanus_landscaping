@@ -67,13 +67,27 @@ export class SitePlanRenderer {
   constructor(canvas, data) {
     this.canvas = canvas;
     this.data = data;
-    this.width = canvas.clientWidth;
-    this.height = canvas.clientHeight;
     this.padding = 40; // px padding around site
+    this.scene = new THREE.Scene();
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    this.renderer.setClearColor(SitePlanStyle.paper);
+    this.initLighting();
+    // Initial setup
+    this.updateSizeAndCamera();
+    this.drawScene();
+    // Handle resize
+    window.addEventListener('resize', () => {
+      this.updateSizeAndCamera();
+      this.drawScene();
+    });
+  }
+
+  updateSizeAndCamera() {
+    // Always use actual pixel size
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
     // Compute bounds from all geometry
-    this.bounds = computeSiteBounds(data);
-    // Log bounds for debugging
-    console.log('Site bounds:', this.bounds);
+    this.bounds = computeSiteBounds(this.data);
     // Compute plan-space size
     const siteWidth = this.bounds.maxLon - this.bounds.minLon;
     const siteHeight = this.bounds.maxLat - this.bounds.minLat;
@@ -84,17 +98,20 @@ export class SitePlanRenderer {
     const scaleY = drawHeight / siteHeight;
     this.planScale = Math.min(scaleX, scaleY);
     // Camera setup: fit the normalized site plan
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.OrthographicCamera(0, this.width, this.height, 0, 0.1, 1000);
+    if (!this.camera) {
+      this.camera = new THREE.OrthographicCamera(0, this.width, this.height, 0, 0.1, 1000);
+    } else {
+      this.camera.left = 0;
+      this.camera.right = this.width;
+      this.camera.top = this.height;
+      this.camera.bottom = 0;
+      this.camera.updateProjectionMatrix();
+    }
     this.camera.position.set(this.width / 2, this.height / 2, 100);
     this.camera.lookAt(this.width / 2, this.height / 2, 0);
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    this.renderer.setClearColor(SitePlanStyle.paper);
     this.renderer.setSize(this.width, this.height, false);
-    this.initLighting();
-    this.drawScene();
-    // Handle resize
-    window.addEventListener('resize', () => this.handleResize());
+    // Debug
+    console.log('Site bounds:', this.bounds, 'Canvas:', this.width, this.height, 'Scale:', this.planScale);
   }
 
   handleResize() {

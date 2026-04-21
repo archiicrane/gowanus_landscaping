@@ -14,10 +14,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Create and append the Three.js canvas
   const canvas = document.createElement('canvas');
   canvas.className = 'site-plan-canvas';
-  // Remove any fixed width/height attributes so CSS can control size
-  canvas.removeAttribute('width');
-  canvas.removeAttribute('height');
   container.appendChild(canvas);
+
+  // Helper to set canvas pixel size to match container
+  function resizeCanvasToDisplaySize() {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+  }
+  // Initial resize
+  resizeCanvasToDisplaySize();
+  // Resize on window resize
+  window.addEventListener('resize', resizeCanvasToDisplaySize);
 
   // Show loading message
   const loading = document.createElement('div');
