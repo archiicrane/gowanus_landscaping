@@ -57,9 +57,13 @@ export class SitePlanRenderer {
       // Skip LineString and other types
     });
 
-    // Draw buildings
+    // Draw buildings (only Polygon or MultiPolygon)
     this.data.buildings.forEach(bldg => {
-      this.drawBuilding(bldg.geometry);
+      const geom = bldg.geometry;
+      if (geom && (geom.type === "Polygon" || geom.type === "MultiPolygon")) {
+        this.drawBuilding(geom);
+      }
+      // Skip LineString and other unsupported types
     });
 
     // Draw trees
