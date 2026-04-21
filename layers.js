@@ -383,28 +383,38 @@ export function setupMapLayers(map) {
     
 
   // --- Add custom architectural layers (buildings, roads, blocks) ---
-  map.addSource('arch-buildings', {
-    type: 'geojson',
-    data: 'models/footprints.geojson'
-  });
-  map.addLayer({
-    id: 'arch-buildings-fill',
-    type: 'fill',
-    source: 'arch-buildings',
-    paint: {
-        'fill-color': currentTheme.building,
-      'fill-opacity': 1
+  if (map && typeof map.addSource === 'function' && typeof map.addLayer === 'function') {
+    if (!map.getSource('arch-buildings')) {
+      map.addSource('arch-buildings', {
+        type: 'geojson',
+        data: 'models/footprints.geojson'
+      });
     }
-  }, 'waterway-label');
-  map.addLayer({
-    id: 'arch-buildings-outline',
-    type: 'line',
-    source: 'arch-buildings',
-    paint: {
-        'line-color': currentTheme.buildingOutline,
-      'line-width': 1.1
+    if (!map.getLayer('arch-buildings-fill')) {
+      map.addLayer({
+        id: 'arch-buildings-fill',
+        type: 'fill',
+        source: 'arch-buildings',
+        paint: {
+          'fill-color': currentTheme.building,
+          'fill-opacity': 1
+        }
+      }, 'waterway-label');
     }
-  }, 'arch-buildings-fill');
+    if (!map.getLayer('arch-buildings-outline')) {
+      map.addLayer({
+        id: 'arch-buildings-outline',
+        type: 'line',
+        source: 'arch-buildings',
+        paint: {
+          'line-color': currentTheme.buildingOutline,
+          'line-width': 1.1
+        }
+      }, 'arch-buildings-fill');
+    }
+  } else {
+    console.warn('Map object is invalid or missing addSource/addLayer methods at custom architectural layers');
+  }
 
   // --- Flood vulnerability layer ---
   map.addSource('flood-vulnerability', {
