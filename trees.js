@@ -81,33 +81,19 @@ window.TreeRenderer = {
     }
   }
 
-window.TreeRenderer = {
-  async initTrees(map) {
-    try {
-      // Load main tree data
-      const response = await fetch('./data/gowanus_trees.json');
-      if (!response.ok) throw new Error(`Trees fetch failed: ${response.status} ${response.statusText}`);
-      const rawText = await response.text();
-      const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
-      const rawData = JSON.parse(cleanedText);
+  // showTrees and hideTrees methods should be inside the same object
+  showTrees(map) {
+    if (map.getLayer('trees-layer')) {
+      map.setLayoutProperty('trees-layer', 'visibility', 'visible');
+    }
+  },
 
-      // Load honeylocust tree geometry from honey_tree.txt
-      let honeylocustFeatures = [];
-      try {
-        const honeyTxt = await fetch('./models/honey_tree.txt');
-        if (honeyTxt.ok) {
-          const honeyText = await honeyTxt.text();
-          // Each line with coordinates is a polygon for a honeylocust tree
-          const lines = honeyText.split(/\r?\n/);
-          for (const line of lines) {
-            if (/none/i.test(line) || !line.trim()) continue;
-            // Format: lng,lat lng,lat ...
-            const coords = line.trim().split(/\s+/).map(pair => {
-              const [lng, lat] = pair.split(',').map(Number);
-              return [lng, lat];
-            });
-            if (coords.length > 1) {
-              honeylocustFeatures.push({
+  hideTrees(map) {
+    if (map.getLayer('trees-layer')) {
+      map.setLayoutProperty('trees-layer', 'visibility', 'none');
+    }
+  }
+};
                 type: 'Feature',
                 geometry: { type: 'Polygon', coordinates: [coords] },
                 properties: { species: 'honeylocust', isHoneyTree: true }
