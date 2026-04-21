@@ -339,46 +339,7 @@ export function setupMapLayers(map) {
     } catch (e) {}
   });
     // (Duplicate block removed: style already declared above)
-    // style.layers.forEach(layer => { ... });
-      if (!map.getLayer(layer.id)) return;
-      if (layer.id === 'trees-layer') return;
-      try {
-        if (
-          layer.type === 'symbol' ||
-          layer.id.includes('label') ||
-          layer.id.includes('poi') ||
-          layer.id.includes('road-label') ||
-          layer.id.includes('transit')
-        ) {
-          map.setLayoutProperty(layer.id, 'visibility', 'none');
-        }
-      } catch (e) {}
-      try {
-        if (layer.type === 'fill' && (layer.id.includes('landuse') || layer.id.includes('park'))) {
-          map.setPaintProperty(layer.id, 'fill-color', currentTheme.background);
-          map.setPaintProperty(layer.id, 'fill-opacity', 1);
-        }
-      } catch (e) {}
-      try {
-        if (layer.id.includes('water')) {
-          map.setPaintProperty(layer.id, 'fill-color', currentTheme.background);
-          map.setPaintProperty(layer.id, 'fill-opacity', 1);
-        }
-      } catch (e) {}
-      try {
-        if (layer.id.includes('building')) {
-          map.setPaintProperty(layer.id, 'fill-color', currentTheme.building);
-          map.setPaintProperty(layer.id, 'fill-outline-color', currentTheme.buildingOutline);
-          map.setPaintProperty(layer.id, 'fill-opacity', 1);
-        }
-      } catch (e) {}
-      try {
-        if (layer.type === 'line' && layer.id.includes('road')) {
-          map.setPaintProperty(layer.id, 'line-color', currentTheme.road);
-          map.setPaintProperty(layer.id, 'line-width', 1.2);
-          map.setPaintProperty(layer.id, 'line-opacity', 1);
-        }
-      } catch (e) {}
+    // Removed stray block that referenced 'layer' outside of a loop.
     };
     
 
