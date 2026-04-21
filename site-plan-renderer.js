@@ -92,24 +92,36 @@ export class SitePlanRenderer {
     const availableHeight = height - this.padding * 2;
     const scaleX = availableWidth / Math.max(maxLon - minLon, 1e-9);
     const scaleY = availableHeight / Math.max(maxLat - minLat, 1e-9);
-    _scale = Math.min(scaleX, scaleY);
+    _scale = Math.min(scaleX, scaleY) * 1.5; // boost scale
 
-    // Centered orthographic camera
+    // Compute site size in plan space
+    const siteWidth = (maxLon - minLon) * _scale;
+    const siteHeight = (maxLat - minLat) * _scale;
+    const margin = 1.2;
+
+    // Camera tightly frames the site
     if (!this.camera) {
       this.camera = new THREE.OrthographicCamera(
-        -width / 2, width / 2, height / 2, -height / 2, -1000, 2000
+        -siteWidth / 2 * margin,
+        siteWidth / 2 * margin,
+        siteHeight / 2 * margin,
+        -siteHeight / 2 * margin,
+        -1000, 2000
       );
     } else {
-      this.camera.left = -width / 2;
-      this.camera.right = width / 2;
-      this.camera.top = height / 2;
-      this.camera.bottom = -height / 2;
+      this.camera.left = -siteWidth / 2 * margin;
+      this.camera.right = siteWidth / 2 * margin;
+      this.camera.top = siteHeight / 2 * margin;
+      this.camera.bottom = -siteHeight / 2 * margin;
       this.camera.near = -1000;
       this.camera.far = 2000;
       this.camera.updateProjectionMatrix();
     }
     this.camera.position.set(0, 0, 1000);
     this.camera.lookAt(0, 0, 0);
+    // Store for ground layer
+    this._siteWidth = siteWidth;
+    this._siteHeight = siteHeight;
   }
 
   handleResize() {
@@ -128,6 +140,16 @@ export class SitePlanRenderer {
 
   drawScene() {
     this.clearContent();
+
+    // Add ground layer
+    if (this._siteWidth && this._siteHeight) {
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(this._siteWidth * 2, this._siteHeight * 2),
+        new THREE.MeshBasicMaterial({ color: SitePlanStyle.grass })
+      );
+      ground.position.z = -1;
+      this.contentGroup.add(ground);
+    }
 
     // Draw parks/planted areas (only polygons)
     this.data.parks.forEach(park => {
@@ -153,23 +175,13 @@ export class SitePlanRenderer {
       }
     });
 
-    // Draw trees (use normalized positions)
+    // Draw trees (use normalized positions, smaller and more transparent)
     this.data.trees.forEach(tree => {
       if (Array.isArray(tree.position)) {
         const [x, y] = projectLonLatToPlan(tree.position[0], tree.position[1]);
-        drawArchitecturalTree(this.contentGroup, { ...tree, position: [x, y] }, SitePlanStyle);
+        drawArchitecturalTree(this.contentGroup, { ...tree, position: [x, y], _treeVisualScale: 0.5 }, SitePlanStyle);
       }
     });
-
-    // Debug: center marker
-    const centerGeom = new THREE.CircleGeometry(8, 24);
-    const centerMat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-    const center = new THREE.Mesh(centerGeom, centerMat);
-    center.position.set(0, 0, 2);
-    this.contentGroup.add(center);
-
-    // Log feature counts
-    console.log('Buildings:', this.data.buildings.length, 'Parks:', this.data.parks.length, 'Trees:', this.data.trees.length);
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -269,17 +281,23 @@ export class SitePlanRenderer {
       }
       if (shape.getPoints().length < 3) return; // skip degenerate
       const extrudeSettings = {
-        depth: SitePlanStyle.buildingExtrude,
+        depth: SitePlanStyle.buildingExtrude * 3,
         bevelEnabled: false
       };
       const geometry3 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
       const material = new THREE.MeshLambertMaterial({
         color: SitePlanStyle.buildingTop,
+        emissive: 0x111111,
         flatShading: true
       });
       const mesh = new THREE.Mesh(geometry3, material);
-      mesh.position.z = 0.1;
+      mesh.position.z = 0.5;
       this.contentGroup.add(mesh);
+      // Optionally add edge lines
+      const edges = new THREE.EdgesGeometry(geometry3);
+      const edgeLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: SitePlanStyle.buildingEdge, linewidth: 1 }));
+      edgeLines.position.copy(mesh.position);
+      this.contentGroup.add(edgeLines);
     });
   }
 }
