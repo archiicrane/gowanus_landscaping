@@ -1,4 +1,4 @@
-  }
+
   'kentucky coffeetree': '#b8d7a5',
   'honeylocust':         '#b7e1c2',
   'london planetree':    '#a8d5ba',
