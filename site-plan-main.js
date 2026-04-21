@@ -1,7 +1,11 @@
+document.addEventListener('DOMContentLoaded', () => {
 // site-plan-main.js
 // Entry point for the Site Plan page
 
-document.addEventListener('DOMContentLoaded', () => {
+import { loadSitePlanData } from './site-plan-data.js';
+import { SitePlanRenderer } from './site-plan-renderer.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
   const container = document.getElementById('site-plan-canvas-container');
   if (!container) {
     console.error('Site Plan: Canvas container not found.');
@@ -13,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.className = 'site-plan-canvas';
   container.appendChild(canvas);
 
-  // Placeholder: Show loading message
+  // Show loading message
   const loading = document.createElement('div');
   loading.textContent = 'Loading site plan...';
   loading.style.position = 'absolute';
@@ -25,6 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
   loading.id = 'site-plan-loading';
   container.appendChild(loading);
 
-  // Next steps: load data, initialize renderer, etc.
-  // (To be implemented in later steps)
+  try {
+    const data = await loadSitePlanData();
+    // Remove loading message
+    loading.remove();
+    // Initialize renderer
+    new SitePlanRenderer(canvas, data);
+  } catch (err) {
+    loading.textContent = 'Failed to load site plan.';
+    console.error('Site Plan error:', err);
+  }
 });
