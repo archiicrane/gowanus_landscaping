@@ -74,68 +74,11 @@ window.TreeRenderer = {
         ctx.fill();
         ctx.restore();
       }
+
     } catch (err) {
       console.error('TREE LOAD ERROR:', err);
     }
   }
-
-  // --- Canopy: dark under-shadow pass ---
-  for (const [dx, dy, r] of clusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx + 1.5, cy + dy + 2, r, 0, Math.PI * 2);
-    ctx.fillStyle = darken(canopyColor, 0.45);
-    ctx.fill();
-  }
-
-  // --- Canopy: main mid-tone fill pass ---
-  for (const [dx, dy, r] of clusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx, cy + dy, r, 0, Math.PI * 2);
-    ctx.fillStyle = canopyColor;
-    ctx.fill();
-  }
-
-  // --- Canopy: lighter top surfaces (simulate light from upper-left) ---
-  const litClusters = [
-    [  0,        0,       R * 0.55 ],
-    [ -R * 0.50, -R * 0.40, R * 0.40 ],
-    [  0,        -R * 0.60, R * 0.32 ],
-  ];
-  for (const [dx, dy, r] of litClusters) {
-    ctx.beginPath();
-    ctx.arc(cx + dx - R * 0.1, cy + dy - R * 0.12, r, 0, Math.PI * 2);
-    ctx.fillStyle = lighten(canopyColor, 0.18);
-    ctx.fill();
-  }
-
-  // --- Small dark leaf-gap dots for texture ---
-  const dots = [
-    [ R * 0.18,  R * 0.14 ],
-    [-R * 0.22,  R * 0.22 ],
-    [ R * 0.30, -R * 0.10 ],
-    [-R * 0.08, -R * 0.28 ],
-    [ R * 0.10,  R * 0.36 ],
-    [-R * 0.35,  R * 0.02 ],
-  ];
-  for (const [dx, dy] of dots) {
-    ctx.beginPath();
-    ctx.arc(cx + dx, cy + dy, R * 0.10, 0, Math.PI * 2);
-    ctx.fillStyle = darken(canopyColor, 0.38);
-    ctx.fill();
-  }
-
-  // --- Specular highlight ---
-  ctx.beginPath();
-  ctx.arc(cx - R * 0.38, cy - R * 0.50, R * 0.28, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.28)';
-  ctx.fill();
-
-  return ctx.getImageData(0, 0, size, size);
-}
-
-function iconId(species) {
-  return 'tree-icon-' + species.replace(/\s+/g, '-');
-}
 
 window.TreeRenderer = {
   async initTrees(map) {
