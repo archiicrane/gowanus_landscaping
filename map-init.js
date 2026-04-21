@@ -51,36 +51,80 @@ export async function initMap() {
 
     map.on('load', () => {
       console.log('[MAP EVENT] Map loaded');
-      // --- RESTORE MAP LAYERS AND UI ---
-      // Add overlays, buildings, topography, flood, bioswale, etc.
-      // Example: load buildings geojson
-      fetch('./models/footprints.geojson')
+      // --- RESTORE EXISTING BUILDINGS (extruded fill and outline) ---
+      fetch('./data/gowanus-buildings.geojson')
         .then(r => r.json())
-        .then(footprintsData => {
-          map.addSource('zoning-footprints', {
+        .then(existingData => {
+          map.addSource('existing', {
             type: 'geojson',
-            data: footprintsData
+            data: existingData
           });
           map.addLayer({
-            id: 'zoning-footprints',
+            id: 'existing-buildings',
+            type: 'fill-extrusion',
+            source: 'existing',
+            paint: {
+              'fill-extrusion-color': '#b7c0c8',
+              'fill-extrusion-base': 0,
+              'fill-extrusion-height': 0,
+              'fill-extrusion-opacity': 0.92
+            }
+          });
+          map.addLayer({
+            id: 'existing-building-outline',
             type: 'line',
-            source: 'zoning-footprints',
+            source: 'existing',
             layout: {
-              visibility: 'visible',
               'line-join': 'round',
               'line-cap': 'round'
             },
             paint: {
-              'line-color': '#f59e0b',
+              'line-color': '#2d3748',
               'line-width': [
                 'interpolate',
                 ['linear'],
                 ['zoom'],
-                13, 1.0,
-                15, 1.6,
-                17, 2.4
+                13, 0.8,
+                16, 1.5,
+                18, 2.2
               ],
-              'line-opacity': 0.9
+              'line-opacity': 1.0
+            }
+          });
+        });
+      // --- RESTORE PARK OUTLINE AND FILL ---
+      fetch('./models/park.geojson')
+        .then(r => r.json())
+        .then(parkData => {
+          map.addSource('park', {
+            type: 'geojson',
+            data: parkData
+          });
+          map.addLayer({
+            id: 'park-hatch-fill',
+            type: 'fill',
+            source: 'park',
+            paint: {
+              'fill-color': '#e6f7e6',
+              'fill-opacity': 0.45
+            }
+          });
+        });
+      fetch('./models/park_outline.geojson')
+        .then(r => r.json())
+        .then(parkOutlineData => {
+          map.addSource('park-outline', {
+            type: 'geojson',
+            data: parkOutlineData
+          });
+          map.addLayer({
+            id: 'park-outline',
+            type: 'line',
+            source: 'park-outline',
+            paint: {
+              'line-color': '#15803d',
+              'line-width': 2.2,
+              'line-opacity': 0.85
             }
           });
         });
