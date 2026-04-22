@@ -1,8 +1,8 @@
 // map-init.js - Handles Mapbox map creation and event wiring
 
-import { resolveMapboxToken } from './token.js';
-import { setupMapLayers } from './layers.js';
-import { setupMapHandlers } from './handlers.js';
+import { resolveMapboxToken } from '/token.js';
+import { setupMapLayers } from '/layers.js';
+import { setupMapHandlers } from '/handlers.js';
 
 export async function initMap() {
 	console.log('[MAP INIT] initMap() called');
