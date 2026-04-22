@@ -1,0 +1,27 @@
+/* Site Strategy page styles */
+
+.site-diagram-frame {
+  background: #f7f6f3;
+  border: 1px solid #d6d6d6;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 12px rgba(120, 180, 160, 0.04);
+}
+.site-diagram-title {
+  font-family: 'Georgia', serif;
+  font-size: 1.3rem;
+  color: #3a4632;
+  margin-bottom: 0.5rem;
+}
+.site-diagram-caption {
+  color: #7a7a7a;
+  font-size: 1rem;
+  margin-bottom: 1.2rem;
+}
+.site-research-paragraph {
+  font-size: 1.05rem;
+  color: #5a5a5a;
+  margin-top: 1.5rem;
+  line-height: 1.6;
+}

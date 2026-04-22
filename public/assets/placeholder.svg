@@ -1,0 +1,4 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="8" width="64" height="64" rx="8" fill="#eae7e2" stroke="#bdbdbd" stroke-width="2"/>
+  <text x="50%" y="54%" text-anchor="middle" fill="#bdbdbd" font-size="18" font-family="Georgia,serif" dy=".3em">?</text>
+</svg>

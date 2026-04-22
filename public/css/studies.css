@@ -1,0 +1,35 @@
+/* Studies page styles */
+
+.studies-featured {
+  background: #f7f6f3;
+  border: 1px solid #d6d6d6;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 12px rgba(120, 180, 160, 0.04);
+  text-align: center;
+}
+.studies-cards {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.studies-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  flex: 1 1 0;
+  padding: 1.2rem 1rem;
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(120, 180, 160, 0.03);
+}
+.studies-card-title {
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+  color: #3a4632;
+  margin-bottom: 0.4rem;
+}
+.studies-card-content {
+  color: #7a7a7a;
+  font-size: 0.98rem;
+}

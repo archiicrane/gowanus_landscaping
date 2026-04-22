@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "band": "Water Band",
+        "description": "Low, wet edge zone for water-loving species.",
+        "species": ["Swamp White Oak", "Buttonbush", "Bald Cypress"]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.990, 40.680],
+          [-73.989, 40.680],
+          [-73.989, 40.681],
+          [-73.990, 40.681],
+          [-73.990, 40.680]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "band": "Forest Band",
+        "description": "Core woodland zone for canopy and understory species.",
+        "species": ["Red Maple", "Serviceberry", "Pin Oak"]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.991, 40.680],
+          [-73.990, 40.680],
+          [-73.990, 40.681],
+          [-73.991, 40.681],
+          [-73.991, 40.680]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "band": "Pollinator Band",
+        "description": "Edge zone for pollinator-friendly and herbaceous species.",
+        "species": ["Milkweed", "Blueberry", "Bee Balm"]
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.992, 40.680],
+          [-73.991, 40.680],
+          [-73.991, 40.681],
+          [-73.992, 40.681],
+          [-73.992, 40.680]
+        ]]
+      }
+    }
+  ]
+}
