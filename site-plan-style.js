@@ -7,6 +7,14 @@ export const SitePlanStyle = {
   grass: '#e6ecd7',
   planted: '#dbe7c9',
   bioswale: '#c7d7b2',
+  // New muted architectural tones for hardscape
+  roadFill: '#e0dedb',        // muted light gray for road fill
+  roadLine: 0xbbb7ae,         // muted gray for road lines (THREE.js color)
+  sidewalkFill: '#ecebe7',    // slightly lighter for sidewalks
+  sidewalkLine: 0xdedcd6,     // light line for sidewalk edges
+  hardscapeFill: '#eae7e2',   // for plazas, paved open areas
+  hardscapeLine: 0xd3d0c8,    // outline for hardscape
+  // Existing
   road: '#e5e3df',
   sidewalk: '#edece8',
   buildingTop: '#f9f9f9',

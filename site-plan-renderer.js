@@ -151,37 +151,101 @@ export class SitePlanRenderer {
       this.contentGroup.add(ground);
     }
 
-    // Draw parks/planted areas (only polygons)
+    // 1. Parks/planted ground
+    let parksDrawn = 0;
     this.data.parks.forEach(park => {
       if (Array.isArray(park.polygon) && Array.isArray(park.polygon[0]) && Array.isArray(park.polygon[0][0])) {
         this.drawPolygon(park.polygon, SitePlanStyle.planted, 0.01);
+        parksDrawn++;
       } else if (Array.isArray(park.polygon) && Array.isArray(park.polygon[0]) && typeof park.polygon[0][0] === 'number') {
         park.polygon.forEach(poly => {
           if (Array.isArray(poly) && Array.isArray(poly[0])) {
             this.drawPolygon([poly], SitePlanStyle.planted, 0.01);
+            parksDrawn++;
           }
         });
       }
     });
 
-    // Draw buildings (Polygon, MultiPolygon, LineString, MultiLineString)
+    // 2. Roads
+    let roadsDrawn = 0;
+    if (Array.isArray(this.data.roads)) {
+      this.data.roads.forEach(road => {
+        const geom = road.geometry;
+        if (!geom) return;
+        if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
+          this.drawPolygon(geom.coordinates, SitePlanStyle.roadFill, 0.02);
+          roadsDrawn++;
+        } else if (geom.type === "LineString" || geom.type === "MultiLineString") {
+          this.drawLineString(geom, SitePlanStyle.roadLine, 2.5); // thick line for roads
+          roadsDrawn++;
+        }
+      });
+    }
+
+    // 3. Sidewalks
+    let sidewalksDrawn = 0;
+    if (Array.isArray(this.data.sidewalks)) {
+      this.data.sidewalks.forEach(sidewalk => {
+        const geom = sidewalk.geometry;
+        if (!geom) return;
+        if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
+          this.drawPolygon(geom.coordinates, SitePlanStyle.sidewalkFill, 0.03);
+          sidewalksDrawn++;
+        } else if (geom.type === "LineString" || geom.type === "MultiLineString") {
+          this.drawLineString(geom, SitePlanStyle.sidewalkLine, 1.5); // thick line for sidewalks
+          sidewalksDrawn++;
+        }
+      });
+    }
+
+    // 4. Hardscape
+    let hardscapeDrawn = 0;
+    if (Array.isArray(this.data.hardscape)) {
+      this.data.hardscape.forEach(hard => {
+        const geom = hard.geometry;
+        if (!geom) return;
+        if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
+          this.drawPolygon(geom.coordinates, SitePlanStyle.hardscapeFill, 0.04);
+          hardscapeDrawn++;
+        } else if (geom.type === "LineString" || geom.type === "MultiLineString") {
+          this.drawLineString(geom, SitePlanStyle.hardscapeLine, 1.2);
+          hardscapeDrawn++;
+        }
+      });
+    }
+
+    // 5. Buildings
+    let buildingsDrawn = 0;
     this.data.buildings.forEach(bldg => {
       const geom = bldg.geometry;
       if (!geom) return;
       if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
         this.drawBuilding(geom);
+        buildingsDrawn++;
       } else if (geom.type === "LineString" || geom.type === "MultiLineString") {
         this.drawLineString(geom, 0x888888, 0.2); // gray lines for buildings
+        buildingsDrawn++;
       }
     });
 
-    // Draw trees (use normalized positions, smaller and more transparent)
+    // 6. Trees
+    let treesDrawn = 0;
     this.data.trees.forEach(tree => {
       if (Array.isArray(tree.position)) {
         const [x, y] = projectLonLatToPlan(tree.position[0], tree.position[1]);
         drawArchitecturalTree(this.contentGroup, { ...tree, position: [x, y], _treeVisualScale: 0.5 }, SitePlanStyle);
+        treesDrawn++;
       }
     });
+
+    // Debug output
+    console.log(`[SitePlan] parks drawn: ${parksDrawn}`);
+    console.log(`[SitePlan] roads drawn: ${roadsDrawn}`);
+    console.log(`[SitePlan] sidewalks drawn: ${sidewalksDrawn}`);
+    console.log(`[SitePlan] hardscape drawn: ${hardscapeDrawn}`);
+    console.log(`[SitePlan] buildings drawn: ${buildingsDrawn}`);
+    console.log(`[SitePlan] trees drawn: ${treesDrawn}`);
 
     this.renderer.render(this.scene, this.camera);
   }
