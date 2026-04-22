@@ -11,12 +11,28 @@ const SIDEWALKS_URL = 'models/sidewalks.geojson';
 const HARDSCAPE_URL = 'models/hardscape.geojson';
 
 
-// Helper: fetch and parse JSON, return null if missing
+
+// Helper: fetch and parse JSON, with explicit logging for optional files
 async function fetchOptionalJSON(url, label) {
+  console.log(`[SitePlan] trying ${label.toLowerCase()} source:`, url);
+  let res;
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    return await res.json();
+    res = await fetch(url);
+    console.log(`[SitePlan] ${label} fetch status:`, res.status, url);
+    if (!res.ok) {
+      console.warn(`[SitePlan] ${label.toLowerCase()}.geojson not found`);
+      return null;
+    }
+    let parsed;
+    try {
+      parsed = await res.json();
+      const featureCount = Array.isArray(parsed.features) ? parsed.features.length : 0;
+      console.log(`[SitePlan] ${label} parse succeeded, features:`, featureCount);
+      return parsed;
+    } catch (err) {
+      console.warn(`[SitePlan] ${label} parse failed:`, err);
+      return null;
+    }
   } catch (e) {
     console.warn(`[SitePlan] ${label} source missing: ${url}`);
     return null;
