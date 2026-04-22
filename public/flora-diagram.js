@@ -109,4 +109,3 @@ function renderFloraDiagram(svg) {
     }
   });
 }
-[This file has been intentionally deleted.]
