@@ -36,3 +36,41 @@
   <script src="flora-diagram.js"></script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gowanus Flora/Fauna Band Diagram</title>
+  <link rel="stylesheet" href="flora-diagram.css">
+</head>
+<body>
+  <div class="top-bar">
+    <span class="brand">Rewilding Gowanus</span>
+    <span class="nav-links">
+      <a href="index.html" class="nav-btn">Map</a>
+      <a href="site-plan.html" class="nav-btn">Site Plan</a>
+      <a href="diagrams.html" class="nav-btn">Diagrams</a>
+      <a href="flora-diagram.html" class="nav-btn active">Flora</a>
+    </span>
+  </div>
+  <main class="flora-diagram-main">
+    <h1 class="flora-title">Gowanus Flora & Fauna Diagram</h1>
+    <div class="flora-diagram-frame">
+      <svg id="flora-diagram-svg"></svg>
+      <div class="flora-diagram-legend">
+        <span class="legend-title">Legend</span>
+        <span class="legend-item"><span class="legend-symbol legend-canopy"></span> Canopy Tree</span>
+        <span class="legend-item"><span class="legend-symbol legend-shrub"></span> Shrub/Understory</span>
+        <span class="legend-item"><span class="legend-symbol legend-pollinator"></span> Pollinator/Fauna</span>
+      </div>
+    </div>
+    <div class="flora-diagram-annotations">
+      <span class="annotation">Wet Edge</span>
+      <span class="annotation">Woodland Core</span>
+      <span class="annotation">Pollinator Edge</span>
+    </div>
+  </main>
+  <script src="flora-diagram.js"></script>
+</body>
+</html>

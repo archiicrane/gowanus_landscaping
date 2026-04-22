@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Rewilding Gowanus - Diagrams</title>
+	<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+	<link rel="stylesheet" href="style.css" />
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="diagrams-page">
+	<nav class="top-bar">
+		<div class="brand">Rewilding Gowanus</div>
+		<div class="nav-links">
+			<a href="site-plan.html" class="nav-btn active">Site Plan</a>
+			<a href="index.html" class="nav-btn">Map</a>
+			<a href="diagrams.html" class="nav-btn active">Diagrams</a>
+			<a href="flora-diagram.html" class="nav-btn">Flora</a>
+		</div>
+	</nav>
+
+	<main class="diagrams-layout">
+		<section class="diagrams-header">
+			<p class="eyebrow">Existing Conditions</p>
+			<h1>Gowanus Tree and Landscape Baseline</h1>
+			<p class="diagrams-intro">
+				These diagrams use the current Gowanus tree dataset from the map to show
+				baseline canopy, density, health, and species conditions before the proposed
+				landscaping intervention is added.
+			</p>
+		</section>
+
+		<div id="diagramError" class="diagram-error" style="display: none;"></div>
+
+		<section class="metrics-grid">
+			<article class="metric-card">
+				<p class="metric-label">Street Trees</p>
+				<div id="totalTreesMetric"></div>
+			</article>
+
+			<article class="metric-card">
+				<p class="metric-label">Estimated Canopy Coverage</p>
+				<div id="canopyMetric"></div>
+			</article>
+
+			<article class="metric-card">
+				<p class="metric-label">Tree Density</p>
+				<div id="densityMetric"></div>
+			</article>
+
+			<article class="metric-card">
+				<p class="metric-label">Estimated Water Retention</p>
+				<div id="waterMetric"></div>
+			</article>
+
+			<article class="metric-card">
+				<p class="metric-label">Study Area</p>
+				<div id="studyAreaMetric"></div>
+			</article>
+
+			<article class="metric-card">
+				<p class="metric-label">Good Health Share</p>
+				<div id="healthMetric"></div>
+			</article>
+		</section>
+
+		<section class="charts-grid two-col">
+			<article class="panel-card">
+				<div class="panel-header">
+					<h2>Top Tree Species</h2>
+					<p>Most common species currently present in the study area.</p>
+				</div>
+				<div class="chart-wrap">
+					<canvas id="speciesChart"></canvas>
+				</div>
+			</article>
+
+			<article class="panel-card">
+				<div class="panel-header">
+					<h2>Tree Health Distribution</h2>
+					<p>Current condition of the mapped street trees.</p>
+				</div>
+				<div class="chart-wrap">
+					<canvas id="healthChart"></canvas>
+				</div>
+			</article>
+		</section>
+
+		<section class="charts-grid two-col">
+			<article class="panel-card">
+				<div class="panel-header">
+					<h2>Estimated Water Retention by Species</h2>
+					<p>Conceptual stormwater storage estimate based on canopy area, 3 ft soil depth, and 20% water holding capacity.</p>
+				</div>
+				<div class="chart-wrap">
+					<canvas id="waterRetentionChart"></canvas>
+				</div>
+			</article>
+
+			<article class="panel-card">
+				<div class="panel-header">
+					<h2>Tree Density by Block</h2>
+					<p>Tree density per block in the study area.</p>
+				</div>
+				<div class="chart-wrap">
+					<canvas id="densityChart"></canvas>
+				</div>
+			</article>
+		</section>
+	</main>
+	<script src="diagrams.js"></script>
+</body>
+</html>
