@@ -147,3 +147,4 @@ function drawGrid(svg, width, height) {
     svg.appendChild(line);
   }
 }
+[This file has been intentionally deleted.]
