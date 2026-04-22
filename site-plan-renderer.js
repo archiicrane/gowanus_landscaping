@@ -56,7 +56,7 @@ export class SitePlanRenderer {
   constructor(canvas, data) {
     this.canvas = canvas;
     this.data = data;
-    this.padding = 40; // px padding around site
+    this.padding = 20; // reduced padding for tighter fit
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setClearColor(SitePlanStyle.paper);
@@ -92,12 +92,12 @@ export class SitePlanRenderer {
     const availableHeight = height - this.padding * 2;
     const scaleX = availableWidth / Math.max(maxLon - minLon, 1e-9);
     const scaleY = availableHeight / Math.max(maxLat - minLat, 1e-9);
-    _scale = Math.min(scaleX, scaleY) * 1.5; // boost scale
+    _scale = Math.min(scaleX, scaleY) * 1.3; // boost scale
 
     // Compute site size in plan space
     const siteWidth = (maxLon - minLon) * _scale;
     const siteHeight = (maxLat - minLat) * _scale;
-    const margin = 1.2;
+    const margin = 1.15;
 
     // Camera tightly frames the site
     if (!this.camera) {

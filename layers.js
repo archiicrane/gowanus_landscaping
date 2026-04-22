@@ -343,8 +343,9 @@ export function setupMapLayers(map) {
     };
     
 
-  // --- Add custom architectural layers (buildings, roads, blocks) ---
+  // --- Add custom architectural layers (buildings, roads, sidewalks) ---
   if (map && typeof map.addSource === 'function' && typeof map.addLayer === 'function') {
+    // Buildings (existing)
     if (!map.getSource('arch-buildings')) {
       map.addSource('arch-buildings', {
         type: 'geojson',
@@ -372,6 +373,41 @@ export function setupMapLayers(map) {
           'line-width': 1.1
         }
       }, 'arch-buildings-fill');
+    }
+
+    // Roads (Mapbox vector tile layer)
+    if (!map.getLayer('custom-roads')) {
+      map.addLayer({
+        id: 'custom-roads',
+        type: 'line',
+        source: 'composite',
+        'source-layer': 'road',
+        paint: {
+          'line-color': '#bdbdbd',
+          'line-width': [ 'interpolate', ['linear'], ['zoom'], 14, 1.2, 18, 3.2 ],
+          'line-opacity': 0.85
+        },
+        filter: ['all', ['!=', ['get', 'class'], 'path']]
+      }, 'arch-buildings-outline');
+      console.log('[LAYERS] Custom Mapbox vector tile road layer added.');
+    }
+
+    // Sidewalks (Mapbox vector tile layer, if available)
+    if (!map.getLayer('custom-sidewalks')) {
+      map.addLayer({
+        id: 'custom-sidewalks',
+        type: 'line',
+        source: 'composite',
+        'source-layer': 'road',
+        paint: {
+          'line-color': '#e0e0e0',
+          'line-width': [ 'interpolate', ['linear'], ['zoom'], 14, 1, 18, 2.2 ],
+          'line-dasharray': [1, 1.2],
+          'line-opacity': 0.7
+        },
+        filter: ['all', ['==', ['get', 'class'], 'sidewalk']]
+      }, 'custom-roads');
+      console.log('[LAYERS] Custom Mapbox vector tile sidewalk layer added.');
     }
   } else {
     console.warn('Map object is invalid or missing addSource/addLayer methods at custom architectural layers');
