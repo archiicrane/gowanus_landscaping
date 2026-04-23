@@ -62,6 +62,9 @@ const SANKEY_GROUP_COLORS = {
   outcome: '#6c806e',
 };
 
+let sankeyGraphIndex = null;
+let currentSankeySubgraph = null;
+
 // ── CSV parser ────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -129,6 +132,8 @@ function speciesSvgThumb(path, alt) {
 
 function buildSpeciesItem(name, role, layerCls, sizeCls, extra, svgPath = null) {
   const item = el('div', 'species-item');
+  item.dataset.speciesName = normalizeName(name);
+  item.dataset.speciesRole = normalizeName(role || '');
   item.appendChild(speciesSymbol(layerCls, sizeCls));
   const thumb = speciesSvgThumb(svgPath, `${capitalise(name)} silhouette`);
   if (thumb) item.appendChild(thumb);
@@ -163,9 +168,11 @@ function capitalise(s) {
 
 function buildBandRow(band, layerData, faunaData, showPhase = false) {
   const row = el('div', 'band-row');
+  row.dataset.bandName = normalizeName(band.key);
 
   // Label column
   const lc = el('div', `band-label-col ${band.slug}`);
+  lc.dataset.bandName = normalizeName(band.key);
   const name = el('p', 'band-name'); name.textContent = band.key;
   const sub  = el('p', 'band-subtitle'); sub.textContent = band.subtitle;
   lc.appendChild(name);
@@ -178,6 +185,8 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
 
   LAYERS.forEach(layer => {
     const col = el('div', 'layer-col');
+    col.dataset.layerName = normalizeName(layer.label);
+    col.dataset.layerKey = normalizeName(layer.key);
     const hd = el('p', 'layer-heading'); hd.textContent = layer.label;
     col.appendChild(hd);
 
@@ -202,6 +211,8 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
 
   // Fauna column
   const faunaCol = el('div', 'layer-col');
+  faunaCol.dataset.layerName = 'fauna';
+  faunaCol.dataset.layerKey = 'fauna';
   const fhd = el('p', 'layer-heading'); fhd.textContent = 'Fauna';
   faunaCol.appendChild(fhd);
   faunaData.forEach(item => {
@@ -274,6 +285,8 @@ function buildGrowthSpeciesItem(item) {
                    item.category === 'shrub' ? 'lc-shrub'  : 'lc-ground';
 
   const si = el('div', 'species-item');
+  si.dataset.speciesName = normalizeName(item.name);
+  si.dataset.speciesRole = normalizeName(item.notes || item.visual_change || '');
   si.appendChild(speciesSymbol(layerCls, sizeCls));
   const thumb = speciesSvgThumb(getSpeciesSvgPath(item.name), `${capitalise(item.name)} silhouette`);
   if (thumb) si.appendChild(thumb);
@@ -456,8 +469,85 @@ function getConnectedSubgraph(selection, graphIndex) {
   return { nodeIds, linkIds };
 }
 
-function applyHighlightState(selection, views, graphIndex) {
-  const { nodeIds, linkIds } = getConnectedSubgraph(selection, graphIndex);
+function labelsFromSubgraph(subgraph, graphIndex) {
+  if (!subgraph || !graphIndex) return new Set();
+  const labels = new Set();
+  subgraph.nodeIds.forEach((nodeId) => {
+    const node = graphIndex.nodeById.get(nodeId);
+    if (!node) return;
+    labels.add(normalizeName(node.label));
+  });
+  return labels;
+}
+
+function matchesAnyLabel(text, labels) {
+  if (!text || !labels || !labels.size) return false;
+  for (const label of labels) {
+    if (label && text.includes(label)) return true;
+  }
+  return false;
+}
+
+function clearFloraBoardHighlight() {
+  const wrap = document.getElementById('flora-diagram-wrap');
+  if (!wrap) return;
+  wrap.querySelectorAll('.band-row, .band-label-col, .layer-col, .species-item').forEach((node) => {
+    node.classList.remove('flora-active');
+    node.classList.remove('flora-dim');
+  });
+}
+
+function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
+  const wrap = document.getElementById('flora-diagram-wrap');
+  if (!wrap) return;
+
+  if (!subgraph || !graphIndex || (!subgraph.nodeIds.size && !subgraph.linkIds.size)) {
+    clearFloraBoardHighlight();
+    return;
+  }
+
+  const labels = labelsFromSubgraph(subgraph, graphIndex);
+  const rows = Array.from(wrap.querySelectorAll('.band-row'));
+  const bandLabels = Array.from(wrap.querySelectorAll('.band-label-col'));
+  const cols = Array.from(wrap.querySelectorAll('.layer-col'));
+  const items = Array.from(wrap.querySelectorAll('.species-item'));
+
+  items.forEach((item) => {
+    const speciesName = item.dataset.speciesName || '';
+    const speciesRole = item.dataset.speciesRole || '';
+    const active = labels.has(speciesName) || matchesAnyLabel(speciesRole, labels);
+    item.classList.toggle('flora-active', active);
+    item.classList.toggle('flora-dim', !active);
+  });
+
+  cols.forEach((col) => {
+    const layerName = col.dataset.layerName || '';
+    const layerKey = col.dataset.layerKey || '';
+    const hasActiveItem = !!col.querySelector('.species-item.flora-active');
+    const active = hasActiveItem || labels.has(layerName) || labels.has(layerKey);
+    col.classList.toggle('flora-active', active);
+    col.classList.toggle('flora-dim', !active);
+  });
+
+  rows.forEach((row) => {
+    const bandName = row.dataset.bandName || '';
+    const hasActiveChild = !!row.querySelector('.layer-col.flora-active, .species-item.flora-active');
+    const active = hasActiveChild || labels.has(bandName);
+    row.classList.toggle('flora-active', active);
+    row.classList.toggle('flora-dim', !active);
+  });
+
+  bandLabels.forEach((label) => {
+    const bandName = label.dataset.bandName || '';
+    const row = label.closest('.band-row');
+    const active = labels.has(bandName) || !!row?.classList.contains('flora-active');
+    label.classList.toggle('flora-active', active);
+    label.classList.toggle('flora-dim', !active);
+  });
+}
+
+function applyHighlightState(selection, views, graphIndex, subgraph = null) {
+  const { nodeIds, linkIds } = subgraph || getConnectedSubgraph(selection, graphIndex);
   const hasSelection = nodeIds.size > 0 || linkIds.size > 0;
 
   views.forEach((view) => {
@@ -579,7 +669,7 @@ function renderSankey(svgEl, rawData, config) {
   return { svg, nodeSelection, linkSelection, labelSelection };
 }
 
-function bindSankeyInteractions(views, graphIndex) {
+function bindSankeyInteractions(views, graphIndex, onSubgraphChange = null) {
   const state = {
     lockedSelection: null,
     hoverSelection: null
@@ -600,9 +690,12 @@ function bindSankeyInteractions(views, graphIndex) {
     const selection = currentSelection();
     if (!selection) {
       clearHighlightState(views);
+      if (onSubgraphChange) onSubgraphChange(null);
       return;
     }
-    applyHighlightState(selection, views, graphIndex);
+    const subgraph = getConnectedSubgraph(selection, graphIndex);
+    applyHighlightState(selection, views, graphIndex, subgraph);
+    if (onSubgraphChange) onSubgraphChange(subgraph);
   }
 
   function setHover(selection) {
@@ -655,17 +748,16 @@ function bindSankeyInteractions(views, graphIndex) {
 
 async function initProposalSankey() {
   const ribbonSvg = document.getElementById('proposalSankeyRibbonSvg');
-  const detailSvg = document.getElementById('proposalSankeySvg');
-  if (!ribbonSvg || !detailSvg) return;
+  if (!ribbonSvg) return;
 
   try {
     const rawData = await loadProposalSankeyData();
     const graphIndex = buildGraphIndex(rawData);
+    sankeyGraphIndex = graphIndex;
 
     let ribbonView = null;
-    let detailView = null;
 
-    const renderBoth = () => {
+    const renderRibbon = () => {
       ribbonView = renderSankey(ribbonSvg, rawData, {
         ribbon: true,
         minWidth: 980,
@@ -678,34 +770,24 @@ async function initProposalSankey() {
         margin: { top: 10, right: 42, bottom: 8, left: 42 }
       });
 
-      detailView = renderSankey(detailSvg, rawData, {
-        ribbon: false,
-        minWidth: 960,
-        minHeight: 460,
-        maxHeight: 700,
-        heightRatio: 0.44,
-        nodeWidth: 14,
-        nodePadding: 22,
-        iterations: 48,
-        margin: { top: 20, right: 130, bottom: 18, left: 130 }
+      bindSankeyInteractions([ribbonView], graphIndex, (subgraph) => {
+        currentSankeySubgraph = subgraph;
+        applyFloraBoardHighlightFromSubgraph(subgraph, sankeyGraphIndex);
       });
-
-      bindSankeyInteractions([ribbonView, detailView], graphIndex);
     };
 
-    renderBoth();
+    renderRibbon();
 
     let raf = null;
     const ro = new ResizeObserver(() => {
       if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(renderBoth);
+      raf = requestAnimationFrame(renderRibbon);
     });
     ro.observe(ribbonSvg.parentElement);
-    ro.observe(detailSvg.parentElement);
   } catch (err) {
-    const detailFrame = detailSvg.parentElement;
-    if (detailFrame) {
-      detailFrame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
+    const ribbonFrame = ribbonSvg.parentElement;
+    if (ribbonFrame) {
+      ribbonFrame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
     }
   }
 }
@@ -753,6 +835,7 @@ async function init() {
       wrap.innerHTML = `<p style="color:#7e2a18;padding:16px;">Error loading diagram data: ${e.message}</p>`;
     }
     renderSpeciesBoard(currentMode);
+    applyFloraBoardHighlightFromSubgraph(currentSankeySubgraph, sankeyGraphIndex);
     wrap.style.opacity = '1';
   }
 

@@ -342,6 +342,7 @@
   border: 1px solid var(--line);
   background: rgba(255,255,255,0.5);
   min-height: 140px;
+  transition: opacity 160ms ease;
 }
 
 .band-label-col {
@@ -350,6 +351,7 @@
   justify-content: center;
   padding: 18px 16px;
   border-right: 1px solid var(--line);
+  transition: opacity 160ms ease;
 }
 
 .band-label-col.wet   { background: rgba(123, 182, 169, 0.14); }
@@ -385,6 +387,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  transition: opacity 160ms ease;
 }
 
 .layer-col:last-child {
@@ -407,6 +410,21 @@
   align-items: flex-start;
   gap: 7px;
   animation: fadeIn 0.25s ease both;
+  transition: opacity 160ms ease;
+}
+
+.band-row.flora-dim,
+.band-label-col.flora-dim,
+.layer-col.flora-dim,
+.species-item.flora-dim {
+  opacity: 0.2;
+}
+
+.band-row.flora-active,
+.band-label-col.flora-active,
+.layer-col.flora-active,
+.species-item.flora-active {
+  opacity: 1;
 }
 
 @keyframes fadeIn {
