@@ -28,6 +28,26 @@ const SIZE_MAP = {
   xlarge: 'sz-xlarge',
 };
 
+const SPECIES_SVG_MAP = {
+  'bald cypress': '/assets/species/bald-cypress.svg',
+  'serviceberry': '/assets/species/serviceberry.svg',
+  'northern red oak': '/assets/species/northern-red-oak.svg',
+  'swamp white oak': '/assets/species/northern-red-oak.svg',
+  'red oak': '/assets/species/northern-red-oak.svg',
+  'black gum': '/assets/species/black-gum.svg',
+  'sweetgum': '/assets/species/sweetgum.svg',
+  'eastern redcedar': '/assets/species/eastern-redcedar.svg',
+};
+
+const SPECIES_BOARD_ITEMS = [
+  { name: 'Bald Cypress', path: '/assets/species/bald-cypress.svg' },
+  { name: 'Serviceberry', path: '/assets/species/serviceberry.svg' },
+  { name: 'Northern Red Oak', path: '/assets/species/northern-red-oak.svg' },
+  { name: 'Black Gum', path: '/assets/species/black-gum.svg' },
+  { name: 'Sweetgum', path: '/assets/species/sweetgum.svg' },
+  { name: 'Eastern Redcedar', path: '/assets/species/eastern-redcedar.svg' },
+];
+
 // ── CSV parser ────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -77,9 +97,27 @@ function sizeClassFor(diagram_size) {
   return SIZE_MAP[diagram_size] || 'sz-small';
 }
 
-function buildSpeciesItem(name, role, layerCls, sizeCls, extra) {
+function normalizeName(name) {
+  return String(name || '').trim().toLowerCase();
+}
+
+function getSpeciesSvgPath(name) {
+  return SPECIES_SVG_MAP[normalizeName(name)] || null;
+}
+
+function speciesSvgThumb(path, alt) {
+  if (!path) return null;
+  const frame = el('span', 'species-svg-thumb');
+  const img = el('img', '', { src: path, alt: alt || '' });
+  frame.appendChild(img);
+  return frame;
+}
+
+function buildSpeciesItem(name, role, layerCls, sizeCls, extra, svgPath = null) {
   const item = el('div', 'species-item');
   item.appendChild(speciesSymbol(layerCls, sizeCls));
+  const thumb = speciesSvgThumb(svgPath, `${capitalise(name)} silhouette`);
+  if (thumb) item.appendChild(thumb);
   const info = el('div', 'species-info');
   const nm = el('span', 'species-name');
   nm.textContent = capitalise(name);
@@ -138,7 +176,8 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
         item.ecological_role,
         layerClassFor(item.canopy_class || layer.key),
         sizeClassFor(item.diagram_size),
-        extra
+        extra,
+        getSpeciesSvgPath(item.name)
       );
       if (item.status === 'target_fauna') si.classList.add('target-fauna');
       col.appendChild(si);
@@ -158,7 +197,8 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
       item.ecological_role,
       'lc-fauna',
       sizeClassFor(item.diagram_size),
-      extra
+      extra,
+      getSpeciesSvgPath(item.name)
     );
     if (item.status === 'target_fauna') si.classList.add('target-fauna');
     faunaCol.appendChild(si);
@@ -221,6 +261,8 @@ function buildGrowthSpeciesItem(item) {
 
   const si = el('div', 'species-item');
   si.appendChild(speciesSymbol(layerCls, sizeCls));
+  const thumb = speciesSvgThumb(getSpeciesSvgPath(item.name), `${capitalise(item.name)} silhouette`);
+  if (thumb) si.appendChild(thumb);
   const info = el('div', 'species-info');
   const nm = el('span', 'species-name'); nm.textContent = capitalise(item.name);
   const role = el('span', 'species-role'); role.textContent = item.notes || '';
@@ -280,6 +322,28 @@ function setActiveTab(tabs, active) {
   });
 }
 
+function renderSpeciesBoard(currentMode) {
+  const board = document.getElementById('species-board-grid');
+  const boardWrap = board?.closest('.species-board');
+  if (!board || !boardWrap) return;
+
+  // Keep SVG board focused on proposed/growth views.
+  boardWrap.style.display = currentMode === 'baseline' ? 'none' : 'block';
+  board.innerHTML = '';
+
+  SPECIES_BOARD_ITEMS.forEach((item) => {
+    const card = el('article', 'species-card');
+    const fig = el('div', 'species-figure');
+    const img = el('img', '', { src: item.path, alt: `${item.name} silhouette` });
+    fig.appendChild(img);
+    const name = el('p', 'species-card-name');
+    name.textContent = item.name;
+    card.appendChild(fig);
+    card.appendChild(name);
+    board.appendChild(card);
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 
 async function init() {
@@ -320,6 +384,7 @@ async function init() {
     } catch (e) {
       wrap.innerHTML = `<p style="color:#7e2a18;padding:16px;">Error loading diagram data: ${e.message}</p>`;
     }
+    renderSpeciesBoard(currentMode);
     wrap.style.opacity = '1';
   }
 

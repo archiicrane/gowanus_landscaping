@@ -239,7 +239,7 @@ main {
 }
 
 .diagrams-layout {
-  max-width: 1180px;
+  width: min(95vw, 1540px);
   margin: 0 auto;
   padding-top: 10px;
 }
