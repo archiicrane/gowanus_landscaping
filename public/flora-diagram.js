@@ -48,6 +48,20 @@ const SPECIES_BOARD_ITEMS = [
   { name: 'Eastern Redcedar', path: '/assets/species/eastern-redcedar.svg' },
 ];
 
+const SANKEY_GROUP_COLORS = {
+  source: '#4f6f98',
+  band: '#d58b3f',
+  'tree-wet': '#6e8f67',
+  'layer-wet': '#8ea9ad',
+  'tree-woodland': '#658157',
+  'layer-woodland': '#8b7a65',
+  'tree-pollinator': '#9a7751',
+  'layer-pollinator': '#b39a63',
+  fauna: '#7a6c8f',
+  process: '#7b786f',
+  outcome: '#7f9b78',
+};
+
 // ── CSV parser ────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -344,9 +358,134 @@ function renderSpeciesBoard(currentMode) {
   });
 }
 
+function hexToRgba(hex, alpha) {
+  const clean = hex.replace('#', '');
+  const value = clean.length === 3
+    ? clean.split('').map((ch) => ch + ch).join('')
+    : clean;
+  const num = Number.parseInt(value, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function nodeColor(group) {
+  return SANKEY_GROUP_COLORS[group] || '#8a8074';
+}
+
+async function loadProposalSankeyData() {
+  const res = await fetch('/data/proposal_sankey.json');
+  if (!res.ok) {
+    throw new Error(`Sankey data load failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+function drawProposalSankey(svgEl, rawData) {
+  if (!svgEl || !window.d3 || !window.d3.sankey) return;
+
+  const container = svgEl.parentElement;
+  const width = Math.max(960, container.clientWidth - 4);
+  const height = Math.max(460, Math.min(700, width * 0.44));
+  const margin = { top: 20, right: 130, bottom: 18, left: 130 };
+
+  svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+  const svg = d3.select(svgEl);
+  svg.selectAll('*').remove();
+
+  const nodeById = new Map(rawData.nodes.map((n) => [n.id, { ...n }]));
+  const nodes = rawData.nodes.map((n) => ({ ...n }));
+  const links = rawData.links.map((l) => {
+    const sourceNode = nodeById.get(l.source);
+    return {
+      ...l,
+      color: hexToRgba(nodeColor(sourceNode?.group), 0.42),
+    };
+  });
+
+  const sankey = d3.sankey()
+    .nodeId((d) => d.id)
+    .nodeWidth(14)
+    .nodePadding(22)
+    .nodeSort((a, b) => d3.ascending(a.label, b.label))
+    .linkSort((a, b) => b.value - a.value)
+    .extent([
+      [margin.left, margin.top],
+      [width - margin.right, height - margin.bottom],
+    ])
+    .iterations(48);
+
+  // Lock nodes to explicit columns for strong left-to-right structure.
+  const graph = {
+    nodes: nodes.map((n) => ({ ...n, layer: n.column })),
+    links: links.map((l) => ({ ...l })),
+  };
+
+  sankey(graph);
+
+  const linkPath = d3.sankeyLinkHorizontal();
+
+  svg.append('g')
+    .attr('fill', 'none')
+    .selectAll('path')
+    .data(graph.links)
+    .join('path')
+    .attr('class', 'sankey-link')
+    .attr('d', linkPath)
+    .attr('stroke', (d) => d.color)
+    .attr('stroke-width', (d) => Math.max(1, d.width));
+
+  const node = svg.append('g')
+    .selectAll('g')
+    .data(graph.nodes)
+    .join('g')
+    .attr('class', 'sankey-node');
+
+  node.append('rect')
+    .attr('x', (d) => d.x0)
+    .attr('y', (d) => d.y0)
+    .attr('height', (d) => Math.max(1, d.y1 - d.y0))
+    .attr('width', (d) => d.x1 - d.x0)
+    .attr('fill', (d) => nodeColor(d.group));
+
+  node.append('text')
+    .attr('class', 'sankey-label')
+    .attr('x', (d) => (d.x0 < width * 0.56 ? d.x1 + 8 : d.x0 - 8))
+    .attr('y', (d) => (d.y0 + d.y1) / 2)
+    .attr('text-anchor', (d) => (d.x0 < width * 0.56 ? 'start' : 'end'))
+    .text((d) => d.label);
+}
+
+async function initProposalSankey() {
+  const svg = document.getElementById('proposalSankeySvg');
+  if (!svg) return;
+
+  try {
+    const data = await loadProposalSankeyData();
+    drawProposalSankey(svg, data);
+
+    let raf = null;
+    const ro = new ResizeObserver(() => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => drawProposalSankey(svg, data));
+    });
+    ro.observe(svg.parentElement);
+  } catch (err) {
+    const frame = svg.parentElement;
+    if (frame) {
+      frame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
+    }
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 
 async function init() {
+  initProposalSankey();
+
   const wrap = document.getElementById('flora-diagram-wrap');
   const modeTabs = Array.from(document.querySelectorAll('.mode-tab'));
   const timeTabs = Array.from(document.querySelectorAll('.time-tab'));

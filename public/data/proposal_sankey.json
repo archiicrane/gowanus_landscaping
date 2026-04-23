@@ -1,0 +1,107 @@
+{
+  "nodes": [
+    { "id": "proposal", "label": "Project Proposal", "column": 0, "group": "source" },
+
+    { "id": "wet-edge", "label": "Wet Edge", "column": 1, "group": "band" },
+    { "id": "woodland-core", "label": "Woodland Core", "column": 1, "group": "band" },
+    { "id": "pollinator-edge", "label": "Pollinator Edge", "column": 1, "group": "band" },
+
+    { "id": "bald-cypress", "label": "Bald Cypress", "column": 2, "group": "tree-wet" },
+    { "id": "black-gum", "label": "Black Gum", "column": 2, "group": "tree-wet" },
+    { "id": "wet-shrub-layer", "label": "Wet Shrub Layer", "column": 2, "group": "layer-wet" },
+    { "id": "wet-groundcover", "label": "Wet Groundcover", "column": 2, "group": "layer-wet" },
+
+    { "id": "northern-red-oak", "label": "Northern Red Oak", "column": 2, "group": "tree-woodland" },
+    { "id": "eastern-redcedar", "label": "Eastern Redcedar", "column": 2, "group": "tree-woodland" },
+    { "id": "sweetgum", "label": "Sweetgum", "column": 2, "group": "tree-woodland" },
+    { "id": "woodland-understory", "label": "Woodland Understory", "column": 2, "group": "layer-woodland" },
+
+    { "id": "serviceberry", "label": "Serviceberry", "column": 2, "group": "tree-pollinator" },
+    { "id": "edge-perennials", "label": "Edge Perennials", "column": 2, "group": "layer-pollinator" },
+    { "id": "edge-shrub-layer", "label": "Edge Shrub Layer", "column": 2, "group": "layer-pollinator" },
+
+    { "id": "amphibians", "label": "Amphibians", "column": 3, "group": "fauna" },
+    { "id": "birds", "label": "Birds", "column": 3, "group": "fauna" },
+    { "id": "native-bees", "label": "Native Bees", "column": 3, "group": "fauna" },
+    { "id": "butterflies", "label": "Butterflies", "column": 3, "group": "fauna" },
+    { "id": "woodland-habitat", "label": "Woodland Habitat", "column": 3, "group": "process" },
+    { "id": "pollinator-habitat", "label": "Pollinator Habitat", "column": 3, "group": "process" },
+    { "id": "stormwater-process", "label": "Stormwater Process", "column": 3, "group": "process" },
+    { "id": "food-web", "label": "Food Web", "column": 3, "group": "process" },
+    { "id": "habitat-corridor", "label": "Habitat Corridor", "column": 3, "group": "process" },
+
+    { "id": "wet-soil", "label": "Wet Soil", "column": 4, "group": "outcome" },
+    { "id": "flood-buffer", "label": "Periodic Flooding Buffer", "column": 4, "group": "outcome" },
+    { "id": "shaded-understory", "label": "Shaded Understory", "column": 4, "group": "outcome" },
+    { "id": "berry-habitat", "label": "Berry Habitat", "column": 4, "group": "outcome" },
+    { "id": "canal-edge-birds", "label": "Canal Edge Birds", "column": 4, "group": "outcome" },
+    { "id": "cooler-microclimate", "label": "Cooler Edge Microclimate", "column": 4, "group": "outcome" },
+    { "id": "stable-food-web", "label": "Stable Food Web", "column": 4, "group": "outcome" },
+    { "id": "connected-edge", "label": "Connected Edge Conditions", "column": 4, "group": "outcome" }
+  ],
+  "links": [
+    { "source": "proposal", "target": "wet-edge", "value": 8 },
+    { "source": "proposal", "target": "woodland-core", "value": 8 },
+    { "source": "proposal", "target": "pollinator-edge", "value": 8 },
+
+    { "source": "wet-edge", "target": "bald-cypress", "value": 3 },
+    { "source": "wet-edge", "target": "black-gum", "value": 2 },
+    { "source": "wet-edge", "target": "wet-shrub-layer", "value": 1 },
+    { "source": "wet-edge", "target": "wet-groundcover", "value": 2 },
+
+    { "source": "woodland-core", "target": "northern-red-oak", "value": 3 },
+    { "source": "woodland-core", "target": "eastern-redcedar", "value": 2 },
+    { "source": "woodland-core", "target": "sweetgum", "value": 2 },
+    { "source": "woodland-core", "target": "woodland-understory", "value": 1 },
+
+    { "source": "pollinator-edge", "target": "serviceberry", "value": 3 },
+    { "source": "pollinator-edge", "target": "edge-perennials", "value": 3 },
+    { "source": "pollinator-edge", "target": "edge-shrub-layer", "value": 2 },
+
+    { "source": "bald-cypress", "target": "stormwater-process", "value": 2 },
+    { "source": "bald-cypress", "target": "amphibians", "value": 1 },
+    { "source": "black-gum", "target": "birds", "value": 1 },
+    { "source": "black-gum", "target": "stormwater-process", "value": 1 },
+    { "source": "wet-shrub-layer", "target": "food-web", "value": 1 },
+    { "source": "wet-groundcover", "target": "amphibians", "value": 1 },
+    { "source": "wet-groundcover", "target": "stormwater-process", "value": 1 },
+
+    { "source": "northern-red-oak", "target": "woodland-habitat", "value": 2 },
+    { "source": "northern-red-oak", "target": "birds", "value": 1 },
+    { "source": "eastern-redcedar", "target": "woodland-habitat", "value": 1 },
+    { "source": "eastern-redcedar", "target": "birds", "value": 1 },
+    { "source": "sweetgum", "target": "woodland-habitat", "value": 1 },
+    { "source": "sweetgum", "target": "food-web", "value": 1 },
+    { "source": "woodland-understory", "target": "woodland-habitat", "value": 1 },
+
+    { "source": "serviceberry", "target": "birds", "value": 1 },
+    { "source": "serviceberry", "target": "food-web", "value": 1 },
+    { "source": "serviceberry", "target": "pollinator-habitat", "value": 1 },
+    { "source": "edge-perennials", "target": "native-bees", "value": 2 },
+    { "source": "edge-perennials", "target": "butterflies", "value": 2 },
+    { "source": "edge-perennials", "target": "pollinator-habitat", "value": 1 },
+    { "source": "edge-shrub-layer", "target": "birds", "value": 1 },
+    { "source": "edge-shrub-layer", "target": "pollinator-habitat", "value": 1 },
+    { "source": "edge-shrub-layer", "target": "food-web", "value": 1 },
+
+    { "source": "amphibians", "target": "wet-soil", "value": 1 },
+    { "source": "amphibians", "target": "flood-buffer", "value": 1 },
+    { "source": "birds", "target": "canal-edge-birds", "value": 2 },
+    { "source": "birds", "target": "berry-habitat", "value": 1 },
+    { "source": "native-bees", "target": "connected-edge", "value": 1 },
+    { "source": "native-bees", "target": "stable-food-web", "value": 1 },
+    { "source": "butterflies", "target": "connected-edge", "value": 1 },
+
+    { "source": "woodland-habitat", "target": "shaded-understory", "value": 2 },
+    { "source": "woodland-habitat", "target": "cooler-microclimate", "value": 1 },
+    { "source": "pollinator-habitat", "target": "connected-edge", "value": 1 },
+    { "source": "pollinator-habitat", "target": "stable-food-web", "value": 1 },
+    { "source": "stormwater-process", "target": "wet-soil", "value": 2 },
+    { "source": "stormwater-process", "target": "flood-buffer", "value": 2 },
+    { "source": "stormwater-process", "target": "cooler-microclimate", "value": 1 },
+    { "source": "food-web", "target": "stable-food-web", "value": 2 },
+    { "source": "food-web", "target": "berry-habitat", "value": 1 },
+    { "source": "habitat-corridor", "target": "connected-edge", "value": 2 },
+    { "source": "habitat-corridor", "target": "canal-edge-birds", "value": 1 }
+  ]
+}

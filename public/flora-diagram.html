@@ -7,6 +7,8 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/flora-diagram.css" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 </head>
 <body class="flora-page">
 
@@ -30,6 +32,20 @@
         canopy layer, understory, ground plane, and associated fauna.
       </p>
     </header>
+
+    <section class="proposal-sankey" aria-labelledby="proposalSankeyTitle">
+      <div class="proposal-sankey-head">
+        <p class="eyebrow">Proposal Logic</p>
+        <h2 id="proposalSankeyTitle">Our Proposal: Ecological Relationship Sankey</h2>
+        <p class="proposal-sankey-intro">
+          Left-to-right logic from site proposal bands to planting layers, ecological interactions,
+          and resulting environmental outcomes.
+        </p>
+      </div>
+      <div class="proposal-sankey-frame">
+        <svg id="proposalSankeySvg" role="img" aria-label="Proposal Sankey diagram"></svg>
+      </div>
+    </section>
 
     <div class="mode-tabs" role="tablist" aria-label="Diagram mode">
       <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Baseline Existing</button>
