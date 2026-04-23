@@ -20,54 +20,63 @@
 	</nav>
 
 	<main class="diagrams-layout">
-		<section class="diagrams-header">
-			<p class="eyebrow">Existing Conditions</p>
-			<h1>Gowanus Tree and Landscape Baseline</h1>
-			<p class="diagrams-intro">
-				These diagrams use the current Gowanus tree dataset from the map to show
-				baseline canopy, density, health, and species conditions before the proposed
-				landscaping intervention is added.
-			</p>
+		<section class="board-section board-intro" id="section-intro">
+			<div class="diagrams-header">
+				<p class="eyebrow">Section 1 · Intro / Context</p>
+				<h1>Gowanus Tree and Landscape Baseline</h1>
+				<p class="diagrams-intro">
+					This board presents existing tree conditions and proposal intervention logic for
+					the Gowanus site in a step-by-step sequence suitable for verbal presentation.
+				</p>
+			</div>
+			<div id="diagramError" class="diagram-error" style="display: none;"></div>
 		</section>
 
-		<div id="diagramError" class="diagram-error" style="display: none;"></div>
+		<section class="board-section board-baseline" id="section-baseline">
+			<div class="board-header-row">
+				<p class="eyebrow">Section 2 · Existing Conditions</p>
+				<h2>Baseline Ecological Inventory</h2>
+			</div>
+			<section class="metrics-grid">
+				<article class="metric-card">
+					<p class="metric-label">Street Trees</p>
+					<div id="totalTreesMetric"></div>
+				</article>
 
-		<section class="metrics-grid">
-			<article class="metric-card">
-				<p class="metric-label">Street Trees</p>
-				<div id="totalTreesMetric"></div>
-			</article>
+				<article class="metric-card">
+					<p class="metric-label">Estimated Canopy Coverage</p>
+					<div id="canopyMetric"></div>
+				</article>
 
-			<article class="metric-card">
-				<p class="metric-label">Estimated Canopy Coverage</p>
-				<div id="canopyMetric"></div>
-			</article>
+				<article class="metric-card">
+					<p class="metric-label">Tree Density</p>
+					<div id="densityMetric"></div>
+				</article>
 
-			<article class="metric-card">
-				<p class="metric-label">Tree Density</p>
-				<div id="densityMetric"></div>
-			</article>
+				<article class="metric-card">
+					<p class="metric-label">Estimated Water Retention</p>
+					<div id="waterMetric"></div>
+				</article>
 
-			<article class="metric-card">
-				<p class="metric-label">Estimated Water Retention</p>
-				<div id="waterMetric"></div>
-			</article>
+				<article class="metric-card">
+					<p class="metric-label">Study Area</p>
+					<div id="studyAreaMetric"></div>
+				</article>
 
-			<article class="metric-card">
-				<p class="metric-label">Study Area</p>
-				<div id="studyAreaMetric"></div>
-			</article>
-
-			<article class="metric-card">
-				<p class="metric-label">Good Health Share</p>
-				<div id="healthMetric"></div>
-			</article>
+				<article class="metric-card">
+					<p class="metric-label">Good Health Share</p>
+					<div id="healthMetric"></div>
+				</article>
+			</section>
 		</section>
 
-		<section class="proposal-improvement">
-			<div class="panel-card">
+		<section class="board-section board-intervention" id="section-intervention">
+			<div class="board-header-row">
+				<p class="eyebrow">Section 3 · Intervention Logic</p>
+				<h2>Ecological Improvement Toggle</h2>
+			</div>
+			<div class="panel-card presentation-toggle-card">
 				<div class="panel-header">
-					<h2>Ecological Improvement Toggle</h2>
 					<p>
 						Proposal contribution math based on park intervention areas and planting-density assumptions.
 					</p>
@@ -80,8 +89,14 @@
 				</div>
 				<div id="improvementScopeNote" class="improvement-scope-note"></div>
 			</div>
+		</section>
 
-			<div class="metrics-grid improvement-metrics-grid">
+		<section class="board-section board-impact" id="section-impact">
+			<div class="board-header-row">
+				<p class="eyebrow">Section 4 · Proposal Impact</p>
+				<h2>Primary Design Move and Quantified Impact</h2>
+			</div>
+			<div class="metrics-grid improvement-metrics-grid impact-metrics-grid">
 				<article class="metric-card">
 					<p class="metric-label">Added Tree Count</p>
 					<div id="addedTreesMetric"></div>
@@ -112,8 +127,14 @@
 					<div id="coverageStateMetric"></div>
 				</article>
 			</div>
+		</section>
 
-			<section class="charts-grid two-col">
+		<section class="board-section board-primary-diagrams" id="section-primary-diagrams">
+			<div class="board-header-row">
+				<p class="eyebrow">Section 5 · Primary Diagram Field</p>
+				<h2>Ecological Benefit and Growth Systems</h2>
+			</div>
+			<section class="charts-grid two-col primary-diagram-grid">
 				<article class="panel-card">
 					<div class="panel-header">
 						<h2>Conceptual Ecological Benefit by Band</h2>
@@ -136,48 +157,54 @@
 			</section>
 		</section>
 
-		<section class="charts-grid two-col">
-			<article class="panel-card">
-				<div class="panel-header">
-					<h2>Top Tree Species</h2>
-					<p>Most common species currently present in the study area.</p>
-				</div>
-				<div class="chart-wrap">
-					<canvas id="speciesChart"></canvas>
-				</div>
-			</article>
+		<section class="board-section board-supporting" id="section-supporting">
+			<div class="board-header-row">
+				<p class="eyebrow">Section 6 · Supporting Data</p>
+				<h2>Secondary Baseline Readouts</h2>
+			</div>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Top Tree Species</h2>
+						<p>Most common species currently present in the study area.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="speciesChart"></canvas>
+					</div>
+				</article>
 
-			<article class="panel-card">
-				<div class="panel-header">
-					<h2>Tree Health Distribution</h2>
-					<p>Current condition of the mapped street trees.</p>
-				</div>
-				<div class="chart-wrap">
-					<canvas id="healthChart"></canvas>
-				</div>
-			</article>
-		</section>
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Tree Health Distribution</h2>
+						<p>Current condition of the mapped street trees.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="healthChart"></canvas>
+					</div>
+				</article>
+			</section>
 
-		<section class="charts-grid two-col">
-			<article class="panel-card">
-				<div class="panel-header">
-					<h2>Estimated Water Retention by Species</h2>
-					<p>Conceptual stormwater storage estimate based on canopy area, 3 ft soil depth, and 20% water holding capacity.</p>
-				</div>
-				<div class="chart-wrap">
-					<canvas id="waterRetentionChart"></canvas>
-				</div>
-			</article>
+			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Estimated Water Retention by Species</h2>
+						<p>Conceptual stormwater storage estimate based on canopy area, 3 ft soil depth, and 20% water holding capacity.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="waterRetentionChart"></canvas>
+					</div>
+				</article>
 
-			<article class="panel-card">
-				<div class="panel-header">
-					<h2>Tree Density by Block</h2>
-					<p>Tree density per block in the study area.</p>
-				</div>
-				<div class="chart-wrap">
-					<canvas id="densityChart"></canvas>
-				</div>
-			</article>
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Tree Density by Block</h2>
+						<p>Tree density per block in the study area.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="densityChart"></canvas>
+					</div>
+				</article>
+			</section>
 		</section>
 	</main>
 	<script type="module" src="/diagrams.js"></script>
