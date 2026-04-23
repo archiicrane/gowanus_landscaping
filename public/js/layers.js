@@ -69,6 +69,56 @@ function floodFeatureToPoint(feature) {
 	return null;
 }
 
+function flattenLineCoordinates(geometry) {
+	if (!geometry) return [];
+	if (geometry.type === 'LineString') return geometry.coordinates || [];
+	if (geometry.type === 'MultiLineString') {
+		return (geometry.coordinates || []).flatMap((segment) => segment || []);
+	}
+	return [];
+}
+
+function contourFeaturesToLowPointGeoJSON(features) {
+	const elevations = features
+		.map((feature) => Number(feature?.properties?.ELEV))
+		.filter((value) => Number.isFinite(value));
+
+	if (!elevations.length) {
+		return { type: 'FeatureCollection', features: [] };
+	}
+
+	const minElev = Math.min(...elevations);
+	const maxElev = Math.max(...elevations);
+	const elevSpan = Math.max(maxElev - minElev, 1);
+	const heatFeatures = [];
+
+	for (const feature of features) {
+		const elev = Number(feature?.properties?.ELEV);
+		if (!Number.isFinite(elev)) continue;
+
+		const coords = flattenLineCoordinates(feature.geometry);
+		if (!coords.length) continue;
+
+		const intensity = Math.max(0.08, ((maxElev - elev) / elevSpan) ** 1.35);
+		const step = coords.length > 24 ? 6 : coords.length > 10 ? 3 : 1;
+
+		for (let index = 0; index < coords.length; index += step) {
+			const coord = coords[index];
+			if (!Array.isArray(coord) || coord.length < 2 || !pointInStudyPolygon(coord)) continue;
+			heatFeatures.push({
+				type: 'Feature',
+				properties: {
+					elev,
+					intensity,
+				},
+				geometry: { type: 'Point', coordinates: coord },
+			});
+		}
+	}
+
+	return { type: 'FeatureCollection', features: heatFeatures };
+}
+
 // Species → color mapping (architectural palette)
 const SPECIES_COLORS = [
 	['Kentucky coffeetree',    '#a3b18a'],
@@ -209,20 +259,6 @@ export async function addTreeLayer(map) {
 		},
 	});
 
-	buildLegend();
-}
-
-function buildLegend() {
-	const container = document.getElementById('legend');
-	if (!container) return;
-
-	container.innerHTML = '<p class="legend-title">Tree Species</p>';
-	for (const [species, color] of SPECIES_COLORS) {
-		const row = document.createElement('div');
-		row.className = 'legend-row';
-		row.innerHTML = `<span class="legend-swatch" style="background:${color}"></span><span>${species}</span>`;
-		container.appendChild(row);
-	}
 }
 
 // ─── Park / Site outline ─────────────────────────────────────────────────────
@@ -295,105 +331,104 @@ export async function addStudyBoundaryLayer(map) {
 	});
 }
 
-export async function addTreeHeatLayer(map) {
-	if (!map.getSource('trees')) return;
-	if (map.getLayer('trees-heatmap')) map.removeLayer('trees-heatmap');
+
+export async function addTopographyHeatLayer(map) {
+	let data;
+	try {
+		const res = await fetch('/data/con_lines_gowanus_clipped.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		data = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load contour data for low-point heatmap:', err);
+		return;
+	}
+
+	const sourceData = contourFeaturesToLowPointGeoJSON(data.features || []);
+
+	if (map.getLayer('topography-heatmap')) map.removeLayer('topography-heatmap');
+	if (map.getSource('topography-heat')) map.removeSource('topography-heat');
+
+	map.addSource('topography-heat', { type: 'geojson', data: sourceData });
 
 	map.addLayer({
-		id: 'trees-heatmap',
+		id: 'topography-heatmap',
 		type: 'heatmap',
-		source: 'trees',
+		source: 'topography-heat',
 		paint: {
 			'heatmap-intensity': [
 				'interpolate', ['linear'], ['zoom'],
-				12, 0.4,
-				16, 0.9,
+				12, 0.55,
+				16, 1.15,
 			],
-			'heatmap-weight': [
-				'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'dbh'], 0], 0],
-				0, 0.05,
-				40, 1,
-			],
+			'heatmap-weight': ['coalesce', ['get', 'intensity'], 0.1],
 			'heatmap-radius': [
 				'interpolate', ['linear'], ['zoom'],
-				12, 16,
-				17, 32,
+				12, 18,
+				17, 34,
 			],
-			'heatmap-opacity': 0.58,
+			'heatmap-opacity': 0.68,
 			'heatmap-color': [
 				'interpolate', ['linear'], ['heatmap-density'],
 				0, 'rgba(250,247,241,0)',
-				0.25, 'rgba(171,184,160,0.26)',
-				0.5, 'rgba(141,156,132,0.42)',
-				0.75, 'rgba(111,131,112,0.62)',
-				1, 'rgba(95,120,96,0.78)',
+				0.2, 'rgba(196,214,206,0.2)',
+				0.42, 'rgba(145,174,160,0.34)',
+				0.65, 'rgba(108,138,123,0.54)',
+				0.82, 'rgba(84,110,96,0.68)',
+				1, 'rgba(60,83,72,0.82)',
 			],
 		},
 	});
 }
 
 export async function addBioswaleOpportunityLayer(map) {
-	let floodData;
-	try {
-		const res = await fetch('/data/flood-vulnerability.geojson');
-		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		floodData = await res.json();
-	} catch (err) {
-		console.error('[LAYERS] Failed to load flood data for bioswale opportunities:', err);
-		return;
-	}
+	const roadFilter = [
+		'all',
+		['within', { type: 'Polygon', coordinates: [STUDY_RING] }],
+		['match', ['get', 'class'], ['primary', 'secondary', 'tertiary', 'street', 'service', 'residential'], true, false],
+	];
 
-	const points = [];
-	for (const feature of floodData.features || []) {
-		const coord = floodFeatureToPoint(feature);
-		if (!coord || !pointInStudyPolygon(coord)) continue;
-		points.push({
-			type: 'Feature',
-			properties: {
-				score: 1,
-				type: 'bioswale-opportunity',
-			},
-			geometry: { type: 'Point', coordinates: coord },
-		});
-	}
-
-	const limited = points.slice(0, 220);
-	const sourceData = { type: 'FeatureCollection', features: limited };
-
-	if (map.getSource('bioswale-opportunities')) map.removeSource('bioswale-opportunities');
-	map.addSource('bioswale-opportunities', { type: 'geojson', data: sourceData });
+	if (map.getLayer('bioswale-corridor-core')) map.removeLayer('bioswale-corridor-core');
+	if (map.getLayer('bioswale-corridor-glow')) map.removeLayer('bioswale-corridor-glow');
 
 	map.addLayer({
-		id: 'bioswale-opportunities-glow',
-		type: 'circle',
-		source: 'bioswale-opportunities',
+		id: 'bioswale-corridor-glow',
+		type: 'line',
+		source: 'composite',
+		'source-layer': 'road',
+		filter: roadFilter,
 		paint: {
-			'circle-radius': [
+			'line-color': '#95b29c',
+			'line-width': [
 				'interpolate', ['linear'], ['zoom'],
-				12, 6,
-				17, 11,
+				12, 5,
+				17, 14,
 			],
-			'circle-color': '#8fae95',
-			'circle-opacity': 0.24,
+			'line-opacity': 0.2,
+			'line-blur': 0.8,
 		},
-	});
+	}, 'building');
 
 	map.addLayer({
-		id: 'bioswale-opportunities-core',
-		type: 'circle',
-		source: 'bioswale-opportunities',
-		paint: {
-			'circle-radius': [
-				'interpolate', ['linear'], ['zoom'],
-				12, 2,
-				17, 4,
-			],
-			'circle-color': '#6f8a78',
-			'circle-stroke-color': '#f1eee8',
-			'circle-stroke-width': 0.9,
-			'circle-opacity': 0.92,
+		id: 'bioswale-corridor-core',
+		type: 'line',
+		source: 'composite',
+		'source-layer': 'road',
+		filter: roadFilter,
+		layout: {
+			'line-cap': 'round',
+			'line-join': 'round',
 		},
-	});
+		paint: {
+			'line-color': '#6f8a78',
+			'line-width': [
+				'interpolate', ['linear'], ['zoom'],
+				12, 1.4,
+				17, 4.2,
+			],
+			'line-opacity': 0.9,
+			'line-dasharray': [2, 1.4],
+		},
+	}, 'building');
 }
 
 // ─── 1ft Contours ───────────────────────────────────────────────────────────

@@ -101,7 +101,7 @@ main {
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
-  padding: 8px 16px;
+  padding: 8px 16px 10px;
 }
 
 #mode-toggle {
@@ -130,7 +130,7 @@ main {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   row-gap: 6px;
   max-width: calc(100% - 260px);
   width: auto;
@@ -144,26 +144,35 @@ main {
 
 .layer-panel-title {
   margin: 0;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #6e665b;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   flex-shrink: 0;
 }
 
 .layer-toggle {
+  appearance: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 7px;
+  font-size: 12px;
   color: var(--ink);
   margin-bottom: 0;
   white-space: nowrap;
   flex-shrink: 0;
-  padding: 2px 6px;
+  min-height: 28px;
+  padding: 3px 8px;
   border: 1px solid rgba(86, 73, 53, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  line-height: 1;
+}
+
+.layer-toggle input[type="checkbox"] {
+  margin: 0;
+  accent-color: #8d8a81;
 }
 
 #map-story-panels {
@@ -242,45 +251,6 @@ main {
   height: 8px;
   border-radius: 99px;
   display: inline-block;
-}
-
-#legend {
-  position: fixed;
-  left: 20px;
-  bottom: 24px;
-  z-index: 2200;
-  width: 210px;
-  max-height: 40vh;
-  overflow: auto;
-  background: rgba(246, 241, 233, 0.93);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 8px 26px rgba(82, 69, 49, 0.12);
-  padding: 12px;
-}
-
-.legend-title {
-  margin: 0 0 8px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6e665b;
-  letter-spacing: 0.03em;
-}
-
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--ink);
-}
-
-.legend-swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 99px;
-  flex-shrink: 0;
 }
 
 #map-tooltip {
@@ -704,11 +674,6 @@ main {
     transform-origin: center right;
   }
 
-  #legend {
-    width: min(44vw, 230px);
-    left: 12px;
-  }
-
   #sub-top-bar {
     padding: 7px 10px;
   }
@@ -727,9 +692,6 @@ main {
     top: 132px;
   }
 
-  #legend {
-    bottom: 12px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -780,9 +742,9 @@ main {
 
   #layer-panel {
     max-width: 100%;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 2px;
+    overflow: visible;
+    flex-wrap: wrap;
+    padding-bottom: 0;
   }
 
   #map {

@@ -9,7 +9,7 @@ import {
 	addContourLayer,
 	addFloodLayer,
 	addCsoOutfallsLayer,
-	addTreeHeatLayer,
+	addTopographyHeatLayer,
 	addBioswaleOpportunityLayer,
 } from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
@@ -58,7 +58,7 @@ export async function initMap() {
 		await addContourLayer(map);
 		await addFloodLayer(map);
 		await addCsoOutfallsLayer(map);
-		await addTreeHeatLayer(map);
+		await addTopographyHeatLayer(map);
 		await addBioswaleOpportunityLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
@@ -80,8 +80,8 @@ function wireLayerToggles(map) {
 		{ id: 'toggle-contours',  layers: ['contour-lines'] },
 		{ id: 'toggle-flood',     layers: ['flood-vulnerability-fill'] },
 		{ id: 'toggle-cso',       layers: ['cso-outfalls-circle'] },
-		{ id: 'toggle-heat',      layers: ['trees-heatmap'] },
-		{ id: 'toggle-bioswale',  layers: ['bioswale-opportunities-glow', 'bioswale-opportunities-core'] },
+		{ id: 'toggle-heat',      layers: ['topography-heatmap'] },
+		{ id: 'toggle-bioswale',  layers: ['bioswale-corridor-glow', 'bioswale-corridor-core'] },
 		{ id: 'toggle-bounding',  layers: ['study-boundary-fill', 'study-boundary-line'] },
 	];
 
