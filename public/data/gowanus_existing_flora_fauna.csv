@@ -1,0 +1,22 @@
+zone,category,name,type,status,canopy_class,ecological_role,diagram_size,notes
+Wet Edge,tree,bald cypress,existing,baseline,canopy,stormwater tolerance,large,existing or contextually appropriate wet-tolerant canopy tree
+Wet Edge,tree,swamp white oak,existing,baseline,canopy,habitat and canopy,large,existing or contextually appropriate native canopy tree
+Wet Edge,shrub,buttonbush,existing,baseline,understory,wetland habitat,small,wet-edge shrub condition
+Wet Edge,perennial,soft rush,existing,baseline,ground,stormwater uptake,small,wet tolerant planting layer
+Wet Edge,fauna,gull,existing,baseline,fauna,urban bird presence,small,common urban waterfront bird
+Wet Edge,fauna,sparrow,existing,baseline,fauna,generalist bird,small,baseline urban bird presence
+Woodland Core,tree,red maple,existing,baseline,canopy,seasonal canopy,large,common canopy presence
+Woodland Core,tree,pin oak,existing,baseline,canopy,shade and habitat,large,existing canopy framework
+Woodland Core,tree,serviceberry,existing,baseline,understory_tree,pollinator support,medium,small flowering tree
+Woodland Core,shrub,blueberry,existing,baseline,understory,habitat and forage,small,understory shrub
+Woodland Core,perennial,fern mix,existing,baseline,ground,groundcover,small,woodland floor planting
+Woodland Core,fauna,pigeon,existing,baseline,fauna,urban bird presence,small,baseline urban fauna
+Woodland Core,fauna,gray squirrel,existing,baseline,fauna,urban habitat use,small,general urban wildlife
+Pollinator Edge,tree,honeylocust,existing,baseline,canopy,light shade,large,open canopy urban tree
+Pollinator Edge,tree,callery pear,existing,baseline,canopy,existing street tree,medium,existing but not key proposed species
+Pollinator Edge,shrub,bayberry,existing,baseline,understory,pollinator and bird support,small,edge shrub layer
+Pollinator Edge,perennial,milkweed,existing,baseline,ground,pollinator host plant,small,monarch support
+Pollinator Edge,perennial,bee balm,existing,baseline,ground,pollinator nectar source,small,pollinator attractor
+Pollinator Edge,perennial,aster mix,existing,baseline,ground,late season nectar,small,pollinator support
+Pollinator Edge,fauna,bee,existing,baseline,fauna,pollination,small,baseline pollinator presence
+Pollinator Edge,fauna,butterfly,existing,baseline,fauna,pollination,small,baseline pollinator presence

@@ -1,0 +1,18 @@
+year_range,zone,name,category,initial_size,future_size,timeline_role,visual_change,notes
+0-2,Wet Edge,bald cypress,tree,medium,large,establishment,canopy_expands,young trees begin establishing
+0-2,Wet Edge,buttonbush,shrub,small,medium,establishment,shrub_mass_increases,wet edge thickens
+0-2,Pollinator Edge,milkweed,perennial,small,medium,establishment,patch_density_increases,host patch begins forming
+0-2,Pollinator Edge,bee balm,perennial,small,medium,establishment,flowering_patch_expands,early pollinator color
+0-2,Woodland Core,serviceberry,tree,small,medium,establishment,understory_tree_grows,early flowering support
+3-5,Wet Edge,bald cypress,tree,medium,large,canopy_growth,canopy_expands,shade and habitat increase
+3-5,Woodland Core,red maple,tree,medium,large,canopy_growth,canopy_expands,core woodland begins reading as a grove
+3-5,Woodland Core,pin oak,tree,medium,large,canopy_growth,canopy_expands,longer-term canopy framework appears
+3-5,Pollinator Edge,milkweed,perennial,medium,medium,habitat_support,fauna_arrival,monarch use becomes more likely
+3-5,Pollinator Edge,native bee,fauna,small,medium,habitat_support,fauna_arrival,more regular pollinator activity
+3-5,Wet Edge,dragonfly,fauna,small,medium,habitat_support,fauna_arrival,indicator of wetter habitat quality
+5-10,Wet Edge,bald cypress,tree,large,xlarge,maturity,dominant_canopy,wet edge reads as mature band
+5-10,Woodland Core,red maple,tree,large,xlarge,maturity,dominant_canopy,woodland core becomes denser
+5-10,Woodland Core,pin oak,tree,large,xlarge,maturity,dominant_canopy,long term canopy presence
+5-10,Woodland Core,songbird,fauna,small,medium,maturity,fauna_arrival,improved nesting and habitat use
+5-10,Pollinator Edge,monarch butterfly,fauna,small,medium,maturity,fauna_arrival,sustained pollinator corridor condition
+5-10,Pollinator Edge,goldenrod,perennial,medium,medium,maturity,seasonal_density,late season pollinator band strengthens

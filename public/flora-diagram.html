@@ -1,76 +1,65 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gowanus Flora & Fauna Diagram</title>
-  <link rel="stylesheet" href="/flora-diagram.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rewilding Gowanus – Flora &amp; Fauna</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/flora-diagram.css" />
 </head>
-<body>
-  <div class="top-bar">
-    <span class="brand">Rewilding Gowanus</span>
-    <span class="nav-links">
+<body class="flora-page">
+
+  <nav class="top-bar">
+    <div class="brand">Rewilding Gowanus</div>
+    <div class="nav-links">
       <a href="index.html" class="nav-btn">Map</a>
       <a href="site-plan.html" class="nav-btn">Site Plan</a>
       <a href="diagrams.html" class="nav-btn">Diagrams</a>
       <a href="flora-diagram.html" class="nav-btn active">Flora</a>
-    </span>
-  </div>
-  <main class="flora-diagram-main">
-    <h1 class="flora-title">Gowanus Flora & Fauna Diagram</h1>
-    <div class="flora-diagram-frame">
-      <svg id="flora-diagram-svg"></svg>
-      <div class="flora-diagram-legend">
-        <span class="legend-title">Legend</span>
-        <span class="legend-item"><span class="legend-symbol legend-canopy"></span> Canopy Tree</span>
-        <span class="legend-item"><span class="legend-symbol legend-shrub"></span> Shrub/Understory</span>
-        <span class="legend-item"><span class="legend-symbol legend-pollinator"></span> Pollinator/Fauna</span>
+    </div>
+  </nav>
+
+  <main class="flora-main">
+
+    <header class="flora-header">
+      <p class="eyebrow">Ecological Inventory</p>
+      <h1>Flora &amp; Fauna Diagram</h1>
+      <p class="flora-intro">
+        Three ecological bands — Wet Edge, Woodland Core, and Pollinator Edge — organized by
+        canopy layer, understory, ground plane, and associated fauna.
+      </p>
+    </header>
+
+    <div class="mode-tabs" role="tablist" aria-label="Diagram mode">
+      <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Baseline Existing</button>
+      <button class="mode-tab" data-mode="proposed" role="tab" aria-selected="false">Proposed Ecology</button>
+      <button class="mode-tab" data-mode="growth" role="tab" aria-selected="false">Growth Over Time</button>
+    </div>
+
+    <div class="time-tabs hidden" id="time-tabs" role="tablist" aria-label="Time period">
+      <button class="time-tab active" data-year="0-2" role="tab" aria-selected="true">0–2 yrs</button>
+      <button class="time-tab" data-year="3-5" role="tab" aria-selected="false">3–5 yrs</button>
+      <button class="time-tab" data-year="5-10" role="tab" aria-selected="false">5–10 yrs</button>
+    </div>
+
+    <div class="flora-diagram-wrap" id="flora-diagram-wrap"></div>
+
+    <footer class="flora-legend">
+      <div class="legend-group"><span class="ls ls-canopy"></span><span>Canopy Tree</span></div>
+      <div class="legend-group"><span class="ls ls-understory-tree"></span><span>Understory Tree</span></div>
+      <div class="legend-group"><span class="ls ls-shrub"></span><span>Shrub</span></div>
+      <div class="legend-group"><span class="ls ls-ground"></span><span>Ground / Perennial</span></div>
+      <div class="legend-group"><span class="ls ls-fauna"></span><span>Fauna</span></div>
+      <div class="legend-group legend-phase">
+        <span class="phase-pip ph1"></span><span>Phase 1</span>
+        <span class="phase-pip ph2"></span><span>Phase 2</span>
+        <span class="phase-pip ph3"></span><span>Phase 3</span>
       </div>
-    </div>
-    <div class="flora-diagram-annotations">
-      <span class="annotation">Wet Edge</span>
-      <span class="annotation">Woodland Core</span>
-      <span class="annotation">Pollinator Edge</span>
-    </div>
+    </footer>
+
   </main>
-  <script type="module" src="/flora-diagram.js"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gowanus Flora/Fauna Band Diagram</title>
-  <link rel="stylesheet" href="flora-diagram.css">
-</head>
-<body>
-  <div class="top-bar">
-    <span class="brand">Rewilding Gowanus</span>
-    <span class="nav-links">
-      <a href="index.html" class="nav-btn">Map</a>
-      <a href="site-plan.html" class="nav-btn">Site Plan</a>
-      <a href="diagrams.html" class="nav-btn">Diagrams</a>
-      <a href="flora-diagram.html" class="nav-btn active">Flora</a>
-    </span>
-  </div>
-  <main class="flora-diagram-main">
-    <h1 class="flora-title">Gowanus Flora & Fauna Diagram</h1>
-    <div class="flora-diagram-frame">
-      <svg id="flora-diagram-svg"></svg>
-      <div class="flora-diagram-legend">
-        <span class="legend-title">Legend</span>
-        <span class="legend-item"><span class="legend-symbol legend-canopy"></span> Canopy Tree</span>
-        <span class="legend-item"><span class="legend-symbol legend-shrub"></span> Shrub/Understory</span>
-        <span class="legend-item"><span class="legend-symbol legend-pollinator"></span> Pollinator/Fauna</span>
-      </div>
-    </div>
-    <div class="flora-diagram-annotations">
-      <span class="annotation">Wet Edge</span>
-      <span class="annotation">Woodland Core</span>
-      <span class="annotation">Pollinator Edge</span>
-    </div>
-  </main>
-  <script src="flora-diagram.js"></script>
+
+  <script src="/flora-diagram.js"></script>
 </body>
 </html>

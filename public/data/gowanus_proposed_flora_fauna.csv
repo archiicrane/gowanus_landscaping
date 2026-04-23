@@ -1,0 +1,25 @@
+zone,category,name,type,status,canopy_class,ecological_role,diagram_size,phase,notes
+Wet Edge,tree,bald cypress,proposed,added,canopy,stormwater tolerance,large,phase_1,reinforce wet edge canopy
+Wet Edge,tree,swamp white oak,proposed,added,canopy,habitat and shade,large,phase_1,expand native canopy
+Wet Edge,shrub,buttonbush,proposed,added,understory,wetland habitat,small,phase_1,increase habitat complexity
+Wet Edge,perennial,soft rush,proposed,added,ground,water uptake,small,phase_1,shoreline planting
+Wet Edge,perennial,blue flag iris,proposed,added,ground,wetland planting,small,phase_1,seasonal color and habitat
+Wet Edge,fauna,dragonfly,proposed,target_fauna,fauna,wetland indicator,small,phase_2,expected with improved habitat
+Wet Edge,fauna,red-winged blackbird,proposed,target_fauna,fauna,wetland bird presence,small,phase_3,possible seasonal use
+Woodland Core,tree,red maple,proposed,added,canopy,seasonal canopy,large,phase_1,core canopy framework
+Woodland Core,tree,pin oak,proposed,added,canopy,shade and habitat,large,phase_1,long-term canopy structure
+Woodland Core,tree,serviceberry,proposed,added,understory_tree,pollinator support,medium,phase_1,flowering understory tree
+Woodland Core,shrub,blueberry,proposed,added,understory,habitat and forage,small,phase_2,edible understory
+Woodland Core,shrub,winterberry,proposed,added,understory,bird forage,small,phase_2,seasonal berries
+Woodland Core,perennial,fern mix,proposed,added,ground,groundcover,small,phase_2,woodland layer
+Woodland Core,fauna,songbird,proposed,target_fauna,fauna,nesting habitat,small,phase_3,increased habitat quality
+Woodland Core,fauna,gray squirrel,proposed,target_fauna,fauna,woodland use,small,phase_3,more stable habitat use
+Pollinator Edge,tree,honeylocust,proposed,added,canopy,light shade,large,phase_1,filtered canopy at edge
+Pollinator Edge,tree,serviceberry,proposed,added,understory_tree,pollinator support,medium,phase_1,flowering support tree
+Pollinator Edge,shrub,bayberry,proposed,added,understory,bird and pollinator support,small,phase_2,edge habitat
+Pollinator Edge,perennial,milkweed,proposed,added,ground,host plant,small,phase_1,monarch support
+Pollinator Edge,perennial,bee balm,proposed,added,ground,nectar source,small,phase_1,pollinator attractor
+Pollinator Edge,perennial,aster mix,proposed,added,ground,late season nectar,small,phase_2,extended bloom period
+Pollinator Edge,perennial,goldenrod,proposed,added,ground,pollinator nectar,small,phase_2,late season support
+Pollinator Edge,fauna,native bee,proposed,target_fauna,fauna,pollination,small,phase_2,increased pollinator activity
+Pollinator Edge,fauna,monarch butterfly,proposed,target_fauna,fauna,host plant relationship,small,phase_3,expected with milkweed establishment
