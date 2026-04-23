@@ -64,6 +64,78 @@
 			</article>
 		</section>
 
+		<section class="proposal-improvement">
+			<div class="panel-card">
+				<div class="panel-header">
+					<h2>Ecological Improvement Toggle</h2>
+					<p>
+						Proposal contribution math based on park intervention areas and planting-density assumptions.
+					</p>
+				</div>
+				<div class="improvement-toggle" role="tablist" aria-label="Proposal contribution scope">
+					<button class="improvement-tab active" data-scope="park" role="tab" aria-selected="true">Park</button>
+					<button class="improvement-tab" data-scope="bioswales" role="tab" aria-selected="false">Bioswales</button>
+					<button class="improvement-tab" data-scope="streetTrees" role="tab" aria-selected="false">Street Trees</button>
+					<button class="improvement-tab" data-scope="projectTotal" role="tab" aria-selected="false">Project Total</button>
+				</div>
+				<div id="improvementScopeNote" class="improvement-scope-note"></div>
+			</div>
+
+			<div class="metrics-grid improvement-metrics-grid">
+				<article class="metric-card">
+					<p class="metric-label">Added Tree Count</p>
+					<div id="addedTreesMetric"></div>
+				</article>
+
+				<article class="metric-card">
+					<p class="metric-label">Estimated Added Future Canopy</p>
+					<div id="addedCanopyMetric"></div>
+				</article>
+
+				<article class="metric-card">
+					<p class="metric-label">Shrub Quantity</p>
+					<div id="addedShrubsMetric"></div>
+				</article>
+
+				<article class="metric-card">
+					<p class="metric-label">Ground / Perennial Quantity</p>
+					<div id="addedGroundMetric"></div>
+				</article>
+
+				<article class="metric-card">
+					<p class="metric-label">Intervention Area</p>
+					<div id="interventionAreaMetric"></div>
+				</article>
+
+				<article class="metric-card">
+					<p class="metric-label">Project Coverage State</p>
+					<div id="coverageStateMetric"></div>
+				</article>
+			</div>
+
+			<section class="charts-grid two-col">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Conceptual Ecological Benefit by Band</h2>
+						<p>Weighted conceptual contribution of each band for canopy, habitat, cooling, stormwater, and pollinators.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="benefitBandChart"></canvas>
+					</div>
+				</article>
+
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Growth Over Time (Intervention Scope)</h2>
+						<p>Projected build-up across 0-2, 3-5, and 5-10 years from the currently selected contribution scope.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="improvementGrowthChart"></canvas>
+					</div>
+				</article>
+			</section>
+		</section>
+
 		<section class="charts-grid two-col">
 			<article class="panel-card">
 				<div class="panel-header">

@@ -129,6 +129,498 @@ function destroyChart(canvasId) {
   if (chart) chart.destroy();
 }
 
+function roundWhole(value) {
+  return Math.round(value);
+}
+
+function sumObjectValues(obj) {
+  return Object.values(obj).reduce((sum, n) => sum + n, 0);
+}
+
+const PROJECT_INPUTS = {
+  areasSqFt: {
+    site: 116563,
+    pollinator: 20386,
+    forest: 47996,
+    wet: 20583
+  },
+  treeDensitySqFt: {
+    forest: 400,
+    wet: 500,
+    pollinator: 800
+  },
+  shrubDensitySqFt: {
+    forest: 100,
+    wet: 120,
+    pollinator: 150
+  },
+  groundDensitySqFt: {
+    forest: 8,
+    wet: 6,
+    pollinator: 4
+  },
+  futureCanopyPerTreeSqFt: {
+    forest: 350,
+    wet: 300,
+    pollinator: 200
+  },
+  conceptualBenefitWeights: {
+    forest: {
+      canopy: 1.0,
+      birdHabitat: 0.9,
+      cooling: 1.0,
+      stormwater: 0.5,
+      pollinator: 0.4,
+      amphibianInsect: 0.0
+    },
+    wet: {
+      canopy: 0.7,
+      birdHabitat: 0.6,
+      cooling: 0.6,
+      stormwater: 1.0,
+      pollinator: 0.5,
+      amphibianInsect: 1.0
+    },
+    pollinator: {
+      canopy: 0.3,
+      birdHabitat: 0.5,
+      cooling: 0.3,
+      stormwater: 0.4,
+      pollinator: 1.0,
+      amphibianInsect: 0.0
+    }
+  }
+};
+
+function calculateParkContribution() {
+  const { areasSqFt, treeDensitySqFt, shrubDensitySqFt, groundDensitySqFt, futureCanopyPerTreeSqFt, conceptualBenefitWeights } = PROJECT_INPUTS;
+
+  const treesRaw = {
+    forest: areasSqFt.forest / treeDensitySqFt.forest,
+    wet: areasSqFt.wet / treeDensitySqFt.wet,
+    pollinator: areasSqFt.pollinator / treeDensitySqFt.pollinator
+  };
+
+  const shrubsRaw = {
+    forest: areasSqFt.forest / shrubDensitySqFt.forest,
+    wet: areasSqFt.wet / shrubDensitySqFt.wet,
+    pollinator: areasSqFt.pollinator / shrubDensitySqFt.pollinator
+  };
+
+  const groundRaw = {
+    forest: areasSqFt.forest / groundDensitySqFt.forest,
+    wet: areasSqFt.wet / groundDensitySqFt.wet,
+    pollinator: areasSqFt.pollinator / groundDensitySqFt.pollinator
+  };
+
+  const futureCanopyRawSqFt = {
+    forest: treesRaw.forest * futureCanopyPerTreeSqFt.forest,
+    wet: treesRaw.wet * futureCanopyPerTreeSqFt.wet,
+    pollinator: treesRaw.pollinator * futureCanopyPerTreeSqFt.pollinator
+  };
+
+  const treesDisplay = {
+    forest: roundWhole(treesRaw.forest),
+    wet: roundWhole(treesRaw.wet),
+    pollinator: roundWhole(treesRaw.pollinator)
+  };
+  const shrubsDisplay = {
+    forest: roundWhole(shrubsRaw.forest),
+    wet: roundWhole(shrubsRaw.wet),
+    pollinator: roundWhole(shrubsRaw.pollinator)
+  };
+  const groundDisplay = {
+    forest: roundWhole(groundRaw.forest),
+    wet: roundWhole(groundRaw.wet),
+    pollinator: roundWhole(groundRaw.pollinator)
+  };
+
+  return {
+    id: 'park',
+    label: 'Park Intervention',
+    available: true,
+    scopeNote: 'Calculated from explicit park band areas and planting-density assumptions.',
+    areasSqFt: {
+      site: areasSqFt.site,
+      intervention: areasSqFt.forest + areasSqFt.wet + areasSqFt.pollinator,
+      forest: areasSqFt.forest,
+      wet: areasSqFt.wet,
+      pollinator: areasSqFt.pollinator
+    },
+    trees: {
+      rawByBand: treesRaw,
+      byBand: treesDisplay,
+      total: sumObjectValues(treesDisplay)
+    },
+    shrubs: {
+      rawByBand: shrubsRaw,
+      byBand: shrubsDisplay,
+      total: sumObjectValues(shrubsDisplay)
+    },
+    ground: {
+      rawByBand: groundRaw,
+      byBand: groundDisplay,
+      total: sumObjectValues(groundDisplay)
+    },
+    futureCanopySqFt: {
+      rawByBand: futureCanopyRawSqFt,
+      rawTotal: sumObjectValues(futureCanopyRawSqFt),
+      displayTotal: roundWhole(sumObjectValues(futureCanopyRawSqFt))
+    },
+    conceptualBenefitByBand: conceptualBenefitWeights,
+    growthSeries: [
+      { label: '0-2 yrs', factor: 0.35 },
+      { label: '3-5 yrs', factor: 0.7 },
+      { label: '5-10 yrs', factor: 1.0 }
+    ]
+  };
+}
+
+function createUnavailableContributor(id, label) {
+  return {
+    id,
+    label,
+    available: false,
+    scopeNote: `${label} quantities not entered yet. Add source quantities later to activate this scope.`,
+    areasSqFt: {
+      site: PROJECT_INPUTS.areasSqFt.site,
+      intervention: null,
+      forest: null,
+      wet: null,
+      pollinator: null
+    },
+    trees: { byBand: { forest: null, wet: null, pollinator: null }, total: null },
+    shrubs: { byBand: { forest: null, wet: null, pollinator: null }, total: null },
+    ground: { byBand: { forest: null, wet: null, pollinator: null }, total: null },
+    futureCanopySqFt: { rawByBand: { forest: null, wet: null, pollinator: null }, rawTotal: null, displayTotal: null },
+    conceptualBenefitByBand: null,
+    growthSeries: [
+      { label: '0-2 yrs', factor: 0 },
+      { label: '3-5 yrs', factor: 0 },
+      { label: '5-10 yrs', factor: 0 }
+    ]
+  };
+}
+
+function buildProjectScopes() {
+  const park = calculateParkContribution();
+  const bioswales = createUnavailableContributor('bioswales', 'Bioswales');
+  const streetTrees = createUnavailableContributor('streetTrees', 'Street Trees');
+
+  const contributors = [park, bioswales, streetTrees];
+  const active = contributors.filter((c) => c.available);
+
+  const projectTotal = {
+    id: 'projectTotal',
+    label: 'Project Total',
+    available: active.length > 0,
+    isPartial: active.length < contributors.length,
+    scopeNote: active.length < contributors.length
+      ? 'Partial total: currently includes Park only. Bioswales and Street Trees are pending input.'
+      : 'Complete total including all intervention contributors.',
+    areasSqFt: {
+      site: PROJECT_INPUTS.areasSqFt.site,
+      intervention: active.reduce((sum, c) => sum + (c.areasSqFt.intervention || 0), 0),
+      forest: active.reduce((sum, c) => sum + (c.areasSqFt.forest || 0), 0),
+      wet: active.reduce((sum, c) => sum + (c.areasSqFt.wet || 0), 0),
+      pollinator: active.reduce((sum, c) => sum + (c.areasSqFt.pollinator || 0), 0)
+    },
+    trees: {
+      byBand: {
+        forest: active.reduce((sum, c) => sum + (c.trees.byBand.forest || 0), 0),
+        wet: active.reduce((sum, c) => sum + (c.trees.byBand.wet || 0), 0),
+        pollinator: active.reduce((sum, c) => sum + (c.trees.byBand.pollinator || 0), 0)
+      }
+    },
+    shrubs: {
+      byBand: {
+        forest: active.reduce((sum, c) => sum + (c.shrubs.byBand.forest || 0), 0),
+        wet: active.reduce((sum, c) => sum + (c.shrubs.byBand.wet || 0), 0),
+        pollinator: active.reduce((sum, c) => sum + (c.shrubs.byBand.pollinator || 0), 0)
+      }
+    },
+    ground: {
+      byBand: {
+        forest: active.reduce((sum, c) => sum + (c.ground.byBand.forest || 0), 0),
+        wet: active.reduce((sum, c) => sum + (c.ground.byBand.wet || 0), 0),
+        pollinator: active.reduce((sum, c) => sum + (c.ground.byBand.pollinator || 0), 0)
+      }
+    },
+    futureCanopySqFt: {
+      displayTotal: roundWhole(active.reduce((sum, c) => sum + (c.futureCanopySqFt.rawTotal || 0), 0))
+    },
+    conceptualBenefitByBand: active.length ? PROJECT_INPUTS.conceptualBenefitWeights : null,
+    growthSeries: [
+      { label: '0-2 yrs', factor: 0.35 },
+      { label: '3-5 yrs', factor: 0.7 },
+      { label: '5-10 yrs', factor: 1.0 }
+    ]
+  };
+
+  projectTotal.trees.total = sumObjectValues(projectTotal.trees.byBand);
+  projectTotal.shrubs.total = sumObjectValues(projectTotal.shrubs.byBand);
+  projectTotal.ground.total = sumObjectValues(projectTotal.ground.byBand);
+
+  return { park, bioswales, streetTrees, projectTotal };
+}
+
+function renderPendingMetric(id, label = 'Pending input') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="metric-value">--</div>
+    <div class="metric-subtitle">${label}</div>
+  `;
+}
+
+function makeBenefitBandChart(scope) {
+  destroyChart('benefitBandChart');
+
+  const canvas = document.getElementById('benefitBandChart');
+  if (!canvas) return;
+
+  if (!scope.conceptualBenefitByBand) {
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: ['Canopy', 'Bird Habitat', 'Cooling', 'Stormwater', 'Pollinator', 'Amphibian/Insect'],
+        datasets: [
+          {
+            label: 'Pending data',
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(170,160,145,0.45)',
+            borderColor: 'rgba(130,120,105,0.45)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        ...baseChartOptions(),
+        plugins: {
+          ...baseChartOptions().plugins,
+          legend: { display: false },
+          tooltip: {
+            ...baseChartOptions().plugins.tooltip,
+            callbacks: {
+              label: () => 'Awaiting bioswale/street-tree assumptions'
+            }
+          }
+        }
+      }
+    });
+    return;
+  }
+
+  const labels = ['Canopy', 'Bird Habitat', 'Cooling', 'Stormwater', 'Pollinator', 'Amphibian/Insect'];
+  const keyMap = ['canopy', 'birdHabitat', 'cooling', 'stormwater', 'pollinator', 'amphibianInsect'];
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Forest Band',
+          data: keyMap.map((k) => scope.conceptualBenefitByBand.forest[k] || 0),
+          backgroundColor: 'rgba(79,127,99,0.58)',
+          borderColor: 'rgba(79,127,99,0.9)',
+          borderWidth: 1
+        },
+        {
+          label: 'Wet Band',
+          data: keyMap.map((k) => scope.conceptualBenefitByBand.wet[k] || 0),
+          backgroundColor: 'rgba(112,143,168,0.58)',
+          borderColor: 'rgba(112,143,168,0.9)',
+          borderWidth: 1
+        },
+        {
+          label: 'Pollinator Band',
+          data: keyMap.map((k) => scope.conceptualBenefitByBand.pollinator[k] || 0),
+          backgroundColor: 'rgba(178,157,98,0.58)',
+          borderColor: 'rgba(178,157,98,0.9)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      scales: {
+        x: {
+          ...baseChartOptions().scales.x,
+          stacked: false
+        },
+        y: {
+          ...baseChartOptions().scales.y,
+          min: 0,
+          max: 1,
+          ticks: {
+            color: chartFontColor(),
+            stepSize: 0.2
+          }
+        }
+      }
+    }
+  });
+}
+
+function makeImprovementGrowthChart(scope) {
+  destroyChart('improvementGrowthChart');
+
+  const canvas = document.getElementById('improvementGrowthChart');
+  if (!canvas) return;
+
+  const labels = scope.growthSeries.map((s) => s.label);
+  const treesSeries = scope.growthSeries.map((s) =>
+    scope.trees.total != null ? roundWhole(scope.trees.total * s.factor) : 0
+  );
+  const canopySeries = scope.growthSeries.map((s) =>
+    scope.futureCanopySqFt.displayTotal != null
+      ? Number(((scope.futureCanopySqFt.displayTotal * s.factor) / 1000).toFixed(1))
+      : 0
+  );
+  const shrubSeries = scope.growthSeries.map((s) =>
+    scope.shrubs.total != null ? roundWhole(scope.shrubs.total * s.factor) : 0
+  );
+  const groundSeries = scope.growthSeries.map((s) =>
+    scope.ground.total != null ? roundWhole(scope.ground.total * s.factor) : 0
+  );
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Trees (count)',
+          data: treesSeries,
+          borderColor: '#4f7f63',
+          backgroundColor: 'rgba(79,127,99,0.1)',
+          tension: 0.25,
+          pointRadius: 3
+        },
+        {
+          label: 'Canopy (thousand sq ft)',
+          data: canopySeries,
+          borderColor: '#6d8ca7',
+          backgroundColor: 'rgba(109,140,167,0.1)',
+          tension: 0.25,
+          pointRadius: 3
+        },
+        {
+          label: 'Shrubs (count)',
+          data: shrubSeries,
+          borderColor: '#9a7a52',
+          backgroundColor: 'rgba(154,122,82,0.1)',
+          tension: 0.25,
+          pointRadius: 3
+        },
+        {
+          label: 'Ground / Perennials (count)',
+          data: groundSeries,
+          borderColor: '#b29d62',
+          backgroundColor: 'rgba(178,157,98,0.1)',
+          tension: 0.25,
+          pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      interaction: {
+        mode: 'index',
+        intersect: false
+      }
+    }
+  });
+}
+
+function renderImprovementScope(scope) {
+  const scopeNote = document.getElementById('improvementScopeNote');
+  if (scopeNote) {
+    scopeNote.textContent = scope.scopeNote;
+  }
+
+  if (!scope.available) {
+    renderPendingMetric('addedTreesMetric', 'Pending quantity assumptions');
+    renderPendingMetric('addedCanopyMetric', 'Pending quantity assumptions');
+    renderPendingMetric('addedShrubsMetric', 'Pending quantity assumptions');
+    renderPendingMetric('addedGroundMetric', 'Pending quantity assumptions');
+    renderPendingMetric('interventionAreaMetric', 'Pending area assumptions');
+    renderPendingMetric('coverageStateMetric', 'Not yet included in project total');
+    makeBenefitBandChart(scope);
+    makeImprovementGrowthChart(scope);
+    return;
+  }
+
+  renderMetric(
+    'addedTreesMetric',
+    formatNumber(scope.trees.total),
+    `Forest ${formatNumber(scope.trees.byBand.forest)} · Wet ${formatNumber(scope.trees.byBand.wet)} · Pollinator ${formatNumber(scope.trees.byBand.pollinator)}`
+  );
+
+  renderMetric(
+    'addedCanopyMetric',
+    `${formatNumber(scope.futureCanopySqFt.displayTotal)} sq ft`,
+    `${formatNumber(scope.futureCanopySqFt.displayTotal / 43560, 2)} acres future canopy`
+  );
+
+  renderMetric(
+    'addedShrubsMetric',
+    formatNumber(scope.shrubs.total),
+    `Forest ${formatNumber(scope.shrubs.byBand.forest)} · Wet ${formatNumber(scope.shrubs.byBand.wet)} · Pollinator ${formatNumber(scope.shrubs.byBand.pollinator)}`
+  );
+
+  renderMetric(
+    'addedGroundMetric',
+    formatNumber(scope.ground.total),
+    `Forest ${formatNumber(scope.ground.byBand.forest)} · Wet ${formatNumber(scope.ground.byBand.wet)} · Pollinator ${formatNumber(scope.ground.byBand.pollinator)}`
+  );
+
+  renderMetric(
+    'interventionAreaMetric',
+    `${formatNumber(scope.areasSqFt.intervention)} sq ft`,
+    `of ${formatNumber(scope.areasSqFt.site)} sq ft site`
+  );
+
+  renderMetric(
+    'coverageStateMetric',
+    scope.isPartial ? 'Partial' : 'Active',
+    scope.isPartial
+      ? 'Total currently includes Park only (Bioswales and Street Trees pending).'
+      : 'Contributor scope active in project math.'
+  );
+
+  makeBenefitBandChart(scope);
+  makeImprovementGrowthChart(scope);
+}
+
+function setupImprovementToggle() {
+  const scopes = buildProjectScopes();
+  const tabs = Array.from(document.querySelectorAll('.improvement-tab'));
+  if (!tabs.length) return;
+
+  function setActiveTab(active) {
+    tabs.forEach((tab) => {
+      const isActive = tab === active;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.scope;
+      if (!scopes[key]) return;
+      setActiveTab(tab);
+      renderImprovementScope(scopes[key]);
+    });
+  });
+
+  const initial = tabs.find((tab) => tab.dataset.scope === 'park') || tabs[0];
+  setActiveTab(initial);
+  renderImprovementScope(scopes[initial.dataset.scope]);
+}
+
 // ── Charts ───────────────────────────────────────────────────────────────
 
 function makeSpeciesChart(speciesCounts) {
@@ -288,6 +780,8 @@ function makeDensityByBlockChart(trees) {
 
 async function buildGowanusTreeDashboard() {
   try {
+    setupImprovementToggle();
+
     const trees = await loadTreeData();
 
     const validTrees = trees.filter(
