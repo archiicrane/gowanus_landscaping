@@ -36,11 +36,15 @@ export async function initMap() {
 
 	mapboxgl.accessToken = token;
 
+	// Responsive initial zoom: smaller screens zoom in less so the full boundary fits
+	const vw = window.innerWidth;
+	const initialZoom = vw >= 1400 ? 13.95 : vw >= 1100 ? 13.6 : vw >= 800 ? 13.2 : 12.7;
+
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
 		center: [-73.9895, 40.6748],
-		zoom: 13.95,
+		zoom: initialZoom,
 		pitch: 0,
 		bearing: 0,
 		antialias: true,
@@ -123,6 +127,9 @@ function initMapIntroSequence(map) {
 
 	map.scrollZoom.disable();
 
+	const vw = window.innerWidth;
+	const stageZoom = vw >= 1400 ? 14.55 : vw >= 1100 ? 14.2 : vw >= 800 ? 13.8 : 13.3;
+
 	let stage = 0;
 	let transitioning = false;
 
@@ -137,6 +144,7 @@ function initMapIntroSequence(map) {
 
 	const applyStage = () => {
 		if (stage === 0) {
+			// Stage 0: boundary outline only
 			setChecked('toggle-bounding', true);
 			setChecked('toggle-buildings', false);
 			setChecked('toggle-trees', false);
@@ -151,6 +159,20 @@ function initMapIntroSequence(map) {
 			return;
 		}
 
+		if (stage === 1) {
+			// Stage 1: contours + low-point heat — topography reading
+			setChecked('toggle-bounding', true);
+			setChecked('toggle-contours', true);
+			setChecked('toggle-heat', true);
+			setChecked('toggle-bioswale', false);
+			setChecked('toggle-flood', false);
+			setChecked('toggle-cso', false);
+			if (existingPanel) existingPanel.classList.add('active');
+			if (bioswalePanel) bioswalePanel.classList.remove('active');
+			return;
+		}
+
+		// Stage 2+: bioswale corridors revealed
 		setChecked('toggle-bounding', true);
 		setChecked('toggle-contours', true);
 		setChecked('toggle-heat', true);
@@ -168,13 +190,14 @@ function initMapIntroSequence(map) {
 		if (transitioning) return;
 
 		if (stage === 0) {
+			// First swipe: zoom in + tilt, reveal topography
 			transitioning = true;
 			stage = 1;
 			applyStage();
 			map.easeTo({
 				pitch: 0,
 				bearing: -40,
-				zoom: 14.55,
+				zoom: stageZoom,
 				duration: 1200,
 				easing: (t) => t * (2 - t),
 			});
@@ -182,6 +205,16 @@ function initMapIntroSequence(map) {
 			return;
 		}
 
+		if (stage === 1) {
+			// Second swipe: reveal bioswale corridors
+			transitioning = true;
+			stage = 2;
+			applyStage();
+			window.setTimeout(() => { transitioning = false; }, 800);
+			return;
+		}
+
+		// Stage 2+: free pan/rotate with scroll
 		const direction = event.deltaY > 0 ? -1 : 1;
 		const nextBearing = map.getBearing() + direction * 4;
 		map.easeTo({ pitch: 0, bearing: nextBearing, duration: 220 });
