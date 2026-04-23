@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,125 +5,90 @@
 	<title>Rewilding Gowanus</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-	<!-- Mapbox GL JS -->
 	<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
 	<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 	<link rel="stylesheet" href="/style.css" />
 	<link rel="stylesheet" href="/tree-info-panel.css" />
 </head>
-<body>
-	<nav class="top-bar">
-		<span class="brand">Rewilding Gowanus</span>
-		<span class="nav-links">
-			<a href="/index.html" class="nav-btn active">Map</a>
-			<a href="/site-plan.html" class="nav-btn">Site Plan</a>
-			<a href="/diagrams.html" class="nav-btn">Diagrams</a>
-			<a href="/flora-diagram.html" class="nav-btn">Flora</a>
-		</span>
-	</nav>
+<body class="map-page">
+	<div class="map-layout">
+		<nav class="top-bar map-top-bar">
+			<div class="map-top-left">
+				<span class="brand">Rewilding Gowanus</span>
+				<span class="nav-links">
+					<a href="/index.html" class="nav-btn active">Map</a>
+					<a href="/site-plan.html" class="nav-btn">Site Plan</a>
+					<a href="/diagrams.html" class="nav-btn">Diagrams</a>
+					<a href="/flora-diagram.html" class="nav-btn">Flora</a>
+				</span>
+			</div>
 
-	<div id="map"></div>
+			<div id="layer-panel" class="layer-toggle-row">
+				<p class="layer-panel-title">Layers</p>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-buildings" /><span class="layer-dot" style="background:#9aa3ae"></span><span>Buildings</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-trees" /><span class="layer-dot" style="background:#7aab6e"></span><span>Trees</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-park" /><span class="layer-dot" style="background:#4e7e5a"></span><span>Park / Site</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-contours" /><span class="layer-dot" style="background:#8e959f"></span><span>1ft Topo Contours</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-flood" /><span class="layer-dot" style="background:#8da8b3"></span><span>Flood Vulnerability</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-cso" /><span class="layer-dot" style="background:#c9863f"></span><span>CSO Outfalls</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-heat" /><span class="layer-dot" style="background:#7d8470"></span><span>Tree Heat Map</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-bioswale" /><span class="layer-dot" style="background:#6f8a78"></span><span>Bioswale Opportunities</span></label>
+				<label class="layer-toggle"><input type="checkbox" id="toggle-bounding" checked /><span class="layer-dot" style="background:#b26f57"></span><span>Gowanus Study Boundary</span></label>
+			</div>
 
-	<div id="sub-top-bar">
-		<div id="layer-panel">
-			<p class="layer-panel-title">Layers</p>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-buildings" />
-				<span class="layer-dot" style="background:#9aa3ae"></span>
-				<span>Buildings</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-trees" />
-				<span class="layer-dot" style="background:#7aab6e"></span>
-				<span>Trees</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-park" />
-				<span class="layer-dot" style="background:#4e7e5a"></span>
-				<span>Park / Site</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-contours" />
-				<span class="layer-dot" style="background:#8e959f"></span>
-				<span>1ft Topo Contours</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-flood" />
-				<span class="layer-dot" style="background:#8da8b3"></span>
-				<span>Flood Vulnerability</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-cso" />
-				<span class="layer-dot" style="background:#c9863f"></span>
-				<span>CSO Outfalls</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-heat" />
-				<span class="layer-dot" style="background:#7d8470"></span>
-				<span>Tree Heat Map</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-bioswale" />
-				<span class="layer-dot" style="background:#6f8a78"></span>
-				<span>Bioswale Opportunities</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-bounding" checked />
-				<span class="layer-dot" style="background:#b26f57"></span>
-				<span>Gowanus Study Boundary</span>
-			</label>
+			<div id="mode-toggle">
+				<label for="mode-plan"><input type="radio" id="mode-plan" name="mode" value="renderedPlan" checked>Rendered Plan</label>
+				<label for="mode-analysis"><input type="radio" id="mode-analysis" name="mode" value="analysis">Analysis</label>
+			</div>
+		</nav>
+
+		<div class="map-container">
+			<div id="map"></div>
+			<div id="legend" class="legend"></div>
+			<div id="map-tooltip"></div>
 		</div>
 
-		<div id="mode-toggle">
-			<label for="mode-plan"><input type="radio" id="mode-plan" name="mode" value="renderedPlan" checked>Rendered Plan</label>
-			<label for="mode-analysis"><input type="radio" id="mode-analysis" name="mode" value="analysis">Analysis</label>
-		</div>
+		<aside class="side-panel">
+			<div id="map-story-panels" aria-live="polite">
+				<section class="story-panel-group active" id="story-existing">
+					<article class="story-card">
+						<p class="story-eyebrow">Existing Size</p>
+						<h3>Gowanus Study Area</h3>
+						<p class="story-metric">2.79 km²</p>
+						<p class="story-note">Bounded site focus used for all clipped overlays and analysis layers.</p>
+					</article>
+					<article class="story-card">
+						<p class="story-eyebrow">History Snapshot</p>
+						<h3>Industrial Waterway Legacy</h3>
+						<p class="story-note">A dense, mixed-use district shaped by canal industry, fill, and evolving ecological pressures.</p>
+					</article>
+					<article class="story-card story-media-slot">
+						<p class="story-eyebrow">Image / SVG Slot</p>
+						<h3>Reference Board</h3>
+						<div class="story-media-frame">Drop archival image or SVG study diagram here</div>
+					</article>
+				</section>
+
+				<section class="story-panel-group" id="story-bioswale">
+					<article class="story-card">
+						<p class="story-eyebrow">Bioswale Layer</p>
+						<h3>Opportunity Corridors</h3>
+						<p class="story-note">Street-edge opportunities are shown with flood context and contour influence.</p>
+					</article>
+					<article class="story-card">
+						<p class="story-eyebrow">Layer Stack</p>
+						<h3>Heat + Topography + Flood</h3>
+						<p class="story-note">Tree heat map, 1ft contours, and flood polygons are staged together for siting review.</p>
+					</article>
+					<article class="story-card story-media-slot">
+						<p class="story-eyebrow">Image / SVG Slot</p>
+						<h3>Bioswale Detail Frame</h3>
+						<div class="story-media-frame">Use for bioswale section sketch or profile diagram</div>
+					</article>
+				</section>
+			</div>
+		</aside>
 	</div>
-
-	<div id="map-story-panels" aria-live="polite">
-		<section class="story-panel-group active" id="story-existing">
-			<article class="story-card">
-				<p class="story-eyebrow">Existing Size</p>
-				<h3>Gowanus Study Area</h3>
-				<p class="story-metric">2.79 km²</p>
-				<p class="story-note">Bounded site focus used for all clipped overlays and analysis layers.</p>
-			</article>
-			<article class="story-card">
-				<p class="story-eyebrow">History Snapshot</p>
-				<h3>Industrial Waterway Legacy</h3>
-				<p class="story-note">A dense, mixed-use district shaped by canal industry, fill, and evolving ecological pressures.</p>
-			</article>
-			<article class="story-card story-media-slot">
-				<p class="story-eyebrow">Image / SVG Slot</p>
-				<h3>Reference Board</h3>
-				<div class="story-media-frame">Drop archival image or SVG study diagram here</div>
-			</article>
-		</section>
-
-		<section class="story-panel-group" id="story-bioswale">
-			<article class="story-card">
-				<p class="story-eyebrow">Bioswale Layer</p>
-				<h3>Opportunity Corridors</h3>
-				<p class="story-note">Street-edge opportunities are shown with flood context and contour influence.</p>
-			</article>
-			<article class="story-card">
-				<p class="story-eyebrow">Layer Stack</p>
-				<h3>Heat + Topography + Flood</h3>
-				<p class="story-note">Tree heat map, 1ft contours, and flood polygons are staged together for siting review.</p>
-			</article>
-			<article class="story-card story-media-slot">
-				<p class="story-eyebrow">Image / SVG Slot</p>
-				<h3>Bioswale Detail Frame</h3>
-				<div class="story-media-frame">Use for bioswale section sketch or profile diagram</div>
-			</article>
-		</section>
-	</div>
-
-	<!-- Tree species legend -->
-	<div id="legend"></div>
-
-	<!-- Hover tooltip -->
-	<div id="map-tooltip"></div>
 
 	<script type="module" src="/main.js"></script>
 </body>
