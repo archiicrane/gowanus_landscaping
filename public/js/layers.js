@@ -487,7 +487,7 @@ export async function addFloodLayer(map) {
 		source: 'flood-vulnerability',
 		paint: {
 			'fill-color': '#8da8b3',
-			'fill-opacity': 0.26,
+			'fill-opacity': 0.10,
 		},
 		filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }],
 	});

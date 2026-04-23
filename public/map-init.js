@@ -131,14 +131,22 @@ function initMapIntroSequence(map) {
 			setChecked('toggle-buildings', false);
 			setChecked('toggle-trees', false);
 			setChecked('toggle-park', false);
-			toggleIds.forEach((id) => setChecked(id, false));
+			setChecked('toggle-flood', false);
+			setChecked('toggle-cso', false);
+			setChecked('toggle-heat', false);
+			setChecked('toggle-bioswale', false);
+			setChecked('toggle-contours', false);
 			if (existingPanel) existingPanel.classList.add('active');
 			if (bioswalePanel) bioswalePanel.classList.remove('active');
 			return;
 		}
 
 		setChecked('toggle-bounding', true);
-		toggleIds.forEach((id) => setChecked(id, true));
+		setChecked('toggle-contours', true);
+		setChecked('toggle-heat', true);
+		setChecked('toggle-bioswale', true);
+		setChecked('toggle-flood', false);
+		setChecked('toggle-cso', false);
 		if (existingPanel) existingPanel.classList.remove('active');
 		if (bioswalePanel) bioswalePanel.classList.add('active');
 	};
