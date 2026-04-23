@@ -42,6 +42,33 @@ function pointInStudyPolygon(point) {
 	return inside;
 }
 
+function polygonCentroid(ring) {
+	if (!Array.isArray(ring) || !ring.length) return null;
+	let x = 0;
+	let y = 0;
+	let n = 0;
+	for (const coord of ring) {
+		if (!Array.isArray(coord) || coord.length < 2) continue;
+		x += Number(coord[0]);
+		y += Number(coord[1]);
+		n += 1;
+	}
+	if (!n) return null;
+	return [x / n, y / n];
+}
+
+function floodFeatureToPoint(feature) {
+	const geom = feature?.geometry;
+	if (!geom) return null;
+	if (geom.type === 'Point') return geom.coordinates;
+	if (geom.type === 'Polygon') return polygonCentroid(geom.coordinates?.[0] || []);
+	if (geom.type === 'MultiPolygon') {
+		const firstRing = geom.coordinates?.[0]?.[0] || [];
+		return polygonCentroid(firstRing);
+	}
+	return null;
+}
+
 // Species → color mapping (architectural palette)
 const SPECIES_COLORS = [
 	['Kentucky coffeetree',    '#a3b18a'],
@@ -228,6 +255,143 @@ export async function addParkLayer(map) {
 				17, 1.5,
 			],
 			'line-opacity': 0.7,
+		},
+	});
+}
+
+export async function addStudyBoundaryLayer(map) {
+	const boundary = {
+		type: 'FeatureCollection',
+		features: [{
+			type: 'Feature',
+			properties: {},
+			geometry: { type: 'Polygon', coordinates: [STUDY_RING] },
+		}],
+	};
+
+	if (map.getSource('study-boundary')) map.removeSource('study-boundary');
+	map.addSource('study-boundary', { type: 'geojson', data: boundary });
+
+	map.addLayer({
+		id: 'study-boundary-fill',
+		type: 'fill',
+		source: 'study-boundary',
+		paint: {
+			'fill-color': '#d2a78f',
+			'fill-opacity': 0.1,
+		},
+	});
+
+	map.addLayer({
+		id: 'study-boundary-line',
+		type: 'line',
+		source: 'study-boundary',
+		paint: {
+			'line-color': '#b26f57',
+			'line-width': 2,
+			'line-opacity': 0.95,
+			'line-dasharray': [2, 1.4],
+		},
+	});
+}
+
+export async function addTreeHeatLayer(map) {
+	if (!map.getSource('trees')) return;
+	if (map.getLayer('trees-heatmap')) map.removeLayer('trees-heatmap');
+
+	map.addLayer({
+		id: 'trees-heatmap',
+		type: 'heatmap',
+		source: 'trees',
+		paint: {
+			'heatmap-intensity': [
+				'interpolate', ['linear'], ['zoom'],
+				12, 0.4,
+				16, 0.9,
+			],
+			'heatmap-weight': [
+				'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'dbh'], 0], 0],
+				0, 0.05,
+				40, 1,
+			],
+			'heatmap-radius': [
+				'interpolate', ['linear'], ['zoom'],
+				12, 16,
+				17, 32,
+			],
+			'heatmap-opacity': 0.58,
+			'heatmap-color': [
+				'interpolate', ['linear'], ['heatmap-density'],
+				0, 'rgba(250,247,241,0)',
+				0.25, 'rgba(171,184,160,0.26)',
+				0.5, 'rgba(141,156,132,0.42)',
+				0.75, 'rgba(111,131,112,0.62)',
+				1, 'rgba(95,120,96,0.78)',
+			],
+		},
+	});
+}
+
+export async function addBioswaleOpportunityLayer(map) {
+	let floodData;
+	try {
+		const res = await fetch('/data/flood-vulnerability.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		floodData = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load flood data for bioswale opportunities:', err);
+		return;
+	}
+
+	const points = [];
+	for (const feature of floodData.features || []) {
+		const coord = floodFeatureToPoint(feature);
+		if (!coord || !pointInStudyPolygon(coord)) continue;
+		points.push({
+			type: 'Feature',
+			properties: {
+				score: 1,
+				type: 'bioswale-opportunity',
+			},
+			geometry: { type: 'Point', coordinates: coord },
+		});
+	}
+
+	const limited = points.slice(0, 220);
+	const sourceData = { type: 'FeatureCollection', features: limited };
+
+	if (map.getSource('bioswale-opportunities')) map.removeSource('bioswale-opportunities');
+	map.addSource('bioswale-opportunities', { type: 'geojson', data: sourceData });
+
+	map.addLayer({
+		id: 'bioswale-opportunities-glow',
+		type: 'circle',
+		source: 'bioswale-opportunities',
+		paint: {
+			'circle-radius': [
+				'interpolate', ['linear'], ['zoom'],
+				12, 6,
+				17, 11,
+			],
+			'circle-color': '#8fae95',
+			'circle-opacity': 0.24,
+		},
+	});
+
+	map.addLayer({
+		id: 'bioswale-opportunities-core',
+		type: 'circle',
+		source: 'bioswale-opportunities',
+		paint: {
+			'circle-radius': [
+				'interpolate', ['linear'], ['zoom'],
+				12, 2,
+				17, 4,
+			],
+			'circle-color': '#6f8a78',
+			'circle-stroke-color': '#f1eee8',
+			'circle-stroke-width': 0.9,
+			'circle-opacity': 0.92,
 		},
 	});
 }

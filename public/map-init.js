@@ -5,9 +5,12 @@ import {
 	addBuildingLayer,
 	addTreeLayer,
 	addParkLayer,
+	addStudyBoundaryLayer,
 	addContourLayer,
 	addFloodLayer,
 	addCsoOutfallsLayer,
+	addTreeHeatLayer,
+	addBioswaleOpportunityLayer,
 } from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
 
@@ -35,10 +38,10 @@ export async function initMap() {
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
-		center: [-73.9895, 40.6745],
-		zoom: 15.25,
+		center: [-73.9895, 40.6748],
+		zoom: 13.95,
 		pitch: 0,
-		bearing: -42,
+		bearing: 0,
 		antialias: true,
 	});
 
@@ -51,11 +54,15 @@ export async function initMap() {
 		await addBuildingLayer(map);
 		await addTreeLayer(map);
 		await addParkLayer(map);
+		await addStudyBoundaryLayer(map);
 		await addContourLayer(map);
 		await addFloodLayer(map);
 		await addCsoOutfallsLayer(map);
+		await addTreeHeatLayer(map);
+		await addBioswaleOpportunityLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
+		initMapIntroSequence(map);
 	});
 
 	map.on('error', (e) => {
@@ -73,18 +80,92 @@ function wireLayerToggles(map) {
 		{ id: 'toggle-contours',  layers: ['contour-lines'] },
 		{ id: 'toggle-flood',     layers: ['flood-vulnerability-fill'] },
 		{ id: 'toggle-cso',       layers: ['cso-outfalls-circle'] },
+		{ id: 'toggle-heat',      layers: ['trees-heatmap'] },
+		{ id: 'toggle-bioswale',  layers: ['bioswale-opportunities-glow', 'bioswale-opportunities-core'] },
+		{ id: 'toggle-bounding',  layers: ['study-boundary-fill', 'study-boundary-line'] },
 	];
 
 	for (const { id, layers } of toggles) {
 		const el = document.getElementById(id);
 		if (!el) continue;
-		el.addEventListener('change', () => {
+		const applyVisibility = () => {
 			const vis = el.checked ? 'visible' : 'none';
 			for (const layerId of layers) {
 				if (map.getLayer(layerId)) {
 					map.setLayoutProperty(layerId, 'visibility', vis);
 				}
 			}
+		};
+		el.addEventListener('change', () => {
+			applyVisibility();
 		});
+		applyVisibility();
 	}
+}
+
+function initMapIntroSequence(map) {
+	const existingPanel = document.getElementById('story-existing');
+	const bioswalePanel = document.getElementById('story-bioswale');
+	const toggleIds = ['toggle-heat', 'toggle-contours', 'toggle-flood', 'toggle-bioswale'];
+
+	if (existingPanel) existingPanel.classList.add('active');
+	if (bioswalePanel) bioswalePanel.classList.remove('active');
+
+	map.scrollZoom.disable();
+
+	let stage = 0;
+	let transitioning = false;
+
+	const setChecked = (id, checked) => {
+		const input = document.getElementById(id);
+		if (!input) return;
+		if (input.checked !== checked) {
+			input.checked = checked;
+			input.dispatchEvent(new Event('change'));
+		}
+	};
+
+	const applyStage = () => {
+		if (stage === 0) {
+			setChecked('toggle-bounding', true);
+			setChecked('toggle-buildings', false);
+			setChecked('toggle-trees', false);
+			setChecked('toggle-park', false);
+			toggleIds.forEach((id) => setChecked(id, false));
+			if (existingPanel) existingPanel.classList.add('active');
+			if (bioswalePanel) bioswalePanel.classList.remove('active');
+			return;
+		}
+
+		setChecked('toggle-bounding', true);
+		toggleIds.forEach((id) => setChecked(id, true));
+		if (existingPanel) existingPanel.classList.remove('active');
+		if (bioswalePanel) bioswalePanel.classList.add('active');
+	};
+
+	applyStage();
+
+	map.getCanvas().addEventListener('wheel', (event) => {
+		event.preventDefault();
+		if (transitioning) return;
+
+		if (stage === 0) {
+			transitioning = true;
+			stage = 1;
+			applyStage();
+			map.easeTo({
+				pitch: 0,
+				bearing: -40,
+				zoom: 14.55,
+				duration: 1200,
+				easing: (t) => t * (2 - t),
+			});
+			window.setTimeout(() => { transitioning = false; }, 1250);
+			return;
+		}
+
+		const direction = event.deltaY > 0 ? -1 : 1;
+		const nextBearing = map.getBearing() + direction * 4;
+		map.easeTo({ pitch: 0, bearing: nextBearing, duration: 220 });
+	}, { passive: false });
 }

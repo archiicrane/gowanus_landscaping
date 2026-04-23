@@ -80,21 +80,37 @@ main {
 /* ---------- Map Page ---------- */
 #map {
   position: fixed;
-  top: 56px;
+  top: 104px;
   left: 0;
   right: 0;
   bottom: 0;
 }
 
-#mode-toggle {
+#sub-top-bar {
   position: fixed;
-  top: 72px;
-  right: 20px;
+  top: 56px;
+  left: 0;
+  width: 100%;
+  min-height: 48px;
   z-index: 2200;
-  background: rgba(246, 241, 233, 0.9);
+  background: rgba(246, 241, 233, 0.94);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 6px 16px;
+}
+
+#mode-toggle {
+  position: relative;
+  top: auto;
+  right: auto;
+  z-index: 2200;
+  background: transparent;
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 4px 8px;
   font-size: 12px;
   color: var(--ink-muted);
   display: flex;
@@ -107,24 +123,27 @@ main {
 }
 
 #layer-panel {
-  position: fixed;
-  top: 116px;
-  left: 20px;
+  position: relative;
   z-index: 2200;
-  width: 210px;
-  background: rgba(246, 241, 233, 0.93);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 8px 26px rgba(82, 69, 49, 0.12);
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow-x: auto;
 }
 
 .layer-panel-title {
-  margin: 0 0 8px 0;
+  margin: 0;
   font-size: 12px;
   font-weight: 600;
   color: #6e665b;
   letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
 
 .layer-toggle {
@@ -133,7 +152,80 @@ main {
   gap: 8px;
   font-size: 13px;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#map-story-panels {
+  position: fixed;
+  top: 124px;
+  right: 16px;
+  z-index: 2190;
+  width: min(33vw, 420px);
+  max-height: calc(100vh - 176px);
+  pointer-events: none;
+}
+
+.story-panel-group {
+  display: none;
+  gap: 10px;
+}
+
+.story-panel-group.active {
+  display: grid;
+}
+
+.story-card {
+  background: rgba(246, 241, 233, 0.95);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 22px rgba(82, 69, 49, 0.1);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.story-eyebrow {
+  margin: 0 0 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b8378;
+}
+
+.story-card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.story-metric {
+  margin: 0 0 4px;
+  font-size: 30px;
+  line-height: 1;
+  font-family: "Georgia", "Times New Roman", serif;
+}
+
+.story-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6a6258;
+}
+
+.story-media-slot .story-media-frame {
+  border: 1px dashed rgba(86, 73, 53, 0.3);
+  border-radius: 8px;
+  min-height: 86px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #877f74;
+  text-align: center;
+  padding: 10px;
 }
 
 .layer-dot {
@@ -597,20 +689,29 @@ main {
   }
 
   #mode-toggle {
-    top: 64px;
-    right: 12px;
+    top: auto;
+    right: auto;
     transform: scale(0.96);
-    transform-origin: top right;
+    transform-origin: center right;
   }
 
-  #layer-panel,
   #legend {
     width: min(44vw, 230px);
     left: 12px;
   }
 
-  #layer-panel {
-    top: 108px;
+  #sub-top-bar {
+    padding: 6px 10px;
+  }
+
+  #map {
+    top: 112px;
+  }
+
+  #map-story-panels {
+    width: min(42vw, 360px);
+    right: 10px;
+    top: 132px;
   }
 
   #legend {
@@ -651,11 +752,28 @@ main {
   }
 
   #mode-toggle {
-    top: auto;
-    right: 10px;
-    bottom: 12px;
+    transform: none;
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  #sub-top-bar {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    align-items: stretch;
+    min-height: 88px;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  #map {
+    top: 146px;
+  }
+
+  #map-story-panels {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    top: 156px;
+    max-height: calc(100vh - 220px);
   }
 }
