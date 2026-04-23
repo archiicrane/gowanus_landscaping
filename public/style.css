@@ -322,6 +322,23 @@ main {
 
 .chart-wrap {
   margin-top: 12px;
+  position: relative;
+  height: 260px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  font-family: "Georgia", serif;
+}
+
+.metric-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  line-height: 1.4;
 }
 
 .diagram-error {
