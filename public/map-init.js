@@ -27,11 +27,11 @@ export async function initMap() {
 
 	const map = new mapboxgl.Map({
 		container: 'map',
-		style: 'mapbox://styles/mapbox/dark-v11',
+		style: 'mapbox://styles/mapbox/light-v11',
 		center: [-73.9895, 40.6745],
-		zoom: 14.5,
-		pitch: 45,
-		bearing: -20,
+		zoom: 15.25,
+		pitch: 0,
+		bearing: -42,
 		antialias: true,
 	});
 
