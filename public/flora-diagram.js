@@ -65,6 +65,42 @@ const SANKEY_GROUP_COLORS = {
 let sankeyGraphIndex = null;
 let currentSankeySubgraph = null;
 
+const TOKEN_STOPWORDS = new Set([
+  'and', 'the', 'for', 'with', 'from', 'over', 'into', 'of', 'to',
+  'edge', 'core', 'conditions', 'process', 'connected', 'stable', 'cooler'
+]);
+
+const TOKEN_SYNONYMS = {
+  bird: ['birds'],
+  birds: ['bird'],
+  bee: ['bees', 'pollinator'],
+  bees: ['bee', 'pollinator'],
+  butterfly: ['butterflies', 'pollinator'],
+  butterflies: ['butterfly', 'pollinator'],
+  pollinator: ['pollination', 'bees', 'butterflies'],
+  pollination: ['pollinator'],
+  stormwater: ['water', 'wet'],
+  water: ['stormwater', 'wet'],
+  woodland: ['forest'],
+  forest: ['woodland'],
+  understory: ['shrub'],
+  shrub: ['understory']
+};
+
+const LAYER_TOKEN_MAP = {
+  canopy: ['canopy', 'tree'],
+  understory_tree: ['understory', 'shrub'],
+  shrub: ['shrub', 'understory'],
+  ground: ['ground', 'perennial', 'soil', 'stormwater', 'water'],
+  fauna: ['fauna', 'bird', 'bee', 'butterfly', 'amphibian', 'food', 'pollinator']
+};
+
+const BAND_TOKEN_MAP = {
+  wet: ['wet', 'stormwater', 'canal', 'flooding', 'soil', 'amphibian'],
+  woodland: ['woodland', 'forest', 'understory', 'shade'],
+  pollinator: ['pollinator', 'bee', 'butterfly', 'nectar', 'flower']
+};
+
 // ── CSV parser ────────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -116,6 +152,26 @@ function sizeClassFor(diagram_size) {
 
 function normalizeName(name) {
   return String(name || '').trim().toLowerCase();
+}
+
+function normalizeToken(token) {
+  let t = normalizeName(token).replace(/[^a-z0-9]/g, '');
+  if (t.endsWith('ies') && t.length > 4) t = `${t.slice(0, -3)}y`;
+  else if (t.endsWith('s') && t.length > 3) t = t.slice(0, -1);
+  return t;
+}
+
+function tokenizeText(text) {
+  const raw = normalizeName(text)
+    .split(/[^a-z0-9]+/)
+    .map(normalizeToken)
+    .filter((token) => token && !TOKEN_STOPWORDS.has(token));
+
+  const expanded = new Set(raw);
+  raw.forEach((token) => {
+    (TOKEN_SYNONYMS[token] || []).forEach((alias) => expanded.add(normalizeToken(alias)));
+  });
+  return expanded;
 }
 
 function getSpeciesSvgPath(name) {
@@ -480,12 +536,30 @@ function labelsFromSubgraph(subgraph, graphIndex) {
   return labels;
 }
 
-function matchesAnyLabel(text, labels) {
-  if (!text || !labels || !labels.size) return false;
-  for (const label of labels) {
-    if (label && text.includes(label)) return true;
+function buildSubgraphLexicon(subgraph, graphIndex) {
+  const labels = labelsFromSubgraph(subgraph, graphIndex);
+  const tokens = new Set();
+  labels.forEach((label) => {
+    tokenizeText(label).forEach((token) => tokens.add(token));
+  });
+  return { labels, tokens };
+}
+
+function matchesLexiconText(text, lexicon) {
+  if (!text || !lexicon) return false;
+  const normalized = normalizeName(text);
+  for (const label of lexicon.labels) {
+    if (label && normalized.includes(label)) return true;
+  }
+  const textTokens = tokenizeText(text);
+  for (const token of textTokens) {
+    if (lexicon.tokens.has(token)) return true;
   }
   return false;
+}
+
+function tokensMatchAny(tokens, candidates) {
+  return candidates.some((candidate) => tokens.has(normalizeToken(candidate)));
 }
 
 function clearFloraBoardHighlight() {
@@ -506,7 +580,7 @@ function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
     return;
   }
 
-  const labels = labelsFromSubgraph(subgraph, graphIndex);
+  const lexicon = buildSubgraphLexicon(subgraph, graphIndex);
   const rows = Array.from(wrap.querySelectorAll('.band-row'));
   const bandLabels = Array.from(wrap.querySelectorAll('.band-label-col'));
   const cols = Array.from(wrap.querySelectorAll('.layer-col'));
@@ -515,7 +589,9 @@ function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
   items.forEach((item) => {
     const speciesName = item.dataset.speciesName || '';
     const speciesRole = item.dataset.speciesRole || '';
-    const active = labels.has(speciesName) || matchesAnyLabel(speciesRole, labels);
+    const active =
+      matchesLexiconText(speciesName, lexicon) ||
+      matchesLexiconText(speciesRole, lexicon);
     item.classList.toggle('flora-active', active);
     item.classList.toggle('flora-dim', !active);
   });
@@ -524,7 +600,12 @@ function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
     const layerName = col.dataset.layerName || '';
     const layerKey = col.dataset.layerKey || '';
     const hasActiveItem = !!col.querySelector('.species-item.flora-active');
-    const active = hasActiveItem || labels.has(layerName) || labels.has(layerKey);
+    const layerTokens = LAYER_TOKEN_MAP[layerKey] || [];
+    const active =
+      hasActiveItem ||
+      matchesLexiconText(layerName, lexicon) ||
+      matchesLexiconText(layerKey, lexicon) ||
+      tokensMatchAny(lexicon.tokens, layerTokens);
     col.classList.toggle('flora-active', active);
     col.classList.toggle('flora-dim', !active);
   });
@@ -532,7 +613,15 @@ function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
   rows.forEach((row) => {
     const bandName = row.dataset.bandName || '';
     const hasActiveChild = !!row.querySelector('.layer-col.flora-active, .species-item.flora-active');
-    const active = hasActiveChild || labels.has(bandName);
+    const bandSlug = row.querySelector('.band-label-col')?.classList.contains('wet')
+      ? 'wet'
+      : row.querySelector('.band-label-col')?.classList.contains('woodland')
+        ? 'woodland'
+        : 'pollinator';
+    const active =
+      hasActiveChild ||
+      matchesLexiconText(bandName, lexicon) ||
+      tokensMatchAny(lexicon.tokens, BAND_TOKEN_MAP[bandSlug] || []);
     row.classList.toggle('flora-active', active);
     row.classList.toggle('flora-dim', !active);
   });
@@ -540,7 +629,7 @@ function applyFloraBoardHighlightFromSubgraph(subgraph, graphIndex) {
   bandLabels.forEach((label) => {
     const bandName = label.dataset.bandName || '';
     const row = label.closest('.band-row');
-    const active = labels.has(bandName) || !!row?.classList.contains('flora-active');
+    const active = matchesLexiconText(bandName, lexicon) || !!row?.classList.contains('flora-active');
     label.classList.toggle('flora-active', active);
     label.classList.toggle('flora-dim', !active);
   });

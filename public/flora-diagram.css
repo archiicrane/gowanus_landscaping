@@ -172,7 +172,7 @@
 .sankey-node.is-dim rect,
 .sankey-link.is-dim,
 .sankey-label.is-dim {
-  opacity: 0.14;
+  opacity: 0.28;
 }
 
 .sankey-node.is-active rect {
@@ -183,7 +183,7 @@
 
 .sankey-link.is-active {
   opacity: 1;
-  stroke-opacity: 0.74;
+  stroke-opacity: 0.88;
 }
 
 .sankey-label.is-active {
@@ -417,7 +417,7 @@
 .band-label-col.flora-dim,
 .layer-col.flora-dim,
 .species-item.flora-dim {
-  opacity: 0.2;
+  opacity: 0.44;
 }
 
 .band-row.flora-active,
@@ -425,6 +425,19 @@
 .layer-col.flora-active,
 .species-item.flora-active {
   opacity: 1;
+}
+
+.band-row.flora-active {
+  border-color: rgba(86,73,53,0.24);
+}
+
+.layer-col.flora-active .layer-heading {
+  color: #4f473e;
+  border-bottom-color: rgba(86,73,53,0.24);
+}
+
+.species-item.flora-active .species-name {
+  color: #2f2a24;
 }
 
 @keyframes fadeIn {
