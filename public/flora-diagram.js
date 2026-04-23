@@ -39,6 +39,24 @@ const SPECIES_SVG_MAP = {
   'eastern redcedar': '/assets/species/eastern-redcedar.svg',
 };
 
+const FAUNA_TEST_SVGS = [
+  '/assets/fauna/Northern Mockingbird.svg',
+  '/assets/fauna/Yellow Warbler.svg'
+];
+
+const FAUNA_SVG_MAP = {
+  gull: '/assets/fauna/Northern Mockingbird.svg',
+  sparrow: '/assets/fauna/Northern Mockingbird.svg',
+  pigeon: '/assets/fauna/Northern Mockingbird.svg',
+  songbird: '/assets/fauna/Northern Mockingbird.svg',
+  'red-winged blackbird': '/assets/fauna/Northern Mockingbird.svg',
+  bee: '/assets/fauna/Yellow Warbler.svg',
+  'native bee': '/assets/fauna/Yellow Warbler.svg',
+  butterfly: '/assets/fauna/Yellow Warbler.svg',
+  'monarch butterfly': '/assets/fauna/Yellow Warbler.svg',
+  dragonfly: '/assets/fauna/Yellow Warbler.svg'
+};
+
 const SPECIES_BOARD_ITEMS = [
   { name: 'Bald Cypress', path: '/assets/species/bald-cypress.svg' },
   { name: 'Serviceberry', path: '/assets/species/serviceberry.svg' },
@@ -174,8 +192,26 @@ function tokenizeText(text) {
   return expanded;
 }
 
-function getSpeciesSvgPath(name) {
-  return SPECIES_SVG_MAP[normalizeName(name)] || null;
+function faunaFallbackSvgPath(name) {
+  const normalized = normalizeName(name);
+  if (!FAUNA_TEST_SVGS.length) return null;
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i += 1) {
+    hash = (hash + normalized.charCodeAt(i)) % FAUNA_TEST_SVGS.length;
+  }
+  return FAUNA_TEST_SVGS[hash];
+}
+
+function getSpeciesSvgPath(name, options = {}) {
+  const normalized = normalizeName(name);
+  const direct = SPECIES_SVG_MAP[normalized];
+  if (direct) return direct;
+
+  if (options.isFauna) {
+    return FAUNA_SVG_MAP[normalized] || faunaFallbackSvgPath(normalized);
+  }
+
+  return null;
 }
 
 function speciesSvgThumb(path, alt) {
@@ -279,7 +315,7 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
       'lc-fauna',
       sizeClassFor(item.diagram_size),
       extra,
-      getSpeciesSvgPath(item.name)
+      getSpeciesSvgPath(item.name, { isFauna: true })
     );
     if (item.status === 'target_fauna') si.classList.add('target-fauna');
     faunaCol.appendChild(si);
@@ -344,7 +380,10 @@ function buildGrowthSpeciesItem(item) {
   si.dataset.speciesName = normalizeName(item.name);
   si.dataset.speciesRole = normalizeName(item.notes || item.visual_change || '');
   si.appendChild(speciesSymbol(layerCls, sizeCls));
-  const thumb = speciesSvgThumb(getSpeciesSvgPath(item.name), `${capitalise(item.name)} silhouette`);
+  const thumb = speciesSvgThumb(
+    getSpeciesSvgPath(item.name, { isFauna: item.category === 'fauna' }),
+    `${capitalise(item.name)} silhouette`
+  );
   if (thumb) si.appendChild(thumb);
   const info = el('div', 'species-info');
   const nm = el('span', 'species-name'); nm.textContent = capitalise(item.name);
