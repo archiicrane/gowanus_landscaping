@@ -80,4 +80,33 @@ export function setupMapHandlers(map) {
 			.setHTML(html)
 			.addTo(map);
 	});
+
+	// ─── CSO Outfalls: hover + popup ─────────────────────────────────────────
+	map.on('mouseenter', 'cso-outfalls-circle', () => {
+		map.getCanvas().style.cursor = 'pointer';
+	});
+
+	map.on('mouseleave', 'cso-outfalls-circle', () => {
+		map.getCanvas().style.cursor = '';
+	});
+
+	map.on('click', 'cso-outfalls-circle', (e) => {
+		const props = e.features[0]?.properties || {};
+		const id = props.id || props.OBJECTID || props.FID || '—';
+		const name = props.name || props.NAME || props.outfall || props.OUTFALL || 'CSO Outfall';
+
+		const html = `
+			<div class="popup-inner">
+				<p class="popup-title">CSO Outfall</p>
+				<table class="popup-table">
+					<tr><td>Name</td><td>${name}</td></tr>
+					<tr><td>ID</td><td>${id}</td></tr>
+				</table>
+			</div>`;
+
+		new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+			.setLngLat(e.lngLat)
+			.setHTML(html)
+			.addTo(map);
+	});
 }

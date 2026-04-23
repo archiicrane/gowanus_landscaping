@@ -1,7 +1,14 @@
 // map-init.js — Creates and exports the Mapbox map instance
 
 import { resolveMapboxToken } from '/js/token.js';
-import { addBuildingLayer, addTreeLayer, addParkLayer } from '/js/layers.js';
+import {
+	addBuildingLayer,
+	addTreeLayer,
+	addParkLayer,
+	addContourLayer,
+	addFloodLayer,
+	addCsoOutfallsLayer,
+} from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
 
 export async function initMap() {
@@ -40,10 +47,13 @@ export async function initMap() {
 	map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
 	map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
-	map.on('load', () => {
-		addBuildingLayer(map);
-		addTreeLayer(map);
-		addParkLayer(map);
+	map.on('load', async () => {
+		await addBuildingLayer(map);
+		await addTreeLayer(map);
+		await addParkLayer(map);
+		await addContourLayer(map);
+		await addFloodLayer(map);
+		await addCsoOutfallsLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
 	});
@@ -60,6 +70,9 @@ function wireLayerToggles(map) {
 		{ id: 'toggle-buildings', layers: ['buildings-extrusion'] },
 		{ id: 'toggle-trees',     layers: ['trees-circles', 'trees-labels'] },
 		{ id: 'toggle-park',      layers: ['park-outline'] },
+		{ id: 'toggle-contours',  layers: ['contour-lines'] },
+		{ id: 'toggle-flood',     layers: ['flood-vulnerability-fill'] },
+		{ id: 'toggle-cso',       layers: ['cso-outfalls-circle'] },
 	];
 
 	for (const { id, layers } of toggles) {

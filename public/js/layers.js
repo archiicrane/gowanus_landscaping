@@ -10,6 +10,37 @@
 //   trees-circles
 //   trees-labels
 //   park-outline
+//   contour-lines
+//   flood-vulnerability-fill
+//   cso-outfalls-circle
+
+const STUDY_RING = [
+	[-73.98963594611494, 40.683945676183654],
+	[-73.98084416376932, 40.680669969224006],
+	[-73.98368161027763, 40.67628724578089],
+	[-73.99274143083169, 40.665495232798115],
+	[-73.99607305804426, 40.667988596328655],
+	[-73.99889524234268, 40.67260255106102],
+	[-73.9964465299067, 40.67744610487334],
+	[-73.99461997552936, 40.67663528353369],
+	[-73.98963594611494, 40.683945676183654],
+];
+
+function pointInStudyPolygon(point) {
+	const x = point[0];
+	const y = point[1];
+	let inside = false;
+	for (let i = 0, j = STUDY_RING.length - 1; i < STUDY_RING.length; j = i++) {
+		const xi = STUDY_RING[i][0];
+		const yi = STUDY_RING[i][1];
+		const xj = STUDY_RING[j][0];
+		const yj = STUDY_RING[j][1];
+		const intersects = ((yi > y) !== (yj > y))
+			&& (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+		if (intersects) inside = !inside;
+	}
+	return inside;
+}
 
 // Species → color mapping (architectural palette)
 const SPECIES_COLORS = [
@@ -197,6 +228,109 @@ export async function addParkLayer(map) {
 				17, 1.5,
 			],
 			'line-opacity': 0.7,
+		},
+	});
+}
+
+// ─── 1ft Contours ───────────────────────────────────────────────────────────
+
+export async function addContourLayer(map) {
+	let data;
+	try {
+		const res = await fetch('/data/con_lines_gowanus_clipped.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		data = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load clipped contour lines:', err);
+		return;
+	}
+
+	if (map.getSource('contour-lines')) map.removeSource('contour-lines');
+	map.addSource('contour-lines', { type: 'geojson', data });
+
+	map.addLayer({
+		id: 'contour-lines',
+		type: 'line',
+		source: 'contour-lines',
+		layout: { 'line-join': 'round', 'line-cap': 'round' },
+		paint: {
+			'line-color': '#8e959f',
+			'line-width': [
+				'case',
+				['==', ['%', ['round', ['coalesce', ['get', 'ELEV'], 0]], 5], 0], 1.1,
+				0.6,
+			],
+			'line-opacity': 0.72,
+		},
+		filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }],
+	});
+}
+
+// ─── Flood Vulnerability ───────────────────────────────────────────────────
+
+export async function addFloodLayer(map) {
+	let data;
+	try {
+		const res = await fetch('/data/flood-vulnerability.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		data = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load flood vulnerability layer:', err);
+		return;
+	}
+
+	if (map.getSource('flood-vulnerability')) map.removeSource('flood-vulnerability');
+	map.addSource('flood-vulnerability', { type: 'geojson', data });
+
+	map.addLayer({
+		id: 'flood-vulnerability-fill',
+		type: 'fill',
+		source: 'flood-vulnerability',
+		paint: {
+			'fill-color': '#8da8b3',
+			'fill-opacity': 0.26,
+		},
+		filter: ['within', { type: 'Polygon', coordinates: [STUDY_RING] }],
+	});
+}
+
+// ─── CSO Outfalls (clipped from citywide) ─────────────────────────────────
+
+export async function addCsoOutfallsLayer(map) {
+	let citywide;
+	try {
+		const res = await fetch('/data/Citywide_Outfalls_20260416.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		citywide = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load CSO outfalls:', err);
+		return;
+	}
+
+	const features = (citywide.features || []).filter((f) => {
+		if (f?.geometry?.type !== 'Point') return false;
+		return pointInStudyPolygon(f.geometry.coordinates);
+	});
+
+	const clipped = { type: 'FeatureCollection', features };
+
+	if (map.getSource('cso-outfalls')) map.removeSource('cso-outfalls');
+	map.addSource('cso-outfalls', { type: 'geojson', data: clipped });
+
+	map.addLayer({
+		id: 'cso-outfalls-circle',
+		type: 'circle',
+		source: 'cso-outfalls',
+		paint: {
+			'circle-radius': [
+				'interpolate', ['linear'], ['zoom'],
+				13, 4,
+				17, 7,
+			],
+			'circle-color': '#c9863f',
+			'circle-stroke-width': 1.5,
+			'circle-stroke-color': '#f6f3ee',
+			'circle-opacity': 0.95,
 		},
 	});
 }
