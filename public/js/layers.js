@@ -353,12 +353,22 @@ export async function addTopographyHeatLayer(map) {
 	// Use circle layer instead of heatmap — heatmap density saturates to one
 	// color when points are dense. Circles colored directly by elev value give
 	// a reliable red (high) → purple (low) gradient across the study area.
-	const elevRange = sourceData.features.length
-		? (() => {
-			const elevs = sourceData.features.map(f => f.properties.elev);
-			return { min: Math.min(...elevs), max: Math.max(...elevs) };
-		})()
-		: { min: 0, max: 10 };
+	// Use reduce instead of spread to avoid stack overflow on large arrays.
+	let elevMin = Infinity, elevMax = -Infinity;
+	for (const f of sourceData.features) {
+		const e = f.properties.elev;
+		if (e < elevMin) elevMin = e;
+		if (e > elevMax) elevMax = e;
+	}
+	if (!sourceData.features.length) { elevMin = 0; elevMax = 10; }
+	const elevSpanQ = Math.max(elevMax - elevMin, 1);
+	const elevRange = {
+		min:  elevMin,
+		q25:  elevMin + elevSpanQ * 0.25,
+		q50:  elevMin + elevSpanQ * 0.50,
+		q75:  elevMin + elevSpanQ * 0.75,
+		max:  elevMax,
+	};
 
 	map.addLayer({
 		id: 'topography-heatmap',
@@ -374,11 +384,11 @@ export async function addTopographyHeatLayer(map) {
 			'circle-opacity': 0.55,
 			'circle-color': [
 				'interpolate', ['linear'], ['get', 'elev'],
-				elevRange.min,       'rgba(50,0,115,1)',   // lowest → purple
-				elevRange.min + (elevRange.max - elevRange.min) * 0.25, 'rgba(110,20,165,1)',
-				elevRange.min + (elevRange.max - elevRange.min) * 0.50, 'rgba(175,30,110,1)',
-				elevRange.min + (elevRange.max - elevRange.min) * 0.75, 'rgba(215,48,30,1)',
-				elevRange.max,       'rgba(215,80,20,1)',  // highest → red
+				elevRange.min,  'rgba(50,0,115,1)',    // lowest → deep purple
+				elevRange.q25,  'rgba(110,20,165,1)',  // mid-low → purple
+				elevRange.q50,  'rgba(175,30,110,1)',  // mid → magenta
+				elevRange.q75,  'rgba(215,48,30,1)',   // mid-high → red-orange
+				elevRange.max,  'rgba(215,80,20,1)',   // highest → red
 			],
 		},
 	});
