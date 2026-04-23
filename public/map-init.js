@@ -6,6 +6,7 @@ import {
 	addTreeLayer,
 	addParkLayer,
 	addStudyBoundaryLayer,
+	addStudyClipMask,
 	addContourLayer,
 	addFloodLayer,
 	addCsoOutfallsLayer,
@@ -51,14 +52,23 @@ export async function initMap() {
 	map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 	map.on('load', async () => {
+		// Hide road name labels from Mapbox basemap
+		for (const layer of map.getStyle().layers) {
+			if (layer.type === 'symbol' && layer['source-layer'] === 'road') {
+				map.setLayoutProperty(layer.id, 'visibility', 'none');
+			}
+		}
+
+		// Data layers — heatmap first so the clip mask can sit on top of it
 		await addBuildingLayer(map);
 		await addTreeLayer(map);
 		await addParkLayer(map);
-		await addStudyBoundaryLayer(map);
+		await addTopographyHeatLayer(map);
+		addStudyClipMask(map);           // clips heatmap bleed at the boundary
+		await addStudyBoundaryLayer(map); // boundary line sits above the mask
 		await addContourLayer(map);
 		await addFloodLayer(map);
 		await addCsoOutfallsLayer(map);
-		await addTopographyHeatLayer(map);
 		await addBioswaleOpportunityLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);

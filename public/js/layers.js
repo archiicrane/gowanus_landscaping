@@ -366,16 +366,51 @@ export async function addTopographyHeatLayer(map) {
 				12, 18,
 				17, 34,
 			],
-			'heatmap-opacity': 0.68,
+			'heatmap-opacity': 0.72,
 			'heatmap-color': [
 				'interpolate', ['linear'], ['heatmap-density'],
-				0, 'rgba(250,247,241,0)',
-				0.2, 'rgba(196,214,206,0.2)',
-				0.42, 'rgba(145,174,160,0.34)',
-				0.65, 'rgba(108,138,123,0.54)',
-				0.82, 'rgba(84,110,96,0.68)',
-				1, 'rgba(60,83,72,0.82)',
+				0,    'rgba(0,0,0,0)',
+				0.12, 'rgba(200,45,35,0.08)',
+				0.30, 'rgba(215,48,30,0.38)',
+				0.52, 'rgba(175,30,110,0.56)',
+				0.72, 'rgba(110,20,165,0.70)',
+				0.88, 'rgba(75,10,145,0.78)',
+				1,    'rgba(50,0,115,0.85)',
 			],
+		},
+	});
+}
+
+// ─── Study area clip mask (hides heatmap bleed outside boundary) ────────────
+
+export function addStudyClipMask(map) {
+	// Inverted polygon: world box minus study ring = masks everything outside boundary
+	const outerRing = [
+		[-180, -85.051], [180, -85.051], [180, 85.051], [-180, 85.051], [-180, -85.051],
+	];
+	// Hole must be clockwise (reverse of the counterclockwise exterior ring)
+	const holeRing = [...STUDY_RING].reverse();
+
+	const maskData = {
+		type: 'FeatureCollection',
+		features: [{
+			type: 'Feature',
+			properties: {},
+			geometry: { type: 'Polygon', coordinates: [outerRing, holeRing] },
+		}],
+	};
+
+	if (map.getLayer('study-clip-mask')) map.removeLayer('study-clip-mask');
+	if (map.getSource('study-clip-mask')) map.removeSource('study-clip-mask');
+
+	map.addSource('study-clip-mask', { type: 'geojson', data: maskData });
+	map.addLayer({
+		id: 'study-clip-mask',
+		type: 'fill',
+		source: 'study-clip-mask',
+		paint: {
+			'fill-color': '#ece7df',
+			'fill-opacity': 0.84,
 		},
 	});
 }
