@@ -14,7 +14,7 @@
 //   flood-vulnerability-fill
 //   cso-outfalls-circle
 
-const STUDY_RING = [
+export const STUDY_RING = [
 	[-73.98963594611494, 40.683945676183654],
 	[-73.98084416376932, 40.680669969224006],
 	[-73.98368161027763, 40.67628724578089],

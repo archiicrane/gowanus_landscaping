@@ -5,6 +5,7 @@ import {
 	addBuildingLayer,
 	addTreeLayer,
 	addParkLayer,
+	STUDY_RING,
 	addStudyBoundaryLayer,
 	addStudyClipMask,
 	addContourLayer,
@@ -36,15 +37,17 @@ export async function initMap() {
 
 	mapboxgl.accessToken = token;
 
-	// Responsive initial zoom: smaller screens zoom in less so the full boundary fits
-	const vw = window.innerWidth;
-	const initialZoom = vw >= 1400 ? 13.95 : vw >= 1100 ? 13.6 : vw >= 800 ? 13.2 : 12.7;
+	const initialPadding = getInitialFitPadding();
+	const studyBounds = getStudyBounds(STUDY_RING);
 
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
-		center: [-73.9895, 40.6748],
-		zoom: initialZoom,
+		bounds: studyBounds,
+		fitBoundsOptions: {
+			padding: initialPadding,
+			maxZoom: 14.45,
+		},
 		pitch: 0,
 		bearing: 0,
 		antialias: true,
@@ -127,8 +130,7 @@ function initMapIntroSequence(map) {
 
 	map.scrollZoom.disable();
 
-	const vw = window.innerWidth;
-	const stageZoom = vw >= 1400 ? 14.55 : vw >= 1100 ? 14.2 : vw >= 800 ? 13.8 : 13.3;
+	const stageZoom = Math.min(15.1, map.getZoom() + 0.95);
 
 	let stage = 0;
 	let transitioning = false;
@@ -219,4 +221,46 @@ function initMapIntroSequence(map) {
 		const nextBearing = map.getBearing() + direction * 4;
 		map.easeTo({ pitch: 0, bearing: nextBearing, duration: 220 });
 	}, { passive: false });
+}
+
+function getStudyBounds(ring) {
+	let minLng = Infinity;
+	let minLat = Infinity;
+	let maxLng = -Infinity;
+	let maxLat = -Infinity;
+
+	for (const [lng, lat] of ring) {
+		if (lng < minLng) minLng = lng;
+		if (lng > maxLng) maxLng = lng;
+		if (lat < minLat) minLat = lat;
+		if (lat > maxLat) maxLat = lat;
+	}
+
+	return [
+		[minLng, minLat],
+		[maxLng, maxLat],
+	];
+}
+
+function getInitialFitPadding() {
+	const vw = window.innerWidth;
+	const vh = window.innerHeight;
+	const storyPanels = document.getElementById('map-story-panels');
+	const rightPanelWidth = storyPanels ? Math.ceil(storyPanels.getBoundingClientRect().width) : 0;
+
+	if (vw <= 800) {
+		return {
+			top: Math.max(76, Math.round(vh * 0.12)),
+			right: 20,
+			bottom: Math.max(34, Math.round(vh * 0.11)),
+			left: 20,
+		};
+	}
+
+	return {
+		top: 94,
+		right: Math.max(42, rightPanelWidth + 28),
+		bottom: 42,
+		left: 42,
+	};
 }
