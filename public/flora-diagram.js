@@ -1,21 +1,30 @@
-/* flora-diagram.js
-   Data sources unchanged:
-     baseline  — gowanus_existing_flora_fauna.csv
-     proposed  — gowanus_proposed_flora_fauna.csv
-     growth    — gowanus_growth_timeline.csv
-   Only the visual representation is architectural / board-like.
+﻿/* flora-diagram.js
+   Renders the Flora & Fauna diagram in three modes:
+     baseline  — reads gowanus_existing_flora_fauna.csv
+     proposed  — reads gowanus_proposed_flora_fauna.csv
+     growth    — reads gowanus_growth_timeline.csv (with year sub-tabs)
 */
 
+// ── Constants ─────────────────────────────────────────────────────────────
+
 const BANDS = [
-  { key: 'Wet Edge', slug: 'wet', subtitle: 'Tidal margin · stormwater edge' },
-  { key: 'Woodland Core', slug: 'woodland', subtitle: 'Interior canopy · understory structure' },
-  { key: 'Pollinator Edge', slug: 'pollinator', subtitle: 'Open edge · flowering corridor' },
+  { key: 'Wet Edge',       slug: 'wet',         subtitle: 'Tidal margin · stormwater edge' },
+  { key: 'Woodland Core',  slug: 'woodland',     subtitle: 'Interior canopy · understory structure' },
+  { key: 'Pollinator Edge',slug: 'pollinator',   subtitle: 'Open edge · flowering corridor' },
 ];
 
+const LAYERS = [
+  { key: 'canopy',          label: 'Canopy' },
+  { key: 'understory_tree', label: 'Understory Tree' },
+  { key: 'shrub',           label: 'Shrub Layer' },
+  { key: 'ground',          label: 'Ground / Perennial' },
+];
+
+// fauna rendered inside ground column as separate section
 const SIZE_MAP = {
-  small: 'sz-small',
+  small:  'sz-small',
   medium: 'sz-medium',
-  large: 'sz-large',
+  large:  'sz-large',
   xlarge: 'sz-xlarge',
 };
 
@@ -30,31 +39,13 @@ const SPECIES_SVG_MAP = {
   'eastern redcedar': '/assets/species/eastern-redcedar.svg',
 };
 
-const SPECIES_BOARD_LANES = [
-  {
-    title: 'Canopy',
-    items: [
-      { name: 'Bald Cypress', path: '/assets/species/bald-cypress.svg', className: 'canopy' },
-      { name: 'Northern Red Oak', path: '/assets/species/northern-red-oak.svg', className: 'canopy' },
-      { name: 'Black Gum', path: '/assets/species/black-gum.svg', className: 'canopy' },
-      { name: 'Sweetgum', path: '/assets/species/sweetgum.svg', className: 'canopy' },
-    ]
-  },
-  {
-    title: 'Midstory',
-    items: [
-      { name: 'Serviceberry', path: '/assets/species/serviceberry.svg', className: 'midstory' },
-      { name: 'Eastern Redcedar', path: '/assets/species/eastern-redcedar.svg', className: 'midstory' },
-    ]
-  },
-  {
-    title: 'Groundcover',
-    items: [
-      { name: 'Milkweed', path: '/assets/species/serviceberry.svg', className: 'ground' },
-      { name: 'Bee Balm', path: '/assets/species/serviceberry.svg', className: 'ground' },
-      { name: 'Soft Rush', path: '/assets/species/serviceberry.svg', className: 'ground' },
-    ]
-  }
+const SPECIES_BOARD_ITEMS = [
+  { name: 'Bald Cypress', path: '/assets/species/bald-cypress.svg' },
+  { name: 'Serviceberry', path: '/assets/species/serviceberry.svg' },
+  { name: 'Northern Red Oak', path: '/assets/species/northern-red-oak.svg' },
+  { name: 'Black Gum', path: '/assets/species/black-gum.svg' },
+  { name: 'Sweetgum', path: '/assets/species/sweetgum.svg' },
+  { name: 'Eastern Redcedar', path: '/assets/species/eastern-redcedar.svg' },
 ];
 
 const SANKEY_GROUP_COLORS = {
@@ -71,15 +62,15 @@ const SANKEY_GROUP_COLORS = {
   outcome: '#6c806e',
 };
 
+// ── CSV parser ────────────────────────────────────────────────────────────
+
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  const headers = lines[0].split(',').map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const vals = line.split(',').map((v) => v.trim());
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
     const row = {};
-    headers.forEach((h, i) => {
-      row[h] = vals[i] || '';
-    });
+    headers.forEach((h, i) => { row[h] = vals[i] || ''; });
     return row;
   });
 }
@@ -90,16 +81,34 @@ async function loadCSV(path) {
   return parseCSV(await res.text());
 }
 
+// ── Rendering helpers ─────────────────────────────────────────────────────
+
 function el(tag, cls, attrs = {}) {
-  const node = document.createElement(tag);
-  if (cls) node.className = cls;
-  Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
-  return node;
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  return e;
 }
 
-function capitalise(value) {
-  const text = String(value || '');
-  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+function speciesSymbol(layerClass, sizeClass) {
+  const s = el('span', `species-symbol ${layerClass} ${sizeClass}`);
+  return s;
+}
+
+function layerClassFor(canopy_class) {
+  const map = {
+    canopy: 'lc-canopy',
+    understory_tree: 'lc-understory-tree',
+    understory: 'lc-shrub',
+    shrub: 'lc-shrub',
+    ground: 'lc-ground',
+    fauna: 'lc-fauna',
+  };
+  return map[canopy_class] || 'lc-ground';
+}
+
+function sizeClassFor(diagram_size) {
+  return SIZE_MAP[diagram_size] || 'sz-small';
 }
 
 function normalizeName(name) {
@@ -110,215 +119,250 @@ function getSpeciesSvgPath(name) {
   return SPECIES_SVG_MAP[normalizeName(name)] || null;
 }
 
-function sizeClassFor(size) {
-  return SIZE_MAP[size] || 'sz-small';
+function speciesSvgThumb(path, alt) {
+  if (!path) return null;
+  const frame = el('span', 'species-svg-thumb');
+  const img = el('img', '', { src: path, alt: alt || '' });
+  frame.appendChild(img);
+  return frame;
 }
 
-function layerClassFor(layer) {
-  const map = {
-    canopy: 'lc-canopy',
-    understory_tree: 'lc-understory-tree',
-    understory: 'lc-understory-tree',
-    shrub: 'lc-understory-tree',
-    ground: 'lc-ground',
-    fauna: 'lc-fauna',
-  };
-  return map[layer] || 'lc-ground';
-}
-
-function speciesHead(layerCls, sizeCls, name, svgPath) {
-  const head = el('div', 'species-head');
-
-  if (svgPath) {
-    const thumb = el('span', 'species-svg-thumb');
-    const img = el('img', '', { src: svgPath, alt: `${capitalise(name)} silhouette` });
-    thumb.appendChild(img);
-    head.appendChild(thumb);
-  } else {
-    head.appendChild(el('span', `species-symbol ${layerCls} ${sizeCls}`));
-  }
-
-  return head;
-}
-
-function buildSpeciesItem(item, options = {}) {
-  const { role, layerCls, sizeCls, extraText, svgPath } = options;
-  const node = el('div', 'species-item');
-  if (item.status === 'target_fauna') node.classList.add('target-fauna');
-
-  node.appendChild(speciesHead(layerCls, sizeCls, item.name, svgPath));
-
+function buildSpeciesItem(name, role, layerCls, sizeCls, extra, svgPath = null) {
+  const item = el('div', 'species-item');
+  item.appendChild(speciesSymbol(layerCls, sizeCls));
+  const thumb = speciesSvgThumb(svgPath, `${capitalise(name)} silhouette`);
+  if (thumb) item.appendChild(thumb);
   const info = el('div', 'species-info');
-  const name = el('span', 'species-name');
-  name.textContent = capitalise(item.name);
-  info.appendChild(name);
-
+  const nm = el('span', 'species-name');
+  nm.textContent = capitalise(name);
+  info.appendChild(nm);
   if (role) {
-    const roleNode = el('span', 'species-role');
-    roleNode.textContent = role;
-    info.appendChild(roleNode);
+    const r = el('span', 'species-role');
+    r.textContent = role;
+    info.appendChild(r);
   }
-
-  if (extraText) {
-    const extra = el('span', options.extraClass || 'phase-badge');
-    extra.textContent = extraText;
-    info.appendChild(extra);
-  }
-
-  node.appendChild(info);
-  return node;
+  if (extra) info.appendChild(extra);
+  item.appendChild(info);
+  return item;
 }
 
-function buildLayerLane(title, items) {
-  const lane = el('div', 'layer-lane');
-  const heading = el('p', 'layer-heading');
-  heading.textContent = title;
-  lane.appendChild(heading);
-
-  const row = el('div', 'layer-species-row');
-  items.forEach((item) => row.appendChild(item));
-  lane.appendChild(row);
-  return lane;
+function phaseBadge(phase) {
+  if (!phase) return null;
+  const cls = phase === 'phase_1' ? 'phase-badge ph1' :
+              phase === 'phase_2' ? 'phase-badge ph2' : 'phase-badge ph3';
+  const b = el('span', cls);
+  b.textContent = phase.replace('_', ' ');
+  return b;
 }
 
-function mapRowsToLanes(rows, showPhase = false) {
-  const canopy = [];
-  const midstory = [];
-  const ground = [];
-  const fauna = [];
+function capitalise(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
-  rows.forEach((item) => {
-    const layerCls = layerClassFor(item.canopy_class || item.category);
-    const sizeCls = sizeClassFor(item.diagram_size || item.future_size);
-    const extraText = showPhase && item.phase
-      ? item.phase.replace('_', ' ')
-      : item.visual_change
-        ? item.visual_change.replace(/_/g, ' ')
-        : '';
+// ── Band row builder ───────────────────────────────────────────────────────
 
-    const built = buildSpeciesItem(item, {
-      role: item.ecological_role || item.notes || '',
-      layerCls,
-      sizeCls,
-      extraText,
-      extraClass: item.phase ? 'phase-badge' : 'growth-role-badge',
-      svgPath: getSpeciesSvgPath(item.name)
+function buildBandRow(band, layerData, faunaData, showPhase = false) {
+  const row = el('div', 'band-row');
+
+  // Label column
+  const lc = el('div', `band-label-col ${band.slug}`);
+  const name = el('p', 'band-name'); name.textContent = band.key;
+  const sub  = el('p', 'band-subtitle'); sub.textContent = band.subtitle;
+  lc.appendChild(name);
+  lc.appendChild(sub);
+  row.appendChild(lc);
+
+  // Content grid — 4 layer columns + fauna
+  const content = el('div', 'band-content');
+  content.style.gridTemplateColumns = 'repeat(4, 1fr) 1fr';
+
+  LAYERS.forEach(layer => {
+    const col = el('div', 'layer-col');
+    const hd = el('p', 'layer-heading'); hd.textContent = layer.label;
+    col.appendChild(hd);
+
+    const items = layerData[layer.key] || [];
+    items.forEach(item => {
+      const extra = showPhase ? phaseBadge(item.phase) : null;
+      const isFauna = false;
+      const si = buildSpeciesItem(
+        item.name,
+        item.ecological_role,
+        layerClassFor(item.canopy_class || layer.key),
+        sizeClassFor(item.diagram_size),
+        extra,
+        getSpeciesSvgPath(item.name)
+      );
+      if (item.status === 'target_fauna') si.classList.add('target-fauna');
+      col.appendChild(si);
     });
 
-    if (item.category === 'fauna' || item.canopy_class === 'fauna') {
-      fauna.push(built);
-    } else if (item.canopy_class === 'canopy' || item.category === 'tree') {
-      canopy.push(built);
-    } else if (item.canopy_class === 'understory_tree' || item.canopy_class === 'understory' || item.category === 'shrub') {
-      midstory.push(built);
-    } else {
-      ground.push(built);
-    }
+    content.appendChild(col);
   });
 
-  return { canopy, midstory, ground, fauna };
+  // Fauna column
+  const faunaCol = el('div', 'layer-col');
+  const fhd = el('p', 'layer-heading'); fhd.textContent = 'Fauna';
+  faunaCol.appendChild(fhd);
+  faunaData.forEach(item => {
+    const extra = showPhase ? phaseBadge(item.phase) : null;
+    const si = buildSpeciesItem(
+      item.name,
+      item.ecological_role,
+      'lc-fauna',
+      sizeClassFor(item.diagram_size),
+      extra,
+      getSpeciesSvgPath(item.name)
+    );
+    if (item.status === 'target_fauna') si.classList.add('target-fauna');
+    faunaCol.appendChild(si);
+  });
+  content.appendChild(faunaCol);
+
+  row.appendChild(content);
+  return row;
 }
 
-function buildBandBoard(band, laneItems, growthNote = '') {
-  const section = el('section', 'flora-band-board');
-  const labelCol = el('div', `band-label-col ${band.slug}`);
-
-  const name = el('p', 'band-name');
-  name.textContent = band.key;
-  labelCol.appendChild(name);
-
-  const subtitle = el('p', growthNote ? 'growth-year-note' : 'band-subtitle');
-  subtitle.textContent = growthNote || band.subtitle;
-  labelCol.appendChild(subtitle);
-
-  const field = el('div', 'flora-band-field');
-  field.appendChild(buildLayerLane('Canopy', laneItems.canopy));
-  field.appendChild(buildLayerLane('Midstory', laneItems.midstory));
-  field.appendChild(buildLayerLane('Groundcover', laneItems.ground));
-  field.appendChild(buildLayerLane('Fauna / Pollinators', laneItems.fauna));
-
-  section.appendChild(labelCol);
-  section.appendChild(field);
-  return section;
-}
+// ── Mode: Baseline ────────────────────────────────────────────────────────
 
 function renderBaseline(rows, container) {
   container.innerHTML = '';
-  BANDS.forEach((band) => {
-    const bandRows = rows.filter((row) => row.zone === band.key);
-    const lanes = mapRowsToLanes(bandRows, false);
-    container.appendChild(buildBandBoard(band, lanes));
+  BANDS.forEach(band => {
+    const bandRows = rows.filter(r => r.zone === band.key);
+    const layerData = {};
+    LAYERS.forEach(l => {
+      layerData[l.key] = bandRows.filter(r =>
+        r.category !== 'fauna' && (
+          r.canopy_class === l.key ||
+          (l.key === 'shrub' && r.canopy_class === 'understory') ||
+          (l.key === 'understory_tree' && r.canopy_class === 'understory_tree')
+        )
+      );
+    });
+    const faunaData = bandRows.filter(r => r.category === 'fauna');
+    container.appendChild(buildBandRow(band, layerData, faunaData, false));
   });
 }
 
+// ── Mode: Proposed ────────────────────────────────────────────────────────
+
 function renderProposed(rows, container) {
   container.innerHTML = '';
-  BANDS.forEach((band) => {
-    const bandRows = rows.filter((row) => row.zone === band.key);
-    const lanes = mapRowsToLanes(bandRows, true);
-    container.appendChild(buildBandBoard(band, lanes));
+  BANDS.forEach(band => {
+    const bandRows = rows.filter(r => r.zone === band.key);
+    const layerData = {};
+    LAYERS.forEach(l => {
+      layerData[l.key] = bandRows.filter(r =>
+        r.category !== 'fauna' && (
+          r.canopy_class === l.key ||
+          (l.key === 'shrub' && r.canopy_class === 'understory') ||
+          (l.key === 'understory_tree' && r.canopy_class === 'understory_tree')
+        )
+      );
+    });
+    const faunaData = bandRows.filter(r => r.category === 'fauna');
+    container.appendChild(buildBandRow(band, layerData, faunaData, true));
   });
+}
+
+// ── Mode: Growth ──────────────────────────────────────────────────────────
+
+function buildGrowthSpeciesItem(item) {
+  const sizeCls = sizeClassFor(item.future_size);
+  const layerCls = item.category === 'fauna' ? 'lc-fauna' :
+                   item.category === 'tree'  ? 'lc-canopy' :
+                   item.category === 'shrub' ? 'lc-shrub'  : 'lc-ground';
+
+  const si = el('div', 'species-item');
+  si.appendChild(speciesSymbol(layerCls, sizeCls));
+  const thumb = speciesSvgThumb(getSpeciesSvgPath(item.name), `${capitalise(item.name)} silhouette`);
+  if (thumb) si.appendChild(thumb);
+  const info = el('div', 'species-info');
+  const nm = el('span', 'species-name'); nm.textContent = capitalise(item.name);
+  const role = el('span', 'species-role'); role.textContent = item.notes || '';
+  const badge = el('span', 'growth-role-badge');
+  badge.textContent = (item.visual_change || '').replace(/_/g, ' ');
+  info.appendChild(nm);
+  info.appendChild(role);
+  info.appendChild(badge);
+  si.appendChild(info);
+  return si;
 }
 
 function renderGrowth(rows, yearRange, container) {
   container.innerHTML = '';
-  const yearRows = rows.filter((row) => row.year_range === yearRange);
+  const yearRows = rows.filter(r => r.year_range === yearRange);
 
-  BANDS.forEach((band) => {
-    const bandRows = yearRows.filter((row) => row.zone === band.key);
+  BANDS.forEach(band => {
+    const bandRows = yearRows.filter(r => r.zone === band.key);
     if (!bandRows.length) return;
-    const lanes = mapRowsToLanes(bandRows, false);
-    container.appendChild(buildBandBoard(band, lanes, `Year ${yearRange}`));
+
+    const row = el('div', 'band-row');
+
+    const lc = el('div', `band-label-col ${band.slug}`);
+    const nm = el('p', 'band-name'); nm.textContent = band.key;
+    const yr = el('p', 'growth-year-note'); yr.textContent = `Year ${yearRange}`;
+    lc.appendChild(nm);
+    lc.appendChild(yr);
+    row.appendChild(lc);
+
+    const content = el('div', 'band-content');
+    content.style.gridTemplateColumns = 'repeat(auto-fill, minmax(160px, 1fr))';
+
+    bandRows.forEach(item => {
+      const col = el('div', 'layer-col');
+      col.appendChild(buildGrowthSpeciesItem(item));
+      content.appendChild(col);
+    });
+
+    row.appendChild(content);
+    container.appendChild(row);
   });
 
   if (!container.children.length) {
     const note = el('p', 'flora-intro');
     note.textContent = `No data for ${yearRange} year range.`;
+    note.style.marginTop = '16px';
     container.appendChild(note);
   }
 }
 
+// ── Tab wiring ────────────────────────────────────────────────────────────
+
 function setActiveTab(tabs, active) {
-  tabs.forEach((tab) => {
-    const selected = tab === active;
-    tab.classList.toggle('active', selected);
-    tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+  tabs.forEach(t => {
+    t.classList.toggle('active', t === active);
+    t.setAttribute('aria-selected', t === active ? 'true' : 'false');
   });
 }
 
 function renderSpeciesBoard(currentMode) {
   const board = document.getElementById('species-board-grid');
-  const wrap = board?.closest('.species-board');
-  if (!board || !wrap) return;
+  const boardWrap = board?.closest('.species-board');
+  if (!board || !boardWrap) return;
 
-  wrap.style.display = currentMode === 'baseline' ? 'none' : 'block';
+  // Keep SVG board focused on proposed/growth views.
+  boardWrap.style.display = currentMode === 'baseline' ? 'none' : 'block';
   board.innerHTML = '';
 
-  SPECIES_BOARD_LANES.forEach((lane) => {
-    const laneEl = el('section', 'species-lane');
-    const title = el('p', 'species-lane-title');
-    title.textContent = lane.title;
-    laneEl.appendChild(title);
-
-    const field = el('div', 'species-lane-field');
-    lane.items.forEach((item) => {
-      const itemEl = el('div', `species-lane-item ${item.className}`);
-      const img = el('img', '', { src: item.path, alt: `${item.name} silhouette` });
-      const label = el('span', 'species-lane-label');
-      label.textContent = item.name;
-      itemEl.appendChild(img);
-      itemEl.appendChild(label);
-      field.appendChild(itemEl);
-    });
-
-    laneEl.appendChild(field);
-    board.appendChild(laneEl);
+  SPECIES_BOARD_ITEMS.forEach((item) => {
+    const card = el('article', 'species-card');
+    const fig = el('div', 'species-figure');
+    const img = el('img', '', { src: item.path, alt: `${item.name} silhouette` });
+    fig.appendChild(img);
+    const name = el('p', 'species-card-name');
+    name.textContent = item.name;
+    card.appendChild(fig);
+    card.appendChild(name);
+    board.appendChild(card);
   });
 }
 
 function hexToRgba(hex, alpha) {
   const clean = hex.replace('#', '');
-  const value = clean.length === 3 ? clean.split('').map((ch) => ch + ch).join('') : clean;
+  const value = clean.length === 3
+    ? clean.split('').map((ch) => ch + ch).join('')
+    : clean;
   const num = Number.parseInt(value, 16);
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
@@ -327,12 +371,14 @@ function hexToRgba(hex, alpha) {
 }
 
 function nodeColor(group) {
-  return SANKEY_GROUP_COLORS[group] || '#7a736b';
+  return SANKEY_GROUP_COLORS[group] || '#8a8074';
 }
 
 async function loadProposalSankeyData() {
   const res = await fetch('/data/proposal_sankey.json');
-  if (!res.ok) throw new Error(`Sankey data load failed: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(`Sankey data load failed: ${res.status}`);
+  }
   return res.json();
 }
 
@@ -340,8 +386,8 @@ function drawProposalSankey(svgEl, rawData) {
   if (!svgEl || !window.d3 || !window.d3.sankey) return;
 
   const container = svgEl.parentElement;
-  const width = Math.max(980, container.clientWidth - 4);
-  const height = Math.max(460, Math.min(680, width * 0.42));
+  const width = Math.max(960, container.clientWidth - 4);
+  const height = Math.max(460, Math.min(700, width * 0.44));
   const margin = { top: 20, right: 130, bottom: 18, left: 130 };
 
   svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -350,31 +396,32 @@ function drawProposalSankey(svgEl, rawData) {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
 
-  const nodeById = new Map(rawData.nodes.map((node) => [node.id, { ...node }]));
-  const nodes = rawData.nodes.map((node) => ({ ...node }));
-  const links = rawData.links.map((link) => {
-    const sourceNode = nodeById.get(link.source);
+  const nodeById = new Map(rawData.nodes.map((n) => [n.id, { ...n }]));
+  const nodes = rawData.nodes.map((n) => ({ ...n }));
+  const links = rawData.links.map((l) => {
+    const sourceNode = nodeById.get(l.source);
     return {
-      ...link,
-      color: hexToRgba(nodeColor(sourceNode?.group), 0.34)
+      ...l,
+      color: hexToRgba(nodeColor(sourceNode?.group), 0.42),
     };
   });
 
   const sankey = d3.sankey()
     .nodeId((d) => d.id)
-    .nodeWidth(12)
-    .nodePadding(24)
+    .nodeWidth(14)
+    .nodePadding(22)
     .nodeSort((a, b) => d3.ascending(a.label, b.label))
     .linkSort((a, b) => b.value - a.value)
     .extent([
       [margin.left, margin.top],
-      [width - margin.right, height - margin.bottom]
+      [width - margin.right, height - margin.bottom],
     ])
     .iterations(48);
 
+  // Lock nodes to explicit columns for strong left-to-right structure.
   const graph = {
-    nodes: nodes.map((node) => ({ ...node, layer: node.column })),
-    links: links.map((link) => ({ ...link }))
+    nodes: nodes.map((n) => ({ ...n, layer: n.column })),
+    links: links.map((l) => ({ ...l })),
   };
 
   sankey(graph);
@@ -382,6 +429,7 @@ function drawProposalSankey(svgEl, rawData) {
   const linkPath = d3.sankeyLinkHorizontal();
 
   svg.append('g')
+    .attr('fill', 'none')
     .selectAll('path')
     .data(graph.links)
     .join('path')
@@ -420,18 +468,20 @@ async function initProposalSankey() {
     drawProposalSankey(svg, data);
 
     let raf = null;
-    const observer = new ResizeObserver(() => {
+    const ro = new ResizeObserver(() => {
       if (raf) cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => drawProposalSankey(svg, data));
     });
-    observer.observe(svg.parentElement);
-  } catch (error) {
+    ro.observe(svg.parentElement);
+  } catch (err) {
     const frame = svg.parentElement;
     if (frame) {
-      frame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${error.message}</p>`;
+      frame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
     }
   }
 }
+
+// ── Init ──────────────────────────────────────────────────────────────────
 
 async function init() {
   initProposalSankey();
@@ -443,27 +493,25 @@ async function init() {
 
   let baselineData = null;
   let proposedData = null;
-  let growthData = null;
-  let currentMode = 'baseline';
-  let currentYear = '0-2';
+  let growthData   = null;
+  let currentMode  = 'baseline';
+  let currentYear  = '0-2';
 
   async function getBaseline() {
     if (!baselineData) baselineData = await loadCSV('/data/gowanus_existing_flora_fauna.csv');
     return baselineData;
   }
-
   async function getProposed() {
     if (!proposedData) proposedData = await loadCSV('/data/gowanus_proposed_flora_fauna.csv');
     return proposedData;
   }
-
   async function getGrowth() {
     if (!growthData) growthData = await loadCSV('/data/gowanus_growth_timeline.csv');
     return growthData;
   }
 
   async function render() {
-    wrap.style.opacity = '0.5';
+    wrap.style.opacity = '0.4';
     try {
       if (currentMode === 'baseline') {
         renderBaseline(await getBaseline(), wrap);
@@ -472,15 +520,14 @@ async function init() {
       } else {
         renderGrowth(await getGrowth(), currentYear, wrap);
       }
-    } catch (error) {
-      wrap.innerHTML = `<p style="color:#7e2a18;padding:16px;">Error loading diagram data: ${error.message}</p>`;
+    } catch (e) {
+      wrap.innerHTML = `<p style="color:#7e2a18;padding:16px;">Error loading diagram data: ${e.message}</p>`;
     }
-
     renderSpeciesBoard(currentMode);
     wrap.style.opacity = '1';
   }
 
-  modeTabs.forEach((tab) => {
+  modeTabs.forEach(tab => {
     tab.addEventListener('click', async () => {
       currentMode = tab.dataset.mode;
       setActiveTab(modeTabs, tab);
@@ -489,7 +536,7 @@ async function init() {
     });
   });
 
-  timeTabs.forEach((tab) => {
+  timeTabs.forEach(tab => {
     tab.addEventListener('click', async () => {
       currentYear = tab.dataset.year;
       setActiveTab(timeTabs, tab);
