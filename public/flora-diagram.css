@@ -71,6 +71,58 @@
   padding: 10px;
 }
 
+.proposal-sankey-ribbon-frame {
+  width: 100%;
+  min-height: 154px;
+  border: 1px solid rgba(86,73,53,0.16);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.74);
+  padding: 10px 12px 8px;
+  margin-bottom: 12px;
+}
+
+.sankey-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sankey-toolbar-note {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8e8579;
+}
+
+.sankey-reset-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: #6f665a;
+  border-radius: 8px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.sankey-reset-btn:hover {
+  background: rgba(86,73,53,0.08);
+  border-color: rgba(86,73,53,0.28);
+  color: #4f4538;
+}
+
+#proposalSankeyRibbonSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
 #proposalSankeySvg {
   width: 100%;
   height: auto;
@@ -82,12 +134,14 @@
   stroke: rgba(47,42,36,0.55);
   stroke-width: 1;
   rx: 1.5;
+  transition: opacity 160ms ease, stroke-width 160ms ease, filter 160ms ease;
 }
 
 .sankey-link {
   fill: none;
   stroke-opacity: 0.45;
   mix-blend-mode: multiply;
+  transition: opacity 160ms ease, stroke-opacity 160ms ease;
 }
 
 .sankey-label {
@@ -97,6 +151,43 @@
   paint-order: stroke;
   stroke: rgba(246,241,233,0.9);
   stroke-width: 3px;
+  transition: opacity 160ms ease;
+}
+
+.sankey-ribbon .sankey-label {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  fill: #5d554b;
+  stroke: rgba(250,247,241,0.95);
+}
+
+.sankey-ribbon .sankey-link {
+  stroke-opacity: 0.34;
+}
+
+.sankey-ribbon .sankey-node rect {
+  stroke-width: 0.9;
+}
+
+.sankey-node.is-dim rect,
+.sankey-link.is-dim,
+.sankey-label.is-dim {
+  opacity: 0.14;
+}
+
+.sankey-node.is-active rect {
+  opacity: 1;
+  stroke-width: 1.6;
+  filter: saturate(0.9) contrast(1.05);
+}
+
+.sankey-link.is-active {
+  opacity: 1;
+  stroke-opacity: 0.74;
+}
+
+.sankey-label.is-active {
+  opacity: 1;
 }
 
 /* ── Mode tabs ──────────────────────────────────────────────────────────── */
@@ -496,6 +587,19 @@
     padding: 8px;
   }
 
+  .proposal-sankey-ribbon-frame {
+    min-height: 142px;
+    padding: 8px 10px 7px;
+  }
+
+  .sankey-toolbar {
+    margin-bottom: 6px;
+  }
+
+  .sankey-toolbar-note {
+    font-size: 10px;
+  }
+
   .species-board-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -516,6 +620,17 @@
   .proposal-sankey-frame {
     min-height: 420px;
     padding: 6px;
+  }
+
+  .proposal-sankey-ribbon-frame {
+    min-height: 132px;
+    padding: 7px 8px 6px;
+  }
+
+  .sankey-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 
   .sankey-label {

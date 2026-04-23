@@ -36,14 +36,20 @@
     <section class="proposal-sankey" aria-labelledby="proposalSankeyTitle">
       <div class="proposal-sankey-head">
         <p class="eyebrow">Proposal Logic</p>
-        <h2 id="proposalSankeyTitle">Our Proposal: Ecological Relationship Sankey</h2>
+        <h2 id="proposalSankeyTitle">Ecological Relationship System</h2>
         <p class="proposal-sankey-intro">
-          Left-to-right logic from site proposal bands to planting layers, ecological interactions,
-          and resulting environmental outcomes.
+          Top ribbon provides a quick systems read. The detailed Sankey below supports full chain tracing.
         </p>
       </div>
+      <div class="proposal-sankey-ribbon-frame">
+        <div class="sankey-toolbar">
+          <p class="sankey-toolbar-note">Hover to preview relationships. Click to lock selection.</p>
+          <button id="sankeyResetBtn" class="sankey-reset-btn" type="button">Reset Highlight</button>
+        </div>
+        <svg id="proposalSankeyRibbonSvg" role="img" aria-label="Overview relationship ribbon Sankey"></svg>
+      </div>
       <div class="proposal-sankey-frame">
-        <svg id="proposalSankeySvg" role="img" aria-label="Proposal Sankey diagram"></svg>
+        <svg id="proposalSankeySvg" role="img" aria-label="Detailed proposal Sankey diagram"></svg>
       </div>
     </section>
 

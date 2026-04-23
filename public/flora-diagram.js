@@ -382,101 +382,330 @@ async function loadProposalSankeyData() {
   return res.json();
 }
 
-function drawProposalSankey(svgEl, rawData) {
-  if (!svgEl || !window.d3 || !window.d3.sankey) return;
+function buildGraphIndex(rawData) {
+  const nodes = rawData.nodes.map((node) => ({ ...node }));
+  const links = rawData.links.map((link, idx) => {
+    const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+    const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+    return {
+      ...link,
+      source: sourceId,
+      target: targetId,
+      linkId: `link-${idx}-${sourceId}-${targetId}`
+    };
+  });
+
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const linkById = new Map(links.map((link) => [link.linkId, link]));
+  const outgoing = new Map(nodes.map((node) => [node.id, []]));
+  const incoming = new Map(nodes.map((node) => [node.id, []]));
+
+  links.forEach((link) => {
+    outgoing.get(link.source)?.push(link.linkId);
+    incoming.get(link.target)?.push(link.linkId);
+  });
+
+  return { nodes, links, nodeById, linkById, outgoing, incoming };
+}
+
+function getConnectedSubgraph(selection, graphIndex) {
+  if (!selection) {
+    return { nodeIds: new Set(), linkIds: new Set() };
+  }
+
+  const seedNodes = new Set();
+  const seedLinks = new Set();
+
+  if (selection.type === 'node') {
+    seedNodes.add(selection.nodeId);
+  } else if (selection.type === 'link') {
+    const link = graphIndex.linkById.get(selection.linkId);
+    if (link) {
+      seedLinks.add(link.linkId);
+      seedNodes.add(link.source);
+      seedNodes.add(link.target);
+    }
+  }
+
+  const nodeIds = new Set(seedNodes);
+  const linkIds = new Set(seedLinks);
+
+  // Traverse both upstream and downstream to collect the full relationship chain.
+  const queue = Array.from(seedNodes);
+  while (queue.length) {
+    const nodeId = queue.shift();
+    const outgoing = graphIndex.outgoing.get(nodeId) || [];
+    const incoming = graphIndex.incoming.get(nodeId) || [];
+
+    [...outgoing, ...incoming].forEach((linkId) => {
+      if (!linkIds.has(linkId)) linkIds.add(linkId);
+      const link = graphIndex.linkById.get(linkId);
+      if (!link) return;
+
+      if (!nodeIds.has(link.source)) {
+        nodeIds.add(link.source);
+        queue.push(link.source);
+      }
+      if (!nodeIds.has(link.target)) {
+        nodeIds.add(link.target);
+        queue.push(link.target);
+      }
+    });
+  }
+
+  return { nodeIds, linkIds };
+}
+
+function applyHighlightState(selection, views, graphIndex) {
+  const { nodeIds, linkIds } = getConnectedSubgraph(selection, graphIndex);
+  const hasSelection = nodeIds.size > 0 || linkIds.size > 0;
+
+  views.forEach((view) => {
+    if (!view) return;
+
+    view.nodeSelection
+      .classed('is-active', (d) => hasSelection && nodeIds.has(d.id))
+      .classed('is-dim', (d) => hasSelection && !nodeIds.has(d.id));
+
+    view.linkSelection
+      .classed('is-active', (d) => hasSelection && linkIds.has(d.linkId))
+      .classed('is-dim', (d) => hasSelection && !linkIds.has(d.linkId));
+
+    view.labelSelection
+      .classed('is-active', (d) => hasSelection && nodeIds.has(d.id))
+      .classed('is-dim', (d) => hasSelection && !nodeIds.has(d.id));
+  });
+}
+
+function clearHighlightState(views) {
+  views.forEach((view) => {
+    if (!view) return;
+    view.nodeSelection.classed('is-active', false).classed('is-dim', false);
+    view.linkSelection.classed('is-active', false).classed('is-dim', false);
+    view.labelSelection.classed('is-active', false).classed('is-dim', false);
+  });
+}
+
+function createSankeyGraph(rawData, nodeWidth, nodePadding) {
+  const nodeById = new Map(rawData.nodes.map((node) => [node.id, { ...node }]));
+  return {
+    nodes: rawData.nodes.map((node) => ({ ...node, layer: node.column })),
+    links: rawData.links.map((link, idx) => {
+      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+      const sourceNode = nodeById.get(sourceId);
+      return {
+        ...link,
+        source: sourceId,
+        target: typeof link.target === 'string' ? link.target : link.target.id,
+        linkId: `link-${idx}-${sourceId}-${typeof link.target === 'string' ? link.target : link.target.id}`,
+        color: hexToRgba(nodeColor(sourceNode?.group), 0.42),
+        nodeWidth,
+        nodePadding
+      };
+    })
+  };
+}
+
+function renderSankey(svgEl, rawData, config) {
+  if (!svgEl || !window.d3 || !window.d3.sankey) return null;
 
   const container = svgEl.parentElement;
-  const width = Math.max(960, container.clientWidth - 4);
-  const height = Math.max(460, Math.min(700, width * 0.44));
-  const margin = { top: 20, right: 130, bottom: 18, left: 130 };
+  const width = Math.max(config.minWidth, container.clientWidth - 2);
+  const height = Math.max(config.minHeight, Math.min(config.maxHeight, width * config.heightRatio));
 
   svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
   svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
-
-  const nodeById = new Map(rawData.nodes.map((n) => [n.id, { ...n }]));
-  const nodes = rawData.nodes.map((n) => ({ ...n }));
-  const links = rawData.links.map((l) => {
-    const sourceNode = nodeById.get(l.source);
-    return {
-      ...l,
-      color: hexToRgba(nodeColor(sourceNode?.group), 0.42),
-    };
-  });
+  svg.classed('sankey-ribbon', config.ribbon);
 
   const sankey = d3.sankey()
     .nodeId((d) => d.id)
-    .nodeWidth(14)
-    .nodePadding(22)
+    .nodeWidth(config.nodeWidth)
+    .nodePadding(config.nodePadding)
     .nodeSort((a, b) => d3.ascending(a.label, b.label))
     .linkSort((a, b) => b.value - a.value)
     .extent([
-      [margin.left, margin.top],
-      [width - margin.right, height - margin.bottom],
+      [config.margin.left, config.margin.top],
+      [width - config.margin.right, height - config.margin.bottom]
     ])
-    .iterations(48);
+    .iterations(config.iterations);
 
-  // Lock nodes to explicit columns for strong left-to-right structure.
-  const graph = {
-    nodes: nodes.map((n) => ({ ...n, layer: n.column })),
-    links: links.map((l) => ({ ...l })),
-  };
-
+  const graph = createSankeyGraph(rawData, config.nodeWidth, config.nodePadding);
   sankey(graph);
 
   const linkPath = d3.sankeyLinkHorizontal();
 
-  svg.append('g')
+  const linkSelection = svg.append('g')
     .attr('fill', 'none')
     .selectAll('path')
     .data(graph.links)
     .join('path')
     .attr('class', 'sankey-link')
+    .attr('data-link-id', (d) => d.linkId)
     .attr('d', linkPath)
     .attr('stroke', (d) => d.color)
-    .attr('stroke-width', (d) => Math.max(1, d.width));
+    .attr('stroke-width', (d) => Math.max(config.ribbon ? 0.8 : 1, d.width));
 
-  const node = svg.append('g')
+  const nodeSelection = svg.append('g')
     .selectAll('g')
     .data(graph.nodes)
     .join('g')
-    .attr('class', 'sankey-node');
+    .attr('class', 'sankey-node')
+    .attr('data-node-id', (d) => d.id);
 
-  node.append('rect')
+  nodeSelection.append('rect')
     .attr('x', (d) => d.x0)
     .attr('y', (d) => d.y0)
     .attr('height', (d) => Math.max(1, d.y1 - d.y0))
     .attr('width', (d) => d.x1 - d.x0)
     .attr('fill', (d) => nodeColor(d.group));
 
-  node.append('text')
+  const labelSelection = nodeSelection.append('text')
     .attr('class', 'sankey-label')
+    .attr('data-node-id', (d) => d.id)
     .attr('x', (d) => (d.x0 < width * 0.56 ? d.x1 + 8 : d.x0 - 8))
     .attr('y', (d) => (d.y0 + d.y1) / 2)
     .attr('text-anchor', (d) => (d.x0 < width * 0.56 ? 'start' : 'end'))
     .text((d) => d.label);
+
+  if (config.ribbon) {
+    labelSelection
+      .attr('opacity', (d) => (d.column % 2 === 0 ? 1 : 0.7))
+      .attr('dy', 0);
+  }
+
+  return { svg, nodeSelection, linkSelection, labelSelection };
+}
+
+function bindSankeyInteractions(views, graphIndex) {
+  const state = {
+    lockedSelection: null,
+    hoverSelection: null
+  };
+
+  function equalSelection(a, b) {
+    if (!a || !b) return false;
+    if (a.type !== b.type) return false;
+    if (a.type === 'node') return a.nodeId === b.nodeId;
+    return a.linkId === b.linkId;
+  }
+
+  function currentSelection() {
+    return state.lockedSelection || state.hoverSelection;
+  }
+
+  function refresh() {
+    const selection = currentSelection();
+    if (!selection) {
+      clearHighlightState(views);
+      return;
+    }
+    applyHighlightState(selection, views, graphIndex);
+  }
+
+  function setHover(selection) {
+    if (state.lockedSelection) return;
+    state.hoverSelection = selection;
+    refresh();
+  }
+
+  function clearHover() {
+    if (state.lockedSelection) return;
+    state.hoverSelection = null;
+    refresh();
+  }
+
+  function toggleLock(selection) {
+    if (equalSelection(state.lockedSelection, selection)) {
+      state.lockedSelection = null;
+    } else {
+      state.lockedSelection = selection;
+      state.hoverSelection = null;
+    }
+    refresh();
+  }
+
+  const resetBtn = document.getElementById('sankeyResetBtn');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      state.lockedSelection = null;
+      state.hoverSelection = null;
+      clearHighlightState(views);
+    };
+  }
+
+  views.forEach((view) => {
+    if (!view) return;
+
+    view.nodeSelection
+      .on('mouseenter', (_, d) => setHover({ type: 'node', nodeId: d.id }))
+      .on('mouseleave', () => clearHover())
+      .on('click', (_, d) => toggleLock({ type: 'node', nodeId: d.id }));
+
+    view.linkSelection
+      .on('mouseenter', (_, d) => setHover({ type: 'link', linkId: d.linkId }))
+      .on('mouseleave', () => clearHover())
+      .on('click', (_, d) => toggleLock({ type: 'link', linkId: d.linkId }));
+  });
+
+  refresh();
 }
 
 async function initProposalSankey() {
-  const svg = document.getElementById('proposalSankeySvg');
-  if (!svg) return;
+  const ribbonSvg = document.getElementById('proposalSankeyRibbonSvg');
+  const detailSvg = document.getElementById('proposalSankeySvg');
+  if (!ribbonSvg || !detailSvg) return;
 
   try {
-    const data = await loadProposalSankeyData();
-    drawProposalSankey(svg, data);
+    const rawData = await loadProposalSankeyData();
+    const graphIndex = buildGraphIndex(rawData);
+
+    let ribbonView = null;
+    let detailView = null;
+
+    const renderBoth = () => {
+      ribbonView = renderSankey(ribbonSvg, rawData, {
+        ribbon: true,
+        minWidth: 980,
+        minHeight: 116,
+        maxHeight: 190,
+        heightRatio: 0.14,
+        nodeWidth: 8,
+        nodePadding: 10,
+        iterations: 30,
+        margin: { top: 10, right: 42, bottom: 8, left: 42 }
+      });
+
+      detailView = renderSankey(detailSvg, rawData, {
+        ribbon: false,
+        minWidth: 960,
+        minHeight: 460,
+        maxHeight: 700,
+        heightRatio: 0.44,
+        nodeWidth: 14,
+        nodePadding: 22,
+        iterations: 48,
+        margin: { top: 20, right: 130, bottom: 18, left: 130 }
+      });
+
+      bindSankeyInteractions([ribbonView, detailView], graphIndex);
+    };
+
+    renderBoth();
 
     let raf = null;
     const ro = new ResizeObserver(() => {
       if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => drawProposalSankey(svg, data));
+      raf = requestAnimationFrame(renderBoth);
     });
-    ro.observe(svg.parentElement);
+    ro.observe(ribbonSvg.parentElement);
+    ro.observe(detailSvg.parentElement);
   } catch (err) {
-    const frame = svg.parentElement;
-    if (frame) {
-      frame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
+    const detailFrame = detailSvg.parentElement;
+    if (detailFrame) {
+      detailFrame.innerHTML = `<p style="padding:16px;color:#7e2a18;">Unable to render proposal Sankey: ${err.message}</p>`;
     }
   }
 }
