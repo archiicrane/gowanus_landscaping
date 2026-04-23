@@ -124,6 +124,7 @@ function initMapIntroSequence(map) {
 	const existingPanel = document.getElementById('story-existing');
 	const bioswalePanel = document.getElementById('story-bioswale');
 	const toggleIds = ['toggle-heat', 'toggle-contours', 'toggle-flood', 'toggle-bioswale'];
+	const studyBounds = getStudyBounds(STUDY_RING);
 
 	if (existingPanel) existingPanel.classList.add('active');
 	if (bioswalePanel) bioswalePanel.classList.remove('active');
@@ -208,11 +209,18 @@ function initMapIntroSequence(map) {
 		}
 
 		if (stage === 1) {
-			// Second swipe: reveal bioswale corridors
+			// Second swipe: reveal bioswale corridors and recenter at max fit
 			transitioning = true;
 			stage = 2;
 			applyStage();
-			window.setTimeout(() => { transitioning = false; }, 800);
+			map.fitBounds(studyBounds, {
+				padding: getCenteredStagePadding(),
+				bearing: -40,
+				pitch: 0,
+				duration: 980,
+				easing: (t) => t * (2 - t),
+			});
+			window.setTimeout(() => { transitioning = false; }, 1020);
 			return;
 		}
 
@@ -261,6 +269,28 @@ function getInitialFitPadding() {
 		top: 94,
 		right: Math.max(42, rightPanelWidth + 28),
 		bottom: 42,
+		left: 42,
+	};
+}
+
+function getCenteredStagePadding() {
+	const vw = window.innerWidth;
+	const vh = window.innerHeight;
+
+	if (vw <= 800) {
+		return {
+			top: Math.max(72, Math.round(vh * 0.11)),
+			right: 20,
+			bottom: Math.max(30, Math.round(vh * 0.08)),
+			left: 20,
+		};
+	}
+
+	// Equal side padding keeps the site centered on the full viewport.
+	return {
+		top: 86,
+		right: 42,
+		bottom: 36,
 		left: 42,
 	};
 }
