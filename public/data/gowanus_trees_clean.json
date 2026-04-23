@@ -1,0 +1,8138 @@
+[
+  {
+    "tree_id": 150277,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68106445,
+    "lon": -73.98227875
+  },
+  {
+    "tree_id": 150036,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.678606,
+    "lon": -73.98419966
+  },
+  {
+    "tree_id": 150316,
+    "species": "black walnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68175712,
+    "lon": -73.9858522
+  },
+  {
+    "tree_id": 150280,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68094009,
+    "lon": -73.98195896
+  },
+  {
+    "tree_id": 150381,
+    "species": "Cornelian cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67925091,
+    "lon": -73.98735008
+  },
+  {
+    "tree_id": 150228,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67749075,
+    "lon": -73.98341124
+  },
+  {
+    "tree_id": 150343,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67973256,
+    "lon": -73.98887051
+  },
+  {
+    "tree_id": 216043,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67603224,
+    "lon": -73.98605699
+  },
+  {
+    "tree_id": 224753,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6759287,
+    "lon": -73.98741548
+  },
+  {
+    "tree_id": 224748,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67670155,
+    "lon": -73.9867732
+  },
+  {
+    "tree_id": 224754,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67583476,
+    "lon": -73.98749355
+  },
+  {
+    "tree_id": 215857,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67637502,
+    "lon": -73.98463955
+  },
+  {
+    "tree_id": 224747,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67684072,
+    "lon": -73.98665754
+  },
+  {
+    "tree_id": 224752,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67613838,
+    "lon": -73.98724123
+  },
+  {
+    "tree_id": 150706,
+    "species": "hardy rubber tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67930017,
+    "lon": -73.9846701
+  },
+  {
+    "tree_id": 215925,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67655488,
+    "lon": -73.98510195
+  },
+  {
+    "tree_id": 215926,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6765936,
+    "lon": -73.98520106
+  },
+  {
+    "tree_id": 150317,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.681783,
+    "lon": -73.98591864
+  },
+  {
+    "tree_id": 216038,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67654774,
+    "lon": -73.98562891
+  },
+  {
+    "tree_id": 16949,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67368826,
+    "lon": -73.99202068
+  },
+  {
+    "tree_id": 215924,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67649387,
+    "lon": -73.98494573
+  },
+  {
+    "tree_id": 215927,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67665637,
+    "lon": -73.98536177
+  },
+  {
+    "tree_id": 240084,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67641316,
+    "lon": -73.99689204
+  },
+  {
+    "tree_id": 240085,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67621877,
+    "lon": -73.99698741
+  },
+  {
+    "tree_id": 19077,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6735789,
+    "lon": -73.99203642
+  },
+  {
+    "tree_id": 240086,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67612158,
+    "lon": -73.9970351
+  },
+  {
+    "tree_id": 240247,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67828123,
+    "lon": -73.9927834
+  },
+  {
+    "tree_id": 240250,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67813823,
+    "lon": -73.99248755
+  },
+  {
+    "tree_id": 240248,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67822562,
+    "lon": -73.99266834
+  },
+  {
+    "tree_id": 240256,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67771394,
+    "lon": -73.99160977
+  },
+  {
+    "tree_id": 240246,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67834508,
+    "lon": -73.99291549
+  },
+  {
+    "tree_id": 217727,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67583727,
+    "lon": -73.9859727
+  },
+  {
+    "tree_id": 216042,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67609766,
+    "lon": -73.98600266
+  },
+  {
+    "tree_id": 240257,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67763126,
+    "lon": -73.99143872
+  },
+  {
+    "tree_id": 150749,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68225847,
+    "lon": -73.9907837
+  },
+  {
+    "tree_id": 240249,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67818266,
+    "lon": -73.99257947
+  },
+  {
+    "tree_id": 240080,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67714699,
+    "lon": -73.99653199
+  },
+  {
+    "tree_id": 240255,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67778368,
+    "lon": -73.99175404
+  },
+  {
+    "tree_id": 240082,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67682147,
+    "lon": -73.9966917
+  },
+  {
+    "tree_id": 240796,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68193596,
+    "lon": -73.98864668
+  },
+  {
+    "tree_id": 240251,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67806703,
+    "lon": -73.99234024
+  },
+  {
+    "tree_id": 240797,
+    "species": "white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68194346,
+    "lon": -73.98866594
+  },
+  {
+    "tree_id": 240081,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67693975,
+    "lon": -73.99663367
+  },
+  {
+    "tree_id": 240275,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67621734,
+    "lon": -73.99254136
+  },
+  {
+    "tree_id": 240274,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67625167,
+    "lon": -73.99251284
+  },
+  {
+    "tree_id": 240252,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67799053,
+    "lon": -73.99218197
+  },
+  {
+    "tree_id": 216044,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67597261,
+    "lon": -73.9861065
+  },
+  {
+    "tree_id": 150347,
+    "species": "Cornelian cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6792016,
+    "lon": -73.98750617
+  },
+  {
+    "tree_id": 217966,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67750383,
+    "lon": -73.98756642
+  },
+  {
+    "tree_id": 150319,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68184576,
+    "lon": -73.98607977
+  },
+  {
+    "tree_id": 217967,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67836844,
+    "lon": -73.9897893
+  },
+  {
+    "tree_id": 217968,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67839404,
+    "lon": -73.98985512
+  },
+  {
+    "tree_id": 217965,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67741441,
+    "lon": -73.98733655
+  },
+  {
+    "tree_id": 217962,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67714667,
+    "lon": -73.98664823
+  },
+  {
+    "tree_id": 18936,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67256407,
+    "lon": -73.99317721
+  },
+  {
+    "tree_id": 224686,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67648893,
+    "lon": -73.9866892
+  },
+  {
+    "tree_id": 217963,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67717164,
+    "lon": -73.98671244
+  },
+  {
+    "tree_id": 217969,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67849606,
+    "lon": -73.99011742
+  },
+  {
+    "tree_id": 150342,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67976829,
+    "lon": -73.98896232
+  },
+  {
+    "tree_id": 239954,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.6732238,
+    "lon": -73.998425
+  },
+  {
+    "tree_id": 240083,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67651652,
+    "lon": -73.99684132
+  },
+  {
+    "tree_id": 240117,
+    "species": "English oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67879696,
+    "lon": -73.99313203
+  },
+  {
+    "tree_id": 241070,
+    "species": "ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67929401,
+    "lon": -73.99216336
+  },
+  {
+    "tree_id": 224749,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67662014,
+    "lon": -73.98684086
+  },
+  {
+    "tree_id": 240118,
+    "species": "English oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67884377,
+    "lon": -73.99310023
+  },
+  {
+    "tree_id": 241069,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67939925,
+    "lon": -73.99243444
+  },
+  {
+    "tree_id": 240874,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68240351,
+    "lon": -73.99056594
+  },
+  {
+    "tree_id": 241068,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67943442,
+    "lon": -73.99252501
+  },
+  {
+    "tree_id": 217694,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67633143,
+    "lon": -73.98482588
+  },
+  {
+    "tree_id": 241081,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67872537,
+    "lon": -73.9906988
+  },
+  {
+    "tree_id": 241075,
+    "species": "English oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67908077,
+    "lon": -73.99161415
+  },
+  {
+    "tree_id": 241073,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67920447,
+    "lon": -73.99193276
+  },
+  {
+    "tree_id": 150039,
+    "species": "Siberian elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67824106,
+    "lon": -73.98325833
+  },
+  {
+    "tree_id": 241071,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6792753,
+    "lon": -73.99211519
+  },
+  {
+    "tree_id": 241074,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67915584,
+    "lon": -73.9918075
+  },
+  {
+    "tree_id": 217695,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67628135,
+    "lon": -73.98486757
+  },
+  {
+    "tree_id": 217696,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67623313,
+    "lon": -73.98490772
+  },
+  {
+    "tree_id": 241079,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6788618,
+    "lon": -73.99105017
+  },
+  {
+    "tree_id": 149922,
+    "species": "hardy rubber tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67866667,
+    "lon": -73.98407404
+  },
+  {
+    "tree_id": 240798,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68196345,
+    "lon": -73.9887173
+  },
+  {
+    "tree_id": 241078,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67889322,
+    "lon": -73.9911311
+  },
+  {
+    "tree_id": 241077,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67895632,
+    "lon": -73.99129362
+  },
+  {
+    "tree_id": 240800,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68201294,
+    "lon": -73.98884442
+  },
+  {
+    "tree_id": 241076,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67898874,
+    "lon": -73.99137712
+  },
+  {
+    "tree_id": 241072,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67925236,
+    "lon": -73.99205609
+  },
+  {
+    "tree_id": 240802,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68205743,
+    "lon": -73.9889587
+  },
+  {
+    "tree_id": 240811,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68249046,
+    "lon": -73.990071
+  },
+  {
+    "tree_id": 240804,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68210417,
+    "lon": -73.98907875
+  },
+  {
+    "tree_id": 240808,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68237136,
+    "lon": -73.98976507
+  },
+  {
+    "tree_id": 244656,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67629657,
+    "lon": -73.98497691
+  },
+  {
+    "tree_id": 244655,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67622799,
+    "lon": -73.98503411
+  },
+  {
+    "tree_id": 244657,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67637744,
+    "lon": -73.98490947
+  },
+  {
+    "tree_id": 240809,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68240136,
+    "lon": -73.98984211
+  },
+  {
+    "tree_id": 240799,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68198795,
+    "lon": -73.98878022
+  },
+  {
+    "tree_id": 240810,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68245134,
+    "lon": -73.98997052
+  },
+  {
+    "tree_id": 241080,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67878348,
+    "lon": -73.99084847
+  },
+  {
+    "tree_id": 241082,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67868472,
+    "lon": -73.9905941
+  },
+  {
+    "tree_id": 224750,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67652643,
+    "lon": -73.98691874
+  },
+  {
+    "tree_id": 240807,
+    "species": "Schumard's oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68223292,
+    "lon": -73.9894847
+  },
+  {
+    "tree_id": 240079,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67725755,
+    "lon": -73.99647774
+  },
+  {
+    "tree_id": 224751,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67648004,
+    "lon": -73.98695729
+  },
+  {
+    "tree_id": 150315,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68173137,
+    "lon": -73.98578607
+  },
+  {
+    "tree_id": 150322,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68230392,
+    "lon": -73.98725617
+  },
+  {
+    "tree_id": 150321,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68192851,
+    "lon": -73.98629226
+  },
+  {
+    "tree_id": 244652,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67582688,
+    "lon": -73.9853686
+  },
+  {
+    "tree_id": 244651,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67575714,
+    "lon": -73.98542677
+  },
+  {
+    "tree_id": 240253,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67794433,
+    "lon": -73.9920864
+  },
+  {
+    "tree_id": 240801,
+    "species": "golden raintree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68203469,
+    "lon": -73.98890027
+  },
+  {
+    "tree_id": 240806,
+    "species": "white oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68221115,
+    "lon": -73.98935354
+  },
+  {
+    "tree_id": 240805,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68213842,
+    "lon": -73.98916671
+  },
+  {
+    "tree_id": 150320,
+    "species": "black walnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68187126,
+    "lon": -73.98614525
+  },
+  {
+    "tree_id": 302845,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68116268,
+    "lon": -73.9905054
+  },
+  {
+    "tree_id": 302842,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68133217,
+    "lon": -73.99093985
+  },
+  {
+    "tree_id": 216040,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6764322,
+    "lon": -73.98572485
+  },
+  {
+    "tree_id": 302843,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68124392,
+    "lon": -73.99071364
+  },
+  {
+    "tree_id": 302847,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68111136,
+    "lon": -73.99037384
+  },
+  {
+    "tree_id": 302846,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68113777,
+    "lon": -73.99044154
+  },
+  {
+    "tree_id": 302844,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68121025,
+    "lon": -73.99062733
+  },
+  {
+    "tree_id": 302936,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68134034,
+    "lon": -73.98917416
+  },
+  {
+    "tree_id": 302853,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68070354,
+    "lon": -73.98932846
+  },
+  {
+    "tree_id": 302944,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68167877,
+    "lon": -73.99004587
+  },
+  {
+    "tree_id": 302937,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68135954,
+    "lon": -73.98922363
+  },
+  {
+    "tree_id": 302938,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68140942,
+    "lon": -73.9893521
+  },
+  {
+    "tree_id": 16950,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67362123,
+    "lon": -73.99188185
+  },
+  {
+    "tree_id": 302852,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68074234,
+    "lon": -73.98942793
+  },
+  {
+    "tree_id": 302945,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68171006,
+    "lon": -73.99012649
+  },
+  {
+    "tree_id": 302946,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68176643,
+    "lon": -73.99027167
+  },
+  {
+    "tree_id": 302933,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68124382,
+    "lon": -73.98892556
+  },
+  {
+    "tree_id": 302935,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68129482,
+    "lon": -73.98905693
+  },
+  {
+    "tree_id": 240875,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68236078,
+    "lon": -73.99059474
+  },
+  {
+    "tree_id": 302841,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68138299,
+    "lon": -73.99107012
+  },
+  {
+    "tree_id": 302848,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68108357,
+    "lon": -73.99030261
+  },
+  {
+    "tree_id": 150750,
+    "species": "Amur maackia",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68219703,
+    "lon": -73.99082544
+  },
+  {
+    "tree_id": 149946,
+    "species": "European hornbeam",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67945295,
+    "lon": -73.98198544
+  },
+  {
+    "tree_id": 302850,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68093236,
+    "lon": -73.989915
+  },
+  {
+    "tree_id": 150748,
+    "species": "Amur maackia",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68244229,
+    "lon": -73.99065882
+  },
+  {
+    "tree_id": 302942,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68159884,
+    "lon": -73.98983999
+  },
+  {
+    "tree_id": 302932,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68121564,
+    "lon": -73.98885297
+  },
+  {
+    "tree_id": 302849,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6810171,
+    "lon": -73.99013223
+  },
+  {
+    "tree_id": 302943,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68164086,
+    "lon": -73.98994823
+  },
+  {
+    "tree_id": 302885,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68120597,
+    "lon": -73.99149727
+  },
+  {
+    "tree_id": 302939,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68144434,
+    "lon": -73.98944203
+  },
+  {
+    "tree_id": 302940,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68148474,
+    "lon": -73.9895461
+  },
+  {
+    "tree_id": 216041,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67624104,
+    "lon": -73.9858836
+  },
+  {
+    "tree_id": 302787,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6808797,
+    "lon": -73.99005113
+  },
+  {
+    "tree_id": 302790,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68108878,
+    "lon": -73.99059019
+  },
+  {
+    "tree_id": 302788,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68091994,
+    "lon": -73.9901549
+  },
+  {
+    "tree_id": 328069,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6816231,
+    "lon": -73.9896271
+  },
+  {
+    "tree_id": 328068,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68156686,
+    "lon": -73.98948184
+  },
+  {
+    "tree_id": 302793,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68121488,
+    "lon": -73.9909153
+  },
+  {
+    "tree_id": 302786,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68076307,
+    "lon": -73.98975044
+  },
+  {
+    "tree_id": 302934,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68126926,
+    "lon": -73.98899108
+  },
+  {
+    "tree_id": 302941,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6815633,
+    "lon": -73.98974845
+  },
+  {
+    "tree_id": 240876,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68216931,
+    "lon": -73.99072377
+  },
+  {
+    "tree_id": 328067,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68148723,
+    "lon": -73.98927617
+  },
+  {
+    "tree_id": 328066,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68135807,
+    "lon": -73.98894258
+  },
+  {
+    "tree_id": 244654,
+    "species": "Japanese hornbeam",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6761733,
+    "lon": -73.98507971
+  },
+  {
+    "tree_id": 328065,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68132423,
+    "lon": -73.98885517
+  },
+  {
+    "tree_id": 17015,
+    "species": "pine",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67140906,
+    "lon": -73.99255482
+  },
+  {
+    "tree_id": 328071,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68172588,
+    "lon": -73.98989256
+  },
+  {
+    "tree_id": 328072,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68179655,
+    "lon": -73.99007509
+  },
+  {
+    "tree_id": 328070,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68165894,
+    "lon": -73.98971966
+  },
+  {
+    "tree_id": 328075,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68202126,
+    "lon": -73.9906555
+  },
+  {
+    "tree_id": 328074,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68191426,
+    "lon": -73.99037911
+  },
+  {
+    "tree_id": 328076,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68204739,
+    "lon": -73.99072299
+  },
+  {
+    "tree_id": 328073,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68185702,
+    "lon": -73.99023128
+  },
+  {
+    "tree_id": 302791,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68112529,
+    "lon": -73.99068432
+  },
+  {
+    "tree_id": 216039,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67648951,
+    "lon": -73.98567727
+  },
+  {
+    "tree_id": 150038,
+    "species": "Siberian elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67830085,
+    "lon": -73.98341254
+  },
+  {
+    "tree_id": 354936,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66636739,
+    "lon": -73.99285012
+  },
+  {
+    "tree_id": 302792,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68116728,
+    "lon": -73.99079258
+  },
+  {
+    "tree_id": 354940,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66652251,
+    "lon": -73.99317123
+  },
+  {
+    "tree_id": 354946,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66684997,
+    "lon": -73.99384909
+  },
+  {
+    "tree_id": 354934,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66622579,
+    "lon": -73.992557
+  },
+  {
+    "tree_id": 302851,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68077689,
+    "lon": -73.98951649
+  },
+  {
+    "tree_id": 354947,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66687761,
+    "lon": -73.99390631
+  },
+  {
+    "tree_id": 354943,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66667661,
+    "lon": -73.99349022
+  },
+  {
+    "tree_id": 354950,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66703317,
+    "lon": -73.99422835
+  },
+  {
+    "tree_id": 354948,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66696774,
+    "lon": -73.9940929
+  },
+  {
+    "tree_id": 354944,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66672072,
+    "lon": -73.99358154
+  },
+  {
+    "tree_id": 150232,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67811815,
+    "lon": -73.98502823
+  },
+  {
+    "tree_id": 354939,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6664784,
+    "lon": -73.99307992
+  },
+  {
+    "tree_id": 354949,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66698877,
+    "lon": -73.99413642
+  },
+  {
+    "tree_id": 354941,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66657868,
+    "lon": -73.99328751
+  },
+  {
+    "tree_id": 354938,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66643826,
+    "lon": -73.99299682
+  },
+  {
+    "tree_id": 19323,
+    "species": "Siberian elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6766066,
+    "lon": -73.98570068
+  },
+  {
+    "tree_id": 354945,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66677909,
+    "lon": -73.99370237
+  },
+  {
+    "tree_id": 240254,
+    "species": "hardy rubber tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67788843,
+    "lon": -73.99197074
+  },
+  {
+    "tree_id": 354937,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66640268,
+    "lon": -73.99292317
+  },
+  {
+    "tree_id": 302854,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68067174,
+    "lon": -73.98924697
+  },
+  {
+    "tree_id": 17012,
+    "species": "pine",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67131465,
+    "lon": -73.99235941
+  },
+  {
+    "tree_id": 244653,
+    "species": "Chinese chestnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67609683,
+    "lon": -73.98514348
+  },
+  {
+    "tree_id": 217964,
+    "species": "black maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67726893,
+    "lon": -73.98696253
+  },
+  {
+    "tree_id": 354942,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66664308,
+    "lon": -73.99342082
+  },
+  {
+    "tree_id": 240803,
+    "species": "silver birch",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68207893,
+    "lon": -73.98901391
+  },
+  {
+    "tree_id": 217970,
+    "species": "pagoda dogwood",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67853977,
+    "lon": -73.99022979
+  },
+  {
+    "tree_id": 354933,
+    "species": "black walnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66618888,
+    "lon": -73.9924806
+  },
+  {
+    "tree_id": 577341,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67794204,
+    "lon": -73.98424131
+  },
+  {
+    "tree_id": 577340,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67791015,
+    "lon": -73.98415947
+  },
+  {
+    "tree_id": 577342,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67811967,
+    "lon": -73.984697
+  },
+  {
+    "tree_id": 579257,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.681618,
+    "lon": -73.99109949
+  },
+  {
+    "tree_id": 579255,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68115538,
+    "lon": -73.99141357
+  },
+  {
+    "tree_id": 577339,
+    "species": "black locust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67785373,
+    "lon": -73.98401474
+  },
+  {
+    "tree_id": 579256,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68128133,
+    "lon": -73.9913277
+  },
+  {
+    "tree_id": 577343,
+    "species": "black locust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67816945,
+    "lon": -73.98482472
+  },
+  {
+    "tree_id": 641935,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67065562,
+    "lon": -73.99274703
+  },
+  {
+    "tree_id": 641933,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67087468,
+    "lon": -73.99319889
+  },
+  {
+    "tree_id": 641936,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67062613,
+    "lon": -73.99268621
+  },
+  {
+    "tree_id": 641934,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67073876,
+    "lon": -73.99291853
+  },
+  {
+    "tree_id": 641937,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67059105,
+    "lon": -73.99261384
+  },
+  {
+    "tree_id": 302789,
+    "species": "mimosa",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6809972,
+    "lon": -73.99035407
+  },
+  {
+    "tree_id": 354935,
+    "species": "black walnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66628122,
+    "lon": -73.99267175
+  },
+  {
+    "tree_id": 150339,
+    "species": "mimosa",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67990222,
+    "lon": -73.98930646
+  },
+  {
+    "tree_id": 19181,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67112203,
+    "lon": -73.98869578
+  },
+  {
+    "tree_id": 19185,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67129382,
+    "lon": -73.98905128
+  },
+  {
+    "tree_id": 19182,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67118263,
+    "lon": -73.98882118
+  },
+  {
+    "tree_id": 18940,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67231661,
+    "lon": -73.99266617
+  },
+  {
+    "tree_id": 19270,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66835398,
+    "lon": -73.99322462
+  },
+  {
+    "tree_id": 19271,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66826773,
+    "lon": -73.99304633
+  },
+  {
+    "tree_id": 19249,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66929194,
+    "lon": -73.99167272
+  },
+  {
+    "tree_id": 19196,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66697524,
+    "lon": -73.99210475
+  },
+  {
+    "tree_id": 18999,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66876498,
+    "lon": -73.99081566
+  },
+  {
+    "tree_id": 19052,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67151217,
+    "lon": -73.99300246
+  },
+  {
+    "tree_id": 19199,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6673636,
+    "lon": -73.99290945
+  },
+  {
+    "tree_id": 19250,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66925609,
+    "lon": -73.99159843
+  },
+  {
+    "tree_id": 19197,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66705576,
+    "lon": -73.9922716
+  },
+  {
+    "tree_id": 16956,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67282714,
+    "lon": -73.99000382
+  },
+  {
+    "tree_id": 19430,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67158978,
+    "lon": -73.98943061
+  },
+  {
+    "tree_id": 19138,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66827817,
+    "lon": -73.99132366
+  },
+  {
+    "tree_id": 19424,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6713413,
+    "lon": -73.9889153
+  },
+  {
+    "tree_id": 19243,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67686086,
+    "lon": -73.98588775
+  },
+  {
+    "tree_id": 18986,
+    "species": "Amur maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6674863,
+    "lon": -73.99343759
+  },
+  {
+    "tree_id": 19180,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67102613,
+    "lon": -73.98849734
+  },
+  {
+    "tree_id": 19425,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67137097,
+    "lon": -73.98897682
+  },
+  {
+    "tree_id": 18984,
+    "species": "Amur maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66759046,
+    "lon": -73.99365305
+  },
+  {
+    "tree_id": 18941,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67227949,
+    "lon": -73.99258952
+  },
+  {
+    "tree_id": 19142,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66861682,
+    "lon": -73.99202422
+  },
+  {
+    "tree_id": 19141,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66856945,
+    "lon": -73.99192623
+  },
+  {
+    "tree_id": 19248,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66934601,
+    "lon": -73.99178477
+  },
+  {
+    "tree_id": 19186,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6713303,
+    "lon": -73.98912676
+  },
+  {
+    "tree_id": 19187,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67139354,
+    "lon": -73.98925763
+  },
+  {
+    "tree_id": 19184,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67124205,
+    "lon": -73.98894414
+  },
+  {
+    "tree_id": 19183,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67121322,
+    "lon": -73.98888449
+  },
+  {
+    "tree_id": 19194,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66689618,
+    "lon": -73.99194095
+  },
+  {
+    "tree_id": 16984,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67257612,
+    "lon": -73.99170299
+  },
+  {
+    "tree_id": 19353,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67613283,
+    "lon": -73.9865867
+  },
+  {
+    "tree_id": 19245,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66948853,
+    "lon": -73.99208012
+  },
+  {
+    "tree_id": 19195,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66694232,
+    "lon": -73.99203655
+  },
+  {
+    "tree_id": 18868,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66937015,
+    "lon": -73.99262373
+  },
+  {
+    "tree_id": 19354,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67617799,
+    "lon": -73.98668057
+  },
+  {
+    "tree_id": 19198,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66715186,
+    "lon": -73.99247072
+  },
+  {
+    "tree_id": 16985,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6725423,
+    "lon": -73.99163298
+  },
+  {
+    "tree_id": 19252,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66906508,
+    "lon": -73.9912026
+  },
+  {
+    "tree_id": 19051,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67154818,
+    "lon": -73.99307704
+  },
+  {
+    "tree_id": 19435,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67185146,
+    "lon": -73.98997333
+  },
+  {
+    "tree_id": 18981,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66870515,
+    "lon": -73.9941921
+  },
+  {
+    "tree_id": 19278,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67253159,
+    "lon": -73.98986499
+  },
+  {
+    "tree_id": 19274,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66765837,
+    "lon": -73.99178669
+  },
+  {
+    "tree_id": 19434,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6717845,
+    "lon": -73.98983445
+  },
+  {
+    "tree_id": 18837,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67266903,
+    "lon": -73.99322021
+  },
+  {
+    "tree_id": 19273,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66786856,
+    "lon": -73.99222117
+  },
+  {
+    "tree_id": 19053,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67147012,
+    "lon": -73.99291539
+  },
+  {
+    "tree_id": 19242,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67695826,
+    "lon": -73.98613939
+  },
+  {
+    "tree_id": 18988,
+    "species": "Amur maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66717117,
+    "lon": -73.99278575
+  },
+  {
+    "tree_id": 19432,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67167378,
+    "lon": -73.98960482
+  },
+  {
+    "tree_id": 18867,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66929129,
+    "lon": -73.9926906
+  },
+  {
+    "tree_id": 19429,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67154954,
+    "lon": -73.98934716
+  },
+  {
+    "tree_id": 18985,
+    "species": "Amur maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66756162,
+    "lon": -73.9935934
+  },
+  {
+    "tree_id": 18989,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66711909,
+    "lon": -73.99267802
+  },
+  {
+    "tree_id": 19080,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67294861,
+    "lon": -73.99072838
+  },
+  {
+    "tree_id": 18987,
+    "species": "Amur maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66741362,
+    "lon": -73.99328726
+  },
+  {
+    "tree_id": 19139,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66841852,
+    "lon": -73.99161399
+  },
+  {
+    "tree_id": 19426,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67141884,
+    "lon": -73.98907611
+  },
+  {
+    "tree_id": 19203,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66888303,
+    "lon": -73.99303111
+  },
+  {
+    "tree_id": 19255,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66887158,
+    "lon": -73.9908016
+  },
+  {
+    "tree_id": 19436,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67194486,
+    "lon": -73.99016703
+  },
+  {
+    "tree_id": 19246,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66946267,
+    "lon": -73.99202653
+  },
+  {
+    "tree_id": 18951,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66859368,
+    "lon": -73.99372446
+  },
+  {
+    "tree_id": 18866,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67047165,
+    "lon": -73.99582917
+  },
+  {
+    "tree_id": 18973,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67065278,
+    "lon": -73.99489584
+  },
+  {
+    "tree_id": 18950,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66856484,
+    "lon": -73.99366483
+  },
+  {
+    "tree_id": 19202,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66751245,
+    "lon": -73.99321787
+  },
+  {
+    "tree_id": 19422,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67120179,
+    "lon": -73.98862598
+  },
+  {
+    "tree_id": 19254,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66891654,
+    "lon": -73.99089477
+  },
+  {
+    "tree_id": 19079,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67299969,
+    "lon": -73.99083439
+  },
+  {
+    "tree_id": 19258,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6687029,
+    "lon": -73.99045206
+  },
+  {
+    "tree_id": 18884,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67053191,
+    "lon": -73.99189787
+  },
+  {
+    "tree_id": 19050,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6715914,
+    "lon": -73.99316655
+  },
+  {
+    "tree_id": 19204,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66883488,
+    "lon": -73.9930714
+  },
+  {
+    "tree_id": 18946,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67197001,
+    "lon": -73.99195043
+  },
+  {
+    "tree_id": 19427,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67145497,
+    "lon": -73.98915103
+  },
+  {
+    "tree_id": 19428,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67151635,
+    "lon": -73.98927833
+  },
+  {
+    "tree_id": 18948,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67178735,
+    "lon": -73.99157324
+  },
+  {
+    "tree_id": 19130,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66808219,
+    "lon": -73.99585279
+  },
+  {
+    "tree_id": 18980,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66873635,
+    "lon": -73.9942566
+  },
+  {
+    "tree_id": 19421,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67115333,
+    "lon": -73.98852547
+  },
+  {
+    "tree_id": 19064,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66985532,
+    "lon": -73.98957701
+  },
+  {
+    "tree_id": 18865,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67034624,
+    "lon": -73.99556738
+  },
+  {
+    "tree_id": 19081,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67009602,
+    "lon": -73.99228162
+  },
+  {
+    "tree_id": 19098,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67043519,
+    "lon": -73.99173817
+  },
+  {
+    "tree_id": 18928,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66809414,
+    "lon": -73.99469762
+  },
+  {
+    "tree_id": 19131,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66818296,
+    "lon": -73.99595389
+  },
+  {
+    "tree_id": 18944,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67205205,
+    "lon": -73.99211986
+  },
+  {
+    "tree_id": 19066,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66997423,
+    "lon": -73.98982288
+  },
+  {
+    "tree_id": 18993,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66930509,
+    "lon": -73.99193409
+  },
+  {
+    "tree_id": 18943,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67210921,
+    "lon": -73.99223788
+  },
+  {
+    "tree_id": 18996,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66909751,
+    "lon": -73.99150425
+  },
+  {
+    "tree_id": 18947,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67184333,
+    "lon": -73.99168883
+  },
+  {
+    "tree_id": 19205,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66871452,
+    "lon": -73.99317214
+  },
+  {
+    "tree_id": 18983,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66956684,
+    "lon": -73.98955863
+  },
+  {
+    "tree_id": 19272,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66805549,
+    "lon": -73.99260758
+  },
+  {
+    "tree_id": 19040,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6707762,
+    "lon": -73.98943039
+  },
+  {
+    "tree_id": 19078,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67304373,
+    "lon": -73.99092578
+  },
+  {
+    "tree_id": 19133,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66829392,
+    "lon": -73.99605821
+  },
+  {
+    "tree_id": 19451,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67232205,
+    "lon": -73.99016436
+  },
+  {
+    "tree_id": 19132,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66823662,
+    "lon": -73.99600772
+  },
+  {
+    "tree_id": 19063,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66983354,
+    "lon": -73.98953198
+  },
+  {
+    "tree_id": 19257,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66872788,
+    "lon": -73.99050382
+  },
+  {
+    "tree_id": 19106,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66632018,
+    "lon": -73.99252
+  },
+  {
+    "tree_id": 19113,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6669805,
+    "lon": -73.993884
+  },
+  {
+    "tree_id": 19041,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67058365,
+    "lon": -73.98903242
+  },
+  {
+    "tree_id": 19251,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66910564,
+    "lon": -73.99128664
+  },
+  {
+    "tree_id": 19044,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66956727,
+    "lon": -73.99272227
+  },
+  {
+    "tree_id": 19059,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67114994,
+    "lon": -73.99225235
+  },
+  {
+    "tree_id": 19060,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67111407,
+    "lon": -73.99217807
+  },
+  {
+    "tree_id": 19034,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67132218,
+    "lon": -73.99055889
+  },
+  {
+    "tree_id": 19450,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67221227,
+    "lon": -73.99025607
+  },
+  {
+    "tree_id": 19347,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66890335,
+    "lon": -73.99285058
+  },
+  {
+    "tree_id": 18974,
+    "species": "white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67043446,
+    "lon": -73.99508044
+  },
+  {
+    "tree_id": 19423,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67129078,
+    "lon": -73.98881054
+  },
+  {
+    "tree_id": 18942,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67222646,
+    "lon": -73.99248001
+  },
+  {
+    "tree_id": 18991,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66939182,
+    "lon": -73.99211369
+  },
+  {
+    "tree_id": 19042,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66923837,
+    "lon": -73.99299693
+  },
+  {
+    "tree_id": 18992,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66936154,
+    "lon": -73.99205098
+  },
+  {
+    "tree_id": 19241,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67333565,
+    "lon": -73.99851532
+  },
+  {
+    "tree_id": 19107,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66637643,
+    "lon": -73.9926362
+  },
+  {
+    "tree_id": 19035,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67128288,
+    "lon": -73.99047766
+  },
+  {
+    "tree_id": 19062,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67089856,
+    "lon": -73.99173179
+  },
+  {
+    "tree_id": 19343,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66830607,
+    "lon": -73.99161588
+  },
+  {
+    "tree_id": 19097,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67067498,
+    "lon": -73.99153743
+  },
+  {
+    "tree_id": 19038,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67096492,
+    "lon": -73.98982045
+  },
+  {
+    "tree_id": 19339,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66804848,
+    "lon": -73.99108342
+  },
+  {
+    "tree_id": 19346,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66886684,
+    "lon": -73.99277512
+  },
+  {
+    "tree_id": 19043,
+    "species": "crab apple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66933148,
+    "lon": -73.99291918
+  },
+  {
+    "tree_id": 19055,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67136281,
+    "lon": -73.99269316
+  },
+  {
+    "tree_id": 19110,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66682794,
+    "lon": -73.99356886
+  },
+  {
+    "tree_id": 19083,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66988346,
+    "lon": -73.99245932
+  },
+  {
+    "tree_id": 19037,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67102174,
+    "lon": -73.9899379
+  },
+  {
+    "tree_id": 19068,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67032036,
+    "lon": -73.99053857
+  },
+  {
+    "tree_id": 19420,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67112367,
+    "lon": -73.98846395
+  },
+  {
+    "tree_id": 18938,
+    "species": "sugar maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67245713,
+    "lon": -73.99295637
+  },
+  {
+    "tree_id": 19189,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6715015,
+    "lon": -73.98948104
+  },
+  {
+    "tree_id": 19036,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67109858,
+    "lon": -73.99009672
+  },
+  {
+    "tree_id": 19039,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6709131,
+    "lon": -73.98971335
+  },
+  {
+    "tree_id": 16954,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67301865,
+    "lon": -73.99063397
+  },
+  {
+    "tree_id": 19134,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66837918,
+    "lon": -73.99612744
+  },
+  {
+    "tree_id": 19057,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67126343,
+    "lon": -73.99248737
+  },
+  {
+    "tree_id": 19056,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67131753,
+    "lon": -73.9925994
+  },
+  {
+    "tree_id": 17028,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67282816,
+    "lon": -73.98873298
+  },
+  {
+    "tree_id": 19058,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67123256,
+    "lon": -73.99242344
+  },
+  {
+    "tree_id": 19348,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6689337,
+    "lon": -73.99291332
+  },
+  {
+    "tree_id": 19192,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67188965,
+    "lon": -73.99028426
+  },
+  {
+    "tree_id": 19109,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66672486,
+    "lon": -73.99335592
+  },
+  {
+    "tree_id": 19108,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66667832,
+    "lon": -73.99325979
+  },
+  {
+    "tree_id": 19344,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66835346,
+    "lon": -73.99171385
+  },
+  {
+    "tree_id": 16976,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67153755,
+    "lon": -73.9913238
+  },
+  {
+    "tree_id": 19082,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67005434,
+    "lon": -73.99231647
+  },
+  {
+    "tree_id": 19137,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66825611,
+    "lon": -73.99127801
+  },
+  {
+    "tree_id": 18978,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66880391,
+    "lon": -73.99439626
+  },
+  {
+    "tree_id": 18937,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.6725299,
+    "lon": -73.99310664
+  },
+  {
+    "tree_id": 19135,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6681343,
+    "lon": -73.99102603
+  },
+  {
+    "tree_id": 17021,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67158906,
+    "lon": -73.99292739
+  },
+  {
+    "tree_id": 19140,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66852061,
+    "lon": -73.99182519
+  },
+  {
+    "tree_id": 19452,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67245638,
+    "lon": -73.99005215
+  },
+  {
+    "tree_id": 19345,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66852302,
+    "lon": -73.99206436
+  },
+  {
+    "tree_id": 18995,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66921188,
+    "lon": -73.99174109
+  },
+  {
+    "tree_id": 19341,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66822334,
+    "lon": -73.99144488
+  },
+  {
+    "tree_id": 18949,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67165846,
+    "lon": -73.99130709
+  },
+  {
+    "tree_id": 18945,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67200919,
+    "lon": -73.99203134
+  },
+  {
+    "tree_id": 17001,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67207101,
+    "lon": -73.98867968
+  },
+  {
+    "tree_id": 17004,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67188861,
+    "lon": -73.98830399
+  },
+  {
+    "tree_id": 18982,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66868013,
+    "lon": -73.99414037
+  },
+  {
+    "tree_id": 18965,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66969493,
+    "lon": -73.99075868
+  },
+  {
+    "tree_id": 18967,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66949057,
+    "lon": -73.99033556
+  },
+  {
+    "tree_id": 19126,
+    "species": "blackgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67235871,
+    "lon": -73.98751885
+  },
+  {
+    "tree_id": 17026,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67195758,
+    "lon": -73.99369019
+  },
+  {
+    "tree_id": 19190,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67154489,
+    "lon": -73.98957083
+  },
+  {
+    "tree_id": 16973,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67218123,
+    "lon": -73.9926531
+  },
+  {
+    "tree_id": 19280,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67237692,
+    "lon": -73.98954475
+  },
+  {
+    "tree_id": 17020,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67155435,
+    "lon": -73.99285556
+  },
+  {
+    "tree_id": 19283,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67204727,
+    "lon": -73.98886226
+  },
+  {
+    "tree_id": 19433,
+    "species": "flowering dogwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67173046,
+    "lon": -73.98972238
+  },
+  {
+    "tree_id": 16977,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67150161,
+    "lon": -73.99124958
+  },
+  {
+    "tree_id": 16955,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67299719,
+    "lon": -73.99058952
+  },
+  {
+    "tree_id": 19282,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67208285,
+    "lon": -73.98893593
+  },
+  {
+    "tree_id": 19284,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67201933,
+    "lon": -73.98880443
+  },
+  {
+    "tree_id": 17027,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67226491,
+    "lon": -73.98756378
+  },
+  {
+    "tree_id": 17029,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67292693,
+    "lon": -73.98893801
+  },
+  {
+    "tree_id": 19256,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66883602,
+    "lon": -73.99072792
+  },
+  {
+    "tree_id": 17011,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67120318,
+    "lon": -73.99212869
+  },
+  {
+    "tree_id": 17018,
+    "species": "eastern redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67146524,
+    "lon": -73.9926711
+  },
+  {
+    "tree_id": 19074,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66751555,
+    "lon": -73.99172849
+  },
+  {
+    "tree_id": 17022,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67165053,
+    "lon": -73.99305463
+  },
+  {
+    "tree_id": 18966,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66954173,
+    "lon": -73.99044149
+  },
+  {
+    "tree_id": 17013,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67134553,
+    "lon": -73.99242333
+  },
+  {
+    "tree_id": 19054,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67139015,
+    "lon": -73.99274978
+  },
+  {
+    "tree_id": 18964,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6697899,
+    "lon": -73.99095533
+  },
+  {
+    "tree_id": 17017,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67145465,
+    "lon": -73.99264918
+  },
+  {
+    "tree_id": 17023,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67180582,
+    "lon": -73.99337606
+  },
+  {
+    "tree_id": 17010,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67115465,
+    "lon": -73.99202824
+  },
+  {
+    "tree_id": 17009,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67101524,
+    "lon": -73.99173969
+  },
+  {
+    "tree_id": 17007,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67171566,
+    "lon": -73.98794775
+  },
+  {
+    "tree_id": 17019,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67152347,
+    "lon": -73.99279164
+  },
+  {
+    "tree_id": 17006,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67174517,
+    "lon": -73.98800854
+  },
+  {
+    "tree_id": 16952,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67353994,
+    "lon": -73.9917135
+  },
+  {
+    "tree_id": 18883,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67047034,
+    "lon": -73.9919494
+  },
+  {
+    "tree_id": 17016,
+    "species": "eastern redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67142671,
+    "lon": -73.99259135
+  },
+  {
+    "tree_id": 19287,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67186995,
+    "lon": -73.98849515
+  },
+  {
+    "tree_id": 17024,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67188288,
+    "lon": -73.99353556
+  },
+  {
+    "tree_id": 18963,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66994633,
+    "lon": -73.99127923
+  },
+  {
+    "tree_id": 18920,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67131088,
+    "lon": -73.99640663
+  },
+  {
+    "tree_id": 17003,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6719261,
+    "lon": -73.98838119
+  },
+  {
+    "tree_id": 17002,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67199988,
+    "lon": -73.98853317
+  },
+  {
+    "tree_id": 19159,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67450258,
+    "lon": -73.98864566
+  },
+  {
+    "tree_id": 19160,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67463183,
+    "lon": -73.98853773
+  },
+  {
+    "tree_id": 17005,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6718588,
+    "lon": -73.98824259
+  },
+  {
+    "tree_id": 19279,
+    "species": "flowering dogwood",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67240897,
+    "lon": -73.98961111
+  },
+  {
+    "tree_id": 17025,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6719214,
+    "lon": -73.99361531
+  },
+  {
+    "tree_id": 16983,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67263142,
+    "lon": -73.99181744
+  },
+  {
+    "tree_id": 78581,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67889507,
+    "lon": -73.99032553
+  },
+  {
+    "tree_id": 19117,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66834848,
+    "lon": -73.99057572
+  },
+  {
+    "tree_id": 19119,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66817496,
+    "lon": -73.9907212
+  },
+  {
+    "tree_id": 18898,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66867104,
+    "lon": -73.99346758
+  },
+  {
+    "tree_id": 16972,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67237477,
+    "lon": -73.99305281
+  },
+  {
+    "tree_id": 19111,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66686829,
+    "lon": -73.9936522
+  },
+  {
+    "tree_id": 18919,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67121677,
+    "lon": -73.99648502
+  },
+  {
+    "tree_id": 18918,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67112452,
+    "lon": -73.99656187
+  },
+  {
+    "tree_id": 19290,
+    "species": "northern red oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67169644,
+    "lon": -73.98813595
+  },
+  {
+    "tree_id": 18997,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66891757,
+    "lon": -73.99113165
+  },
+  {
+    "tree_id": 19049,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67164947,
+    "lon": -73.9932868
+  },
+  {
+    "tree_id": 19291,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67165968,
+    "lon": -73.98805985
+  },
+  {
+    "tree_id": 19061,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67104204,
+    "lon": -73.99202891
+  },
+  {
+    "tree_id": 18848,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66998972,
+    "lon": -73.9933584
+  },
+  {
+    "tree_id": 19099,
+    "species": "northern red oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66696223,
+    "lon": -73.99173177
+  },
+  {
+    "tree_id": 19292,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67161734,
+    "lon": -73.98797218
+  },
+  {
+    "tree_id": 19340,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66814504,
+    "lon": -73.99128301
+  },
+  {
+    "tree_id": 19289,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67177761,
+    "lon": -73.98830398
+  },
+  {
+    "tree_id": 19293,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67187528,
+    "lon": -73.99079808
+  },
+  {
+    "tree_id": 18994,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66925746,
+    "lon": -73.99183546
+  },
+  {
+    "tree_id": 19071,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66791291,
+    "lon": -73.99255088
+  },
+  {
+    "tree_id": 19288,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67181319,
+    "lon": -73.98837765
+  },
+  {
+    "tree_id": 16953,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67346996,
+    "lon": -73.99156858
+  },
+  {
+    "tree_id": 19125,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67239332,
+    "lon": -73.98759035
+  },
+  {
+    "tree_id": 18849,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6700496,
+    "lon": -73.99348268
+  },
+  {
+    "tree_id": 19431,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67162502,
+    "lon": -73.9895037
+  },
+  {
+    "tree_id": 19244,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67678001,
+    "lon": -73.98567886
+  },
+  {
+    "tree_id": 17030,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67303633,
+    "lon": -73.98956638
+  },
+  {
+    "tree_id": 18998,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66881349,
+    "lon": -73.99091612
+  },
+  {
+    "tree_id": 19188,
+    "species": "crimson king maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67148238,
+    "lon": -73.98944147
+  },
+  {
+    "tree_id": 19067,
+    "species": "golden raintree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67028652,
+    "lon": -73.99046858
+  },
+  {
+    "tree_id": 18917,
+    "species": "sugar maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67100909,
+    "lon": -73.99665802
+  },
+  {
+    "tree_id": 18939,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67237877,
+    "lon": -73.99279454
+  },
+  {
+    "tree_id": 19437,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67200184,
+    "lon": -73.9902852
+  },
+  {
+    "tree_id": 19116,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66841835,
+    "lon": -73.99051715
+  },
+  {
+    "tree_id": 19118,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66824391,
+    "lon": -73.9906634
+  },
+  {
+    "tree_id": 19286,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67195728,
+    "lon": -73.98867597
+  },
+  {
+    "tree_id": 17014,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67139377,
+    "lon": -73.99252317
+  },
+  {
+    "tree_id": 19115,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6684748,
+    "lon": -73.99046982
+  },
+  {
+    "tree_id": 78590,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67830688,
+    "lon": -73.99125987
+  },
+  {
+    "tree_id": 78495,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68052622,
+    "lon": -73.99121173
+  },
+  {
+    "tree_id": 78682,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67842688,
+    "lon": -73.99179233
+  },
+  {
+    "tree_id": 78680,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67851961,
+    "lon": -73.99200425
+  },
+  {
+    "tree_id": 78515,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67808807,
+    "lon": -73.99261817
+  },
+  {
+    "tree_id": 78685,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67823374,
+    "lon": -73.99135097
+  },
+  {
+    "tree_id": 78684,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67832292,
+    "lon": -73.99155477
+  },
+  {
+    "tree_id": 67363,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67440906,
+    "lon": -73.98651899
+  },
+  {
+    "tree_id": 67464,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66994288,
+    "lon": -73.99214724
+  },
+  {
+    "tree_id": 78683,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67837627,
+    "lon": -73.99167667
+  },
+  {
+    "tree_id": 78676,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67878825,
+    "lon": -73.99261815
+  },
+  {
+    "tree_id": 78587,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67818643,
+    "lon": -73.99098487
+  },
+  {
+    "tree_id": 67356,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67488748,
+    "lon": -73.98750789
+  },
+  {
+    "tree_id": 78511,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67769924,
+    "lon": -73.99181246
+  },
+  {
+    "tree_id": 19070,
+    "species": "golden raintree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67046841,
+    "lon": -73.99084468
+  },
+  {
+    "tree_id": 19355,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67621757,
+    "lon": -73.98676286
+  },
+  {
+    "tree_id": 78494,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68049551,
+    "lon": -73.99113275
+  },
+  {
+    "tree_id": 78513,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67791041,
+    "lon": -73.99225003
+  },
+  {
+    "tree_id": 78574,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68057077,
+    "lon": -73.9910445
+  },
+  {
+    "tree_id": 78501,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67887387,
+    "lon": -73.9874793
+  },
+  {
+    "tree_id": 78679,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.678588,
+    "lon": -73.99216054
+  },
+  {
+    "tree_id": 78502,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67881015,
+    "lon": -73.98752231
+  },
+  {
+    "tree_id": 78723,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67799875,
+    "lon": -73.98677581
+  },
+  {
+    "tree_id": 78509,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67756199,
+    "lon": -73.99152805
+  },
+  {
+    "tree_id": 78428,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67238046,
+    "lon": -73.99483789
+  },
+  {
+    "tree_id": 67463,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67002512,
+    "lon": -73.99207792
+  },
+  {
+    "tree_id": 78427,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67230593,
+    "lon": -73.99468482
+  },
+  {
+    "tree_id": 78487,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68006881,
+    "lon": -73.99003527
+  },
+  {
+    "tree_id": 78488,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68010002,
+    "lon": -73.99011554
+  },
+  {
+    "tree_id": 78490,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68019415,
+    "lon": -73.99035764
+  },
+  {
+    "tree_id": 78659,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68071541,
+    "lon": -73.98550652
+  },
+  {
+    "tree_id": 78514,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6780146,
+    "lon": -73.99246592
+  },
+  {
+    "tree_id": 78578,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68073489,
+    "lon": -73.99146637
+  },
+  {
+    "tree_id": 78748,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68034221,
+    "lon": -73.99196486
+  },
+  {
+    "tree_id": 76749,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68108098,
+    "lon": -73.988231
+  },
+  {
+    "tree_id": 78336,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67769869,
+    "lon": -73.99327883
+  },
+  {
+    "tree_id": 78245,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67812947,
+    "lon": -73.98567279
+  },
+  {
+    "tree_id": 76579,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6803658,
+    "lon": -73.98932969
+  },
+  {
+    "tree_id": 78338,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6775644,
+    "lon": -73.99300136
+  },
+  {
+    "tree_id": 78489,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6801572,
+    "lon": -73.9902626
+  },
+  {
+    "tree_id": 78649,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67976892,
+    "lon": -73.99132457
+  },
+  {
+    "tree_id": 78653,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67990882,
+    "lon": -73.99168495
+  },
+  {
+    "tree_id": 78732,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6771082,
+    "lon": -73.99166472
+  },
+  {
+    "tree_id": 78764,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67988125,
+    "lon": -73.99133283
+  },
+  {
+    "tree_id": 78770,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67958282,
+    "lon": -73.99056224
+  },
+  {
+    "tree_id": 78661,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68077888,
+    "lon": -73.9856696
+  },
+  {
+    "tree_id": 78650,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67980832,
+    "lon": -73.99142607
+  },
+  {
+    "tree_id": 78663,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6808426,
+    "lon": -73.98583332
+  },
+  {
+    "tree_id": 78571,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68037518,
+    "lon": -73.99054174
+  },
+  {
+    "tree_id": 78721,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67790941,
+    "lon": -73.98654629
+  },
+  {
+    "tree_id": 78656,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67958637,
+    "lon": -73.99247741
+  },
+  {
+    "tree_id": 78506,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67962518,
+    "lon": -73.99256931
+  },
+  {
+    "tree_id": 67358,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67475205,
+    "lon": -73.98722795
+  },
+  {
+    "tree_id": 78430,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67252361,
+    "lon": -73.99513187
+  },
+  {
+    "tree_id": 67427,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.6756902,
+    "lon": -73.98590518
+  },
+  {
+    "tree_id": 78334,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67780162,
+    "lon": -73.9934915
+  },
+  {
+    "tree_id": 78681,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67848186,
+    "lon": -73.99191798
+  },
+  {
+    "tree_id": 78510,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67764369,
+    "lon": -73.99169736
+  },
+  {
+    "tree_id": 78678,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67867418,
+    "lon": -73.99235746
+  },
+  {
+    "tree_id": 67375,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67094562,
+    "lon": -73.99357975
+  },
+  {
+    "tree_id": 78493,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68044608,
+    "lon": -73.99100559
+  },
+  {
+    "tree_id": 78533,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67833389,
+    "lon": -73.99332845
+  },
+  {
+    "tree_id": 78503,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67864389,
+    "lon": -73.98763451
+  },
+  {
+    "tree_id": 67376,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67090843,
+    "lon": -73.99350273
+  },
+  {
+    "tree_id": 67426,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6756358,
+    "lon": -73.98579255
+  },
+  {
+    "tree_id": 76750,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68113083,
+    "lon": -73.98835949
+  },
+  {
+    "tree_id": 78535,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6780234,
+    "lon": -73.99365492
+  },
+  {
+    "tree_id": 78341,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67730303,
+    "lon": -73.99246131
+  },
+  {
+    "tree_id": 78660,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68074739,
+    "lon": -73.9855887
+  },
+  {
+    "tree_id": 78654,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6799375,
+    "lon": -73.99175882
+  },
+  {
+    "tree_id": 78568,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6802333,
+    "lon": -73.99017703
+  },
+  {
+    "tree_id": 78496,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68058265,
+    "lon": -73.99135687
+  },
+  {
+    "tree_id": 67425,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67545788,
+    "lon": -73.9854242
+  },
+  {
+    "tree_id": 76747,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68099436,
+    "lon": -73.98800774
+  },
+  {
+    "tree_id": 67442,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67608156,
+    "lon": -73.98702843
+  },
+  {
+    "tree_id": 78639,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67935906,
+    "lon": -73.99026884
+  },
+  {
+    "tree_id": 78534,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67826791,
+    "lon": -73.99337276
+  },
+  {
+    "tree_id": 78500,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67894174,
+    "lon": -73.9874335
+  },
+  {
+    "tree_id": 78591,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67834137,
+    "lon": -73.99133862
+  },
+  {
+    "tree_id": 78662,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68081112,
+    "lon": -73.98575242
+  },
+  {
+    "tree_id": 78664,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68087384,
+    "lon": -73.98591357
+  },
+  {
+    "tree_id": 78665,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68090408,
+    "lon": -73.98599126
+  },
+  {
+    "tree_id": 76748,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68102402,
+    "lon": -73.9880842
+  },
+  {
+    "tree_id": 76751,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68115999,
+    "lon": -73.98843466
+  },
+  {
+    "tree_id": 78768,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67966048,
+    "lon": -73.99076276
+  },
+  {
+    "tree_id": 78767,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67971175,
+    "lon": -73.99089515
+  },
+  {
+    "tree_id": 78652,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67987765,
+    "lon": -73.99160465
+  },
+  {
+    "tree_id": 78766,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67979289,
+    "lon": -73.99110467
+  },
+  {
+    "tree_id": 78198,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6786531,
+    "lon": -73.99311245
+  },
+  {
+    "tree_id": 78655,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67998488,
+    "lon": -73.99188087
+  },
+  {
+    "tree_id": 78763,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67991262,
+    "lon": -73.99141381
+  },
+  {
+    "tree_id": 78765,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67983023,
+    "lon": -73.99120107
+  },
+  {
+    "tree_id": 76801,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68172411,
+    "lon": -73.98809258
+  },
+  {
+    "tree_id": 78756,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68007428,
+    "lon": -73.9859306
+  },
+  {
+    "tree_id": 78579,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68076986,
+    "lon": -73.99155626
+  },
+  {
+    "tree_id": 78645,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67962178,
+    "lon": -73.99094558
+  },
+  {
+    "tree_id": 78577,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68071016,
+    "lon": -73.9914028
+  },
+  {
+    "tree_id": 78677,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67872697,
+    "lon": -73.99247811
+  },
+  {
+    "tree_id": 78651,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67984398,
+    "lon": -73.99151793
+  },
+  {
+    "tree_id": 76810,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68182331,
+    "lon": -73.98808352
+  },
+  {
+    "tree_id": 78757,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68010642,
+    "lon": -73.98601348
+  },
+  {
+    "tree_id": 78746,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68052163,
+    "lon": -73.99184289
+  },
+  {
+    "tree_id": 78642,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67950532,
+    "lon": -73.99064559
+  },
+  {
+    "tree_id": 78769,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67962862,
+    "lon": -73.99068049
+  },
+  {
+    "tree_id": 78588,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67823461,
+    "lon": -73.99109487
+  },
+  {
+    "tree_id": 76809,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68178326,
+    "lon": -73.98797922
+  },
+  {
+    "tree_id": 78640,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67941242,
+    "lon": -73.99040631
+  },
+  {
+    "tree_id": 78675,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67886567,
+    "lon": -73.99279507
+  },
+  {
+    "tree_id": 78592,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67837614,
+    "lon": -73.991418
+  },
+  {
+    "tree_id": 78429,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67245469,
+    "lon": -73.99499035
+  },
+  {
+    "tree_id": 78416,
+    "species": "Japanese snowbell",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67838368,
+    "lon": -73.9857279
+  },
+  {
+    "tree_id": 78758,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68013782,
+    "lon": -73.98609444
+  },
+  {
+    "tree_id": 78597,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67861101,
+    "lon": -73.99195426
+  },
+  {
+    "tree_id": 78576,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68068543,
+    "lon": -73.99133923
+  },
+  {
+    "tree_id": 78674,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67889439,
+    "lon": -73.99286071
+  },
+  {
+    "tree_id": 78644,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67958712,
+    "lon": -73.99085629
+  },
+  {
+    "tree_id": 78595,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67852533,
+    "lon": -73.99175863
+  },
+  {
+    "tree_id": 78426,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67223909,
+    "lon": -73.99454755
+  },
+  {
+    "tree_id": 19193,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67193142,
+    "lon": -73.9903707
+  },
+  {
+    "tree_id": 19072,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66783555,
+    "lon": -73.99239079
+  },
+  {
+    "tree_id": 78335,
+    "species": "purple-leaf plum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67775156,
+    "lon": -73.99338806
+  },
+  {
+    "tree_id": 78596,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67857214,
+    "lon": -73.99186551
+  },
+  {
+    "tree_id": 78598,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67869806,
+    "lon": -73.99215301
+  },
+  {
+    "tree_id": 67365,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67414704,
+    "lon": -73.98597738
+  },
+  {
+    "tree_id": 78516,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67813818,
+    "lon": -73.99272201
+  },
+  {
+    "tree_id": 78505,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67976286,
+    "lon": -73.99247634
+  },
+  {
+    "tree_id": 78771,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67953055,
+    "lon": -73.99042728
+  },
+  {
+    "tree_id": 76800,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68175786,
+    "lon": -73.98817803
+  },
+  {
+    "tree_id": 78759,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68016971,
+    "lon": -73.98617668
+  },
+  {
+    "tree_id": 78641,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67945258,
+    "lon": -73.99050973
+  },
+  {
+    "tree_id": 78749,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68026713,
+    "lon": -73.99201589
+  },
+  {
+    "tree_id": 19123,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67249108,
+    "lon": -73.98779236
+  },
+  {
+    "tree_id": 78646,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67965021,
+    "lon": -73.99101881
+  },
+  {
+    "tree_id": 78648,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67972503,
+    "lon": -73.99121152
+  },
+  {
+    "tree_id": 78491,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68031999,
+    "lon": -73.9906813
+  },
+  {
+    "tree_id": 78480,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67858269,
+    "lon": -73.99056387
+  },
+  {
+    "tree_id": 78605,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67828215,
+    "lon": -73.98722731
+  },
+  {
+    "tree_id": 78606,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67822871,
+    "lon": -73.98708949
+  },
+  {
+    "tree_id": 78724,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67809084,
+    "lon": -73.98701239
+  },
+  {
+    "tree_id": 78612,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67786636,
+    "lon": -73.98615493
+  },
+  {
+    "tree_id": 19200,
+    "species": "silver maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66741988,
+    "lon": -73.99302605
+  },
+  {
+    "tree_id": 19247,
+    "species": "silver maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66941653,
+    "lon": -73.99193092
+  },
+  {
+    "tree_id": 19281,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6723134,
+    "lon": -73.98941324
+  },
+  {
+    "tree_id": 78608,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67817565,
+    "lon": -73.98695263
+  },
+  {
+    "tree_id": 67459,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66943628,
+    "lon": -73.99045736
+  },
+  {
+    "tree_id": 78570,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68031348,
+    "lon": -73.99038314
+  },
+  {
+    "tree_id": 19112,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66691129,
+    "lon": -73.99374103
+  },
+  {
+    "tree_id": 19114,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66707121,
+    "lon": -73.99407139
+  },
+  {
+    "tree_id": 78753,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67648409,
+    "lon": -73.99279838
+  },
+  {
+    "tree_id": 78643,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67954397,
+    "lon": -73.99074516
+  },
+  {
+    "tree_id": 78751,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67642736,
+    "lon": -73.99268085
+  },
+  {
+    "tree_id": 78599,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67875965,
+    "lon": -73.99229364
+  },
+  {
+    "tree_id": 78479,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67948274,
+    "lon": -73.98706479
+  },
+  {
+    "tree_id": 67455,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66970552,
+    "lon": -73.99101512
+  },
+  {
+    "tree_id": 19136,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66818402,
+    "lon": -73.99112889
+  },
+  {
+    "tree_id": 78600,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67882097,
+    "lon": -73.99243364
+  },
+  {
+    "tree_id": 78761,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68023301,
+    "lon": -73.98633987
+  },
+  {
+    "tree_id": 78760,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68020136,
+    "lon": -73.98625828
+  },
+  {
+    "tree_id": 78762,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68026316,
+    "lon": -73.98641762
+  },
+  {
+    "tree_id": 78792,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67721869,
+    "lon": -73.99081555
+  },
+  {
+    "tree_id": 78795,
+    "species": "pond cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67695425,
+    "lon": -73.9902674
+  },
+  {
+    "tree_id": 78791,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67738882,
+    "lon": -73.9911682
+  },
+  {
+    "tree_id": 67461,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66930225,
+    "lon": -73.9901797
+  },
+  {
+    "tree_id": 76715,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68106481,
+    "lon": -73.98846447
+  },
+  {
+    "tree_id": 78497,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68067528,
+    "lon": -73.99159512
+  },
+  {
+    "tree_id": 67454,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66985542,
+    "lon": -73.99132567
+  },
+  {
+    "tree_id": 78747,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6803895,
+    "lon": -73.99193271
+  },
+  {
+    "tree_id": 76714,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68110859,
+    "lon": -73.98857801
+  },
+  {
+    "tree_id": 78420,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67873915,
+    "lon": -73.98664036
+  },
+  {
+    "tree_id": 78424,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6788418,
+    "lon": -73.98690386
+  },
+  {
+    "tree_id": 78594,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67844567,
+    "lon": -73.99157675
+  },
+  {
+    "tree_id": 67364,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67435607,
+    "lon": -73.98640945
+  },
+  {
+    "tree_id": 78417,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67853472,
+    "lon": -73.9861156
+  },
+  {
+    "tree_id": 67428,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67574461,
+    "lon": -73.98601782
+  },
+  {
+    "tree_id": 67357,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67483154,
+    "lon": -73.98739226
+  },
+  {
+    "tree_id": 67361,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67459307,
+    "lon": -73.98689933
+  },
+  {
+    "tree_id": 78617,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67290746,
+    "lon": -73.99321611
+  },
+  {
+    "tree_id": 78609,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67800836,
+    "lon": -73.98652117
+  },
+  {
+    "tree_id": 78422,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67879341,
+    "lon": -73.98677965
+  },
+  {
+    "tree_id": 78704,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67491519,
+    "lon": -73.99761
+  },
+  {
+    "tree_id": 78619,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67324306,
+    "lon": -73.99293646
+  },
+  {
+    "tree_id": 78719,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67774022,
+    "lon": -73.98611166
+  },
+  {
+    "tree_id": 67362,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67453566,
+    "lon": -73.98678067
+  },
+  {
+    "tree_id": 67355,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67493458,
+    "lon": -73.98760526
+  },
+  {
+    "tree_id": 78728,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67823316,
+    "lon": -73.98737801
+  },
+  {
+    "tree_id": 78789,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67744641,
+    "lon": -73.99128757
+  },
+  {
+    "tree_id": 78589,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6782754,
+    "lon": -73.991188
+  },
+  {
+    "tree_id": 78339,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67747369,
+    "lon": -73.99281394
+  },
+  {
+    "tree_id": 78604,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67840384,
+    "lon": -73.98754118
+  },
+  {
+    "tree_id": 78421,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67876865,
+    "lon": -73.9867161
+  },
+  {
+    "tree_id": 78620,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67337564,
+    "lon": -73.992826
+  },
+  {
+    "tree_id": 19324,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67614015,
+    "lon": -73.98609169
+  },
+  {
+    "tree_id": 78621,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67357125,
+    "lon": -73.992663
+  },
+  {
+    "tree_id": 78622,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67365468,
+    "lon": -73.99259347
+  },
+  {
+    "tree_id": 78610,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67794957,
+    "lon": -73.98636953
+  },
+  {
+    "tree_id": 67453,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66992214,
+    "lon": -73.99146389
+  },
+  {
+    "tree_id": 78478,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67945295,
+    "lon": -73.98708486
+  },
+  {
+    "tree_id": 78593,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6784109,
+    "lon": -73.99149738
+  },
+  {
+    "tree_id": 78607,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67820305,
+    "lon": -73.9870233
+  },
+  {
+    "tree_id": 16990,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.672117,
+    "lon": -73.9907527
+  },
+  {
+    "tree_id": 78752,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6764544,
+    "lon": -73.99273688
+  },
+  {
+    "tree_id": 67360,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67464312,
+    "lon": -73.98700279
+  },
+  {
+    "tree_id": 19124,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67245545,
+    "lon": -73.98771873
+  },
+  {
+    "tree_id": 67456,
+    "species": "willow oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66964673,
+    "lon": -73.99089334
+  },
+  {
+    "tree_id": 78790,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6774232,
+    "lon": -73.99123946
+  },
+  {
+    "tree_id": 78601,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67888256,
+    "lon": -73.99257427
+  },
+  {
+    "tree_id": 16975,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67191492,
+    "lon": -73.99210313
+  },
+  {
+    "tree_id": 78613,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67782799,
+    "lon": -73.98605598
+  },
+  {
+    "tree_id": 67374,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67098885,
+    "lon": -73.99366925
+  },
+  {
+    "tree_id": 78772,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67969324,
+    "lon": -73.98978576
+  },
+  {
+    "tree_id": 16991,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67208906,
+    "lon": -73.99069486
+  },
+  {
+    "tree_id": 67373,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67104663,
+    "lon": -73.99378888
+  },
+  {
+    "tree_id": 78623,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67375249,
+    "lon": -73.99251197
+  },
+  {
+    "tree_id": 78241,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67938716,
+    "lon": -73.99261263
+  },
+  {
+    "tree_id": 78624,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67396803,
+    "lon": -73.99233236
+  },
+  {
+    "tree_id": 78481,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67853552,
+    "lon": -73.9906035
+  },
+  {
+    "tree_id": 78625,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67404405,
+    "lon": -73.99226901
+  },
+  {
+    "tree_id": 78686,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67814155,
+    "lon": -73.9911403
+  },
+  {
+    "tree_id": 67460,
+    "species": "willow oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.66941365,
+    "lon": -73.99041048
+  },
+  {
+    "tree_id": 67462,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6692464,
+    "lon": -73.99006401
+  },
+  {
+    "tree_id": 67457,
+    "species": "willow oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66958795,
+    "lon": -73.99077156
+  },
+  {
+    "tree_id": 67433,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67605338,
+    "lon": -73.98665711
+  },
+  {
+    "tree_id": 78556,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67960915,
+    "lon": -73.98680246
+  },
+  {
+    "tree_id": 78517,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67831246,
+    "lon": -73.99308316
+  },
+  {
+    "tree_id": 67432,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67599751,
+    "lon": -73.98654143
+  },
+  {
+    "tree_id": 78507,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67949923,
+    "lon": -73.99265437
+  },
+  {
+    "tree_id": 78518,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6783686,
+    "lon": -73.99319948
+  },
+  {
+    "tree_id": 67383,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6705469,
+    "lon": -73.99275418
+  },
+  {
+    "tree_id": 67382,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67062953,
+    "lon": -73.99292526
+  },
+  {
+    "tree_id": 67384,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67051132,
+    "lon": -73.99268052
+  },
+  {
+    "tree_id": 78425,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67209979,
+    "lon": -73.99426146
+  },
+  {
+    "tree_id": 78558,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67925298,
+    "lon": -73.98587631
+  },
+  {
+    "tree_id": 67378,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67078846,
+    "lon": -73.99325433
+  },
+  {
+    "tree_id": 67381,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67066011,
+    "lon": -73.99298858
+  },
+  {
+    "tree_id": 67385,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67043928,
+    "lon": -73.99253136
+  },
+  {
+    "tree_id": 67449,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6752805,
+    "lon": -73.98769845
+  },
+  {
+    "tree_id": 86589,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66745529,
+    "lon": -73.99510079
+  },
+  {
+    "tree_id": 67380,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67071421,
+    "lon": -73.9931006
+  },
+  {
+    "tree_id": 86588,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6675085,
+    "lon": -73.99521013
+  },
+  {
+    "tree_id": 86591,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6672986,
+    "lon": -73.99477884
+  },
+  {
+    "tree_id": 78725,
+    "species": "Oklahoma redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67811733,
+    "lon": -73.98708044
+  },
+  {
+    "tree_id": 67377,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67086756,
+    "lon": -73.9934181
+  },
+  {
+    "tree_id": 78508,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67938254,
+    "lon": -73.99273317
+  },
+  {
+    "tree_id": 67448,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67535691,
+    "lon": -73.98763454
+  },
+  {
+    "tree_id": 67434,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6761019,
+    "lon": -73.98675757
+  },
+  {
+    "tree_id": 86590,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66739587,
+    "lon": -73.99497869
+  },
+  {
+    "tree_id": 19285,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67199022,
+    "lon": -73.98874415
+  },
+  {
+    "tree_id": 67450,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67521568,
+    "lon": -73.98775266
+  },
+  {
+    "tree_id": 67458,
+    "species": "willow oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66947038,
+    "lon": -73.99052799
+  },
+  {
+    "tree_id": 78423,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67881754,
+    "lon": -73.9868416
+  },
+  {
+    "tree_id": 78559,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67917847,
+    "lon": -73.98568258
+  },
+  {
+    "tree_id": 78793,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67702976,
+    "lon": -73.99042393
+  },
+  {
+    "tree_id": 86630,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66594366,
+    "lon": -73.99258393
+  },
+  {
+    "tree_id": 78572,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68041415,
+    "lon": -73.99064191
+  },
+  {
+    "tree_id": 78415,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67835517,
+    "lon": -73.98565472
+  },
+  {
+    "tree_id": 78647,
+    "species": "sugar maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67968263,
+    "lon": -73.99110231
+  },
+  {
+    "tree_id": 16974,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67195204,
+    "lon": -73.99217978
+  },
+  {
+    "tree_id": 67441,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67614176,
+    "lon": -73.98697809
+  },
+  {
+    "tree_id": 67354,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67498758,
+    "lon": -73.9877148
+  },
+  {
+    "tree_id": 76833,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68162184,
+    "lon": -73.98848112
+  },
+  {
+    "tree_id": 67445,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67585699,
+    "lon": -73.98721627
+  },
+  {
+    "tree_id": 67443,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67602137,
+    "lon": -73.98707878
+  },
+  {
+    "tree_id": 67446,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67577827,
+    "lon": -73.98728211
+  },
+  {
+    "tree_id": 86629,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66600085,
+    "lon": -73.99253612
+  },
+  {
+    "tree_id": 67447,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67544951,
+    "lon": -73.98755709
+  },
+  {
+    "tree_id": 67444,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67594265,
+    "lon": -73.98714462
+  },
+  {
+    "tree_id": 78720,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67778108,
+    "lon": -73.98621662
+  },
+  {
+    "tree_id": 76832,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68168786,
+    "lon": -73.9884361
+  },
+  {
+    "tree_id": 78575,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68062348,
+    "lon": -73.99117999
+  },
+  {
+    "tree_id": 78482,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67823538,
+    "lon": -73.99085563
+  },
+  {
+    "tree_id": 67431,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67594752,
+    "lon": -73.98643792
+  },
+  {
+    "tree_id": 19069,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67042603,
+    "lon": -73.99075705
+  },
+  {
+    "tree_id": 78618,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67312486,
+    "lon": -73.99303496
+  },
+  {
+    "tree_id": 16997,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67307998,
+    "lon": -73.99250884
+  },
+  {
+    "tree_id": 16999,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67223699,
+    "lon": -73.99076924
+  },
+  {
+    "tree_id": 18990,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66950501,
+    "lon": -73.9923481
+  },
+  {
+    "tree_id": 78730,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67776173,
+    "lon": -73.9912493
+  },
+  {
+    "tree_id": 67430,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67589164,
+    "lon": -73.98632224
+  },
+  {
+    "tree_id": 77645,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67969704,
+    "lon": -73.98910288
+  },
+  {
+    "tree_id": 78750,
+    "species": "silver linden",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.67638768,
+    "lon": -73.99259864
+  },
+  {
+    "tree_id": 78418,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67868576,
+    "lon": -73.98650331
+  },
+  {
+    "tree_id": 78557,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67935446,
+    "lon": -73.98614018
+  },
+  {
+    "tree_id": 77647,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67959799,
+    "lon": -73.98884789
+  },
+  {
+    "tree_id": 77643,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67981618,
+    "lon": -73.98940957
+  },
+  {
+    "tree_id": 76835,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68150296,
+    "lon": -73.98856219
+  },
+  {
+    "tree_id": 76716,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68096374,
+    "lon": -73.98820233
+  },
+  {
+    "tree_id": 67424,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67541083,
+    "lon": -73.98532679
+  },
+  {
+    "tree_id": 77644,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67975293,
+    "lon": -73.98924675
+  },
+  {
+    "tree_id": 77646,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67965588,
+    "lon": -73.9889969
+  },
+  {
+    "tree_id": 78754,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67964842,
+    "lon": -73.98483256
+  },
+  {
+    "tree_id": 76834,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68154681,
+    "lon": -73.98853228
+  },
+  {
+    "tree_id": 78729,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67792559,
+    "lon": -73.99111209
+  },
+  {
+    "tree_id": 76836,
+    "species": "English oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68133293,
+    "lon": -73.98867814
+  },
+  {
+    "tree_id": 86608,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66720575,
+    "lon": -73.9947589
+  },
+  {
+    "tree_id": 86570,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.66745732,
+    "lon": -73.99529408
+  },
+  {
+    "tree_id": 78573,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6804826,
+    "lon": -73.99081784
+  },
+  {
+    "tree_id": 89846,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67047912,
+    "lon": -73.98923508
+  },
+  {
+    "tree_id": 78731,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67770572,
+    "lon": -73.9912962
+  },
+  {
+    "tree_id": 16986,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67250259,
+    "lon": -73.99155079
+  },
+  {
+    "tree_id": 78658,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68033556,
+    "lon": -73.98453063
+  },
+  {
+    "tree_id": 16987,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67237435,
+    "lon": -73.99128537
+  },
+  {
+    "tree_id": 67451,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67010716,
+    "lon": -73.99184721
+  },
+  {
+    "tree_id": 67379,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67076082,
+    "lon": -73.9931971
+  },
+  {
+    "tree_id": 67386,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67029608,
+    "lon": -73.99223486
+  },
+  {
+    "tree_id": 89845,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67043673,
+    "lon": -73.98914745
+  },
+  {
+    "tree_id": 89855,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67126279,
+    "lon": -73.990855
+  },
+  {
+    "tree_id": 16989,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.672182,
+    "lon": -73.99088723
+  },
+  {
+    "tree_id": 78382,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67717607,
+    "lon": -73.99173735
+  },
+  {
+    "tree_id": 67429,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67579313,
+    "lon": -73.98611828
+  },
+  {
+    "tree_id": 16988,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67230935,
+    "lon": -73.99115083
+  },
+  {
+    "tree_id": 78726,
+    "species": "Oklahoma redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67814881,
+    "lon": -73.98716133
+  },
+  {
+    "tree_id": 78381,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67712252,
+    "lon": -73.99178196
+  },
+  {
+    "tree_id": 78492,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6803512,
+    "lon": -73.99076157
+  },
+  {
+    "tree_id": 78727,
+    "species": "Oklahoma redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6781793,
+    "lon": -73.98723966
+  },
+  {
+    "tree_id": 16998,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6730424,
+    "lon": -73.99243129
+  },
+  {
+    "tree_id": 78616,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67285508,
+    "lon": -73.99325976
+  },
+  {
+    "tree_id": 16996,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67311593,
+    "lon": -73.99258305
+  },
+  {
+    "tree_id": 16995,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67315381,
+    "lon": -73.99266121
+  },
+  {
+    "tree_id": 78383,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67722404,
+    "lon": -73.99169737
+  },
+  {
+    "tree_id": 78614,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67275589,
+    "lon": -73.99334241
+  },
+  {
+    "tree_id": 78615,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67280641,
+    "lon": -73.99330031
+  },
+  {
+    "tree_id": 89848,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67060159,
+    "lon": -73.98948823
+  },
+  {
+    "tree_id": 76770,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68141055,
+    "lon": -73.98849776
+  },
+  {
+    "tree_id": 76769,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68134906,
+    "lon": -73.98853936
+  },
+  {
+    "tree_id": 89854,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67101992,
+    "lon": -73.99035295
+  },
+  {
+    "tree_id": 78569,
+    "species": "silver maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68027452,
+    "lon": -73.99028298
+  },
+  {
+    "tree_id": 89759,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67045022,
+    "lon": -73.99057017
+  },
+  {
+    "tree_id": 89847,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67051209,
+    "lon": -73.98930323
+  },
+  {
+    "tree_id": 89849,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6707741,
+    "lon": -73.98984482
+  },
+  {
+    "tree_id": 89853,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67095368,
+    "lon": -73.99021603
+  },
+  {
+    "tree_id": 89852,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67090834,
+    "lon": -73.99012232
+  },
+  {
+    "tree_id": 89758,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67052615,
+    "lon": -73.9907272
+  },
+  {
+    "tree_id": 78567,
+    "species": "silver maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68011889,
+    "lon": -73.98988295
+  },
+  {
+    "tree_id": 67423,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67534613,
+    "lon": -73.98519284
+  },
+  {
+    "tree_id": 89757,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67059354,
+    "lon": -73.99086657
+  },
+  {
+    "tree_id": 89755,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67078689,
+    "lon": -73.99126643
+  },
+  {
+    "tree_id": 89762,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66999996,
+    "lon": -73.989639
+  },
+  {
+    "tree_id": 89760,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67039137,
+    "lon": -73.99044845
+  },
+  {
+    "tree_id": 89756,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67070478,
+    "lon": -73.99109663
+  },
+  {
+    "tree_id": 89763,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66995905,
+    "lon": -73.9895544
+  },
+  {
+    "tree_id": 89761,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6700494,
+    "lon": -73.98974124
+  },
+  {
+    "tree_id": 78419,
+    "species": "eastern redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67871627,
+    "lon": -73.98658162
+  },
+  {
+    "tree_id": 78537,
+    "species": "dawn redwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67375377,
+    "lon": -73.99563902
+  },
+  {
+    "tree_id": 78755,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67969278,
+    "lon": -73.98494692
+  },
+  {
+    "tree_id": 78657,
+    "species": "common hackberry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68029183,
+    "lon": -73.98441828
+  },
+  {
+    "tree_id": 19073,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66766026,
+    "lon": -73.99202798
+  },
+  {
+    "tree_id": 78794,
+    "species": "eastern redbud",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67699479,
+    "lon": -73.99035145
+  },
+  {
+    "tree_id": 19065,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66990124,
+    "lon": -73.98967195
+  },
+  {
+    "tree_id": 78380,
+    "species": "flowering dogwood",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67707478,
+    "lon": -73.99182174
+  },
+  {
+    "tree_id": 89851,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67086389,
+    "lon": -73.99003043
+  },
+  {
+    "tree_id": 78337,
+    "species": "crimson king maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67760033,
+    "lon": -73.99307559
+  },
+  {
+    "tree_id": 17000,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67219131,
+    "lon": -73.99067496
+  },
+  {
+    "tree_id": 78536,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67310064,
+    "lon": -73.99428853
+  },
+  {
+    "tree_id": 100445,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68180193,
+    "lon": -73.99109434
+  },
+  {
+    "tree_id": 78611,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67790821,
+    "lon": -73.98626287
+  },
+  {
+    "tree_id": 78344,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67706654,
+    "lon": -73.99197269
+  },
+  {
+    "tree_id": 18979,
+    "species": "hardy rubber tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66877271,
+    "lon": -73.99433176
+  },
+  {
+    "tree_id": 19201,
+    "species": "Amur maackia",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.66747131,
+    "lon": -73.99313262
+  },
+  {
+    "tree_id": 19253,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66895254,
+    "lon": -73.99096937
+  },
+  {
+    "tree_id": 150078,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6807587,
+    "lon": -73.98355439
+  },
+  {
+    "tree_id": 149788,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67992693,
+    "lon": -73.9842442
+  },
+  {
+    "tree_id": 78521,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67294909,
+    "lon": -73.99424325
+  },
+  {
+    "tree_id": 150425,
+    "species": "English oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68301307,
+    "lon": -73.98729291
+  },
+  {
+    "tree_id": 150121,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67891142,
+    "lon": -73.99018928
+  },
+  {
+    "tree_id": 78560,
+    "species": "black locust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67915248,
+    "lon": -73.985615
+  },
+  {
+    "tree_id": 18968,
+    "species": "golden raintree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66944441,
+    "lon": -73.99023997
+  },
+  {
+    "tree_id": 122038,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67116542,
+    "lon": -73.99555507
+  },
+  {
+    "tree_id": 150429,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68233796,
+    "lon": -73.98556205
+  },
+  {
+    "tree_id": 150427,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68240254,
+    "lon": -73.98572763
+  },
+  {
+    "tree_id": 150428,
+    "species": "American linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68236912,
+    "lon": -73.98564195
+  },
+  {
+    "tree_id": 122043,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67145999,
+    "lon": -73.99616815
+  },
+  {
+    "tree_id": 78773,
+    "species": "smoketree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67982556,
+    "lon": -73.98969644
+  },
+  {
+    "tree_id": 78342,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67724751,
+    "lon": -73.99234661
+  },
+  {
+    "tree_id": 78340,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67743821,
+    "lon": -73.99274061
+  },
+  {
+    "tree_id": 122041,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67138075,
+    "lon": -73.99600322
+  },
+  {
+    "tree_id": 122042,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67142586,
+    "lon": -73.99609712
+  },
+  {
+    "tree_id": 122040,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67133636,
+    "lon": -73.99591085
+  },
+  {
+    "tree_id": 89850,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67082179,
+    "lon": -73.98994341
+  },
+  {
+    "tree_id": 67452,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67003809,
+    "lon": -73.99170411
+  },
+  {
+    "tree_id": 150579,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67688593,
+    "lon": -73.98567697
+  },
+  {
+    "tree_id": 78520,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67299937,
+    "lon": -73.99434736
+  },
+  {
+    "tree_id": 78512,
+    "species": "Japanese maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67777668,
+    "lon": -73.99197293
+  },
+  {
+    "tree_id": 150420,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67705838,
+    "lon": -73.98433637
+  },
+  {
+    "tree_id": 78745,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68057623,
+    "lon": -73.99180577
+  },
+  {
+    "tree_id": 78722,
+    "species": "bur oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67796914,
+    "lon": -73.98669973
+  },
+  {
+    "tree_id": 150520,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67894063,
+    "lon": -73.98272016
+  },
+  {
+    "tree_id": 122039,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67126239,
+    "lon": -73.99575689
+  },
+  {
+    "tree_id": 150521,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67896587,
+    "lon": -73.98278501
+  },
+  {
+    "tree_id": 122036,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67101733,
+    "lon": -73.99524685
+  },
+  {
+    "tree_id": 150382,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67932612,
+    "lon": -73.98729935
+  },
+  {
+    "tree_id": 150335,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6797155,
+    "lon": -73.98166191
+  },
+  {
+    "tree_id": 150333,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67980534,
+    "lon": -73.98160127
+  },
+  {
+    "tree_id": 150334,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67976091,
+    "lon": -73.98163126
+  },
+  {
+    "tree_id": 150231,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67808799,
+    "lon": -73.9849505
+  },
+  {
+    "tree_id": 122037,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67109145,
+    "lon": -73.99540111
+  },
+  {
+    "tree_id": 122044,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67159695,
+    "lon": -73.9964532
+  },
+  {
+    "tree_id": 150337,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6795612,
+    "lon": -73.98176604
+  },
+  {
+    "tree_id": 150332,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67985661,
+    "lon": -73.98156667
+  },
+  {
+    "tree_id": 150526,
+    "species": "pond cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67948622,
+    "lon": -73.98412165
+  },
+  {
+    "tree_id": 150336,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6796652,
+    "lon": -73.98169585
+  },
+  {
+    "tree_id": 150338,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67992071,
+    "lon": -73.98935397
+  },
+  {
+    "tree_id": 150174,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68153804,
+    "lon": -73.98349443
+  },
+  {
+    "tree_id": 150519,
+    "species": "pond cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67890264,
+    "lon": -73.98262258
+  },
+  {
+    "tree_id": 150344,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67930854,
+    "lon": -73.98778096
+  },
+  {
+    "tree_id": 78582,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67896621,
+    "lon": -73.99027706
+  },
+  {
+    "tree_id": 150430,
+    "species": "katsura tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68229966,
+    "lon": -73.98546386
+  },
+  {
+    "tree_id": 150518,
+    "species": "pond cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67882991,
+    "lon": -73.98243576
+  },
+  {
+    "tree_id": 78583,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67914505,
+    "lon": -73.9901552
+  },
+  {
+    "tree_id": 150341,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67982901,
+    "lon": -73.98911834
+  },
+  {
+    "tree_id": 150292,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68034301,
+    "lon": -73.98123588
+  },
+  {
+    "tree_id": 150288,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68055003,
+    "lon": -73.98109612
+  },
+  {
+    "tree_id": 150290,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68045629,
+    "lon": -73.9811594
+  },
+  {
+    "tree_id": 150291,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68040453,
+    "lon": -73.98119434
+  },
+  {
+    "tree_id": 150522,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67899087,
+    "lon": -73.98284921
+  },
+  {
+    "tree_id": 150084,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68003122,
+    "lon": -73.98168222
+  },
+  {
+    "tree_id": 149897,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.68104329,
+    "lon": -73.98194917
+  },
+  {
+    "tree_id": 150576,
+    "species": "tree of heaven",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67642937,
+    "lon": -73.98450566
+  },
+  {
+    "tree_id": 150622,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67747245,
+    "lon": -73.98590892
+  },
+  {
+    "tree_id": 150419,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67760453,
+    "lon": -73.98574067
+  },
+  {
+    "tree_id": 149898,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68078092,
+    "lon": -73.98127502
+  },
+  {
+    "tree_id": 149787,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6798178,
+    "lon": -73.98431863
+  },
+  {
+    "tree_id": 149789,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.68000196,
+    "lon": -73.98419303
+  },
+  {
+    "tree_id": 149790,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.68006042,
+    "lon": -73.98415316
+  },
+  {
+    "tree_id": 150079,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.68068433,
+    "lon": -73.983363
+  },
+  {
+    "tree_id": 149987,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67863379,
+    "lon": -73.99018214
+  },
+  {
+    "tree_id": 149985,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67856863,
+    "lon": -73.99001534
+  },
+  {
+    "tree_id": 149986,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67859996,
+    "lon": -73.99009553
+  },
+  {
+    "tree_id": 149894,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6812222,
+    "lon": -73.98240889
+  },
+  {
+    "tree_id": 149983,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67847265,
+    "lon": -73.98976963
+  },
+  {
+    "tree_id": 100443,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68197914,
+    "lon": -73.99097463
+  },
+  {
+    "tree_id": 149835,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68010466,
+    "lon": -73.98393889
+  },
+  {
+    "tree_id": 149899,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68074344,
+    "lon": -73.98117871
+  },
+  {
+    "tree_id": 149900,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68071421,
+    "lon": -73.98110359
+  },
+  {
+    "tree_id": 149836,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68004329,
+    "lon": -73.98378088
+  },
+  {
+    "tree_id": 149891,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68140135,
+    "lon": -73.98286924
+  },
+  {
+    "tree_id": 149837,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67999889,
+    "lon": -73.98366655
+  },
+  {
+    "tree_id": 16951,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6735861,
+    "lon": -73.99180909
+  },
+  {
+    "tree_id": 150160,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68015645,
+    "lon": -73.98172871
+  },
+  {
+    "tree_id": 150015,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68033291,
+    "lon": -73.98396886
+  },
+  {
+    "tree_id": 149892,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68131315,
+    "lon": -73.9826426
+  },
+  {
+    "tree_id": 150705,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67916642,
+    "lon": -73.98476048
+  },
+  {
+    "tree_id": 150122,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67898599,
+    "lon": -73.99013852
+  },
+  {
+    "tree_id": 149895,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68118147,
+    "lon": -73.98230423
+  },
+  {
+    "tree_id": 150123,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67905861,
+    "lon": -73.99008908
+  },
+  {
+    "tree_id": 149965,
+    "species": "Kentucky yellowwood",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67972058,
+    "lon": -73.98472522
+  },
+  {
+    "tree_id": 149972,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68024359,
+    "lon": -73.98599902
+  },
+  {
+    "tree_id": 149971,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68016862,
+    "lon": -73.9858056
+  },
+  {
+    "tree_id": 149976,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68033517,
+    "lon": -73.98631079
+  },
+  {
+    "tree_id": 149967,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67987346,
+    "lon": -73.98504414
+  },
+  {
+    "tree_id": 149968,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67993934,
+    "lon": -73.9852141
+  },
+  {
+    "tree_id": 150525,
+    "species": "pond cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67942949,
+    "lon": -73.98397592
+  },
+  {
+    "tree_id": 150017,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68068354,
+    "lon": -73.98373237
+  },
+  {
+    "tree_id": 150016,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68039981,
+    "lon": -73.98392373
+  },
+  {
+    "tree_id": 150037,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.67848095,
+    "lon": -73.9838771
+  },
+  {
+    "tree_id": 150421,
+    "species": "purple-leaf plum",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67701792,
+    "lon": -73.98423234
+  },
+  {
+    "tree_id": 149966,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67977339,
+    "lon": -73.98486145
+  },
+  {
+    "tree_id": 149923,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67892494,
+    "lon": -73.98473877
+  },
+  {
+    "tree_id": 149893,
+    "species": "Callery pear",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68127017,
+    "lon": -73.98253216
+  },
+  {
+    "tree_id": 150080,
+    "species": "cherry",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68056904,
+    "lon": -73.98306627
+  },
+  {
+    "tree_id": 150151,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68105229,
+    "lon": -73.98431613
+  },
+  {
+    "tree_id": 150426,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68296025,
+    "lon": -73.98715749
+  },
+  {
+    "tree_id": 149896,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68113774,
+    "lon": -73.98219187
+  },
+  {
+    "tree_id": 150527,
+    "species": "Douglas-fir",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67951771,
+    "lon": -73.98420254
+  },
+  {
+    "tree_id": 67359,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67469464,
+    "lon": -73.98710929
+  },
+  {
+    "tree_id": 150577,
+    "species": "Norway maple",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.6765427,
+    "lon": -73.9847964
+  },
+  {
+    "tree_id": 150346,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67924533,
+    "lon": -73.98761852
+  },
+  {
+    "tree_id": 150582,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67703553,
+    "lon": -73.98606078
+  },
+  {
+    "tree_id": 78580,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67882684,
+    "lon": -73.99037202
+  },
+  {
+    "tree_id": 150233,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67818097,
+    "lon": -73.98519012
+  },
+  {
+    "tree_id": 150234,
+    "species": "sweetgum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67821138,
+    "lon": -73.9852685
+  },
+  {
+    "tree_id": 150345,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67927706,
+    "lon": -73.98770006
+  },
+  {
+    "tree_id": 16948,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67372237,
+    "lon": -73.99209131
+  },
+  {
+    "tree_id": 150648,
+    "species": "purple-leaf plum",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67716672,
+    "lon": -73.98434284
+  },
+  {
+    "tree_id": 150581,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67700776,
+    "lon": -73.98598954
+  },
+  {
+    "tree_id": 100444,
+    "species": "'Schubert' chokecherry",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68191373,
+    "lon": -73.99101882
+  },
+  {
+    "tree_id": 150289,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68050169,
+    "lon": -73.98112875
+  },
+  {
+    "tree_id": 149974,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68028361,
+    "lon": -73.98617777
+  },
+  {
+    "tree_id": 150230,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67801271,
+    "lon": -73.98475648
+  },
+  {
+    "tree_id": 149975,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68034172,
+    "lon": -73.98625219
+  },
+  {
+    "tree_id": 150523,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67901586,
+    "lon": -73.98291341
+  },
+  {
+    "tree_id": 149977,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.6803741,
+    "lon": -73.98633573
+  },
+  {
+    "tree_id": 149890,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68144608,
+    "lon": -73.98298417
+  },
+  {
+    "tree_id": 149973,
+    "species": "London planetree",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68027584,
+    "lon": -73.98608223
+  },
+  {
+    "tree_id": 78343,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67718846,
+    "lon": -73.99222461
+  },
+  {
+    "tree_id": 150162,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68025048,
+    "lon": -73.98197088
+  },
+  {
+    "tree_id": 149821,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67917048,
+    "lon": -73.98358788
+  },
+  {
+    "tree_id": 150159,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.68010507,
+    "lon": -73.98159638
+  },
+  {
+    "tree_id": 149822,
+    "species": "Japanese zelkova",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67911186,
+    "lon": -73.98343694
+  },
+  {
+    "tree_id": 150422,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67699145,
+    "lon": -73.98416428
+  },
+  {
+    "tree_id": 150165,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6806216,
+    "lon": -73.98292671
+  },
+  {
+    "tree_id": 150164,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68058419,
+    "lon": -73.98283036
+  },
+  {
+    "tree_id": 149919,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67819728,
+    "lon": -73.98286596
+  },
+  {
+    "tree_id": 150647,
+    "species": "ginkgo",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67719804,
+    "lon": -73.98442303
+  },
+  {
+    "tree_id": 150166,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68065277,
+    "lon": -73.98300701
+  },
+  {
+    "tree_id": 149921,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67826591,
+    "lon": -73.98304258
+  },
+  {
+    "tree_id": 150168,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68073433,
+    "lon": -73.98321706
+  },
+  {
+    "tree_id": 150083,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68047445,
+    "lon": -73.98282286
+  },
+  {
+    "tree_id": 150167,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6807034,
+    "lon": -73.98313741
+  },
+  {
+    "tree_id": 150580,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67697324,
+    "lon": -73.98590096
+  },
+  {
+    "tree_id": 150169,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68079992,
+    "lon": -73.983386
+  },
+  {
+    "tree_id": 149950,
+    "species": null,
+    "dbh": null,
+    "health": null,
+    "lat": 40.6801334,
+    "lon": -73.98372964
+  },
+  {
+    "tree_id": 149889,
+    "species": "pin oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68148955,
+    "lon": -73.98309589
+  },
+  {
+    "tree_id": 150449,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68126703,
+    "lon": -73.98598308
+  },
+  {
+    "tree_id": 150451,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68145009,
+    "lon": -73.98585938
+  },
+  {
+    "tree_id": 150049,
+    "species": "katsura tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68202679,
+    "lon": -73.98682104
+  },
+  {
+    "tree_id": 150051,
+    "species": "katsura tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68194458,
+    "lon": -73.98661021
+  },
+  {
+    "tree_id": 150450,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68137589,
+    "lon": -73.98590952
+  },
+  {
+    "tree_id": 150048,
+    "species": "katsura tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68209773,
+    "lon": -73.987003
+  },
+  {
+    "tree_id": 150119,
+    "species": "honeylocust",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67878859,
+    "lon": -73.99027289
+  },
+  {
+    "tree_id": 150161,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68022005,
+    "lon": -73.98189251
+  },
+  {
+    "tree_id": 150050,
+    "species": "katsura tree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68199238,
+    "lon": -73.98673279
+  },
+  {
+    "tree_id": 149949,
+    "species": "American elm",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68006881,
+    "lon": -73.98356407
+  },
+  {
+    "tree_id": 149947,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67955009,
+    "lon": -73.98223443
+  },
+  {
+    "tree_id": 150047,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68230017,
+    "lon": -73.98752223
+  },
+  {
+    "tree_id": 150098,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6810284,
+    "lon": -73.98396792
+  },
+  {
+    "tree_id": 122035,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67094175,
+    "lon": -73.99508954
+  },
+  {
+    "tree_id": 150163,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68044402,
+    "lon": -73.98246935
+  },
+  {
+    "tree_id": 149970,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68000777,
+    "lon": -73.98546611
+  },
+  {
+    "tree_id": 150099,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68106662,
+    "lon": -73.98406616
+  },
+  {
+    "tree_id": 150082,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68049966,
+    "lon": -73.98288773
+  },
+  {
+    "tree_id": 78519,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67309229,
+    "lon": -73.99453976
+  },
+  {
+    "tree_id": 150318,
+    "species": "black walnut",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68182,
+    "lon": -73.98601365
+  },
+  {
+    "tree_id": 150323,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6823403,
+    "lon": -73.98734957
+  },
+  {
+    "tree_id": 149951,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68015618,
+    "lon": -73.98378804
+  },
+  {
+    "tree_id": 149952,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68018397,
+    "lon": -73.98385927
+  },
+  {
+    "tree_id": 149948,
+    "species": "red maple",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68000622,
+    "lon": -73.98340364
+  },
+  {
+    "tree_id": 150578,
+    "species": "green ash",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67660099,
+    "lon": -73.98494594
+  },
+  {
+    "tree_id": 150120,
+    "species": "eastern redbud",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67885049,
+    "lon": -73.99023075
+  },
+  {
+    "tree_id": 150283,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68066216,
+    "lon": -73.98124423
+  },
+  {
+    "tree_id": 150284,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68061771,
+    "lon": -73.98112993
+  },
+  {
+    "tree_id": 150279,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.6809718,
+    "lon": -73.98204051
+  },
+  {
+    "tree_id": 150282,
+    "species": "Chinese elm",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68068963,
+    "lon": -73.98131487
+  },
+  {
+    "tree_id": 150524,
+    "species": "Chinese fringetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67916057,
+    "lon": -73.98328512
+  },
+  {
+    "tree_id": 150423,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67690604,
+    "lon": -73.98394468
+  },
+  {
+    "tree_id": 150276,
+    "species": "littleleaf linden",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68115384,
+    "lon": -73.98250865
+  },
+  {
+    "tree_id": 78504,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67857016,
+    "lon": -73.98768426
+  },
+  {
+    "tree_id": 19075,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67365376,
+    "lon": -73.99219178
+  },
+  {
+    "tree_id": 150229,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67752116,
+    "lon": -73.98348961
+  },
+  {
+    "tree_id": 150340,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67985275,
+    "lon": -73.98917934
+  },
+  {
+    "tree_id": 150081,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.68052387,
+    "lon": -73.98295003
+  },
+  {
+    "tree_id": 149984,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.6785368,
+    "lon": -73.98993386
+  },
+  {
+    "tree_id": 150281,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Poor",
+    "lat": 40.68076979,
+    "lon": -73.981521
+  },
+  {
+    "tree_id": 149920,
+    "species": "sawtooth oak",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67822823,
+    "lon": -73.9829456
+  },
+  {
+    "tree_id": 19076,
+    "species": "bald cypress",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67361677,
+    "lon": -73.99211502
+  },
+  {
+    "tree_id": 19342,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.66827398,
+    "lon": -73.99154955
+  },
+  {
+    "tree_id": 150278,
+    "species": "Kentucky coffeetree",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.68103224,
+    "lon": -73.98219592
+  },
+  {
+    "tree_id": 19191,
+    "species": "Japanese tree lilac",
+    "dbh": null,
+    "health": "Good",
+    "lat": 40.67164196,
+    "lon": -73.98977171
+  },
+  {
+    "tree_id": 149969,
+    "species": "swamp white oak",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67997003,
+    "lon": -73.98536876
+  },
+  {
+    "tree_id": 122045,
+    "species": "Sophora",
+    "dbh": null,
+    "health": "Fair",
+    "lat": 40.67106766,
+    "lon": -73.99680161
+  }
+]

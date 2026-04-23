@@ -1,66 +1,295 @@
-/* Main site-wide styles for architectural research look */
+/* style.css — Dark architectural theme for Rewilding Gowanus */
 
-body {
-  font-family: 'Georgia', serif;
-  background: #f7f6f3;
-  color: #3a4632;
-  margin: 0;
-  padding: 0;
+/* ─── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+	--bg:        #121417;
+	--panel:     #1B1F24;
+	--border:    rgba(255,255,255,0.07);
+	--text:      #d4d9dc;
+	--text-dim:  #7a8490;
+	--accent:    #7aab6e;
+	--font:      'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	--nav-h:     48px;
 }
 
-nav.top-bar, .top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  border-bottom: 1px solid #d6d6d6;
-  padding: 0.7rem 2rem 0.7rem 1.2rem;
-  box-shadow: 0 2px 8px rgba(120, 180, 160, 0.03);
-  position: relative;
-  z-index: 10;
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font);
+	font-size: 13px;
+	line-height: 1.5;
 }
+
+/* ─── Top navigation ───────────────────────────────────────────────────────── */
+.top-bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: var(--nav-h);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 1.5rem;
+	background: var(--panel);
+	border-bottom: 1px solid var(--border);
+	z-index: 100;
+	box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
 .brand {
-  font-family: 'Georgia', serif;
-  font-size: 1.25rem;
-  color: #7a7a7a;
-  font-weight: 600;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--text-dim);
 }
+
 .nav-links {
-  display: flex;
-  gap: 1.2rem;
+	display: flex;
+	gap: 0.25rem;
 }
+
 .nav-btn {
-  color: #8a8a8a;
-  text-decoration: none;
-  font-size: 1.08rem;
-  padding: 0.2rem 0.7rem;
-  border-bottom: 2px solid transparent;
-  transition: border 0.18s, color 0.18s;
+	color: var(--text-dim);
+	text-decoration: none;
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 0.35rem 0.75rem;
+	border-radius: 3px;
+	transition: color 0.15s, background 0.15s;
 }
+
+.nav-btn:hover {
+	color: var(--text);
+	background: rgba(255,255,255,0.05);
+}
+
 .nav-btn.active {
-  color: #3a4632;
-  border-bottom: 2px solid #bdbdbd;
-  font-weight: 600;
+	color: var(--accent);
+	background: rgba(122,171,110,0.1);
 }
 
-main {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 2.2rem 1.2rem 2.5rem 1.2rem;
+/* ─── Map container ─────────────────────────────────────────────────────────── */
+#map {
+	position: fixed;
+	top: var(--nav-h);
+	left: 0;
+	right: 0;
+	bottom: 0;
 }
 
-hr {
-  border: none;
-  border-top: 1px solid #e0e0e0;
-  margin: 2.5rem 0 2rem 0;
+/* ─── Layer panel ───────────────────────────────────────────────────────────── */
+#layer-panel {
+	position: fixed;
+	top: calc(var(--nav-h) + 16px);
+	left: 16px;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 10px 14px 12px;
+	z-index: 10;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+	min-width: 148px;
 }
 
-/* Thin muted scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  background: #f7f6f3;
+.layer-panel-title {
+	margin: 0 0 8px 0;
+	font-size: 0.65rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-dim);
 }
-::-webkit-scrollbar-thumb {
-  background: #e0e0e0;
-  border-radius: 8px;
+
+.layer-toggle {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 4px 0;
+	cursor: pointer;
+	font-size: 0.78rem;
+	color: var(--text);
+	user-select: none;
 }
+
+.layer-toggle input[type="checkbox"] {
+	appearance: none;
+	width: 14px;
+	height: 14px;
+	border: 1px solid var(--border);
+	border-radius: 2px;
+	background: transparent;
+	cursor: pointer;
+	position: relative;
+	flex-shrink: 0;
+}
+
+.layer-toggle input[type="checkbox"]:checked {
+	background: rgba(122,171,110,0.25);
+	border-color: var(--accent);
+}
+
+.layer-toggle input[type="checkbox"]:checked::after {
+	content: '';
+	position: absolute;
+	left: 3px; top: 1px;
+	width: 5px; height: 8px;
+	border: 1.5px solid var(--accent);
+	border-top: none;
+	border-left: none;
+	transform: rotate(45deg);
+}
+
+.layer-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* ─── Species legend ────────────────────────────────────────────────────────── */
+#legend {
+	position: fixed;
+	bottom: 40px;
+	left: 16px;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 10px 14px 12px;
+	z-index: 10;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+	max-width: 180px;
+}
+
+.legend-title {
+	margin: 0 0 8px 0;
+	font-size: 0.65rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--text-dim);
+}
+
+.legend-row {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	padding: 2px 0;
+	font-size: 0.72rem;
+	color: var(--text);
+}
+
+.legend-swatch {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* ─── Hover tooltip ─────────────────────────────────────────────────────────── */
+#map-tooltip {
+	display: none;
+	position: fixed;
+	pointer-events: none;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	padding: 4px 8px;
+	font-size: 0.75rem;
+	color: var(--text);
+	z-index: 200;
+	white-space: nowrap;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* ─── Mapbox popup overrides ────────────────────────────────────────────────── */
+.arch-popup .mapboxgl-popup-content {
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	padding: 0;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+	color: var(--text);
+}
+
+.arch-popup .mapboxgl-popup-tip {
+	border-top-color: var(--panel);
+}
+
+.arch-popup .mapboxgl-popup-close-button {
+	color: var(--text-dim);
+	font-size: 14px;
+	padding: 2px 6px;
+}
+
+.popup-inner {
+	padding: 12px 14px;
+}
+
+.popup-title {
+	margin: 0 0 8px 0;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	color: var(--accent);
+}
+
+.popup-table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 0.75rem;
+}
+
+.popup-table td {
+	padding: 2px 0;
+	vertical-align: top;
+}
+
+.popup-table td:first-child {
+	color: var(--text-dim);
+	padding-right: 12px;
+	white-space: nowrap;
+}
+
+/* ─── Mapbox controls theme ─────────────────────────────────────────────────── */
+.mapboxgl-ctrl-group {
+	background: var(--panel) !important;
+	border: 1px solid var(--border) !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+}
+
+.mapboxgl-ctrl-group button {
+	background-color: transparent !important;
+	color: var(--text-dim) !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+	background-color: rgba(255,255,255,0.05) !important;
+}
+
+.mapboxgl-ctrl-attrib {
+	background: rgba(18,20,23,0.7) !important;
+	color: var(--text-dim) !important;
+	font-size: 10px !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+	color: var(--text-dim) !important;
+}
+
+.mapboxgl-ctrl-scale {
+	background: rgba(27,31,36,0.8) !important;
+	border-color: var(--border) !important;
+	color: var(--text-dim) !important;
+	font-size: 10px !important;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+

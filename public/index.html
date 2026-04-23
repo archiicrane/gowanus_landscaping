@@ -5,40 +5,50 @@
 	<meta charset="utf-8" />
 	<title>Rewilding Gowanus</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-	<!-- Mapbox code removed for security -->
-	<link rel="stylesheet" href="/style.css" />
-	<link rel="stylesheet" href="/tree-info-panel.css" />
-	<!-- Turf.js for spatial operations (local) -->
-	<script src="/vendor/turf.min.js"></script>
+	<!-- Mapbox GL JS -->
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+	<link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-	<div class="top-bar">
+	<nav class="top-bar">
 		<span class="brand">Rewilding Gowanus</span>
 		<span class="nav-links">
-			<a href="index.html" class="nav-btn active">Map</a>
-			<a href="site-plan.html" class="nav-btn">Site Plan</a>
-			<a href="diagrams.html" class="nav-btn">Diagrams</a>
-			<a href="flora-diagram.html" class="nav-btn">Flora</a>
+			<a href="/index.html" class="nav-btn active">Map</a>
+			<a href="/site-plan.html" class="nav-btn">Site Strategy</a>
+			<a href="/flora-diagram.html" class="nav-btn">Planting Research</a>
+			<a href="/diagrams.html" class="nav-btn">Studies</a>
 		</span>
-	</div>
+	</nav>
+
 	<div id="map"></div>
-	<div id="mode-toggle">
-		<label for="mode-plan"><input type="radio" id="mode-plan" name="mode" value="plan" checked>Rendered Plan</label>
-		<label for="mode-analysis"><input type="radio" id="mode-analysis" name="mode" value="analysis">Analysis</label>
-	</div>
-	<div id="tree-info-panel">
-		<div id="tree-info-content">
-			<!-- Tree info will be injected here -->
-		</div>
+
+	<!-- Layer toggles -->
+	<div id="layer-panel">
+		<p class="layer-panel-title">Layers</p>
+		<label class="layer-toggle">
+			<input type="checkbox" id="toggle-buildings" checked />
+			<span class="layer-dot" style="background:#9aa3ae"></span>
+			<span>Buildings</span>
+		</label>
+		<label class="layer-toggle">
+			<input type="checkbox" id="toggle-trees" checked />
+			<span class="layer-dot" style="background:#7aab6e"></span>
+			<span>Trees</span>
+		</label>
+		<label class="layer-toggle">
+			<input type="checkbox" id="toggle-park" checked />
+			<span class="layer-dot" style="background:#4e7e5a"></span>
+			<span>Park / Site</span>
+		</label>
 	</div>
 
-	<div class="layer-panel ui-panel" id="layer-panel">
-		<label class="layer-toggle"><input type="checkbox" id="toggle-topo" checked /> <span>Topo</span></label>
-		<label class="layer-toggle"><input type="checkbox" id="toggle-flood" checked /> <span>Flood</span></label>
-		<!-- Add more layer toggles as needed -->
-	</div>
+	<!-- Tree species legend -->
+	<div id="legend"></div>
 
-	<script type="module" src="/main.js"></script>
+	<!-- Hover tooltip -->
+	<div id="map-tooltip"></div>
+
+	<script type="module" src="/js/main.js"></script>
 </body>
 </html>

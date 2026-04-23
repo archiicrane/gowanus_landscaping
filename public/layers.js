@@ -1,7 +1,7 @@
-// layers.js - All map overlays and sources
+// layers.js — GeoJSON layer setup for the Gowanus map
+// Re-exported from /js/layers.js for backwards compatibility
+export { addBuildingLayer, addTreeLayer, addParkLayer } from '/js/layers.js';
 
-// --- Ensure STUDY_RING and pointInStudyPolygon are defined on window ---
-if (!window.STUDY_RING) {
   // Coordinates from main_pre_split_utf8.js (lng, lat pairs)
   window.STUDY_RING = [
     [-73.98963594611494, 40.683945676183654],
