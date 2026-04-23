@@ -244,6 +244,14 @@ main {
   color: #877f74;
   text-align: center;
   padding: 10px;
+  overflow: hidden;
+}
+
+.story-media-slot .story-media-frame img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .layer-dot {
