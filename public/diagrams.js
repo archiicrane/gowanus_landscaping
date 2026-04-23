@@ -125,8 +125,245 @@ function baseChartOptions() {
 }
 
 function destroyChart(canvasId) {
+  if (!window.Chart || !Chart.getChart) return;
   const chart = Chart.getChart(canvasId);
   if (chart) chart.destroy();
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs = {}, text = '') {
+  const node = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+  if (text) node.textContent = text;
+  return node;
+}
+
+function createDrawingField(containerId, height = 320) {
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+
+  const width = Math.max(720, container.clientWidth || 960);
+  container.innerHTML = '';
+
+  const svg = svgEl('svg', {
+    class: 'arch-svg',
+    viewBox: `0 0 ${width} ${height}`,
+    preserveAspectRatio: 'none'
+  });
+
+  container.appendChild(svg);
+  return { svg, width, height };
+}
+
+function addDatum(svg, width, baselineY, left = 36, right = 26) {
+  svg.appendChild(svgEl('line', {
+    class: 'arch-datum-line',
+    x1: left,
+    y1: baselineY,
+    x2: width - right,
+    y2: baselineY
+  }));
+}
+
+function addGuide(svg, x1, y1, x2, y2) {
+  svg.appendChild(svgEl('line', {
+    class: 'arch-guide-line',
+    x1, y1, x2, y2
+  }));
+}
+
+function addText(svg, x, y, text, className = 'arch-label', anchor = 'start') {
+  svg.appendChild(svgEl('text', {
+    class: className,
+    x,
+    y,
+    'text-anchor': anchor,
+    'dominant-baseline': 'middle'
+  }, text));
+}
+
+function drawPlantGlyph(svg, x, baselineY, height, crownWidth, fillClass = 'arch-fill-green') {
+  svg.appendChild(svgEl('line', {
+    class: 'arch-stem',
+    x1: x,
+    y1: baselineY,
+    x2: x,
+    y2: baselineY - height
+  }));
+
+  svg.appendChild(svgEl('ellipse', {
+    class: `${fillClass} arch-outline`,
+    cx: x,
+    cy: baselineY - height,
+    rx: crownWidth,
+    ry: Math.max(10, crownWidth * 0.72)
+  }));
+}
+
+function renderPlantingSection(containerId, items, options = {}) {
+  const field = createDrawingField(containerId, options.height || 320);
+  if (!field) return;
+
+  const { svg, width, height } = field;
+  const baselineY = height - 54;
+  const left = 52;
+  const right = 32;
+  const top = 26;
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+  const innerWidth = width - left - right;
+  const step = innerWidth / Math.max(items.length, 1);
+
+  addDatum(svg, width, baselineY, left, right);
+  addText(svg, left - 20, baselineY - 4, options.scaleLabel || 'datum', 'arch-scale-text', 'start');
+
+  for (let index = 0; index < items.length; index += 1) {
+    const item = items[index];
+    const x = left + step * index + step * 0.5;
+    const plantHeight = 42 + ((baselineY - top - 60) * item.value / maxValue);
+    const crownWidth = Math.max(12, step * 0.18 + (item.value / maxValue) * step * 0.14);
+
+    addGuide(svg, x, baselineY, x, top + 10);
+    drawPlantGlyph(svg, x, baselineY, plantHeight, crownWidth, item.fillClass || 'arch-fill-green');
+
+    const labelY = Math.max(top + 12, baselineY - plantHeight - crownWidth - 18);
+    svg.appendChild(svgEl('path', {
+      class: 'arch-leader',
+      d: `M ${x + 8} ${labelY + 4} L ${x + crownWidth * 0.55} ${baselineY - plantHeight - 4}`
+    }));
+
+    addText(svg, x + 12, labelY, item.label, 'arch-label');
+    if (item.note) addText(svg, x + 12, labelY + 14, item.note, 'arch-title-note');
+  }
+}
+
+function renderPaletteClusters(containerId, items, options = {}) {
+  const field = createDrawingField(containerId, options.height || 300);
+  if (!field) return;
+  const { svg, width } = field;
+  const left = 40;
+  const top = 34;
+  const rowGap = 82;
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+
+  items.forEach((item, index) => {
+    const y = top + index * rowGap;
+    const clusterX = left + 84;
+    const count = Math.max(3, Math.min(12, Math.round((item.value / maxValue) * 12)));
+
+    addText(svg, left, y - 18, item.label, 'arch-label');
+    addText(svg, left, y - 4, item.note, 'arch-title-note');
+
+    for (let i = 0; i < count; i += 1) {
+      const cx = clusterX + (i % 6) * 18 + ((Math.floor(i / 6) % 2) * 8);
+      const cy = y + Math.floor(i / 6) * 18;
+      svg.appendChild(svgEl('circle', {
+        class: `${item.fillClass || 'arch-fill-green'} arch-outline`,
+        cx,
+        cy,
+        r: 7 + (item.value / maxValue) * 5
+      }));
+    }
+
+    addText(svg, width - 24, y + 8, formatNumber(item.value), 'arch-scale-text', 'end');
+  });
+}
+
+function renderTemporalBands(containerId, seriesCollection, labels) {
+  const field = createDrawingField(containerId, 340);
+  if (!field) return;
+  const { svg, width } = field;
+  const left = 50;
+  const top = 38;
+  const bandHeight = 64;
+  const innerWidth = width - left - 36;
+
+  labels.forEach((label, index) => {
+    const y = top + index * (bandHeight + 20);
+    addText(svg, left - 8, y + bandHeight / 2, label, 'arch-label', 'end');
+    svg.appendChild(svgEl('rect', {
+      class: 'arch-fill-neutral',
+      x: left,
+      y,
+      width: innerWidth,
+      height: bandHeight
+    }));
+  });
+
+  seriesCollection.forEach((series, seriesIndex) => {
+    const maxValue = Math.max(...series.values, 1);
+    series.values.forEach((value, index) => {
+      const y = top + index * (bandHeight + 20) + 8 + seriesIndex * 11;
+      const widthValue = (innerWidth - 100) * (value / maxValue);
+      svg.appendChild(svgEl('rect', {
+        class: `${series.fillClass} arch-outline`,
+        x: left + 18,
+        y,
+        width: Math.max(8, widthValue),
+        height: 8
+      }));
+      addText(svg, left + 24 + Math.max(8, widthValue) + 8, y + 4, `${series.label}: ${formatNumber(value)}${series.suffix || ''}`, 'arch-title-note');
+    });
+  });
+}
+
+function renderBandBenefitField(containerId, scope) {
+  const field = createDrawingField(containerId, 360);
+  if (!field) return;
+  const { svg, width, height } = field;
+
+  if (!scope.conceptualBenefitByBand) {
+    addText(svg, 40, height / 2, 'Pending contributor input', 'arch-label');
+    addText(svg, 40, height / 2 + 18, 'Bioswales and street-tree assumptions can be inserted later.', 'arch-title-note');
+    return;
+  }
+
+  const labels = [
+    { key: 'canopy', label: 'Canopy' },
+    { key: 'birdHabitat', label: 'Bird Habitat' },
+    { key: 'cooling', label: 'Cooling' },
+    { key: 'stormwater', label: 'Stormwater' },
+    { key: 'pollinator', label: 'Pollinator' },
+    { key: 'amphibianInsect', label: 'Amphib./Insect' }
+  ];
+
+  const bands = [
+    { key: 'forest', label: 'Forest Band', fillClass: 'arch-fill-green-strong' },
+    { key: 'wet', label: 'Wet Band', fillClass: 'arch-fill-plum' },
+    { key: 'pollinator', label: 'Pollinator Band', fillClass: 'arch-fill-green' }
+  ];
+
+  const left = 70;
+  const right = 24;
+  const baselineY = height - 58;
+  const top = 44;
+  const step = (width - left - right) / labels.length;
+
+  addDatum(svg, width, baselineY, left, right);
+
+  bands.forEach((band, bandIndex) => {
+    const bandY = top + bandIndex * 96;
+    addText(svg, 24, bandY + 26, band.label, 'arch-label');
+
+    labels.forEach((metric, index) => {
+      const x = left + step * index + step * 0.5;
+      const value = scope.conceptualBenefitByBand[band.key][metric.key] || 0;
+      const heightValue = 18 + value * 40;
+
+      addGuide(svg, x, baselineY - 6, x, bandY + 8);
+      svg.appendChild(svgEl('rect', {
+        class: `${band.fillClass} arch-outline`,
+        x: x - 8,
+        y: bandY + 52 - heightValue,
+        width: 16,
+        height: heightValue
+      }));
+
+      if (bandIndex === bands.length - 1) {
+        addText(svg, x, baselineY + 18, metric.label, 'arch-title-note', 'middle');
+      }
+    });
+  });
 }
 
 function roundWhole(value) {
@@ -374,101 +611,10 @@ function renderPendingMetric(id, label = 'Pending input') {
 }
 
 function makeBenefitBandChart(scope) {
-  destroyChart('benefitBandChart');
-
-  const canvas = document.getElementById('benefitBandChart');
-  if (!canvas) return;
-
-  if (!scope.conceptualBenefitByBand) {
-    new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: ['Canopy', 'Bird Habitat', 'Cooling', 'Stormwater', 'Pollinator', 'Amphibian/Insect'],
-        datasets: [
-          {
-            label: 'Pending data',
-            data: [0, 0, 0, 0, 0, 0],
-            backgroundColor: 'rgba(170,160,145,0.45)',
-            borderColor: 'rgba(130,120,105,0.45)',
-            borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        ...baseChartOptions(),
-        plugins: {
-          ...baseChartOptions().plugins,
-          legend: { display: false },
-          tooltip: {
-            ...baseChartOptions().plugins.tooltip,
-            callbacks: {
-              label: () => 'Awaiting bioswale/street-tree assumptions'
-            }
-          }
-        }
-      }
-    });
-    return;
-  }
-
-  const labels = ['Canopy', 'Bird Habitat', 'Cooling', 'Stormwater', 'Pollinator', 'Amphibian/Insect'];
-  const keyMap = ['canopy', 'birdHabitat', 'cooling', 'stormwater', 'pollinator', 'amphibianInsect'];
-
-  new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Forest Band',
-          data: keyMap.map((k) => scope.conceptualBenefitByBand.forest[k] || 0),
-          backgroundColor: 'rgba(79,127,99,0.58)',
-          borderColor: 'rgba(79,127,99,0.9)',
-          borderWidth: 1
-        },
-        {
-          label: 'Wet Band',
-          data: keyMap.map((k) => scope.conceptualBenefitByBand.wet[k] || 0),
-          backgroundColor: 'rgba(112,143,168,0.58)',
-          borderColor: 'rgba(112,143,168,0.9)',
-          borderWidth: 1
-        },
-        {
-          label: 'Pollinator Band',
-          data: keyMap.map((k) => scope.conceptualBenefitByBand.pollinator[k] || 0),
-          backgroundColor: 'rgba(178,157,98,0.58)',
-          borderColor: 'rgba(178,157,98,0.9)',
-          borderWidth: 1
-        }
-      ]
-    },
-    options: {
-      ...baseChartOptions(),
-      scales: {
-        x: {
-          ...baseChartOptions().scales.x,
-          stacked: false
-        },
-        y: {
-          ...baseChartOptions().scales.y,
-          min: 0,
-          max: 1,
-          ticks: {
-            color: chartFontColor(),
-            stepSize: 0.2
-          }
-        }
-      }
-    }
-  });
+  renderBandBenefitField('benefitBandChart', scope);
 }
 
 function makeImprovementGrowthChart(scope) {
-  destroyChart('improvementGrowthChart');
-
-  const canvas = document.getElementById('improvementGrowthChart');
-  if (!canvas) return;
-
   const labels = scope.growthSeries.map((s) => s.label);
   const treesSeries = scope.growthSeries.map((s) =>
     scope.trees.total != null ? roundWhole(scope.trees.total * s.factor) : 0
@@ -485,53 +631,12 @@ function makeImprovementGrowthChart(scope) {
     scope.ground.total != null ? roundWhole(scope.ground.total * s.factor) : 0
   );
 
-  new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Trees (count)',
-          data: treesSeries,
-          borderColor: '#4f7f63',
-          backgroundColor: 'rgba(79,127,99,0.1)',
-          tension: 0.25,
-          pointRadius: 3
-        },
-        {
-          label: 'Canopy (thousand sq ft)',
-          data: canopySeries,
-          borderColor: '#6d8ca7',
-          backgroundColor: 'rgba(109,140,167,0.1)',
-          tension: 0.25,
-          pointRadius: 3
-        },
-        {
-          label: 'Shrubs (count)',
-          data: shrubSeries,
-          borderColor: '#9a7a52',
-          backgroundColor: 'rgba(154,122,82,0.1)',
-          tension: 0.25,
-          pointRadius: 3
-        },
-        {
-          label: 'Ground / Perennials (count)',
-          data: groundSeries,
-          borderColor: '#b29d62',
-          backgroundColor: 'rgba(178,157,98,0.1)',
-          tension: 0.25,
-          pointRadius: 3
-        }
-      ]
-    },
-    options: {
-      ...baseChartOptions(),
-      interaction: {
-        mode: 'index',
-        intersect: false
-      }
-    }
-  });
+  renderTemporalBands('improvementGrowthChart', [
+    { label: 'Trees', values: treesSeries, fillClass: 'arch-fill-green-strong' },
+    { label: 'Canopy', values: canopySeries, fillClass: 'arch-fill-plum', suffix: 'k sq ft' },
+    { label: 'Shrubs', values: shrubSeries, fillClass: 'arch-fill-neutral' },
+    { label: 'Ground', values: groundSeries, fillClass: 'arch-fill-green' }
+  ], labels);
 }
 
 function renderImprovementScope(scope) {
@@ -624,90 +729,41 @@ function setupImprovementToggle() {
 // ── Charts ───────────────────────────────────────────────────────────────
 
 function makeSpeciesChart(speciesCounts) {
-  const topSpecies = sortEntriesDesc(speciesCounts).slice(0, 10);
-  const labels = topSpecies.map(([name]) => titleCase(name));
-  const values = topSpecies.map(([, count]) => count);
-
-  destroyChart('speciesChart');
-  new Chart(document.getElementById('speciesChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Tree Count',
-        data: values,
-        backgroundColor: [
-          '#b8d7a5','#b7e1c2','#a8d5ba','#9fcfb2','#d6e3b2',
-          '#8fbba1','#f2e3ab','#9dc8ba','#e9c8b8','#d6c8de'
-        ],
-        borderColor: 'rgba(86,73,53,0.25)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      ...baseChartOptions(),
-      plugins: { ...baseChartOptions().plugins, legend: { display: false } }
-    }
-  });
+  const topSpecies = sortEntriesDesc(speciesCounts).slice(0, 6).map(([name, value]) => ({
+    label: titleCase(name),
+    note: 'baseline species count',
+    value,
+    fillClass: 'arch-fill-green'
+  }));
+  renderPaletteClusters('speciesChart', topSpecies, { height: 300 });
 }
 
 function makeHealthChart(healthCounts) {
   const order = ['Good', 'Fair', 'Poor', 'Unknown'];
-  const labels = order.filter((k) => healthCounts[k] != null);
-  const values = labels.map((k) => healthCounts[k]);
-
-  destroyChart('healthChart');
-  new Chart(document.getElementById('healthChart'), {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: ['#b7e1c2', '#f2e3ab', '#e7b8b3', '#c7c4be'],
-        borderColor: '#f2eee7',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: chartFontColor() } },
-        tooltip: {
-          backgroundColor: 'rgba(250,247,241,0.98)',
-          titleColor: '#2f2a24',
-          bodyColor: '#4f4538',
-          borderColor: 'rgba(86,73,53,0.2)',
-          borderWidth: 1
-        }
-      }
-    }
-  });
+  const fills = {
+    Good: 'arch-fill-green-strong',
+    Fair: 'arch-fill-green',
+    Poor: 'arch-fill-plum-strong',
+    Unknown: 'arch-fill-neutral'
+  };
+  renderPaletteClusters('healthChart', order.map((label) => ({
+    label,
+    note: 'health share',
+    value: healthCounts[label] || 0,
+    fillClass: fills[label]
+  })), { height: 300 });
 }
 
 function makeWaterRetentionChart(speciesRetentionEntries) {
-  const top = speciesRetentionEntries.slice(0, 8);
-  const labels = top.map(([name]) => titleCase(name));
-  const values = top.map(([, retentionM3]) => Number(retentionM3.toFixed(1)));
-
-  destroyChart('waterRetentionChart');
-  new Chart(document.getElementById('waterRetentionChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Estimated Retention (m³)',
-        data: values,
-        backgroundColor: '#b7c7a0',
-        borderColor: 'rgba(86,73,53,0.25)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      ...baseChartOptions(),
-      indexAxis: 'y',
-      plugins: { ...baseChartOptions().plugins, legend: { display: false } }
-    }
+  const top = speciesRetentionEntries.slice(0, 6).map(([name, retentionM3]) => ({
+    label: titleCase(name),
+    note: `${Number(retentionM3.toFixed(1))} m3`,
+    value: retentionM3,
+    fillClass: 'arch-fill-plum'
+  }));
+  renderPlantingSection('waterRetentionChart', top, {
+    height: 310,
+    scaleLabel: 'retention section'
   });
 }
 
@@ -736,43 +792,14 @@ function makeDensityByBlockChart(trees) {
   const labels = Object.keys(bins);
   const values = Object.values(bins);
 
-  destroyChart('densityChart');
-  new Chart(document.getElementById('densityChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Number of blocks',
-        data: values,
-        backgroundColor: ['#d6e3b2','#b8d7a5','#8fbba1','#6fa088','#4f8070'],
-        borderColor: 'rgba(86,73,53,0.25)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      ...baseChartOptions(),
-      plugins: {
-        ...baseChartOptions().plugins,
-        legend: { display: false },
-        tooltip: {
-          ...baseChartOptions().plugins.tooltip,
-          callbacks: {
-            title: (items) => `${items[0].label} trees per block`,
-            label: (item) => `${item.raw} block${item.raw !== 1 ? 's' : ''}`
-          }
-        }
-      },
-      scales: {
-        x: {
-          ...baseChartOptions().scales.x,
-          title: { display: true, text: 'Trees per block', color: chartFontColor() }
-        },
-        y: {
-          ...baseChartOptions().scales.y,
-          title: { display: true, text: 'Number of blocks', color: chartFontColor() }
-        }
-      }
-    }
+  renderPlantingSection('densityChart', labels.map((label, index) => ({
+    label: `${label} / block`,
+    note: `${values[index]} blocks`,
+    value: values[index],
+    fillClass: index > 2 ? 'arch-fill-plum' : 'arch-fill-green'
+  })), {
+    height: 310,
+    scaleLabel: 'block section'
   });
 }
 

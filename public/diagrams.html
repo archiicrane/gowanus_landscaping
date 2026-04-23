@@ -6,7 +6,6 @@
 	<title>Rewilding Gowanus - Diagrams</title>
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="stylesheet" href="/style.css" />
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="diagrams-page">
 	<nav class="top-bar">
@@ -140,8 +139,8 @@
 						<h2>Conceptual Ecological Benefit by Band</h2>
 						<p>Weighted conceptual contribution of each band for canopy, habitat, cooling, stormwater, and pollinators.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="benefitBandChart"></canvas>
+					<div class="chart-wrap drawing-wrap">
+						<div id="benefitBandChart" class="arch-drawing-field" aria-label="Conceptual ecological benefit drawing"></div>
 					</div>
 				</article>
 
@@ -150,8 +149,8 @@
 						<h2>Growth Over Time (Intervention Scope)</h2>
 						<p>Projected build-up across 0-2, 3-5, and 5-10 years from the currently selected contribution scope.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="improvementGrowthChart"></canvas>
+					<div class="chart-wrap drawing-wrap">
+						<div id="improvementGrowthChart" class="arch-drawing-field" aria-label="Growth over time temporal bands"></div>
 					</div>
 				</article>
 			</section>
@@ -168,8 +167,8 @@
 						<h2>Top Tree Species</h2>
 						<p>Most common species currently present in the study area.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="speciesChart"></canvas>
+					<div class="chart-wrap drawing-wrap compact-drawing-wrap">
+						<div id="speciesChart" class="arch-drawing-field" aria-label="Tree species planting palette"></div>
 					</div>
 				</article>
 
@@ -178,8 +177,8 @@
 						<h2>Tree Health Distribution</h2>
 						<p>Current condition of the mapped street trees.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="healthChart"></canvas>
+					<div class="chart-wrap drawing-wrap compact-drawing-wrap">
+						<div id="healthChart" class="arch-drawing-field" aria-label="Tree health palette drawing"></div>
 					</div>
 				</article>
 			</section>
@@ -190,8 +189,8 @@
 						<h2>Estimated Water Retention by Species</h2>
 						<p>Conceptual stormwater storage estimate based on canopy area, 3 ft soil depth, and 20% water holding capacity.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="waterRetentionChart"></canvas>
+					<div class="chart-wrap drawing-wrap compact-drawing-wrap">
+						<div id="waterRetentionChart" class="arch-drawing-field" aria-label="Water retention planting section"></div>
 					</div>
 				</article>
 
@@ -200,8 +199,8 @@
 						<h2>Tree Density by Block</h2>
 						<p>Tree density per block in the study area.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="densityChart"></canvas>
+					<div class="chart-wrap drawing-wrap compact-drawing-wrap">
+						<div id="densityChart" class="arch-drawing-field" aria-label="Tree density section drawing"></div>
 					</div>
 				</article>
 			</section>

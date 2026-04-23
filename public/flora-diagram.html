@@ -24,7 +24,7 @@
 
   <main class="flora-main">
 
-    <header class="flora-header">
+    <header class="flora-header flora-board-section">
       <p class="eyebrow">Ecological Inventory</p>
       <h1>Flora &amp; Fauna Diagram</h1>
       <p class="flora-intro">
@@ -33,7 +33,7 @@
       </p>
     </header>
 
-    <section class="proposal-sankey" aria-labelledby="proposalSankeyTitle">
+    <section class="proposal-sankey flora-board-section" aria-labelledby="proposalSankeyTitle">
       <div class="proposal-sankey-head">
         <p class="eyebrow">Proposal Logic</p>
         <h2 id="proposalSankeyTitle">Our Proposal: Ecological Relationship Sankey</h2>
@@ -47,40 +47,33 @@
       </div>
     </section>
 
-    <div class="mode-tabs" role="tablist" aria-label="Diagram mode">
-      <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Baseline Existing</button>
-      <button class="mode-tab" data-mode="proposed" role="tab" aria-selected="false">Proposed Ecology</button>
-      <button class="mode-tab" data-mode="growth" role="tab" aria-selected="false">Growth Over Time</button>
-    </div>
+    <section class="flora-board-section flora-layer-study" aria-labelledby="floraLayerStudyTitle">
+      <div class="flora-study-head">
+        <p class="eyebrow">Layered Field Study</p>
+        <h2 id="floraLayerStudyTitle">Band Elevations and Ecological Layers</h2>
+      </div>
+      <div class="mode-tabs" role="tablist" aria-label="Diagram mode">
+        <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Baseline Existing</button>
+        <button class="mode-tab" data-mode="proposed" role="tab" aria-selected="false">Proposed Ecology</button>
+        <button class="mode-tab" data-mode="growth" role="tab" aria-selected="false">Growth Over Time</button>
+      </div>
 
-    <div class="time-tabs hidden" id="time-tabs" role="tablist" aria-label="Time period">
-      <button class="time-tab active" data-year="0-2" role="tab" aria-selected="true">0–2 yrs</button>
-      <button class="time-tab" data-year="3-5" role="tab" aria-selected="false">3–5 yrs</button>
-      <button class="time-tab" data-year="5-10" role="tab" aria-selected="false">5–10 yrs</button>
-    </div>
+      <div class="time-tabs hidden" id="time-tabs" role="tablist" aria-label="Time period">
+        <button class="time-tab active" data-year="0-2" role="tab" aria-selected="true">0–2 yrs</button>
+        <button class="time-tab" data-year="3-5" role="tab" aria-selected="false">3–5 yrs</button>
+        <button class="time-tab" data-year="5-10" role="tab" aria-selected="false">5–10 yrs</button>
+      </div>
 
-    <div class="flora-diagram-wrap" id="flora-diagram-wrap"></div>
+      <div class="flora-diagram-wrap" id="flora-diagram-wrap"></div>
+    </section>
 
-    <section class="species-board" aria-labelledby="speciesBoardTitle">
+    <section class="species-board flora-board-section" aria-labelledby="speciesBoardTitle">
       <div class="species-board-head">
-        <h2 id="speciesBoardTitle">Proposed Tree Palette</h2>
-        <p>SVG silhouettes from the proposed planting set, aligned as architectural legend assets.</p>
+        <h2 id="speciesBoardTitle">Proposed Tree Elevation Palette</h2>
+        <p>Tree silhouettes aligned to canopy and midstory datum lines for presentation use.</p>
       </div>
       <div class="species-board-grid" id="species-board-grid"></div>
     </section>
-
-    <footer class="flora-legend">
-      <div class="legend-group"><span class="ls ls-canopy"></span><span>Canopy Tree</span></div>
-      <div class="legend-group"><span class="ls ls-understory-tree"></span><span>Understory Tree</span></div>
-      <div class="legend-group"><span class="ls ls-shrub"></span><span>Shrub</span></div>
-      <div class="legend-group"><span class="ls ls-ground"></span><span>Ground / Perennial</span></div>
-      <div class="legend-group"><span class="ls ls-fauna"></span><span>Fauna</span></div>
-      <div class="legend-group legend-phase">
-        <span class="phase-pip ph1"></span><span>Phase 1</span>
-        <span class="phase-pip ph2"></span><span>Phase 2</span>
-        <span class="phase-pip ph3"></span><span>Phase 3</span>
-      </div>
-    </footer>
 
   </main>
 
