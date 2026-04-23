@@ -252,7 +252,7 @@ function calculateParkContribution() {
     id: 'park',
     label: 'Park Intervention',
     available: true,
-    scopeNote: 'Calculated from explicit park band areas and planting-density assumptions.',
+    scopeNote: 'Based on park band areas and planting density assumptions.',
     areasSqFt: {
       site: areasSqFt.site,
       intervention: areasSqFt.forest + areasSqFt.wet + areasSqFt.pollinator,
@@ -294,7 +294,7 @@ function createUnavailableContributor(id, label) {
     id,
     label,
     available: false,
-    scopeNote: `${label} quantities not entered yet. Add source quantities later to activate this scope.`,
+    scopeNote: `${label} quantities are not entered yet.`,
     areasSqFt: {
       site: PROJECT_INPUTS.areasSqFt.site,
       intervention: null,
@@ -329,8 +329,8 @@ function buildProjectScopes() {
     available: active.length > 0,
     isPartial: active.length < contributors.length,
     scopeNote: active.length < contributors.length
-      ? 'Partial total: currently includes Park only. Bioswales and Street Trees are pending input.'
-      : 'Complete total including all intervention contributors.',
+      ? 'Partial total: Park only. Bioswales and Street Trees pending.'
+      : 'Complete total across all contributors.',
     areasSqFt: {
       site: PROJECT_INPUTS.areasSqFt.site,
       intervention: active.reduce((sum, c) => sum + (c.areasSqFt.intervention || 0), 0),
@@ -599,8 +599,8 @@ function renderImprovementScope(scope) {
     'coverageStateMetric',
     scope.isPartial ? 'Partial' : 'Active',
     scope.isPartial
-      ? 'Total currently includes Park only (Bioswales and Street Trees pending).'
-      : 'Contributor scope active in project math.'
+      ? 'Park included; bioswales and street trees pending.'
+      : 'All contributors included.'
   );
 
   makeBenefitBandChart(scope);
@@ -839,11 +839,11 @@ async function buildGowanusTreeDashboard() {
     // Metrics
     renderMetric('totalTreesMetric',
       formatNumber(totalTrees),
-      'Street trees in study area');
+      'Mapped street trees');
 
     renderMetric('canopyMetric',
       `${formatNumber(canopyCoveragePct, 1)}%`,
-      `${formatNumber(totalEstimatedCanopyHa, 1)} ha estimated canopy`);
+      `${formatNumber(totalEstimatedCanopyHa, 1)} ha canopy`);
 
     renderMetric('densityMetric',
       formatNumber(densityPerKm2, 0),
@@ -851,16 +851,16 @@ async function buildGowanusTreeDashboard() {
 
     renderMetric('waterMetric',
       `${formatNumber(totalEstimatedRetentionM3, 0)} m³`,
-      `${formatNumber(totalEstimatedRetentionM3 * 1000, 0)} L estimated storage`);
+      `${formatNumber(totalEstimatedRetentionM3 * 1000, 0)} L storage`);
 
     renderMetric('studyAreaMetric',
       `${formatNumber(studyAreaKm2, 2)} km²`,
-      'Bounding study area');
+      'Study boundary');
 
     const goodPct = totalTrees ? (healthCounts.Good / totalTrees) * 100 : 0;
     renderMetric('healthMetric',
       `${formatNumber(goodPct, 0)}%`,
-      'Trees in good health');
+      'Good condition');
 
     // Charts
     makeSpeciesChart(speciesCounts);

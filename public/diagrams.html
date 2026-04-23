@@ -22,11 +22,11 @@
 	<main class="diagrams-layout">
 		<section class="board-section board-intro" id="section-intro">
 			<div class="diagrams-header">
-				<p class="eyebrow">Section 1 · Intro / Context</p>
-				<h1>Gowanus Tree and Landscape Baseline</h1>
+				<p class="eyebrow">Overview</p>
+				<h1>Gowanus Trees: Existing Conditions to Projected Change</h1>
 				<p class="diagrams-intro">
-					This board presents existing tree conditions and proposal intervention logic for
-					the Gowanus site in a step-by-step sequence suitable for verbal presentation.
+					Start with the current tree inventory, then transition to intervention assumptions
+					and projected ecological outcomes.
 				</p>
 			</div>
 			<div id="diagramError" class="diagram-error" style="display: none;"></div>
@@ -34,8 +34,8 @@
 
 		<section class="board-section board-baseline" id="section-baseline">
 			<div class="board-header-row">
-				<p class="eyebrow">Section 2 · Existing Conditions</p>
-				<h2>Baseline Ecological Inventory</h2>
+				<p class="eyebrow">Existing Conditions</p>
+				<h2>Baseline Metrics</h2>
 			</div>
 			<section class="metrics-grid">
 				<article class="metric-card">
@@ -70,15 +70,65 @@
 			</section>
 		</section>
 
+		<section class="board-section board-supporting" id="section-supporting">
+			<div class="board-header-row">
+				<p class="eyebrow">Existing Conditions</p>
+				<h2>Baseline Graphs</h2>
+			</div>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Top Species</h2>
+						<p>Most frequent species in the current inventory.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="speciesChart"></canvas>
+					</div>
+				</article>
+
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Health Distribution</h2>
+						<p>Current health classes across mapped trees.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="healthChart"></canvas>
+					</div>
+				</article>
+			</section>
+
+			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Water Retention by Species</h2>
+						<p>Estimated retention capacity per dominant species.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="waterRetentionChart"></canvas>
+					</div>
+				</article>
+
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Density by Block</h2>
+						<p>Distribution of trees per block across the study area.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="densityChart"></canvas>
+					</div>
+				</article>
+			</section>
+		</section>
+
 		<section class="board-section board-intervention" id="section-intervention">
 			<div class="board-header-row">
-				<p class="eyebrow">Section 3 · Intervention Logic</p>
-				<h2>Ecological Improvement Toggle</h2>
+				<p class="eyebrow">Project Scenario</p>
+				<h2>Intervention Scope</h2>
 			</div>
 			<div class="panel-card presentation-toggle-card">
 				<div class="panel-header">
 					<p>
-						Proposal contribution math based on park intervention areas and planting-density assumptions.
+						Select a contribution scope to preview quantity and growth assumptions.
 					</p>
 				</div>
 				<div class="improvement-toggle" role="tablist" aria-label="Proposal contribution scope">
@@ -93,8 +143,8 @@
 
 		<section class="board-section board-impact" id="section-impact">
 			<div class="board-header-row">
-				<p class="eyebrow">Section 4 · Proposal Impact</p>
-				<h2>Primary Design Move and Quantified Impact</h2>
+				<p class="eyebrow">Project Change</p>
+				<h2>Intervention Metrics</h2>
 			</div>
 			<div class="metrics-grid improvement-metrics-grid impact-metrics-grid">
 				<article class="metric-card">
@@ -131,14 +181,14 @@
 
 		<section class="board-section board-primary-diagrams" id="section-primary-diagrams">
 			<div class="board-header-row">
-				<p class="eyebrow">Section 5 · Primary Diagram Field</p>
-				<h2>Ecological Benefit and Growth Systems</h2>
+				<p class="eyebrow">Project Change</p>
+				<h2>Projected Performance Graphs</h2>
 			</div>
 			<section class="charts-grid two-col primary-diagram-grid">
 				<article class="panel-card">
 					<div class="panel-header">
-						<h2>Conceptual Ecological Benefit by Band</h2>
-						<p>Weighted conceptual contribution of each band for canopy, habitat, cooling, stormwater, and pollinators.</p>
+						<h2>Benefit by Band</h2>
+						<p>Relative contribution across canopy, habitat, cooling, stormwater, and pollination.</p>
 					</div>
 					<div class="chart-wrap">
 						<canvas id="benefitBandChart"></canvas>
@@ -147,61 +197,11 @@
 
 				<article class="panel-card">
 					<div class="panel-header">
-						<h2>Growth Over Time (Intervention Scope)</h2>
-						<p>Projected build-up across 0-2, 3-5, and 5-10 years from the currently selected contribution scope.</p>
+						<h2>Growth by Scope</h2>
+						<p>Projected trajectory for 0-2, 3-5, and 5-10 years.</p>
 					</div>
 					<div class="chart-wrap">
 						<canvas id="improvementGrowthChart"></canvas>
-					</div>
-				</article>
-			</section>
-		</section>
-
-		<section class="board-section board-supporting" id="section-supporting">
-			<div class="board-header-row">
-				<p class="eyebrow">Section 6 · Supporting Data</p>
-				<h2>Secondary Baseline Readouts</h2>
-			</div>
-			<section class="charts-grid two-col supporting-diagram-grid">
-				<article class="panel-card">
-					<div class="panel-header">
-						<h2>Top Tree Species</h2>
-						<p>Most common species currently present in the study area.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="speciesChart"></canvas>
-					</div>
-				</article>
-
-				<article class="panel-card">
-					<div class="panel-header">
-						<h2>Tree Health Distribution</h2>
-						<p>Current condition of the mapped street trees.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="healthChart"></canvas>
-					</div>
-				</article>
-			</section>
-
-			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
-				<article class="panel-card quiet-support-card">
-					<div class="panel-header">
-						<h2>Estimated Water Retention by Species</h2>
-						<p>Conceptual stormwater storage estimate based on canopy area, 3 ft soil depth, and 20% water holding capacity.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="waterRetentionChart"></canvas>
-					</div>
-				</article>
-
-				<article class="panel-card quiet-support-card">
-					<div class="panel-header">
-						<h2>Tree Density by Block</h2>
-						<p>Tree density per block in the study area.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="densityChart"></canvas>
 					</div>
 				</article>
 			</section>
