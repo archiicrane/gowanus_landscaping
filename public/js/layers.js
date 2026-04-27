@@ -13,6 +13,8 @@
 //   contour-lines
 //   flood-vulnerability-fill
 //   cso-outfalls-circle
+//   remediation-superfund-fill
+//   remediation-brownfield-fill
 
 export const STUDY_RING = [
 	[-73.98963594611494, 40.683945676183654],
@@ -76,6 +78,72 @@ function flattenLineCoordinates(geometry) {
 		return (geometry.coordinates || []).flatMap((segment) => segment || []);
 	}
 	return [];
+}
+
+function getStudyBbox(ring) {
+	let minLng = Infinity;
+	let minLat = Infinity;
+	let maxLng = -Infinity;
+	let maxLat = -Infinity;
+
+	for (const [lng, lat] of ring) {
+		if (lng < minLng) minLng = lng;
+		if (lng > maxLng) maxLng = lng;
+		if (lat < minLat) minLat = lat;
+		if (lat > maxLat) maxLat = lat;
+	}
+
+	return { minLng, minLat, maxLng, maxLat };
+}
+
+function normalizeProgramLabel(value) {
+	return String(value || '').trim().toLowerCase();
+}
+
+function getCleanupType(programRaw) {
+	const program = normalizeProgramLabel(programRaw);
+	if (program.includes('brownfield')) return 'brownfield';
+	if (program.includes('superfund')) return 'superfund';
+	return null;
+}
+
+async function fetchRemediationSitesForStudyArea() {
+	const { minLng, minLat, maxLng, maxLat } = getStudyBbox(STUDY_RING);
+	const query = new URLSearchParams({
+		where: '1=1',
+		geometry: `${minLng},${minLat},${maxLng},${maxLat}`,
+		geometryType: 'esriGeometryEnvelope',
+		inSR: '4326',
+		spatialRel: 'esriSpatialRelIntersects',
+		outFields: 'SITECODE,SITENAME,PROGRAM,SITECLASS,DETAIL_URL',
+		outSR: '4326',
+		f: 'geojson',
+	});
+
+	const url = `https://gisservices.dec.ny.gov/arcgis/rest/services/der/RemediationSpills/MapServer/3/query?${query.toString()}`;
+	const res = await fetch(url);
+	if (!res.ok) throw new Error(`HTTP ${res.status}`);
+	const data = await res.json();
+
+	const features = (data.features || [])
+		.map((feature) => {
+			const cleanupType = getCleanupType(feature?.properties?.PROGRAM);
+			if (!cleanupType) return null;
+			return {
+				...feature,
+				properties: {
+					...(feature.properties || {}),
+					cleanup_type: cleanupType,
+					program_clean: String(feature?.properties?.PROGRAM || '').trim(),
+				},
+			};
+		})
+		.filter(Boolean);
+
+	return {
+		type: 'FeatureCollection',
+		features,
+	};
 }
 
 function contourFeaturesToLowPointGeoJSON(features) {
@@ -578,6 +646,92 @@ export async function addCsoOutfallsLayer(map) {
 			'circle-stroke-width': 1.5,
 			'circle-stroke-color': '#f6f3ee',
 			'circle-opacity': 0.95,
+		},
+	});
+}
+
+// ─── Toxic Soil Cleanup Sites (NYS DEC) ────────────────────────────────────
+
+export async function addRemediationSitesLayer(map) {
+	let data;
+	try {
+		data = await fetchRemediationSitesForStudyArea();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load remediation site borders:', err);
+		return;
+	}
+
+	if (map.getLayer('remediation-sites-labels')) map.removeLayer('remediation-sites-labels');
+	if (map.getLayer('remediation-superfund-line')) map.removeLayer('remediation-superfund-line');
+	if (map.getLayer('remediation-superfund-fill')) map.removeLayer('remediation-superfund-fill');
+	if (map.getLayer('remediation-brownfield-line')) map.removeLayer('remediation-brownfield-line');
+	if (map.getLayer('remediation-brownfield-fill')) map.removeLayer('remediation-brownfield-fill');
+	if (map.getSource('remediation-sites')) map.removeSource('remediation-sites');
+
+	map.addSource('remediation-sites', { type: 'geojson', data });
+
+	map.addLayer({
+		id: 'remediation-brownfield-fill',
+		type: 'fill',
+		source: 'remediation-sites',
+		filter: ['==', ['get', 'cleanup_type'], 'brownfield'],
+		paint: {
+			'fill-color': '#d1843b',
+			'fill-opacity': 0.18,
+		},
+	});
+
+	map.addLayer({
+		id: 'remediation-brownfield-line',
+		type: 'line',
+		source: 'remediation-sites',
+		filter: ['==', ['get', 'cleanup_type'], 'brownfield'],
+		paint: {
+			'line-color': '#b06420',
+			'line-width': 1.3,
+			'line-opacity': 0.9,
+		},
+	});
+
+	map.addLayer({
+		id: 'remediation-superfund-fill',
+		type: 'fill',
+		source: 'remediation-sites',
+		filter: ['==', ['get', 'cleanup_type'], 'superfund'],
+		paint: {
+			'fill-color': '#c23d3d',
+			'fill-opacity': 0.24,
+		},
+	});
+
+	map.addLayer({
+		id: 'remediation-superfund-line',
+		type: 'line',
+		source: 'remediation-sites',
+		filter: ['==', ['get', 'cleanup_type'], 'superfund'],
+		paint: {
+			'line-color': '#8d1f1f',
+			'line-width': 1.7,
+			'line-opacity': 0.95,
+		},
+	});
+
+	map.addLayer({
+		id: 'remediation-sites-labels',
+		type: 'symbol',
+		source: 'remediation-sites',
+		minzoom: 15,
+		layout: {
+			'text-field': ['get', 'SITENAME'],
+			'text-size': 10,
+			'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Bold'],
+			'text-offset': [0, 0.9],
+			'text-anchor': 'top',
+		},
+		paint: {
+			'text-color': '#3f2f25',
+			'text-halo-color': '#f6f3ee',
+			'text-halo-width': 1,
 		},
 	});
 }

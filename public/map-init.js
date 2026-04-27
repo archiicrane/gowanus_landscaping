@@ -13,6 +13,7 @@ import {
 	addCsoOutfallsLayer,
 	addTopographyHeatLayer,
 	addBioswaleOpportunityLayer,
+	addRemediationSitesLayer,
 } from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
 
@@ -76,6 +77,7 @@ export async function initMap() {
 		await addContourLayer(map);
 		await addFloodLayer(map);
 		await addCsoOutfallsLayer(map);
+		await addRemediationSitesLayer(map);
 		await addBioswaleOpportunityLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
@@ -97,7 +99,8 @@ function wireLayerToggles(map) {
 		{ id: 'toggle-contours',  layers: ['contour-lines'] },
 		{ id: 'toggle-flood',     layers: ['flood-vulnerability-fill'] },
 		{ id: 'toggle-cso',       layers: ['cso-outfalls-circle'] },
-		{ id: 'toggle-heat',      layers: ['topography-heatmap'] },
+		{ id: 'toggle-remediation', layers: ['remediation-brownfield-fill', 'remediation-brownfield-line', 'remediation-superfund-fill', 'remediation-superfund-line', 'remediation-sites-labels'] },
+		{ id: 'toggle-heat',      layers: ['topography-heatmap', 'study-clip-mask'] },
 		{ id: 'toggle-bioswale',  layers: ['bioswale-corridor-glow', 'bioswale-corridor-core'] },
 		{ id: 'toggle-bounding',  layers: ['study-boundary-fill', 'study-boundary-line'] },
 	];
@@ -123,8 +126,8 @@ function wireLayerToggles(map) {
 function initMapIntroSequence(map) {
 	const existingPanel = document.getElementById('story-existing');
 	const bioswalePanel = document.getElementById('story-bioswale');
-	const toggleIds = ['toggle-heat', 'toggle-contours', 'toggle-flood', 'toggle-bioswale'];
 	const studyBounds = getStudyBounds(STUDY_RING);
+	const heatToggle = document.getElementById('toggle-heat');
 
 	if (existingPanel) existingPanel.classList.add('active');
 	if (bioswalePanel) bioswalePanel.classList.remove('active');
@@ -135,6 +138,15 @@ function initMapIntroSequence(map) {
 
 	let stage = 0;
 	let transitioning = false;
+	let userHeatPreference = null;
+
+	if (heatToggle) {
+		heatToggle.addEventListener('change', (event) => {
+			if (event.isTrusted) {
+				userHeatPreference = heatToggle.checked;
+			}
+		});
+	}
 
 	const setChecked = (id, checked) => {
 		const input = document.getElementById(id);
@@ -166,7 +178,7 @@ function initMapIntroSequence(map) {
 			// Stage 1: contours + low-point heat — topography reading
 			setChecked('toggle-bounding', true);
 			setChecked('toggle-contours', true);
-			setChecked('toggle-heat', true);
+			setChecked('toggle-heat', userHeatPreference ?? true);
 			setChecked('toggle-bioswale', false);
 			setChecked('toggle-flood', false);
 			setChecked('toggle-cso', false);
@@ -178,7 +190,7 @@ function initMapIntroSequence(map) {
 		// Stage 2+: bioswale corridors revealed
 		setChecked('toggle-bounding', true);
 		setChecked('toggle-contours', true);
-		setChecked('toggle-heat', true);
+		setChecked('toggle-heat', userHeatPreference ?? true);
 		setChecked('toggle-bioswale', true);
 		setChecked('toggle-flood', false);
 		setChecked('toggle-cso', false);
