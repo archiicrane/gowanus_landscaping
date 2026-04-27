@@ -99,6 +99,7 @@
       "type": "Feature",
       "properties": {
         "id": "prospect-park",
+        "osm_id": "R9760157",
         "name": "Prospect Park",
         "distance_m": 1220,
         "distance_label": "~1.2 km to edge · 15 min walk",
@@ -130,6 +131,7 @@
       "type": "Feature",
       "properties": {
         "id": "green-wood-cemetery",
+        "osm_id": "R10213172",
         "name": "Green-Wood Cemetery",
         "distance_m": 1650,
         "distance_label": "~1.7 km · 21 min walk",

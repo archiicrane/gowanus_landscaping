@@ -663,6 +663,35 @@ export async function addNearbyParksLayer(map) {
 		return;
 	}
 
+	// Fetch real OSM boundaries from Nominatim for parks that have an osm_id
+	const osmFeatures = data.features.filter(f => f.properties.osm_id);
+	if (osmFeatures.length > 0) {
+		try {
+			const ids = osmFeatures.map(f => f.properties.osm_id).join(',');
+			const nominatimRes = await fetch(
+				`https://nominatim.openstreetmap.org/lookup?osm_ids=${ids}&format=geojson&polygon_geojson=1`,
+				{ headers: { 'Accept': 'application/json' } }
+			);
+			if (nominatimRes.ok) {
+				const nominatimData = await nominatimRes.json();
+				// Build a lookup map: osm_id string → geometry
+				const geomByOsmId = {};
+				for (const nf of (nominatimData.features || [])) {
+					const key = `${nf.properties.osm_type[0].toUpperCase()}${nf.properties.osm_id}`;
+					geomByOsmId[key] = nf.geometry;
+				}
+				// Replace geometry for matched features
+				for (const feature of data.features) {
+					if (feature.properties.osm_id && geomByOsmId[feature.properties.osm_id]) {
+						feature.geometry = geomByOsmId[feature.properties.osm_id];
+					}
+				}
+			}
+		} catch (e) {
+			console.warn('[LAYERS] Nominatim boundary fetch failed, using fallback coords:', e);
+		}
+	}
+
 	const layerIds = ['nearby-parks-label', 'nearby-parks-outline-hover', 'nearby-parks-outline', 'nearby-parks-fill'];
 	for (const id of layerIds) {
 		if (map.getLayer(id)) map.removeLayer(id);
