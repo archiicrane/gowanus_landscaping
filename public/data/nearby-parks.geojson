@@ -1,0 +1,143 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "thomas-greene",
+        "name": "Thomas Greene Playground",
+        "distance_m": 310,
+        "distance_label": "~0.3 km · 4 min walk",
+        "area_acres": 2.1,
+        "established": 1939,
+        "image_url": null,
+        "description": "A neighborhood playground sitting directly within the Gowanus study corridor on 3rd Avenue. It serves as the closest public green space to the site and a critical anchor in one of Brooklyn's most industrially impacted blocks — surrounded by contaminated lots, active rail, and the Gowanus Canal.",
+        "ecology_note": "With under 5% tree canopy coverage on adjacent blocks, this park represents one of the only permeable surfaces in the immediate zone. Its role as a stepping-stone habitat node is central to the Gowanus green corridor proposal — connecting the canal edge to Carroll Gardens and Park Slope trees to the north.",
+        "wildlife": ["House Sparrow", "Rock Pigeon", "European Starling", "Common Grackle", "American Robin", "Gray Squirrel"],
+        "programs": ["Youth sports leagues (basketball, soccer)", "After-school recreation", "Spray shower summer cooling station", "NYC Parks summer programs"],
+        "link": "https://www.nycgovparks.org/parks/thomas-greene-playground"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.9952, 40.6727],
+          [-73.9939, 40.6727],
+          [-73.9939, 40.6735],
+          [-73.9952, 40.6735],
+          [-73.9952, 40.6727]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "carroll-park",
+        "name": "Carroll Park",
+        "distance_m": 860,
+        "distance_label": "~0.9 km · 11 min walk",
+        "area_acres": 1.8,
+        "established": 1867,
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Carroll_Park_Carroll_Gardens_Brooklyn_2.jpg",
+        "description": "A historic neighborhood park in Carroll Gardens bounded by Carroll Street, Court Street, and Smith Street. One of the oldest named parks in Brooklyn, it is shaded by a mature canopy of London plane trees and honey locusts and serves as the main outdoor commons for the Carroll Gardens residential community.",
+        "ecology_note": "The mature London plane and honey locust canopy creates critical summer cooling and wildlife refuge in a dense residential district. The park's root systems intercept significant stormwater that would otherwise enter the Gowanus Canal catchment. Its tree cover marks a clear ecological threshold between the hardscape-heavy Gowanus corridor to the south.",
+        "wildlife": ["American Robin", "Gray Catbird", "Blue Jay", "Mourning Dove", "House Sparrow", "Eastern Gray Squirrel", "Monarch Butterfly (migration)"],
+        "programs": ["Community gardening", "Bocce courts", "Children's playground", "Carroll Gardens neighborhood events"],
+        "link": "https://www.nycgovparks.org/parks/carroll-park"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.9990, 40.6793],
+          [-73.9971, 40.6793],
+          [-73.9971, 40.6802],
+          [-73.9990, 40.6802],
+          [-73.9990, 40.6793]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "coffey-park",
+        "name": "Coffey Park",
+        "distance_m": 1580,
+        "distance_label": "~1.6 km · 20 min walk",
+        "area_acres": 3.5,
+        "established": 1904,
+        "image_url": null,
+        "description": "A neighborhood park in the heart of Red Hook, bounded by Richards, Dwight, Coffey, and Sullivan Streets. One of the largest open spaces in Red Hook, Coffey Park provides the community with a shaded lawn, mature tree canopy, and a playground. It was substantially rebuilt after Hurricane Sandy flooding.",
+        "ecology_note": "The park's mature oaks and elms provide one of the only significant woodland-edge habitats in Red Hook. Its proximity to the waterfront means it sits in a migratory bird flyway — warblers, vireos, and thrushes are regularly recorded here during spring and fall migration. The park's low-lying terrain makes it particularly vulnerable to sea-level rise, giving it direct relevance to the Gowanus coastal resilience narrative.",
+        "wildlife": ["Red-tailed Hawk", "American Kestrel", "Gray Catbird", "House Wren", "Yellow Warbler (migration)", "Common Yellowthroat", "Eastern Gray Squirrel", "Monarch Butterfly"],
+        "programs": ["After-school sports leagues", "Playground and spray shower", "Community events and outdoor cinema", "NYC Parks nature walks"],
+        "link": "https://www.nycgovparks.org/parks/coffey-park"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.0113, 40.6743],
+          [-74.0081, 40.6743],
+          [-74.0081, 40.6762],
+          [-74.0113, 40.6762],
+          [-74.0113, 40.6743]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "prospect-park",
+        "name": "Prospect Park",
+        "distance_m": 1220,
+        "distance_label": "~1.2 km to edge · 15 min walk",
+        "area_acres": 526,
+        "established": 1867,
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Long_Meadow_-_Prospect_Park.jpg/1200px-Long_Meadow_-_Prospect_Park.jpg",
+        "description": "Designed by Frederick Law Olmsted and Calvert Vaux, Prospect Park is Brooklyn's flagship green space and one of the great urban parks of America. Its 526 acres contain the only remaining old-growth forest in Brooklyn (the Ravine), a 60-acre lake, and New York City's largest continuous meadow (the Long Meadow). The park is managed by the Prospect Park Alliance.",
+        "ecology_note": "Prospect Park is one of New York City's top two birding locations, with over 200 species recorded annually. The Ravine contains a continuous canopy of oaks, tulip trees, and black cherry that has never been cleared — providing a rare urban forest interior microclimate. Prospect Lake hosts breeding black-crowned night herons, great blue herons, double-crested cormorants, and nesting Canada geese. Red foxes were successfully reintroduced in 2011. The park sits along the Atlantic Flyway, making it critical for migratory passerines each spring and fall.",
+        "wildlife": ["Red-tailed Hawk", "Eastern Screech-Owl", "Great Blue Heron", "Black-crowned Night Heron", "Double-crested Cormorant", "Red Fox", "Virginia Opossum", "Raccoon", "Eastern Gray Squirrel", "Wood Thrush", "Ovenbird", "Peregrine Falcon", "American Kestrel", "Painted Turtle", "Red-eared Slider"],
+        "programs": ["Audubon NYC bird walks (weekly)", "Urban Park Rangers nature programs", "Boathouse kayaking", "Prospect Park Alliance volunteer restoration", "Concerts at the Bandshell", "Off-leash dog hours (Long Meadow)"],
+        "link": "https://www.prospectpark.org"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-73.9768, 40.6836],
+          [-73.9694, 40.6836],
+          [-73.9594, 40.6741],
+          [-73.9549, 40.6640],
+          [-73.9617, 40.6567],
+          [-73.9700, 40.6567],
+          [-73.9770, 40.6630],
+          [-73.9768, 40.6836]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "red-hook-recreation",
+        "name": "Red Hook Recreation Area",
+        "distance_m": 2350,
+        "distance_label": "~2.4 km · 30 min walk",
+        "area_acres": 68,
+        "established": 1936,
+        "image_url": null,
+        "description": "A large waterfront recreational complex in Red Hook encompassing ball fields, a running track, playground facilities, and public beach access along the New York Harbor shoreline. One of the largest open recreational spaces in southern Brooklyn, it offers unobstructed views of the Statue of Liberty and Upper New York Bay.",
+        "ecology_note": "Positioned directly on New York Harbor, this park sits within one of the most significant urban waterbird habitats in the northeast. The adjacent bay is a staging area for migratory shorebirds and waterfowl along the Atlantic Flyway. Ospreys are observed fishing in the near-shore waters regularly (nesting platforms are installed on nearby structures). Winter brings significant concentrations of diving ducks. The shoreline also marks the northern edge of the influence zone for the recovering Jamaica Bay salt marsh ecosystem.",
+        "wildlife": ["Osprey", "Peregrine Falcon", "Double-crested Cormorant", "Great Black-backed Gull", "Laughing Gull", "Common Tern", "Least Tern", "Semipalmated Sandpiper", "Dunlin", "Bufflehead (winter)", "Greater Scaup (winter)", "Common Merganser (winter)", "Herring Gull"],
+        "programs": ["NYC Department of Parks athletics (baseball, soccer, cricket)", "NYC Ferry terminal access", "Community garden plots", "Brooklyn Cyclones partner programs", "NYC Parks waterfront access"],
+        "link": "https://www.nycgovparks.org/parks/red-hook-recreation-area"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.0219, 40.6716],
+          [-74.0152, 40.6716],
+          [-74.0152, 40.6743],
+          [-74.0219, 40.6743],
+          [-74.0219, 40.6716]
+        ]]
+      }
+    }
+  ]
+}

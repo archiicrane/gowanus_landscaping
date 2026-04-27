@@ -650,6 +650,91 @@ export async function addCsoOutfallsLayer(map) {
 	});
 }
 
+// ─── Nearby Parks (context layer) ────────────────────────────────────────────
+
+export async function addNearbyParksLayer(map) {
+	let data;
+	try {
+		const res = await fetch('/data/nearby-parks.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		data = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load nearby parks GeoJSON:', err);
+		return;
+	}
+
+	const layerIds = ['nearby-parks-label', 'nearby-parks-outline-hover', 'nearby-parks-outline', 'nearby-parks-fill'];
+	for (const id of layerIds) {
+		if (map.getLayer(id)) map.removeLayer(id);
+	}
+	if (map.getSource('nearby-parks')) map.removeSource('nearby-parks');
+
+	map.addSource('nearby-parks', { type: 'geojson', data });
+
+	map.addLayer({
+		id: 'nearby-parks-fill',
+		type: 'fill',
+		source: 'nearby-parks',
+		paint: {
+			'fill-color': '#5a9e6f',
+			'fill-opacity': 0.07,
+		},
+	});
+
+	map.addLayer({
+		id: 'nearby-parks-outline',
+		type: 'line',
+		source: 'nearby-parks',
+		paint: {
+			'line-color': '#4c8a5e',
+			'line-width': [
+				'interpolate', ['linear'], ['zoom'],
+				11, 1.2,
+				16, 2.2,
+			],
+			'line-opacity': 0.85,
+			'line-dasharray': [3, 1.6],
+		},
+	});
+
+	// Hover highlight outline — only visible on the hovered feature
+	map.addLayer({
+		id: 'nearby-parks-outline-hover',
+		type: 'line',
+		source: 'nearby-parks',
+		filter: ['==', ['get', 'id'], ''],
+		paint: {
+			'line-color': '#2a7245',
+			'line-width': 2.8,
+			'line-opacity': 0.95,
+		},
+	});
+
+	map.addLayer({
+		id: 'nearby-parks-label',
+		type: 'symbol',
+		source: 'nearby-parks',
+		minzoom: 13,
+		layout: {
+			'text-field': ['get', 'name'],
+			'text-size': [
+				'interpolate', ['linear'], ['zoom'],
+				13, 10,
+				16, 13,
+			],
+			'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Bold'],
+			'text-offset': [0, 0],
+			'text-anchor': 'center',
+			'text-max-width': 8,
+		},
+		paint: {
+			'text-color': '#2a5e3a',
+			'text-halo-color': 'rgba(242, 238, 231, 0.88)',
+			'text-halo-width': 1.4,
+		},
+	});
+}
+
 // ─── Toxic Soil Cleanup Sites (NYS DEC) ────────────────────────────────────
 
 export async function addRemediationSitesLayer(map) {

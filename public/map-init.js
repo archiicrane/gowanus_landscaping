@@ -14,6 +14,7 @@ import {
 	addTopographyHeatLayer,
 	addBioswaleOpportunityLayer,
 	addRemediationSitesLayer,
+	addNearbyParksLayer,
 } from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
 
@@ -39,15 +40,16 @@ export async function initMap() {
 	mapboxgl.accessToken = token;
 
 	const initialPadding = getInitialFitPadding();
-	const studyBounds = getStudyBounds(STUDY_RING);
+	// Wider initial bounds shows surrounding parks before the site intro zooms in
+	const contextBounds = [[-74.028, 40.650], [-73.948, 40.690]];
 
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
-		bounds: studyBounds,
+		bounds: contextBounds,
 		fitBoundsOptions: {
 			padding: initialPadding,
-			maxZoom: 14.45,
+			maxZoom: 13.2,
 		},
 		pitch: 0,
 		bearing: 0,
@@ -67,6 +69,8 @@ export async function initMap() {
 			}
 		}
 
+		// Nearby parks first — sits under all other layers
+		await addNearbyParksLayer(map);
 		// Data layers — heatmap first so the clip mask can sit on top of it
 		await addBuildingLayer(map);
 		await addTreeLayer(map);
@@ -93,6 +97,7 @@ export async function initMap() {
 
 function wireLayerToggles(map) {
 	const toggles = [
+		{ id: 'toggle-nearby-parks', layers: ['nearby-parks-fill', 'nearby-parks-outline', 'nearby-parks-outline-hover', 'nearby-parks-label'] },
 		{ id: 'toggle-buildings', layers: ['buildings-extrusion'] },
 		{ id: 'toggle-trees',     layers: ['trees-circles', 'trees-labels'] },
 		{ id: 'toggle-park',      layers: ['park-outline'] },
@@ -124,17 +129,20 @@ function wireLayerToggles(map) {
 }
 
 function initMapIntroSequence(map) {
+	const parksPanel    = document.getElementById('story-parks');
 	const existingPanel = document.getElementById('story-existing');
 	const bioswalePanel = document.getElementById('story-bioswale');
-	const studyBounds = getStudyBounds(STUDY_RING);
-	const heatToggle = document.getElementById('toggle-heat');
+	const studyBounds   = getStudyBounds(STUDY_RING);
+	const heatToggle    = document.getElementById('toggle-heat');
 
-	if (existingPanel) existingPanel.classList.add('active');
+	if (parksPanel)    parksPanel.classList.add('active');
+	if (existingPanel) existingPanel.classList.remove('active');
 	if (bioswalePanel) bioswalePanel.classList.remove('active');
 
 	map.scrollZoom.disable();
 
-	const stageZoom = Math.min(15.1, map.getZoom() + 0.95);
+	// Fixed zoom level for the topography close-up (Stage 2)
+	const stageZoom = 14.8;
 
 	let stage = 0;
 	let transitioning = false;
@@ -159,8 +167,9 @@ function initMapIntroSequence(map) {
 
 	const applyStage = () => {
 		if (stage === 0) {
-			// Stage 0: boundary outline only
-			setChecked('toggle-bounding', true);
+			// Stage 0 — context view: surrounding parks highlighted, site hidden
+			setChecked('toggle-nearby-parks', true);
+			setChecked('toggle-bounding', false);
 			setChecked('toggle-buildings', false);
 			setChecked('toggle-trees', false);
 			setChecked('toggle-park', false);
@@ -169,31 +178,50 @@ function initMapIntroSequence(map) {
 			setChecked('toggle-heat', false);
 			setChecked('toggle-bioswale', false);
 			setChecked('toggle-contours', false);
-			if (existingPanel) existingPanel.classList.add('active');
+			setChecked('toggle-remediation', false);
+			if (parksPanel)    parksPanel.classList.add('active');
+			if (existingPanel) existingPanel.classList.remove('active');
 			if (bioswalePanel) bioswalePanel.classList.remove('active');
 			return;
 		}
 
 		if (stage === 1) {
-			// Stage 1: contours + low-point heat — topography reading
+			// Stage 1 — enter study site: boundary revealed, parks remain
+			setChecked('toggle-nearby-parks', true);
+			setChecked('toggle-bounding', true);
+			setChecked('toggle-contours', false);
+			setChecked('toggle-heat', false);
+			setChecked('toggle-bioswale', false);
+			setChecked('toggle-flood', false);
+			setChecked('toggle-cso', false);
+			if (parksPanel)    parksPanel.classList.remove('active');
+			if (existingPanel) existingPanel.classList.add('active');
+			if (bioswalePanel) bioswalePanel.classList.remove('active');
+			return;
+		}
+
+		if (stage === 2) {
+			// Stage 2 — topography reading: contours + heat
 			setChecked('toggle-bounding', true);
 			setChecked('toggle-contours', true);
 			setChecked('toggle-heat', userHeatPreference ?? true);
 			setChecked('toggle-bioswale', false);
 			setChecked('toggle-flood', false);
 			setChecked('toggle-cso', false);
+			if (parksPanel)    parksPanel.classList.remove('active');
 			if (existingPanel) existingPanel.classList.add('active');
 			if (bioswalePanel) bioswalePanel.classList.remove('active');
 			return;
 		}
 
-		// Stage 2+: bioswale corridors revealed
+		// Stage 3+ — bioswale corridors revealed
 		setChecked('toggle-bounding', true);
 		setChecked('toggle-contours', true);
 		setChecked('toggle-heat', userHeatPreference ?? true);
 		setChecked('toggle-bioswale', true);
 		setChecked('toggle-flood', false);
 		setChecked('toggle-cso', false);
+		if (parksPanel)    parksPanel.classList.remove('active');
 		if (existingPanel) existingPanel.classList.remove('active');
 		if (bioswalePanel) bioswalePanel.classList.add('active');
 	};
@@ -205,9 +233,25 @@ function initMapIntroSequence(map) {
 		if (transitioning) return;
 
 		if (stage === 0) {
-			// First swipe: zoom in + tilt, reveal topography
+			// First scroll: fly into study area
 			transitioning = true;
 			stage = 1;
+			applyStage();
+			map.fitBounds(studyBounds, {
+				padding: getInitialFitPadding(),
+				bearing: -40,
+				pitch: 0,
+				duration: 1500,
+				easing: (t) => t * (2 - t),
+			});
+			window.setTimeout(() => { transitioning = false; }, 1550);
+			return;
+		}
+
+		if (stage === 1) {
+			// Second scroll: zoom in, reveal topography
+			transitioning = true;
+			stage = 2;
 			applyStage();
 			map.easeTo({
 				pitch: 0,
@@ -220,10 +264,10 @@ function initMapIntroSequence(map) {
 			return;
 		}
 
-		if (stage === 1) {
-			// Second swipe: reveal bioswale corridors and recenter at max fit
+		if (stage === 2) {
+			// Third scroll: reveal bioswale corridors
 			transitioning = true;
-			stage = 2;
+			stage = 3;
 			applyStage();
 			map.fitBounds(studyBounds, {
 				padding: getCenteredStagePadding(),
@@ -236,7 +280,7 @@ function initMapIntroSequence(map) {
 			return;
 		}
 
-		// Stage 2+: free pan/rotate with scroll
+		// Stage 3+: free pan/rotate with scroll
 		const direction = event.deltaY > 0 ? -1 : 1;
 		const nextBearing = map.getBearing() + direction * 4;
 		map.easeTo({ pitch: 0, bearing: nextBearing, duration: 220 });
