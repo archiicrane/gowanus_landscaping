@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Wildlife Corridor Analysis · Rewilding Gowanus</title>
+	<link rel="stylesheet" href="/style.css" />
+	<style>
+		body { background: var(--paper); padding-top: 56px; }
+
+		.page-hero {
+			padding: 52px 48px 36px;
+			max-width: 1100px;
+			margin: 0 auto;
+		}
+		.page-hero h1 {
+			font-size: clamp(22px, 3vw, 36px);
+			font-weight: 700;
+			letter-spacing: -0.02em;
+			margin: 0 0 10px;
+			color: var(--ink);
+		}
+		.page-hero p {
+			font-size: 15px;
+			color: var(--ink-muted);
+			max-width: 660px;
+			line-height: 1.65;
+			margin: 0;
+		}
+
+		/* ── Section headings ─────────────────────── */
+		.section {
+			max-width: 1100px;
+			margin: 0 auto 64px;
+			padding: 0 48px;
+		}
+		.section-title {
+			font-size: 11px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.14em;
+			color: var(--accent);
+			margin: 0 0 6px;
+		}
+		.section-heading {
+			font-size: clamp(17px, 2vw, 24px);
+			font-weight: 700;
+			margin: 0 0 8px;
+			letter-spacing: -0.015em;
+		}
+		.section-sub {
+			font-size: 13.5px;
+			color: var(--ink-muted);
+			line-height: 1.6;
+			max-width: 680px;
+			margin: 0 0 28px;
+		}
+		hr.divider {
+			border: none;
+			border-top: 1px solid var(--line);
+			margin: 0 48px 48px;
+			max-width: 1100px;
+		}
+
+		/* ── Corridor diagram ─────────────────────── */
+		.corridor-diagram {
+			position: relative;
+			width: 100%;
+			height: 220px;
+			overflow: visible;
+		}
+		.corridor-svg {
+			width: 100%;
+			height: 100%;
+			overflow: visible;
+		}
+
+		/* ── Species matrix ───────────────────────── */
+		.matrix-wrap {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+		}
+		.matrix-table {
+			border-collapse: collapse;
+			width: 100%;
+			min-width: 700px;
+			font-size: 12.5px;
+		}
+		.matrix-table th {
+			font-weight: 600;
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			color: var(--ink-muted);
+			padding: 8px 10px 10px;
+			text-align: center;
+			white-space: nowrap;
+			border-bottom: 1.5px solid var(--line);
+		}
+		.matrix-table th.species-col {
+			text-align: left;
+			min-width: 180px;
+		}
+		.matrix-table td {
+			padding: 6px 10px;
+			border-bottom: 1px solid var(--line);
+			text-align: center;
+			vertical-align: middle;
+		}
+		.matrix-table td.species-name {
+			text-align: left;
+			font-size: 13px;
+			color: var(--ink);
+			white-space: nowrap;
+		}
+		.matrix-table td.species-name em {
+			font-size: 11px;
+			color: var(--ink-muted);
+			font-style: italic;
+			display: block;
+			margin-top: 1px;
+		}
+		.matrix-table tr:hover td { background: rgba(79,127,99,0.04); }
+
+		/* presence dots */
+		.dot-present {
+			display: inline-block;
+			width: 14px; height: 14px;
+			border-radius: 50%;
+			background: var(--accent);
+			opacity: 0.85;
+		}
+		.dot-gowanus {
+			display: inline-block;
+			width: 14px; height: 14px;
+			border-radius: 50%;
+			background: #c76b3c;
+			opacity: 0.95;
+		}
+		.dot-absent {
+			display: inline-block;
+			width: 8px; height: 8px;
+			border-radius: 50%;
+			background: var(--line);
+			margin: 3px;
+		}
+
+		/* score pill */
+		.score-pill {
+			display: inline-block;
+			padding: 2px 9px;
+			border-radius: 20px;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 0.04em;
+		}
+		.score-high   { background: #d7edd5; color: #2e6e36; }
+		.score-medium { background: #fdf0d8; color: #8a6020; }
+		.score-low    { background: #f5e0d8; color: #883020; }
+
+		/* corridor score bar */
+		.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+		.score-bar-track {
+			height: 6px;
+			flex: 1;
+			background: var(--line);
+			border-radius: 3px;
+			overflow: hidden;
+		}
+		.score-bar-fill {
+			height: 100%;
+			border-radius: 3px;
+			background: var(--accent);
+			transition: width 0.6s ease;
+		}
+		.score-bar-pct {
+			font-size: 11px;
+			color: var(--ink-muted);
+			min-width: 32px;
+			text-align: right;
+		}
+
+		/* column header park name */
+		.col-gowanus { color: #c76b3c !important; }
+
+		/* ── Cards grid ───────────────────────────── */
+		.cards-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+			gap: 18px;
+		}
+		.animal-card {
+			background: #fff;
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			padding: 18px 20px 16px;
+			position: relative;
+		}
+		.animal-card-icon {
+			font-size: 28px;
+			line-height: 1;
+			margin-bottom: 10px;
+		}
+		.animal-card h3 {
+			font-size: 14px;
+			font-weight: 700;
+			margin: 0 0 4px;
+			color: var(--ink);
+		}
+		.animal-card .card-sci {
+			font-size: 11px;
+			color: var(--ink-muted);
+			font-style: italic;
+			margin: 0 0 10px;
+		}
+		.animal-card p {
+			font-size: 12.5px;
+			color: var(--ink-muted);
+			line-height: 1.5;
+			margin: 0 0 12px;
+		}
+		.card-parks {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 5px;
+		}
+		.park-chip {
+			font-size: 10px;
+			font-weight: 600;
+			letter-spacing: 0.04em;
+			padding: 2px 7px;
+			border-radius: 20px;
+			border: 1px solid rgba(76,138,94,0.3);
+			color: var(--accent);
+			background: rgba(79,127,99,0.06);
+		}
+		.park-chip.gowanus-chip {
+			border-color: rgba(199,107,60,0.4);
+			color: #c76b3c;
+			background: rgba(199,107,60,0.07);
+		}
+		.verdict-badge {
+			position: absolute;
+			top: 14px;
+			right: 14px;
+		}
+
+		/* ── Verdict summary ─────────────────────── */
+		.verdict-box {
+			background: rgba(79,127,99,0.07);
+			border: 1px solid rgba(76,138,94,0.2);
+			border-radius: 12px;
+			padding: 28px 32px;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 24px;
+		}
+		@media (max-width: 640px) { .verdict-box { grid-template-columns: 1fr; } }
+		.verdict-box h3 {
+			font-size: 15px;
+			font-weight: 700;
+			margin: 0 0 10px;
+		}
+		.verdict-box ul {
+			margin: 0;
+			padding-left: 18px;
+			font-size: 13px;
+			color: var(--ink-muted);
+			line-height: 1.7;
+		}
+		.verdict-box li { margin-bottom: 4px; }
+		strong.ok   { color: #2e6e36; }
+		strong.warn { color: #8a6020; }
+		strong.bad  { color: #883020; }
+
+		/* legend */
+		.legend-row {
+			display: flex;
+			gap: 20px;
+			flex-wrap: wrap;
+			font-size: 12px;
+			color: var(--ink-muted);
+			margin-bottom: 16px;
+			align-items: center;
+		}
+		.legend-row span { display: flex; align-items: center; gap: 6px; }
+	</style>
+</head>
+<body>
+	<nav class="top-bar">
+		<span class="brand">Rewilding Gowanus</span>
+		<span class="nav-links">
+			<a href="/index.html" class="nav-btn">Map</a>
+			<a href="/site-plan.html" class="nav-btn">Site Plan</a>
+			<a href="/diagrams.html" class="nav-btn">Diagrams</a>
+			<a href="/flora-diagram.html" class="nav-btn">Flora</a>
+			<a href="/wildlife-corridor.html" class="nav-btn active">Wildlife</a>
+		</span>
+	</nav>
+
+	<div class="page-hero">
+		<p class="section-title">Ecological Analysis</p>
+		<h1>Wildlife Corridor Feasibility</h1>
+		<p>Can Gowanus serve as a stepping-stone habitat node connecting the green spaces of South Brooklyn? This analysis maps target species across six nearby parks and evaluates which animals could colonize a rewilded Gowanus corridor — and which already exist in parks on both sides.</p>
+	</div>
+
+	<!-- ── 1. Corridor Diagram ─────────────────────────────────── -->
+	<div class="section">
+		<p class="section-title">01 · Context</p>
+		<p class="section-heading">The Stepping-Stone Problem</p>
+		<p class="section-sub">Gowanus sits in a gap between two significant green masses: Prospect Park / Green-Wood Cemetery to the east/south and the Red Hook waterfront to the west. Without a continuous green corridor, wildlife cannot move between these nodes. The canal itself is an ecological barrier — rewilding the surrounding blocks converts the gap into a bridge.</p>
+		<div class="corridor-diagram">
+			<svg class="corridor-svg" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet" id="corridor-svg"></svg>
+		</div>
+	</div>
+
+	<hr class="divider" />
+
+	<!-- ── 2. Species presence matrix ─────────────────────────── -->
+	<div class="section">
+		<p class="section-title">02 · Presence Matrix</p>
+		<p class="section-heading">Which Animals Are Already in the Nearby Parks?</p>
+		<p class="section-sub">The 18 target species for Gowanus rewilding — selected for habitat suitability, ecological role, and NYC feasibility — mapped against confirmed presence in each surrounding park. Orange = Gowanus (proposed). Green = confirmed presence. A high overlap score means the species already exists in parks flanking the site and is likely to colonize once habitat is restored.</p>
+
+		<div class="legend-row">
+			<span><span class="dot-present"></span> Confirmed in park</span>
+			<span><span class="dot-absent"></span> Not recorded</span>
+			<span><span class="dot-gowanus"></span> Target for Gowanus</span>
+		</div>
+
+		<div class="matrix-wrap">
+			<table class="matrix-table" id="species-matrix"></table>
+		</div>
+	</div>
+
+	<hr class="divider" />
+
+	<!-- ── 3. Target animal cards ─────────────────────────────── -->
+	<div class="section">
+		<p class="section-title">03 · Target Species</p>
+		<p class="section-heading">Animals We're Trying to Bring to Gowanus</p>
+		<p class="section-sub">Each card shows an animal we're designing habitat for, which parks it already inhabits, and what makes Gowanus a viable corridor step for it. Cards are ranked by corridor feasibility.</p>
+		<div class="cards-grid" id="animal-cards"></div>
+	</div>
+
+	<hr class="divider" />
+
+	<!-- ── 4. Verdict ─────────────────────────────────────────── -->
+	<div class="section">
+		<p class="section-title">04 · Verdict</p>
+		<p class="section-heading">Is Gowanus a Good Middle Ground?</p>
+		<p class="section-sub">Summary assessment of the corridor's ecological potential.</p>
+		<div class="verdict-box">
+			<div>
+				<h3>Strong Corridor Candidates</h3>
+				<ul>
+					<li><strong class="ok">Red-tailed Hawk</strong> — Already patrols the Gowanus blocks from Green-Wood and Prospect. A rewilded edge with perch trees closes the gap immediately.</li>
+					<li><strong class="ok">Eastern Gray Squirrel</strong> — Present in all six parks. Any planted street tree extends its range.</li>
+					<li><strong class="ok">Monarch Butterfly</strong> — Uses flowering corridors. The Gowanus planting plan (milkweed, asters, goldenrod) directly targets its migration route.</li>
+					<li><strong class="ok">Gray Catbird</strong> — Dense shrub nester. Coffey Park and Carroll Park populations would expand naturally into Gowanus edge plantings.</li>
+					<li><strong class="ok">American Robin</strong> — Lawn/edge species. Immediate colonizer once soil is unsealed.</li>
+					<li><strong class="ok">Yellow Warbler</strong> — Already at Coffey Park. Willow and elderberry plantings at the canal edge = direct habitat bridge.</li>
+				</ul>
+			</div>
+			<div>
+				<h3>Longer-Term Corridor Goals</h3>
+				<ul>
+					<li><strong class="warn">Eastern Screech-Owl</strong> — Present at Prospect Park and Green-Wood. Needs mature hollow trees; box programs can accelerate colonization.</li>
+					<li><strong class="warn">Wood Thrush</strong> — Interior forest specialist. Gowanus cannot provide interior habitat alone — but it extends the Prospect-Green-Wood forest corridor's functional edge.</li>
+					<li><strong class="warn">Red Fox</strong> — Only at Prospect Park currently. Long-term: if the full corridor is planted, documented range expansion is plausible (they colonized Greenpoint in 2019).</li>
+					<li><strong class="warn">Painted Turtle</strong> — Canal water quality is improving post-Superfund. Present at Prospect Lake and Green-Wood ponds; canal edge bioswales with calm pools could support them.</li>
+					<li><strong class="bad">Great Blue Heron</strong> — Foraging range extends to Gowanus Canal now, but nesting requires tall isolated trees over water. Decades-long goal.</li>
+					<li><strong class="bad">Osprey</strong> — Active over Red Hook Bay. Canal mouth habitat could serve as foraging extension, but nesting requires dedicated platforms over open water.</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<script>
+	// ── Data ─────────────────────────────────────────────────────────────────
+
+	const PARKS = [
+		{ id: 'gowanus',      name: 'Gowanus\n(proposed)',  short: 'Gowanus',    color: '#c76b3c' },
+		{ id: 'thomas',       name: 'Thomas\nGreene',       short: 'Thomas G.',  color: '#4c8a5e' },
+		{ id: 'carroll',      name: 'Carroll\nPark',        short: 'Carroll',    color: '#4c8a5e' },
+		{ id: 'coffey',       name: 'Coffey\nPark',         short: 'Coffey',     color: '#4c8a5e' },
+		{ id: 'prospect',     name: 'Prospect\nPark',       short: 'Prospect',   color: '#4c8a5e' },
+		{ id: 'greenwood',    name: 'Green-Wood\nCemetery', short: 'Green-Wood', color: '#4c8a5e' },
+		{ id: 'redhook',      name: 'Red Hook\nRec Area',   short: 'Red Hook',   color: '#4c8a5e' },
+	];
+
+	// target: true = we're designing for this at Gowanus
+	// parks: list of park IDs where confirmed
+	// score: 0–100 corridor feasibility for Gowanus
+	const SPECIES = [
+		{
+			icon: '🦅', name: 'Red-tailed Hawk', sci: 'Buteo jamaicensis',
+			role: 'Apex predator / rodent control',
+			desc: 'Nests and forages across all six parks. Rewilding the Gowanus corridor with tall perch trees and reduced hard surfaces would create an immediate territorial bridge between Prospect Park and Coffey Park populations.',
+			parks: ['thomas','carroll','coffey','prospect','greenwood','redhook'],
+			target: true, score: 95,
+		},
+		{
+			icon: '🐿', name: 'Eastern Gray Squirrel', sci: 'Sciurus carolinensis',
+			role: 'Seed disperser / mast consumer',
+			desc: 'The most generalist urban mammal in NYC. Confirmed in every park surveyed. Will colonize any planted canopy corridor immediately — no special habitat requirements beyond scattered trees.',
+			parks: ['thomas','carroll','coffey','prospect','greenwood'],
+			target: true, score: 98,
+		},
+		{
+			icon: '🦋', name: 'Monarch Butterfly', sci: 'Danaus plexippus',
+			role: 'Pollinator / Atlantic Flyway migrant',
+			desc: 'Uses the Gowanus area as a fall migration path. The proposed milkweed and native aster plantings directly target its breeding and refueling needs. Carroll and Coffey Park populations would anchor Gowanus as a corridor node.',
+			parks: ['carroll','coffey'],
+			target: true, score: 92,
+		},
+		{
+			icon: '🐦', name: 'Gray Catbird', sci: 'Dumetella carolinensis',
+			role: 'Insect predator / frugivore',
+			desc: 'Dense shrub nester common to Carroll and Coffey Parks. Elderberry, serviceberry, and native viburnum plantings at Gowanus would pull this species across the gap within a single breeding season.',
+			parks: ['carroll','coffey','prospect'],
+			target: true, score: 88,
+		},
+		{
+			icon: '🐛', name: 'American Robin', sci: 'Turdus migratorius',
+			role: 'Invertebrate predator / seed disperser',
+			desc: 'First colonizer of unsealed urban soils. Present at all surveyed parks. Any ground-level planting with accessible invertebrate-rich soil will attract robins immediately post-construction.',
+			parks: ['thomas','carroll','coffey','prospect','greenwood'],
+			target: true, score: 97,
+		},
+		{
+			icon: '🌿', name: 'Yellow Warbler', sci: 'Setophaga petechia',
+			role: 'Canopy insect predator / indicator species',
+			desc: 'Breeding at Coffey Park. Willows, alders, and elderberry along the Gowanus Canal edge provide direct habitat. The canal corridor is a natural migration pathway — this species would be an early arrival.',
+			parks: ['coffey'],
+			target: true, score: 80,
+		},
+		{
+			icon: '🦉', name: 'Eastern Screech-Owl', sci: 'Megascops asio',
+			role: 'Nocturnal predator / cavity nester',
+			desc: 'Resident at both Prospect Park and Green-Wood Cemetery. Needs mature hollow trees or nest boxes. A box installation program at Gowanus could accelerate colonization within 3–5 years.',
+			parks: ['prospect','greenwood'],
+			target: true, score: 68,
+		},
+		{
+			icon: '🎵', name: 'Wood Thrush', sci: 'Hylocichla mustelina',
+			role: 'Forest interior indicator / insect predator',
+			desc: 'Breeds in both Prospect Park Ravine and Green-Wood Cemetery. Requires shaded interior forest floor — Gowanus cannot provide this alone, but the corridor extends functional habitat connectivity toward these source populations.',
+			parks: ['prospect','greenwood'],
+			target: true, score: 52,
+		},
+		{
+			icon: '🦊', name: 'Red Fox', sci: 'Vulpes vulpes',
+			role: 'Mesopredator / ecosystem balancer',
+			desc: 'Reintroduced to Prospect Park in 2011. NYC foxes are expanding — documented in Greenpoint, Bushwick, and the Navy Yard. A fully planted Gowanus corridor creates a viable movement route from Prospect Park westward.',
+			parks: ['prospect'],
+			target: true, score: 45,
+		},
+		{
+			icon: '🐢', name: 'Painted Turtle', sci: 'Chrysemys picta',
+			role: 'Aquatic grazer / wetland indicator',
+			desc: 'Present at Prospect Lake and Green-Wood\'s kettle ponds. As Gowanus Canal water quality improves post-Superfund remediation, bioswale-connected calm pools at the canal edge could support a breeding population.',
+			parks: ['prospect','greenwood'],
+			target: true, score: 38,
+		},
+		{
+			icon: '🦜', name: 'Monk Parakeet', sci: 'Myiopsitta monachus',
+			role: 'Community colonial nester',
+			desc: 'The Green-Wood colony (nesting on the Gothic arch since 1970s) is one of the oldest urban parakeet colonies in North America. Gowanus is within their foraging range — any open feeding stations or large communal trees could attract satellite colonies.',
+			parks: ['greenwood'],
+			target: false, score: 60,
+		},
+		{
+			icon: '🦢', name: 'Great Blue Heron', sci: 'Ardea herodias',
+			role: 'Apex wetland predator / keystone forager',
+			desc: 'Active heronries at both Prospect Park and Green-Wood. Already forages along the Gowanus Canal at low tide. Long-term canal restoration goal: as fish populations recover, dedicated foraging habitat at canal-facing bioswale edges is feasible.',
+			parks: ['prospect','greenwood','redhook'],
+			target: true, score: 55,
+		},
+		{
+			icon: '🦅', name: 'Osprey', sci: 'Pandion haliaetus',
+			role: 'Apex piscivore / harbor indicator',
+			desc: 'Regularly observed over Red Hook Bay and nesting on structures above the harbor. The Gowanus Canal mouth is within established foraging territory. Nesting platforms on canal infrastructure could support this species within a decade.',
+			parks: ['redhook'],
+			target: true, score: 40,
+		},
+		{
+			icon: '🦆', name: 'Mallard', sci: 'Anas platyrhynchos',
+			role: 'Generalist waterfowl / wetland colonizer',
+			desc: 'Present in every water body in South Brooklyn. The Gowanus Canal, once remediated, would be immediately colonized. Bioswale-connected freshwater basins would add breeding habitat.',
+			parks: ['prospect','greenwood','redhook'],
+			target: true, score: 85,
+		},
+		{
+			icon: '🐝', name: 'Eastern Bumble Bee', sci: 'Bombus impatiens',
+			role: 'Native pollinator / ecosystem anchor',
+			desc: 'The most resilient native bee in NYC. Present wherever native flowering plants grow. The Gowanus planting plan\'s dense native meadow and edge plantings directly support bumble bee foraging corridors linking Carroll Gardens to Red Hook.',
+			parks: ['thomas','carroll','coffey','prospect','greenwood'],
+			target: true, score: 94,
+		},
+		{
+			icon: '🐦', name: 'American Kestrel', sci: 'Falco sparverius',
+			role: 'Small falcon / invertebrate predator',
+			desc: 'Declining nationally, but confirmed at Coffey Park, Prospect Park, and Red Hook. Open meadow hunting ground at Gowanus combined with nest boxes on industrial structures could support a pair. NYC Kestrel Partnership is active in the area.',
+			parks: ['coffey','prospect','redhook'],
+			target: true, score: 72,
+		},
+		{
+			icon: '🦔', name: 'Virginia Opossum', sci: 'Didelphis virginiana',
+			role: 'Scavenger / tick predator',
+			desc: 'Present at Prospect Park. NYC\'s only marsupial consumes thousands of ticks per season. Dense ground cover with accessible food sources would draw opossums into the Gowanus corridor within years of planting.',
+			parks: ['prospect'],
+			target: true, score: 58,
+		},
+		{
+			icon: '🐇', name: 'Eastern Cottontail', sci: 'Sylvilagus floridanus',
+			role: 'Grazer / prey base anchor',
+			desc: 'Confirmed at Green-Wood Cemetery. Dense shrub plantings with undisturbed ground cover in the Gowanus corridor provide direct cottontail habitat — and a prey base that attracts hawks and owls.',
+			parks: ['greenwood'],
+			target: true, score: 62,
+		},
+	];
+
+	// ── Corridor Diagram ─────────────────────────────────────────────────────
+
+	function drawCorridorDiagram() {
+		const svg = document.getElementById('corridor-svg');
+		const W = 900, H = 180;
+
+		// Nodes: [x, y, label, size, color]
+		const nodes = [
+			{ x: 80,  y: 90,  label: 'Red Hook\nWaterfront', r: 36, color: '#6a9e78', sub: 'migratory shore\n+ harbor birds' },
+			{ x: 230, y: 90,  label: 'Coffey Park', r: 22, color: '#5a8a6a', sub: 'edge & shrub\nbirds' },
+			{ x: 390, y: 90,  label: 'GOWANUS\nCORRIDOR', r: 42, color: '#c76b3c', sub: 'proposed\nstepping stone', highlight: true },
+			{ x: 560, y: 60,  label: 'Carroll Park', r: 18, color: '#5a8a6a', sub: 'canopy\nbirds' },
+			{ x: 560, y: 125, label: 'Green-Wood', r: 30, color: '#4a7a5a', sub: 'heronries &\nowls' },
+			{ x: 730, y: 90,  label: 'Prospect\nPark', r: 44, color: '#3a6a4a', sub: 'old-growth\nforest + lake' },
+			{ x: 870, y: 45,  label: 'Thomas\nGreene', r: 16, color: '#5a8a6a', sub: 'pocket\npark' },
+		];
+
+		const edges = [
+			[0,1],[1,2],[2,3],[2,4],[3,5],[4,5],[5,6]
+		];
+
+		let markup = '';
+
+		// Arrow defs
+		markup += `<defs>
+			<marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+				<path d="M0,0 L0,6 L6,3 z" fill="rgba(100,130,110,0.5)" />
+			</marker>
+		</defs>`;
+
+		// Edges
+		for (const [a, b] of edges) {
+			const na = nodes[a], nb = nodes[b];
+			markup += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}"
+				stroke="rgba(100,130,110,0.35)" stroke-width="2"
+				stroke-dasharray="5 3" marker-end="url(#arr)" />`;
+		}
+
+		// Nodes
+		for (const n of nodes) {
+			if (n.highlight) {
+				markup += `<circle cx="${n.x}" cy="${n.y}" r="${n.r + 6}" fill="rgba(199,107,60,0.12)" />`;
+			}
+			markup += `<circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${n.color}" opacity="0.82" />`;
+			const lines = n.label.split('\n');
+			const lineH = 13;
+			const startY = n.y - ((lines.length - 1) * lineH) / 2;
+			for (let i = 0; i < lines.length; i++) {
+				markup += `<text x="${n.x}" y="${startY + i * lineH + 4}"
+					text-anchor="middle" font-size="10" font-weight="700"
+					fill="${n.highlight ? '#fff' : '#f2eee7'}"
+					font-family="Helvetica Neue, Arial, sans-serif">${lines[i]}</text>`;
+			}
+			// Sub-label below circle
+			const subLines = n.sub.split('\n');
+			const subY = n.y + n.r + 12;
+			for (let i = 0; i < subLines.length; i++) {
+				markup += `<text x="${n.x}" y="${subY + i * 12}"
+					text-anchor="middle" font-size="9" fill="#7a6e62"
+					font-family="Helvetica Neue, Arial, sans-serif">${subLines[i]}</text>`;
+			}
+		}
+
+		svg.innerHTML = markup;
+	}
+
+	// ── Species Matrix ───────────────────────────────────────────────────────
+
+	function buildMatrix() {
+		const table = document.getElementById('species-matrix');
+		const parkCols = PARKS; // all 7 (including Gowanus)
+
+		let html = '<thead><tr>';
+		html += '<th class="species-col">Species</th>';
+		html += '<th class="species-col" style="min-width:80px;text-align:center">Role</th>';
+		for (const p of parkCols) {
+			const cls = p.id === 'gowanus' ? 'col-gowanus' : '';
+			html += `<th class="${cls}">${p.short}</th>`;
+		}
+		html += '<th>Corridor<br>Score</th>';
+		html += '</tr></thead><tbody>';
+
+		// Sort by score desc
+		const sorted = [...SPECIES].sort((a,b) => b.score - a.score);
+
+		for (const sp of sorted) {
+			html += '<tr>';
+			html += `<td class="species-name">${sp.icon} ${sp.name}<em>${sp.sci}</em></td>`;
+			html += `<td style="font-size:11px;color:var(--ink-muted);text-align:left;white-space:nowrap">${sp.role}</td>`;
+			for (const p of parkCols) {
+				if (p.id === 'gowanus') {
+					html += sp.target
+						? `<td><span class="dot-gowanus" title="Target for Gowanus"></span></td>`
+						: `<td><span class="dot-absent"></span></td>`;
+				} else {
+					html += sp.parks.includes(p.id)
+						? `<td><span class="dot-present"></span></td>`
+						: `<td><span class="dot-absent"></span></td>`;
+				}
+			}
+			// Score bar
+			const cls = sp.score >= 80 ? 'score-high' : sp.score >= 55 ? 'score-medium' : 'score-low';
+			html += `<td style="min-width:110px">
+				<div class="score-bar-wrap">
+					<div class="score-bar-track"><div class="score-bar-fill" style="width:${sp.score}%"></div></div>
+					<span class="score-bar-pct">${sp.score}%</span>
+				</div>
+			</td>`;
+			html += '</tr>';
+		}
+
+		html += '</tbody>';
+		table.innerHTML = html;
+	}
+
+	// ── Animal Cards ─────────────────────────────────────────────────────────
+
+	function buildCards() {
+		const container = document.getElementById('animal-cards');
+		const targets = SPECIES.filter(s => s.target).sort((a,b) => b.score - a.score);
+
+		let html = '';
+		for (const sp of targets) {
+			const cls = sp.score >= 80 ? 'score-high' : sp.score >= 55 ? 'score-medium' : 'score-low';
+			const label = sp.score >= 80 ? 'High feasibility' : sp.score >= 55 ? 'Medium' : 'Long-term goal';
+			const parkChips = sp.parks.map(pid => {
+				const p = PARKS.find(x => x.id === pid);
+				return `<span class="park-chip">${p ? p.short : pid}</span>`;
+			}).join('');
+			html += `<div class="animal-card">
+				<div class="verdict-badge"><span class="score-pill ${cls}">${label}</span></div>
+				<div class="animal-card-icon">${sp.icon}</div>
+				<h3>${sp.name}</h3>
+				<p class="card-sci">${sp.sci} · ${sp.role}</p>
+				<p>${sp.desc}</p>
+				<div class="card-parks">
+					<span class="park-chip gowanus-chip">Gowanus target</span>
+					${parkChips}
+				</div>
+			</div>`;
+		}
+		container.innerHTML = html;
+	}
+
+	// ── Init ─────────────────────────────────────────────────────────────────
+
+	drawCorridorDiagram();
+	buildMatrix();
+	buildCards();
+	</script>
+</body>
+</html>

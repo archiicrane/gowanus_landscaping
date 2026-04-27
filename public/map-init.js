@@ -15,6 +15,7 @@ import {
 	addBioswaleOpportunityLayer,
 	addRemediationSitesLayer,
 	addNearbyParksLayer,
+	addDistanceRingsLayer,
 } from '/js/layers.js';
 import { setupMapHandlers } from '/js/handlers.js';
 
@@ -83,6 +84,7 @@ export async function initMap() {
 		await addCsoOutfallsLayer(map);
 		await addRemediationSitesLayer(map);
 		await addBioswaleOpportunityLayer(map);
+		await addDistanceRingsLayer(map);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
 		initMapIntroSequence(map);
@@ -98,6 +100,7 @@ export async function initMap() {
 function wireLayerToggles(map) {
 	const toggles = [
 		{ id: 'toggle-nearby-parks', layers: ['nearby-parks-fill', 'nearby-parks-outline', 'nearby-parks-outline-hover', 'nearby-parks-label'] },
+		{ id: 'toggle-distance-rings', layers: ['distance-rings-line', 'distance-ring-labels', 'distance-spokes', 'distance-spoke-labels'] },
 		{ id: 'toggle-buildings', layers: ['buildings-extrusion'] },
 		{ id: 'toggle-trees',     layers: ['trees-circles', 'trees-labels'] },
 		{ id: 'toggle-park',      layers: ['park-outline'] },

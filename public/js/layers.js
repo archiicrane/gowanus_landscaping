@@ -764,6 +764,199 @@ export async function addNearbyParksLayer(map) {
 	});
 }
 
+// ─── Distance Rings from Gowanus Site Center ─────────────────────────────────
+
+// Center of the Gowanus study area (approx centroid of STUDY_RING)
+const SITE_CENTER = [-73.9923, 40.6750];
+
+// Generate a circle polygon (lon,lat) given center, radius in km, and step count
+function makeCircleGeoJSON(centerLon, centerLat, radiusKm, steps = 96) {
+	const coords = [];
+	const toRad = (d) => (d * Math.PI) / 180;
+	const toDeg = (r) => (r * 180) / Math.PI;
+	const R = 6371; // Earth radius km
+	const lat1 = toRad(centerLat);
+	const lon1 = toRad(centerLon);
+	const d = radiusKm / R;
+	for (let i = 0; i <= steps; i++) {
+		const bearing = toRad((360 / steps) * i);
+		const lat2 = Math.asin(
+			Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(bearing),
+		);
+		const lon2 =
+			lon1 +
+			Math.atan2(
+				Math.sin(bearing) * Math.sin(d) * Math.cos(lat1),
+				Math.cos(d) - Math.sin(lat1) * Math.sin(lat2),
+			);
+		coords.push([toDeg(lon2), toDeg(lat2)]);
+	}
+	return coords;
+}
+
+// Point on a given circle at bearing 90° (east) — used for label placement
+function circleLabelPoint(radiusKm) {
+	const toRad = (d) => (d * Math.PI) / 180;
+	const toDeg = (r) => (r * 180) / Math.PI;
+	const R = 6371;
+	const lat1 = toRad(SITE_CENTER[1]);
+	const lon1 = toRad(SITE_CENTER[0]);
+	const d = radiusKm / R;
+	const bearing = toRad(90); // east
+	const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(bearing));
+	const lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+	return [toDeg(lon2), toDeg(lat2)];
+}
+
+// Centroid of a GeoJSON Polygon or MultiPolygon feature's outer ring
+function featureCentroid(geom) {
+	let ring = null;
+	if (geom.type === 'Polygon') ring = geom.coordinates[0];
+	else if (geom.type === 'MultiPolygon') ring = geom.coordinates[0][0];
+	if (!ring || !ring.length) return null;
+	const lon = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+	const lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+	return [lon, lat];
+}
+
+export async function addDistanceRingsLayer(map) {
+	// Ring radii in km (≈ 0.25 mi, 0.5 mi, 1 mi, 1.5 mi, 2 mi)
+	const rings = [
+		{ km: 0.40, miles: '¼ mi' },
+		{ km: 0.80, miles: '½ mi' },
+		{ km: 1.61, miles: '1 mi' },
+		{ km: 2.41, miles: '1½ mi' },
+		{ km: 3.22, miles: '2 mi' },
+	];
+
+	// Build ring polygon features
+	const ringFeatures = rings.map((r) => ({
+		type: 'Feature',
+		properties: { label: `${r.miles}  ·  ${r.km.toFixed(1)} km` },
+		geometry: { type: 'Polygon', coordinates: [makeCircleGeoJSON(SITE_CENTER[0], SITE_CENTER[1], r.km)] },
+	}));
+
+	// Label points on the east edge of each ring
+	const labelFeatures = rings.map((r) => ({
+		type: 'Feature',
+		properties: { label: `${r.miles}` },
+		geometry: { type: 'Point', coordinates: circleLabelPoint(r.km) },
+	}));
+
+	// Load park data for spokes
+	let parksData = null;
+	try {
+		const res = await fetch('/data/nearby-parks.geojson');
+		if (res.ok) parksData = await res.json();
+	} catch (_) { /* spoke layer optional */ }
+
+	// Build spoke lines: site center → each park centroid
+	const spokeFeatures = [];
+	if (parksData) {
+		for (const feature of parksData.features) {
+			const centroid = featureCentroid(feature.geometry);
+			if (!centroid) continue;
+			const distKm = Math.sqrt(
+				((centroid[0] - SITE_CENTER[0]) * 111.32 * Math.cos((SITE_CENTER[1] * Math.PI) / 180)) ** 2 +
+				((centroid[1] - SITE_CENTER[1]) * 110.57) ** 2,
+			);
+			const distMi = distKm * 0.6214;
+			spokeFeatures.push({
+				type: 'Feature',
+				properties: {
+					name: feature.properties.name,
+					dist_label: `${distMi.toFixed(2)} mi`,
+				},
+				geometry: { type: 'LineString', coordinates: [SITE_CENTER, centroid] },
+			});
+		}
+	}
+
+	// Remove old layers/sources if re-adding
+	for (const id of ['distance-ring-labels', 'distance-rings-line', 'distance-spoke-labels', 'distance-spokes']) {
+		if (map.getLayer(id)) map.removeLayer(id);
+	}
+	for (const id of ['distance-rings', 'distance-ring-label-pts', 'distance-spokes']) {
+		if (map.getSource(id)) map.removeSource(id);
+	}
+
+	// Rings source + layer
+	map.addSource('distance-rings', {
+		type: 'geojson',
+		data: { type: 'FeatureCollection', features: ringFeatures },
+	});
+	map.addLayer({
+		id: 'distance-rings-line',
+		type: 'line',
+		source: 'distance-rings',
+		paint: {
+			'line-color': '#8a7a6a',
+			'line-width': 1,
+			'line-opacity': 0.5,
+			'line-dasharray': [4, 3],
+		},
+	});
+
+	// Ring label points source + layer
+	map.addSource('distance-ring-label-pts', {
+		type: 'geojson',
+		data: { type: 'FeatureCollection', features: labelFeatures },
+	});
+	map.addLayer({
+		id: 'distance-ring-labels',
+		type: 'symbol',
+		source: 'distance-ring-label-pts',
+		layout: {
+			'text-field': ['get', 'label'],
+			'text-size': 10,
+			'text-anchor': 'left',
+			'text-offset': [0.4, 0],
+			'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+		},
+		paint: {
+			'text-color': '#7a6e62',
+			'text-halo-color': 'rgba(242,238,231,0.85)',
+			'text-halo-width': 1.2,
+		},
+	});
+
+	// Spokes source + layers
+	if (spokeFeatures.length) {
+		map.addSource('distance-spokes', {
+			type: 'geojson',
+			data: { type: 'FeatureCollection', features: spokeFeatures },
+		});
+		map.addLayer({
+			id: 'distance-spokes',
+			type: 'line',
+			source: 'distance-spokes',
+			paint: {
+				'line-color': '#4c8a5e',
+				'line-width': 0.8,
+				'line-opacity': 0.45,
+				'line-dasharray': [2, 2],
+			},
+		});
+		map.addLayer({
+			id: 'distance-spoke-labels',
+			type: 'symbol',
+			source: 'distance-spokes',
+			layout: {
+				'text-field': ['get', 'dist_label'],
+				'text-size': 9.5,
+				'symbol-placement': 'line-center',
+				'text-font': ['Open Sans Italic', 'Arial Unicode MS Regular'],
+				'text-rotation-alignment': 'map',
+			},
+			paint: {
+				'text-color': '#4c8a5e',
+				'text-halo-color': 'rgba(242,238,231,0.9)',
+				'text-halo-width': 1.2,
+			},
+		});
+	}
+}
+
 // ─── Toxic Soil Cleanup Sites (NYS DEC) ────────────────────────────────────
 
 export async function addRemediationSitesLayer(map) {

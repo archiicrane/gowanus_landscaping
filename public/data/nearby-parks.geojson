@@ -37,6 +37,7 @@
       "type": "Feature",
       "properties": {
         "id": "carroll-park",
+        "osm_id": "W40416347",
         "name": "Carroll Park",
         "distance_m": 860,
         "distance_label": "~0.9 km · 11 min walk",
@@ -68,6 +69,7 @@
       "type": "Feature",
       "properties": {
         "id": "coffey-park",
+        "osm_id": "W37075223",
         "name": "Coffey Park",
         "distance_m": 1580,
         "distance_label": "~1.6 km · 20 min walk",
@@ -160,6 +162,7 @@
       "type": "Feature",
       "properties": {
         "id": "red-hook-recreation",
+        "osm_id": "R13920588",
         "name": "Red Hook Recreation Area",
         "distance_m": 2350,
         "distance_label": "~2.4 km · 30 min walk",
