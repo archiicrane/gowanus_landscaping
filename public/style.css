@@ -445,6 +445,7 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #4c8a5e;
+  flex: 0 0 auto;
 }
 
 .park-panel-ecology {
@@ -683,7 +684,7 @@ body[data-map-page="preceedence"] #park-info-panel {
   top: 72px;
   left: 14px;
   right: 14px;
-  bottom: 16px;
+  bottom: 72px;
   width: auto;
   max-height: none;
   background: transparent;
@@ -693,7 +694,7 @@ body[data-map-page="preceedence"] #park-info-panel {
   display: grid;
   grid-template-columns: minmax(230px, 330px) minmax(420px, 580px);
   justify-content: space-between;
-  align-items: start;
+  align-items: stretch;
   gap: 12px;
   z-index: 3100;
   overflow: visible;
@@ -718,14 +719,17 @@ body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
   display: grid;
   gap: 12px;
   min-height: 0;
+  height: 100%;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
   grid-template-rows: 1fr 1fr 1fr;
+  align-content: stretch;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
-  grid-template-rows: auto minmax(180px, 1fr) minmax(300px, 2fr);
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 2fr);
+  align-content: stretch;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
@@ -739,6 +743,8 @@ body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
   padding: 10px 12px;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-box-trees {
@@ -769,10 +775,12 @@ body[data-map-page="preceedence"] #park-info-panel .park-list {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 5px;
-  max-height: calc(100% - 26px);
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-list li {
@@ -789,11 +797,11 @@ body[data-map-page="preceedence"] #park-info-panel .park-list-item {
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(255,255,255,0.4);
 }
 
@@ -844,7 +852,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     top: 74px;
     left: 8px;
     right: 8px;
-    bottom: 8px;
+    bottom: 74px;
     grid-template-columns: 1fr;
     grid-template-rows: repeat(6, minmax(78px, auto));
     gap: 7px;
