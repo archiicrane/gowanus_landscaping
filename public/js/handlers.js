@@ -287,13 +287,30 @@ function loadImageBitmap(url) {
 }
 
 function pixelIsCanopy(r, g, b) {
-	// Simple RGB canopy heuristic for satellite imagery.
+	// RGB canopy heuristic tuned to reject water and shadow-heavy pixels.
+	const max = Math.max(r, g, b);
+	const min = Math.min(r, g, b);
+	const saturation = max > 0 ? (max - min) / max : 0;
 	const greenExcess = g - Math.max(r, b);
-	const vegetationScore = (1.2 * g) - (0.8 * r) - (0.6 * b);
-	return g > 55 && greenExcess > 8 && vegetationScore > 8;
+	const vegetationScore = (1.25 * g) - (0.85 * r) - (0.7 * b);
+	const looksLikeWater = b > g + 8 && b > r + 8;
+	return !looksLikeWater && g > 58 && saturation > 0.12 && greenExcess > 10 && vegetationScore > 10;
 }
 
-async function generateSatelliteCanopyDots(geom, parkKey, areaAcres) {
+function getWaterLayerIds(map) {
+	return (map.getStyle()?.layers || [])
+		.filter((layer) => layer.type === 'fill' && layer['source-layer'] === 'water')
+		.map((layer) => layer.id);
+}
+
+function pointHitsWaterLayer(map, lngLat, waterLayerIds) {
+	if (!waterLayerIds.length) return false;
+	const p = map.project(lngLat);
+	const hits = map.queryRenderedFeatures([p.x, p.y], { layers: waterLayerIds });
+	return hits.length > 0;
+}
+
+async function generateSatelliteCanopyDots(map, geom, parkKey, areaAcres) {
 	if (satelliteDotCache.has(parkKey)) return satelliteDotCache.get(parkKey);
 	if (!window.mapboxgl?.accessToken) return [];
 
@@ -307,6 +324,7 @@ async function generateSatelliteCanopyDots(geom, parkKey, areaAcres) {
 	const token = encodeURIComponent(window.mapboxgl.accessToken);
 	const bboxStr = `${bbox.minLon},${bbox.minLat},${bbox.maxLon},${bbox.maxLat}`;
 	const url = `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/[${bboxStr}]/${width}x${height}?access_token=${token}&logo=false&attribution=false`;
+	const waterLayerIds = getWaterLayerIds(map);
 
 	try {
 		const img = await loadImageBitmap(url);
@@ -318,12 +336,13 @@ async function generateSatelliteCanopyDots(geom, parkKey, areaAcres) {
 		const imageData = ctx.getImageData(0, 0, width, height).data;
 
 		const rand = seededRandom(hashString(`${parkKey}-sat`));
-		const attempts = Math.max(500, Math.min(7000, Math.round(areaAcres * 22)));
+		const attempts = Math.max(600, Math.min(8500, Math.round(areaAcres * 28)));
 		const dots = [];
 		for (let i = 0; i < attempts; i++) {
 			const lon = bbox.minLon + rand() * (bbox.maxLon - bbox.minLon);
 			const lat = bbox.minLat + rand() * (bbox.maxLat - bbox.minLat);
 			if (!pointInGeometry([lon, lat], geom)) continue;
+			if (pointHitsWaterLayer(map, { lng: lon, lat }, waterLayerIds)) continue;
 
 			const px = Math.max(0, Math.min(width - 1, Math.floor(((lon - bbox.minLon) / (bbox.maxLon - bbox.minLon || 1e-9)) * (width - 1))));
 			const py = Math.max(0, Math.min(height - 1, Math.floor(((bbox.maxLat - lat) / (bbox.maxLat - bbox.minLat || 1e-9)) * (height - 1))));
@@ -341,7 +360,7 @@ async function generateSatelliteCanopyDots(geom, parkKey, areaAcres) {
 			}
 		}
 
-		const capped = dots.slice(0, 1800);
+		const capped = dots.slice(0, 2200);
 		satelliteDotCache.set(parkKey, capped);
 		return capped;
 	} catch (err) {
@@ -413,7 +432,7 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	let effectiveTreeCount = selected.length;
 
 	const parkKey = String(feature?.properties?.id || feature?.properties?.name || 'park');
-	const satelliteDots = areaAcres > 0 ? await generateSatelliteCanopyDots(geom, parkKey, areaAcres) : [];
+	const satelliteDots = areaAcres > 0 ? await generateSatelliteCanopyDots(map, geom, parkKey, areaAcres) : [];
 	if (satelliteDots.length > 0) {
 		mode = 'satellite';
 		dotFeatures = satelliteDots;
