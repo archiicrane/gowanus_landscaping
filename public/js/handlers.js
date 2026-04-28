@@ -18,8 +18,8 @@ const PARK_TREE_ENRICHMENT = {
 		],
 	},
 	'green-wood-cemetery': {
-		expectedTreeCount: 7000, // Historic arboretum estimate
-		dataSource: 'Arboretum records',
+		expectedTreeCount: 9048, // Green-Wood Living Tree Collection (ArcGIS FeatureServer)
+		dataSource: 'Green-Wood Living Tree Collection',
 		commonSpecies: [
 			{ species: 'Acer platanoides', count: 1000 }, // Norway maple
 			{ species: 'Quercus alba', count: 800 },      // white oak
@@ -348,8 +348,11 @@ async function loadOsmTreesForGeometry(geom, parkKey) {
 
 	try {
 		const isProspectPark = parkKey === 'prospect-park';
+		const isGreenWood = parkKey === 'green-wood-cemetery';
 		const apiUrl = isProspectPark
 			? '/api/prospect-park-trees'
+			: isGreenWood
+				? '/api/green-wood-trees'
 			: `/api/osm-park-trees?${params.toString()}`;
 		const res = await fetch(apiUrl);
 		if (!res.ok) return [];
@@ -394,6 +397,9 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	} else if (mode === 'treekeeper') {
 		dataLabel = 'Mapped';
 		noteText = 'Dots are direct mapped tree points from Prospect Park TreeKeeper (GeoServer WFS), filtered to park boundary.';
+	} else if (mode === 'greenwood_official') {
+		dataLabel = 'Mapped';
+		noteText = 'Dots are direct mapped tree points from Green-Wood\'s official Living Tree Collection ArcGIS layer, filtered to park boundary.';
 	} else if (mode === 'governors_inventory') {
 		dataLabel = 'Published';
 		noteText = 'Counts and species come from Governors Island TreePlotter. Dot distribution is modeled because their public endpoint provides inventory metrics but not raw per-tree point export.';
@@ -463,9 +469,12 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	let effectiveTreeCount = mappedTrees.length;
 	let useEnrichedData = false;
 	const hasTreeKeeperSource = mappedTrees.some((row) => row.source === 'treekeeper_wfs');
+	const hasGreenWoodOfficialSource = mappedTrees.some((row) => row.source === 'greenwood_feature_service');
 
 	if (hasTreeKeeperSource && mappedTrees.length > 0) {
 		mode = 'treekeeper';
+	} else if (hasGreenWoodOfficialSource && mappedTrees.length > 0) {
+		mode = 'greenwood_official';
 	}
 
 	// If OSM data is sparse, check for published inventory
