@@ -11,7 +11,7 @@
   --glass-panel-bg-strong: rgba(248, 248, 246, 0.78);
   --glass-panel-border: rgba(120, 130, 120, 0.24);
   --glass-panel-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
-  --map-wash-image: url('/assets/map-wash.svg');
+  --map-wash-image: url('/assets/mapbox-nyc-wash.png');
   --map-wash-opacity: 0.2;
   --font-sans: "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Georgia", "Times New Roman", serif;
@@ -948,8 +948,17 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 .diagrams-layout {
   width: min(94vw, 1460px);
   margin: 0 auto;
-  padding-top: 24px;
+  margin-top: 14px;
+  padding-top: 30px;
   padding-bottom: 80px;
+}
+
+.diagrams-page {
+  scroll-padding-top: 88px;
+}
+
+.diagrams-page .board-intro {
+  scroll-margin-top: 88px;
 }
 
 .board-section {
@@ -995,7 +1004,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 .diagrams-header h1 {
   margin: 6px 0 10px 0;
-  font-size: 30px;
+  font-size: clamp(30px, 3.2vw, 46px);
   line-height: 1.2;
   font-family: var(--font-serif);
   font-weight: 600;
