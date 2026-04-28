@@ -20,6 +20,7 @@ import {
 import { setupMapHandlers } from '/js/handlers.js';
 
 export async function initMap() {
+	const mapPage = document.body?.dataset.mapPage || 'analysis';
 	const mapDiv = document.getElementById('map');
 	if (!mapDiv) {
 		console.error('[MAP INIT] #map container not found');
@@ -89,7 +90,7 @@ export async function initMap() {
 		await addDistanceRingsLayer(map, resolvedParksData);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
-		initMapIntroSequence(map);
+		applyPageProfile(mapPage);
 	});
 
 	map.on('error', (e) => {
@@ -97,6 +98,60 @@ export async function initMap() {
 	});
 
 	return map;
+
+	function applyPageProfile(page) {
+		const parksPanel = document.getElementById('story-parks');
+		const existingPanel = document.getElementById('story-existing');
+		const bioswalePanel = document.getElementById('story-bioswale');
+
+		const setChecked = (id, checked) => {
+			const input = document.getElementById(id);
+			if (!input) return;
+			if (input.checked !== checked) {
+				input.checked = checked;
+				input.dispatchEvent(new Event('change'));
+			}
+		};
+
+		if (page === 'map') {
+			// Context map view: parks + distance only.
+			setChecked('toggle-nearby-parks', true);
+			setChecked('toggle-distance-rings', true);
+			setChecked('toggle-buildings', false);
+			setChecked('toggle-trees', false);
+			setChecked('toggle-park', false);
+			setChecked('toggle-contours', false);
+			setChecked('toggle-flood', false);
+			setChecked('toggle-cso', false);
+			setChecked('toggle-remediation', false);
+			setChecked('toggle-heat', false);
+			setChecked('toggle-bioswale', false);
+			setChecked('toggle-bounding', false);
+
+			if (parksPanel) parksPanel.classList.add('active');
+			if (existingPanel) existingPanel.classList.remove('active');
+			if (bioswalePanel) bioswalePanel.classList.remove('active');
+			return;
+		}
+
+		// Site analysis page: analysis overlays, no surrounding-park context overlays.
+		setChecked('toggle-nearby-parks', false);
+		setChecked('toggle-distance-rings', false);
+		setChecked('toggle-buildings', false);
+		setChecked('toggle-trees', false);
+		setChecked('toggle-park', false);
+		setChecked('toggle-contours', true);
+		setChecked('toggle-flood', true);
+		setChecked('toggle-cso', true);
+		setChecked('toggle-remediation', true);
+		setChecked('toggle-heat', true);
+		setChecked('toggle-bioswale', true);
+		setChecked('toggle-bounding', true);
+
+		if (parksPanel) parksPanel.classList.remove('active');
+		if (existingPanel) existingPanel.classList.add('active');
+		if (bioswalePanel) bioswalePanel.classList.remove('active');
+	}
 }
 
 function wireLayerToggles(map) {
