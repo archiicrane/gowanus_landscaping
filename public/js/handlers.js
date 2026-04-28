@@ -63,6 +63,79 @@ const PARK_CALLOUT_OFFSETS = {
 const RACCOON_SVG_PATH = '/assets/fauna/racoon.svg';
 let parkCalloutMarkers = [];
 
+const PARK_FLORA_PROFILES = {
+	'prospect-park': ['Black Cherry', 'Sweetgum', 'Serviceberry', 'River Birch'],
+	'green-wood-cemetery': ['Dawn Redwood', 'American Beech', 'White Oak', 'Kentucky Coffeetree'],
+	'governors-island': ['Meadow Grasses', 'Beach Plum', 'Switchgrass', 'Bayberry'],
+	'carroll-park': ['London Plane', 'Honey Locust', 'Red Maple', 'American Elm'],
+	'coffey-park': ['Oak', 'Elm', 'Sweetgum', 'Dogwood'],
+	'red-hook-recreation': ['Salt Tolerant Grass', 'Beach Rose', 'Bayberry', 'Willow'],
+	'thomas-greene': ['Street Tree Mix', 'Honey Locust', 'Sycamore', 'Ornamental Cherry'],
+};
+
+function parseArrayProp(value) {
+	if (Array.isArray(value)) return value;
+	if (typeof value !== 'string') return [];
+	try {
+		const parsed = JSON.parse(value);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch (_) {
+		return [];
+	}
+}
+
+function dedupeKeepOrder(items) {
+	const seen = new Set();
+	const out = [];
+	for (const raw of items || []) {
+		const val = String(raw || '').trim();
+		if (!val) continue;
+		const key = val.toLowerCase();
+		if (seen.has(key)) continue;
+		seen.add(key);
+		out.push(val);
+	}
+	return out;
+}
+
+function updateParkList(elId, items, emptyLabel = 'No data yet') {
+	const el = document.getElementById(elId);
+	if (!el) return;
+	el.innerHTML = '';
+	const values = dedupeKeepOrder(items).slice(0, 16);
+	if (!values.length) {
+		const li = document.createElement('li');
+		li.textContent = emptyLabel;
+		el.appendChild(li);
+		return;
+	}
+	for (const item of values) {
+		const li = document.createElement('li');
+		li.textContent = item;
+		el.appendChild(li);
+	}
+}
+
+function fitFeatureToFramedViewport(map, feature) {
+	const geom = feature?.geometry;
+	if (!geom) return;
+	const b = geometryBounds(geom);
+	if (!Number.isFinite(b.minLon) || !Number.isFinite(b.minLat) || !Number.isFinite(b.maxLon) || !Number.isFinite(b.maxLat)) return;
+
+	const isCompact = window.innerWidth <= 980;
+	const padding = isCompact
+		? { top: 270, right: 30, bottom: 30, left: 30 }
+		: { top: 96, right: 600, bottom: 40, left: 350 };
+
+	map.fitBounds(
+		[[b.minLon, b.minLat], [b.maxLon, b.maxLat]],
+		{
+			padding,
+			duration: 900,
+			maxZoom: 16.2,
+		}
+	);
+}
 function getGeometryCentroid(geom) {
 	if (!geom) return null;
 	let ring = null;
@@ -163,6 +236,7 @@ function setupPreceedenceParkCallouts(map, parksData) {
 		`;
 
 		el.addEventListener('click', async () => {
+			fitFeatureToFramedViewport(map, feature);
 			openParkPanel(props);
 			try {
 				await analyzePreceedenceParkTrees(map, feature);
@@ -238,56 +312,21 @@ function openParkPanel(props) {
 
 	if (!panel) return;
 
-	nameEl.textContent = props.name || 'Park';
-	distEl.textContent = props.distance_label || '';
-	areaEl.textContent = props.area_acres ? `${props.area_acres} acres` : '';
-	estEl.textContent  = props.established ? `Est. ${props.established}` : '';
-	descEl.textContent = props.description || '';
-	ecoEl.textContent  = props.ecology_note || '';
+	if (nameEl) nameEl.textContent = props.name || 'Park';
+	if (distEl) distEl.textContent = props.distance_label || '';
+	if (areaEl) areaEl.textContent = props.area_acres ? `${props.area_acres} ac` : '';
+	if (estEl) estEl.textContent  = props.established ? `Est. ${props.established}` : '';
+	if (descEl) descEl.textContent = props.description || '';
+	if (ecoEl) ecoEl.textContent  = props.ecology_note || '';
 
 	if (linkEl) {
 		linkEl.href = props.link || '#';
 		linkEl.style.display = props.link ? 'inline-block' : 'none';
 	}
 
-	// Image: show if image_url present, else show placeholder
-	const imageUrl = props.image_url && props.image_url !== 'null' ? props.image_url : null;
-	if (imgEl && imgPhEl) {
-		if (imageUrl) {
-			imgEl.src = imageUrl;
-			imgEl.alt = props.name || '';
-			imgEl.classList.remove('hidden');
-			imgPhEl.classList.add('hidden');
-		} else {
-			imgEl.src = '';
-			imgEl.classList.add('hidden');
-			imgPhEl.classList.remove('hidden');
-		}
-	}
 
-	// Wildlife chips — Mapbox serialises array properties as JSON strings
-	if (wildlifeEl) {
-		wildlifeEl.innerHTML = '';
-		let wildlife = [];
-		try { wildlife = typeof props.wildlife === 'string' ? JSON.parse(props.wildlife) : (props.wildlife || []); } catch (_) {}
-		for (const s of wildlife) {
-			const li = document.createElement('li');
-			li.textContent = s;
-			wildlifeEl.appendChild(li);
-		}
-	}
-
-	// Programs list
-	if (programsEl) {
-		programsEl.innerHTML = '';
-		let programs = [];
-		try { programs = typeof props.programs === 'string' ? JSON.parse(props.programs) : (props.programs || []); } catch (_) {}
-		for (const p of programs) {
-			const li = document.createElement('li');
-			li.textContent = p;
-			programsEl.appendChild(li);
-		}
-	}
+	const fauna = parseArrayProp(props.wildlife);
+	updateParkList('park-fauna-list', fauna, 'No fauna list');
 
 	panel.classList.add('active');
 }
@@ -669,7 +708,7 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 			<div class="park-tree-bar-row">
 				<span class="park-tree-bar-label">${d.species}</span>
 				<div class="park-tree-bar-track"><span class="park-tree-bar-fill" style="width:${Number.isFinite(Number(d.count)) && Number(d.count) > 0 ? (Number(d.count) / max) * 100 : 0}%"></span></div>
-				<span class="park-tree-bar-value">${Number.isFinite(Number(d.count)) && Number(d.count) > 0 ? Number(d.count) : '—'}</span>
+				<span class="park-tree-bar-value">${Number.isFinite(Number(d.count)) && Number(d.count) > 0 ? Number(d.count) : 'n/a'}</span>
 			</div>
 		`).join('')
 		: '<p class="park-tree-empty">Species breakdown not available for this park in the source dataset.</p>';
@@ -785,6 +824,12 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		mode,
 		parkEnrichment,
 	});
+
+	const floraProfile = PARK_FLORA_PROFILES[parkId] || [];
+	const floraFromTrees = topSpecies.map((s) => s.species);
+	updateParkList('park-tree-list', floraFromTrees, 'No tree species available');
+	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available');
+	updateParkList('park-fauna-list', parseArrayProp(feature?.properties?.wildlife), 'No fauna list');
 }
 
 export function setupMapHandlers(map, nearbyParksData = null) {
@@ -804,6 +849,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 		map.on('click', 'nearby-parks-fill', async (e) => {
 			const feature = e.features && e.features[0];
 			if (!feature) return;
+			fitFeatureToFramedViewport(map, feature);
 			openParkPanel(feature.properties);
 			if (isPreceedencePage) {
 				try {

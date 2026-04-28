@@ -41,43 +41,56 @@
 		</div>
 	</div>
 
-	<div id="park-info-panel" role="complementary" aria-label="Park information">
+	<div id="park-info-panel" class="active" role="complementary" aria-label="Park information">
 		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
-		<div class="park-panel-image-wrap">
-			<img class="park-panel-image" id="park-panel-image" src="" alt="" />
-			<div class="park-panel-image-placeholder" id="park-panel-image-placeholder">
-				<span class="park-panel-image-icon">&#9752;</span>
-				<span>No photo available</span>
-			</div>
+
+		<div class="park-layout-col park-layout-left">
+			<section class="park-glass-box park-box-trees">
+				<h4 class="park-panel-section-title">Trees</h4>
+				<ul class="park-list" id="park-tree-list">
+					<li>Select a park</li>
+				</ul>
+			</section>
+
+			<section class="park-glass-box park-box-plants">
+				<h4 class="park-panel-section-title">Plants</h4>
+				<ul class="park-list" id="park-flora-list">
+					<li>Select a park</li>
+				</ul>
+			</section>
+
+			<section class="park-glass-box park-box-fauna">
+				<h4 class="park-panel-section-title">Fauna</h4>
+				<ul class="park-list" id="park-fauna-list">
+					<li>Select a park</li>
+				</ul>
+			</section>
 		</div>
-		<div class="park-panel-body">
-			<p class="park-panel-distance" id="park-panel-distance">-</p>
-			<h2 class="park-panel-name" id="park-panel-name">Park</h2>
-			<p class="park-panel-area-row">
-				<span id="park-panel-area"></span>
-				<span class="park-panel-sep">&middot;</span>
-				<span id="park-panel-established"></span>
-			</p>
-			<p class="park-panel-desc" id="park-panel-desc"></p>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Ecology &amp; Context</h4>
+
+		<div class="park-layout-col park-layout-right">
+			<section class="park-glass-box park-box-title">
+				<p class="park-panel-distance" id="park-panel-distance">Click any park</p>
+				<h2 class="park-panel-name" id="park-panel-name">Park title</h2>
+				<p class="park-panel-area-row">
+					<span id="park-panel-area"></span>
+					<span class="park-panel-sep">&middot;</span>
+					<span id="park-panel-established"></span>
+				</p>
+			</section>
+
+			<section class="park-glass-box park-box-description">
+				<h4 class="park-panel-section-title">Description</h4>
+				<p class="park-panel-desc" id="park-panel-desc">Click a park to load details.</p>
 				<p class="park-panel-ecology" id="park-panel-ecology"></p>
-			</div>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Wildlife Observed</h4>
-				<ul class="park-panel-wildlife" id="park-panel-wildlife"></ul>
-			</div>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Programs &amp; Facilities</h4>
-				<ul class="park-panel-programs" id="park-panel-programs"></ul>
-			</div>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Tree Density Diagram</h4>
+				<a class="park-panel-link" id="park-panel-link" href="#" target="_blank" rel="noopener noreferrer">View source page &nearr;</a>
+			</section>
+
+			<section class="park-glass-box park-box-diagram">
+				<h4 class="park-panel-section-title">Diagram</h4>
 				<div class="park-tree-metrics" id="park-tree-metrics"></div>
 				<div class="park-tree-type-bars" id="park-tree-type-bars"></div>
 				<p class="park-tree-note" id="park-tree-note"></p>
-			</div>
-			<a class="park-panel-link" id="park-panel-link" href="#" target="_blank" rel="noopener noreferrer">View source page &nearr;</a>
+			</section>
 		</div>
 	</div>
 
