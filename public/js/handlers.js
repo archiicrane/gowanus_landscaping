@@ -1077,13 +1077,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 	const pageType = document.body?.dataset.mapPage || '';
 	const isPreceedencePage = pageType === 'preceedence' || pageType === 'map';
 
-	if (isPreceedencePage) {
-		resolveNearbyParksForCallouts(nearbyParksData)
-			.then((parksData) => {
-				if (parksData?.features?.length) setupPreceedenceParkCallouts(map, parksData);
-			})
-			.catch((err) => console.warn('[HANDLERS] Could not initialize park callouts:', err));
-	}
+
 
 	// ─── Nearby Parks: click → side panel ────────────────────────────────────
 	if (map.getLayer('nearby-parks-fill')) {
@@ -1094,10 +1088,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			openParkPanel(feature.properties);
 			if (isPreceedencePage) {
 				try {
-					await Promise.all([
-						updateSelectedParkContext(map, feature),
-						analyzePreceedenceParkTrees(map, feature),
-					]);
+					await analyzePreceedenceParkTrees(map, feature);
 				} catch (err) {
 					console.warn('[HANDLERS] Failed to analyze park trees:', err);
 				}
