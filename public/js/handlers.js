@@ -62,6 +62,7 @@ const PARK_CALLOUT_OFFSETS = {
 
 const RACCOON_SVG_PATH = '/assets/fauna/racoon.svg';
 let parkCalloutMarkers = [];
+const EMPTY_FEATURE_COLLECTION = { type: 'FeatureCollection', features: [] };
 
 const PARK_FLORA_PROFILES = {
 	'prospect-park': ['Black Cherry', 'Sweetgum', 'Serviceberry', 'River Birch'],
@@ -172,6 +173,185 @@ function clearParkCallouts() {
 	parkCalloutMarkers = [];
 }
 
+function waitForMapIdle(map, timeoutMs = 1400) {
+	return new Promise((resolve) => {
+		let settled = false;
+		const finish = () => {
+			if (settled) return;
+			settled = true;
+			map.off('idle', finish);
+			resolve();
+		};
+
+		map.once('idle', finish);
+		window.setTimeout(finish, timeoutMs);
+	});
+}
+
+function getParkContextLayerIds(map) {
+	const styleLayers = map.getStyle?.().layers || [];
+	const waterLayerIds = [];
+	const pathLayerIds = [];
+
+	for (const layer of styleLayers) {
+		if (!layer?.id || layer.layout?.visibility === 'none') continue;
+		const id = String(layer.id).toLowerCase();
+		const sourceLayer = String(layer['source-layer'] || '').toLowerCase();
+		const type = layer.type;
+
+		const looksLikeWater = id.includes('water') || sourceLayer.includes('water');
+		if (looksLikeWater && (type === 'line' || type === 'fill')) {
+			waterLayerIds.push(layer.id);
+			continue;
+		}
+
+		const looksLikePath = id.includes('path')
+			|| sourceLayer.includes('path')
+			|| id.includes('pedestrian')
+			|| sourceLayer.includes('pedestrian')
+			|| id.includes('steps')
+			|| sourceLayer.includes('steps');
+		if (looksLikePath && type === 'line') {
+			pathLayerIds.push(layer.id);
+		}
+	}
+
+	return { waterLayerIds, pathLayerIds };
+}
+
+function geometryTouchesPark(geom, parkGeom) {
+	if (!geom || !parkGeom) return false;
+	const samplePoints = [];
+	const visit = (coords) => {
+		for (const coord of coords || []) {
+			if (Array.isArray(coord?.[0])) {
+				visit(coord);
+			} else if (Number.isFinite(coord?.[0]) && Number.isFinite(coord?.[1])) {
+				samplePoints.push([coord[0], coord[1]]);
+			}
+		}
+	};
+	visit(geom.coordinates);
+	if (!samplePoints.length) return false;
+	return samplePoints.some((point) => pointInGeometry(point, parkGeom));
+}
+
+function dedupeRenderedFeatures(features) {
+	const seen = new Set();
+	const unique = [];
+	for (const feature of features || []) {
+		const idPart = feature.id ?? feature.properties?.id ?? feature.properties?.name ?? '';
+		const coordsPart = JSON.stringify(feature.geometry?.coordinates || null);
+		const key = `${feature.layer?.id || ''}:${feature.geometry?.type || ''}:${idPart}:${coordsPart}`;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		unique.push({
+			type: 'Feature',
+			properties: { ...(feature.properties || {}) },
+			geometry: feature.geometry,
+		});
+	}
+	return unique;
+}
+
+function collectRenderedParkContextFeatures(map, parkFeature, layerIds) {
+	if (!Array.isArray(layerIds) || !layerIds.length) return [];
+	const bbox = geometryBounds(parkFeature?.geometry);
+	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
+		return [];
+	}
+
+	const points = [
+		map.project([bbox.minLon, bbox.maxLat]),
+		map.project([bbox.maxLon, bbox.minLat]),
+	];
+	const rendered = map.queryRenderedFeatures(points, { layers: layerIds });
+	const filtered = rendered.filter((feature) => geometryTouchesPark(feature.geometry, parkFeature.geometry));
+	return dedupeRenderedFeatures(filtered);
+}
+
+function ensureParkContextOverlayLayers(map) {
+	if (!map.getSource('selected-park-water')) {
+		map.addSource('selected-park-water', {
+			type: 'geojson',
+			data: EMPTY_FEATURE_COLLECTION,
+		});
+	}
+
+	if (!map.getSource('selected-park-paths')) {
+		map.addSource('selected-park-paths', {
+			type: 'geojson',
+			data: EMPTY_FEATURE_COLLECTION,
+		});
+	}
+
+	if (!map.getLayer('selected-park-water-fill')) {
+		map.addLayer({
+			id: 'selected-park-water-fill',
+			type: 'fill',
+			source: 'selected-park-water',
+			paint: {
+				'fill-color': '#4b8fe8',
+				'fill-opacity': 0.18,
+			},
+		}, 'nearby-parks-label');
+	}
+
+	if (!map.getLayer('selected-park-water-outline')) {
+		map.addLayer({
+			id: 'selected-park-water-outline',
+			type: 'line',
+			source: 'selected-park-water',
+			paint: {
+				'line-color': '#2f78de',
+				'line-width': 2,
+				'line-opacity': 0.95,
+			},
+		}, 'nearby-parks-label');
+	}
+
+	if (!map.getLayer('selected-park-paths-outline')) {
+		map.addLayer({
+			id: 'selected-park-paths-outline',
+			type: 'line',
+			source: 'selected-park-paths',
+			layout: {
+				'line-join': 'round',
+				'line-cap': 'round',
+			},
+			paint: {
+				'line-color': '#d94135',
+				'line-width': [
+					'interpolate', ['linear'], ['zoom'],
+					11, 1.3,
+					16, 2.6,
+				],
+				'line-opacity': 0.95,
+			},
+		}, 'nearby-parks-label');
+	}
+}
+
+function clearSelectedParkContext(map) {
+	const waterSource = map.getSource('selected-park-water');
+	const pathSource = map.getSource('selected-park-paths');
+	if (waterSource) waterSource.setData(EMPTY_FEATURE_COLLECTION);
+	if (pathSource) pathSource.setData(EMPTY_FEATURE_COLLECTION);
+}
+
+async function updateSelectedParkContext(map, parkFeature) {
+	if (!parkFeature?.geometry) return;
+	ensureParkContextOverlayLayers(map);
+	await waitForMapIdle(map);
+	const { waterLayerIds, pathLayerIds } = getParkContextLayerIds(map);
+	const waterFeatures = collectRenderedParkContextFeatures(map, parkFeature, waterLayerIds);
+	const pathFeatures = collectRenderedParkContextFeatures(map, parkFeature, pathLayerIds);
+	const waterSource = map.getSource('selected-park-water');
+	const pathSource = map.getSource('selected-park-paths');
+	if (waterSource) waterSource.setData({ type: 'FeatureCollection', features: waterFeatures });
+	if (pathSource) pathSource.setData({ type: 'FeatureCollection', features: pathFeatures });
+}
+
 async function resolveNearbyParksForCallouts(fallbackData = null) {
 	if (fallbackData?.features?.length) return fallbackData;
 
@@ -239,7 +419,10 @@ function setupPreceedenceParkCallouts(map, parksData) {
 			fitFeatureToFramedViewport(map, feature);
 			openParkPanel(props);
 			try {
-				await analyzePreceedenceParkTrees(map, feature);
+				await Promise.all([
+					updateSelectedParkContext(map, feature),
+					analyzePreceedenceParkTrees(map, feature),
+				]);
 			} catch (err) {
 				console.warn('[HANDLERS] Callout analysis failed:', err);
 			}
@@ -853,7 +1036,10 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			openParkPanel(feature.properties);
 			if (isPreceedencePage) {
 				try {
-					await analyzePreceedenceParkTrees(map, feature);
+					await Promise.all([
+						updateSelectedParkContext(map, feature),
+						analyzePreceedenceParkTrees(map, feature),
+					]);
 				} catch (err) {
 					console.warn('[HANDLERS] Failed to analyze park trees:', err);
 				}
@@ -888,6 +1074,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 		closeBtn.addEventListener('click', () => {
 			const panel = document.getElementById('park-info-panel');
 			if (panel) panel.classList.remove('active');
+			clearSelectedParkContext(map);
 		});
 	}
 
