@@ -747,30 +747,6 @@ body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
   flex-direction: column;
 }
 
-body[data-map-page="preceedence"] #park-info-panel .park-box-trees {
-  border-color: rgba(227, 185, 46, 0.75);
-}
-
-body[data-map-page="preceedence"] #park-info-panel .park-box-plants {
-  border-color: rgba(133, 103, 197, 0.75);
-}
-
-body[data-map-page="preceedence"] #park-info-panel .park-box-fauna {
-  border-color: rgba(79, 209, 145, 0.78);
-}
-
-body[data-map-page="preceedence"] #park-info-panel .park-box-title {
-  border-color: rgba(232, 67, 67, 0.85);
-}
-
-body[data-map-page="preceedence"] #park-info-panel .park-box-description {
-  border-color: rgba(34, 175, 219, 0.85);
-}
-
-body[data-map-page="preceedence"] #park-info-panel .park-box-diagram {
-  border-color: rgba(104, 48, 155, 0.84);
-}
-
 body[data-map-page="preceedence"] #park-info-panel .park-list {
   margin: 0;
   padding: 0;
