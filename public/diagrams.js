@@ -789,6 +789,28 @@ function makeDensityByBlockChart(trees) {
   });
 }
 
+function initDiagramsBackgroundParallax() {
+  const page = document.body;
+  if (!page || !page.classList.contains('diagrams-page')) return;
+
+  const applyScrollShift = () => {
+    const y = window.scrollY || window.pageYOffset || 0;
+    page.style.setProperty('--diagram-bg-shift', `${y}px`);
+  };
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      applyScrollShift();
+      ticking = false;
+    });
+  }, { passive: true });
+
+  applyScrollShift();
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────
 
 async function buildGowanusTreeDashboard() {
@@ -878,5 +900,8 @@ async function buildGowanusTreeDashboard() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', buildGowanusTreeDashboard);
+document.addEventListener('DOMContentLoaded', () => {
+  initDiagramsBackgroundParallax();
+  buildGowanusTreeDashboard();
+});
 

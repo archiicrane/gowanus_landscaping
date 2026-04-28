@@ -11,6 +11,8 @@
   --glass-panel-bg-strong: rgba(248, 248, 246, 0.78);
   --glass-panel-border: rgba(120, 130, 120, 0.24);
   --glass-panel-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
+  --map-wash-image: url('/assets/map-wash.svg');
+  --map-wash-opacity: 0.2;
   --font-sans: "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Georgia", "Times New Roman", serif;
   --font-display: "Helvetica Neue", Arial, sans-serif;
@@ -26,10 +28,35 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  background: var(--paper-wash);
+  background: #ebe8df;
   color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -4% -3%;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #e9e5dc;
+  background-image: var(--map-wash-image);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  opacity: var(--map-wash-opacity);
+  transform: translate3d(0, 0, 0) scale(1.05);
+}
+
+body.diagrams-page::before {
+  transform: translate3d(0, calc(var(--diagram-bg-shift, 0px) * 0.06), 0) scale(1.08);
+  will-change: transform;
 }
 
 /* ---------- Shared Navigation ---------- */
@@ -915,23 +942,23 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 /* ---------- Diagrams Page ---------- */
 .diagrams-page {
-  background: var(--paper-wash);
+  --map-wash-opacity: 0.24;
 }
 
 .diagrams-layout {
-  width: min(96vw, 1680px);
+  width: min(94vw, 1460px);
   margin: 0 auto;
   padding-top: 24px;
   padding-bottom: 80px;
 }
 
 .board-section {
-  padding: 24px;
+  padding: 16px;
   margin-bottom: 18px;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 18px;
-  background: var(--glass-panel-bg-strong);
-  box-shadow: var(--glass-panel-shadow);
+  border: 1.5px solid rgba(120, 130, 120, 0.35);
+  border-radius: 12px;
+  background: rgba(248, 248, 246, 0.16);
+  box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
   scroll-snap-align: start;
@@ -990,10 +1017,10 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 .metric-card,
 .panel-card {
-  background: var(--glass-panel-bg);
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 14px;
-  box-shadow: var(--glass-panel-shadow);
+  background: rgba(248, 248, 246, 0.16);
+  border: 1.5px solid rgba(120, 130, 120, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
 }
@@ -1018,15 +1045,15 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 .charts-grid.two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 34px;
+  gap: 18px;
 }
 
 .panel-card {
-  padding: 18px;
+  padding: 12px;
   display: grid;
-  grid-template-columns: minmax(180px, 240px) 1fr;
+  grid-template-columns: minmax(150px, 220px) 1fr;
   align-items: start;
-  gap: 22px;
+  gap: 14px;
 }
 
 .panel-header h2 {
@@ -1048,7 +1075,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 .chart-wrap {
   margin-top: 0;
   position: relative;
-  height: 320px;
+  height: clamp(260px, 34vh, 320px);
 }
 
 .drawing-wrap {
@@ -1178,15 +1205,25 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 }
 
 .primary-diagram-grid .chart-wrap {
-  height: 430px;
+  height: clamp(290px, 44vh, 420px);
 }
 
 .supporting-diagram-grid .chart-wrap {
-  height: 310px;
+  height: clamp(250px, 33vh, 310px);
 }
 
 .secondary-support-grid {
   margin-top: 14px;
+}
+
+@media (max-width: 1320px) {
+  .metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .charts-grid.two-col {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quiet-support-card {
@@ -1247,7 +1284,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 @media (max-width: 980px) {
   .board-section {
-    padding: 24px 0;
+    padding: 12px;
   }
 
   .board-header-row h2 {
@@ -1261,7 +1298,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
   .metrics-grid,
   .charts-grid.two-col {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .metric-card {
@@ -1308,6 +1345,11 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 @media (max-width: 640px) {
   .diagrams-layout {
     padding-bottom: 50px;
+  }
+
+  .metrics-grid,
+  .charts-grid.two-col {
+    grid-template-columns: 1fr;
   }
 
   .board-header-row h2 {
