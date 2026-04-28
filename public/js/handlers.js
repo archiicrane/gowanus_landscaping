@@ -234,14 +234,56 @@ function ensurePreceedenceTreeLayer(map) {
 	}
 }
 
-function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compactness, topSpecies }) {
+function hashString(seed) {
+	let h = 2166136261;
+	for (let i = 0; i < seed.length; i++) {
+		h ^= seed.charCodeAt(i);
+		h = Math.imul(h, 16777619);
+	}
+	return h >>> 0;
+}
+
+function seededRandom(seed) {
+	let t = seed >>> 0;
+	return () => {
+		t += 0x6d2b79f5;
+		let v = Math.imul(t ^ (t >>> 15), t | 1);
+		v ^= v + Math.imul(v ^ (v >>> 7), v | 61);
+		return ((v ^ (v >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
+function generateEstimatedDots(geom, count, seedKey) {
+	const dots = [];
+	const bbox = geometryBounds(geom);
+	const rand = seededRandom(hashString(seedKey));
+	const maxAttempts = Math.max(500, count * 20);
+	let attempts = 0;
+
+	while (dots.length < count && attempts < maxAttempts) {
+		attempts += 1;
+		const lon = bbox.minLon + rand() * (bbox.maxLon - bbox.minLon);
+		const lat = bbox.minLat + rand() * (bbox.maxLat - bbox.minLat);
+		if (!pointInGeometry([lon, lat], geom)) continue;
+		dots.push({
+			type: 'Feature',
+			properties: { species: 'Estimated canopy' },
+			geometry: { type: 'Point', coordinates: [lon, lat] },
+		});
+	}
+
+	return dots;
+}
+
+function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compactness, topSpecies, mode }) {
 	const metricsEl = document.getElementById('park-tree-metrics');
 	const barsEl = document.getElementById('park-tree-type-bars');
 	const noteEl = document.getElementById('park-tree-note');
 	if (!metricsEl || !barsEl || !noteEl) return;
+	const dataLabel = mode === 'estimated' ? 'Estimated' : 'Observed';
 
 	metricsEl.innerHTML = `
-		<div class="park-tree-metric"><span>Trees</span><strong>${treeCount}</strong></div>
+		<div class="park-tree-metric"><span>Trees (${dataLabel})</span><strong>${treeCount}</strong></div>
 		<div class="park-tree-metric"><span>Density</span><strong>${densityPerAcre.toFixed(1)} / acre</strong></div>
 		<div class="park-tree-metric"><span>Area</span><strong>${areaAcres.toFixed(1)} ac</strong></div>
 		<div class="park-tree-metric"><span>Shape</span><strong>${compactness.toFixed(2)}</strong></div>
@@ -256,9 +298,11 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 				<span class="park-tree-bar-value">${d.count}</span>
 			</div>
 		`).join('')
-		: '<p class="park-tree-empty">No tree records found in this park from the loaded dataset.</p>';
+		: '<p class="park-tree-empty">Street-tree species breakdown is unavailable for this park in the source dataset.</p>';
 
-	noteEl.textContent = 'Dots on map represent tree records in this park. More dots = higher observed density.';
+	noteEl.textContent = mode === 'estimated'
+		? 'This park has no street-tree points in the NYC street-tree dataset. Dot pattern is an estimated canopy-density proxy based on park footprint area.'
+		: 'Dots on map represent observed street-tree records in this park. More dots = higher observed street-tree density.';
 }
 
 async function analyzePreceedenceParkTrees(map, feature) {
@@ -276,25 +320,32 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		}
 		return pointInGeometry([row.lon, row.lat], geom);
 	});
+	let dotFeatures = selected.map((row) => ({
+		type: 'Feature',
+		properties: { species: row.species || 'Unknown' },
+		geometry: { type: 'Point', coordinates: [row.lon, row.lat] },
+	}));
 
 	ensurePreceedenceTreeLayer(map);
-	const source = map.getSource('preceedence-park-tree-dots');
-	if (source) {
-		source.setData({
-			type: 'FeatureCollection',
-			features: selected.map((row) => ({
-				type: 'Feature',
-				properties: { species: row.species || 'Unknown' },
-				geometry: { type: 'Point', coordinates: [row.lon, row.lat] },
-			})),
-		});
-	}
-
 	const fallbackAreaAcres = (geometryAreaPerimeter(geom).area || 0) / 4046.8564224;
 	const areaAcres = Number.isFinite(Number(feature?.properties?.area_acres))
 		? Number(feature.properties.area_acres)
 		: fallbackAreaAcres;
-	const densityPerAcre = areaAcres > 0 ? selected.length / areaAcres : 0;
+
+	let mode = 'observed';
+	let effectiveTreeCount = selected.length;
+	if (selected.length === 0 && areaAcres > 0) {
+		mode = 'estimated';
+		effectiveTreeCount = Math.round(Math.min(900, Math.max(24, areaAcres * 16)));
+		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, String(feature?.properties?.id || feature?.properties?.name || 'park'));
+	}
+
+	const source = map.getSource('preceedence-park-tree-dots');
+	if (source) {
+		source.setData({ type: 'FeatureCollection', features: dotFeatures });
+	}
+
+	const densityPerAcre = areaAcres > 0 ? effectiveTreeCount / areaAcres : 0;
 
 	const counts = new Map();
 	for (const row of selected) {
@@ -310,11 +361,12 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	const compactness = perimeter > 0 ? (4 * Math.PI * area) / (perimeter * perimeter) : 0;
 
 	renderPreceedenceDiagram({
-		treeCount: selected.length,
+		treeCount: effectiveTreeCount,
 		areaAcres,
 		densityPerAcre,
 		compactness,
 		topSpecies,
+		mode,
 	});
 }
 
