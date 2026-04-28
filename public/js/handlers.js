@@ -138,6 +138,7 @@ function openParkPanel(props) {
 const osmDotCache = new Map();
 const parkInventoryCache = new Map();
 const estimatedDotCache = new Map();
+const mappedDotCache = new Map();
 
 function pointInRing(point, ring) {
 	const x = point[0];
@@ -332,6 +333,32 @@ function generateEstimatedDots(geom, count, seedKey) {
 	return dots;
 }
 
+function sampleRowsDeterministic(rows, limit, seedKey) {
+	if (!Array.isArray(rows) || rows.length <= limit) return rows || [];
+	const rand = seededRandom(hashString(`${seedKey}:${rows.length}:${limit}`));
+	const pool = rows.slice();
+	for (let i = pool.length - 1; i > 0; i--) {
+		const j = Math.floor(rand() * (i + 1));
+		const temp = pool[i];
+		pool[i] = pool[j];
+		pool[j] = temp;
+	}
+	return pool.slice(0, limit);
+}
+
+function getMappedDotsCached(rows, maxDots, seedKey) {
+	const key = `${seedKey}:${rows.length}:${maxDots}`;
+	if (mappedDotCache.has(key)) return mappedDotCache.get(key);
+	const subset = sampleRowsDeterministic(rows, maxDots, seedKey);
+	const dots = subset.map((row) => ({
+		type: 'Feature',
+		properties: { species: normalizeSpeciesName(row) },
+		geometry: { type: 'Point', coordinates: [row.lon, row.lat] },
+	}));
+	mappedDotCache.set(key, dots);
+	return dots;
+}
+
 function getEstimatedDotsCached(geom, count, seedKey) {
 	const key = `${seedKey}:${count}`;
 	if (estimatedDotCache.has(key)) return estimatedDotCache.get(key);
@@ -366,7 +393,10 @@ async function loadOsmTreesForGeometry(geom, parkKey) {
 		const res = await fetch(apiUrl);
 		if (!res.ok) return [];
 		const data = await res.json();
-		const rows = (data.rows || []).filter((row) => pointInGeometry([row.lon, row.lat], geom));
+		const shouldTrustParkSpecificSource = isProspectPark || isGreenWood;
+		const rows = shouldTrustParkSpecificSource
+			? (data.rows || [])
+			: (data.rows || []).filter((row) => pointInGeometry([row.lon, row.lat], geom));
 		osmDotCache.set(parkKey, rows);
 		return rows;
 	} catch (err) {
@@ -458,11 +488,7 @@ async function analyzePreceedenceParkTrees(map, feature) {
 
 	const parkKey = String(feature?.properties?.id || feature?.properties?.name || 'park');
 	const mappedTrees = await loadOsmTreesForGeometry(geom, parkKey);
-	let dotFeatures = mappedTrees.map((row) => ({
-		type: 'Feature',
-		properties: { species: normalizeSpeciesName(row) },
-		geometry: { type: 'Point', coordinates: [row.lon, row.lat] },
-	}));
+	let dotFeatures = [];
 
 	ensurePreceedenceTreeLayer(map);
 	const fallbackAreaAcres = (geometryAreaPerimeter(geom).area || 0) / 4046.8564224;
@@ -487,6 +513,11 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		mode = 'treekeeper';
 	} else if (hasGreenWoodOfficialSource && mappedTrees.length > 0) {
 		mode = 'greenwood_official';
+	}
+
+	if (mappedTrees.length > 0) {
+		const maxRenderDots = (mode === 'treekeeper' || mode === 'greenwood_official') ? 1200 : 1600;
+		dotFeatures = getMappedDotsCached(mappedTrees, maxRenderDots, `${parkId || parkKey}-${mode}`);
 	}
 
 	// If OSM data is sparse, check for published inventory
