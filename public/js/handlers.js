@@ -2,37 +2,45 @@
 
 // ─── Park Tree Data Enrichment ────────────────────────────────────────────────
 // Published tree inventory data for parks with comprehensive catalogues.
-// Source: Park alliances and historical records. Used to supplement/validate OSM data.
+// Source: Park alliances and historical records (TreeKeeper, published inventories).
+// Used to supplement/validate OSM data when mapping is incomplete.
 const PARK_TREE_ENRICHMENT = {
 	'prospect-park': {
-		expectedTreeCount: 8000, // Prospect Park Alliance inventory
+		expectedTreeCount: 16152, // TreeKeeper database (Prospect Park Alliance)
+		dataSource: 'TreeKeeper',
 		commonSpecies: [
-			{ species: 'Quercus', count: 1200 },
-			{ species: 'Acer', count: 900 },
-			{ species: 'Carpinus', count: 700 },
-			{ species: 'Fraxinus', count: 600 },
+			{ species: 'Quercus', count: 2400 },  // ~15% oaks
+			{ species: 'Acer', count: 1800 },     // ~11% maples
+			{ species: 'Carpinus betulus', count: 1200 }, // European hornbeam
+			{ species: 'Fraxinus', count: 900 },  // ash
+			{ species: 'Ulmus', count: 700 },     // elm
+			{ species: 'Platanus', count: 600 },  // sycamore
 		],
 	},
 	'green-wood-cemetery': {
-		expectedTreeCount: 7000, // Green-Wood historic arboretum
+		expectedTreeCount: 7000, // Historic arboretum estimate
+		dataSource: 'Arboretum records',
 		commonSpecies: [
-			{ species: 'Acer platanoides', count: 800 },
-			{ species: 'Quercus alba', count: 700 },
-			{ species: 'Pinus strobus', count: 600 },
+			{ species: 'Acer platanoides', count: 1000 }, // Norway maple
+			{ species: 'Quercus alba', count: 800 },      // white oak
+			{ species: 'Pinus strobus', count: 600 },     // white pine
+			{ species: 'Fagus grandifolia', count: 500 }, // American beech
 		],
 	},
 	'carroll-park': {
-		expectedTreeCount: 150,
+		expectedTreeCount: 180,
+		dataSource: 'Park records',
 		commonSpecies: [
-			{ species: 'Platanus acerifolia', count: 80 },
-			{ species: 'Gleditsia triacanthos', count: 50 },
+			{ species: 'Platanus acerifolia', count: 100 },  // London plane
+			{ species: 'Gleditsia triacanthos', count: 60 }, // Honey locust
 		],
 	},
 	'coffey-park': {
-		expectedTreeCount: 200,
+		expectedTreeCount: 220,
+		dataSource: 'Park records',
 		commonSpecies: [
-			{ species: 'Quercus', count: 80 },
-			{ species: 'Ulmus', count: 70 },
+			{ species: 'Quercus', count: 100 },
+			{ species: 'Ulmus', count: 80 },
 		],
 	},
 };
@@ -364,10 +372,12 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		noteText = 'Dots are researched mapped tree locations from OpenStreetMap/Overpass inside this park boundary. Density reflects mapped tree points.';
 	} else if (mode === 'osm_with_reference') {
 		dataLabel = 'Mapped';
-		noteText = 'Dots are mapped tree locations from OpenStreetMap/Overpass. Published inventory may show additional documented trees not yet mapped in OSM.';
+		const source = parkEnrichment?.dataSource || 'Published';
+		noteText = `Dots are mapped tree locations from OpenStreetMap/Overpass. ${source} inventory (${parkEnrichment?.expectedTreeCount} total trees) may show additional documented trees not yet mapped in OSM.`;
 	} else if (mode === 'enriched') {
 		dataLabel = 'Published';
-		noteText = 'Data from published park inventory (Park Alliance or historical records). Dot distribution is modeled. Actual tree locations will be more precise.';
+		const source = parkEnrichment?.dataSource || 'Published';
+		noteText = `Data from ${source}: ${parkEnrichment?.expectedTreeCount} catalogued trees. Dot distribution is modeled. Actual tree locations will be more precise once mapped in OpenStreetMap.`;
 	} else if (mode === 'estimated') {
 		dataLabel = 'Estimated';
 		noteText = 'No mapped tree points were returned for this park. Dot pattern is an estimated fallback based on park area.';
