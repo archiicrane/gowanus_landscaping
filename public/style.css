@@ -8,6 +8,7 @@
   --accent-soft: rgba(79, 127, 99, 0.12);
   --font-sans: "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Georgia", "Times New Roman", serif;
+  --font-display: "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
@@ -46,10 +47,31 @@ body {
 
 .brand {
   font-size: 13px;
+  font-family: var(--font-display);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--ink);
+}
+
+h1,
+h2,
+h3,
+h4,
+.eyebrow,
+.story-eyebrow,
+.layer-panel-title,
+.park-panel-distance,
+.park-panel-name,
+.park-panel-section-title,
+.section-title,
+.section-heading,
+.site-diagram-title,
+.studies-card-title,
+.band-title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 .nav-links {
@@ -215,7 +237,7 @@ main {
 .story-card h3 {
   margin: 0 0 6px;
   font-size: 18px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 600;
   color: var(--ink);
 }
@@ -385,7 +407,7 @@ main {
 .park-panel-name {
   margin: 0 0 4px;
   font-size: 20px;
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-weight: 600;
   color: var(--ink);
   line-height: 1.2;
@@ -658,7 +680,7 @@ main {
 
 body[data-map-page="preceedence"] #park-info-panel {
   position: fixed;
-  top: 88px;
+  top: 72px;
   left: 14px;
   right: 14px;
   bottom: 16px;
@@ -680,6 +702,10 @@ body[data-map-page="preceedence"] #park-info-panel {
   visibility: hidden;
   transform: translateY(8px);
   transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+
+body[data-map-page="preceedence"] #map {
+  top: 56px;
 }
 
 body[data-map-page="preceedence"] #park-info-panel.active {
@@ -770,6 +796,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-panel-name {
   font-size: 32px;
   margin: 0;
   line-height: 1.1;
+  font-weight: 700;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-panel-distance {
@@ -907,7 +934,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   margin: 6px 0 0;
   font-size: 24px;
   line-height: 1.22;
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
   font-weight: 500;
   color: #3e3933;
 }

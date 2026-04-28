@@ -1,4 +1,4 @@
-// map-init.js — Creates and exports the Mapbox map instance
+// map-init.js - Creates and exports the Mapbox map instance
 
 import { resolveMapboxToken } from './js/token.js';
 import {
@@ -230,7 +230,7 @@ function initMapIntroSequence(map) {
 
 	const applyStage = () => {
 		if (stage === 0) {
-			// Stage 0 — context view: surrounding parks highlighted, site hidden
+			// Stage 0 - context view: surrounding parks highlighted, site hidden
 			setChecked('toggle-nearby-parks', true);
 			setChecked('toggle-bounding', false);
 			setChecked('toggle-buildings', false);
@@ -249,7 +249,7 @@ function initMapIntroSequence(map) {
 		}
 
 		if (stage === 1) {
-			// Stage 1 — enter study site: boundary revealed, parks remain
+			// Stage 1 - enter study site: boundary revealed, parks remain
 			setChecked('toggle-nearby-parks', true);
 			setChecked('toggle-bounding', true);
 			setChecked('toggle-contours', false);
@@ -264,7 +264,7 @@ function initMapIntroSequence(map) {
 		}
 
 		if (stage === 2) {
-			// Stage 2 — topography reading: contours + heat
+			// Stage 2 - topography reading: contours + heat
 			setChecked('toggle-bounding', true);
 			setChecked('toggle-contours', true);
 			setChecked('toggle-heat', userHeatPreference ?? true);
@@ -277,7 +277,7 @@ function initMapIntroSequence(map) {
 			return;
 		}
 
-		// Stage 3+ — bioswale corridors revealed
+		// Stage 3+ - bioswale corridors revealed
 		setChecked('toggle-bounding', true);
 		setChecked('toggle-contours', true);
 		setChecked('toggle-heat', userHeatPreference ?? true);

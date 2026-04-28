@@ -24,8 +24,11 @@
   box-shadow: 0 2px 8px rgba(120, 180, 160, 0.03);
 }
 .studies-card-title {
-  font-family: 'Georgia', serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: #3a4632;
   margin-bottom: 0.4rem;
 }

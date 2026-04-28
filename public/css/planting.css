@@ -9,8 +9,11 @@
 }
 .planting-nav .subtab {
   color: #7a7a7a;
-  font-family: 'Georgia', serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -44,8 +47,11 @@
 }
 
 .band-title {
-  font-family: 'Georgia', serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: #3a4632;
   margin-bottom: 0.3rem;
 }

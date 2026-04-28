@@ -1,4 +1,4 @@
-﻿/* flora-diagram.css — page-specific styles for Flora & Fauna diagram page
+﻿/* flora-diagram.css - page-specific styles for Flora & Fauna diagram page
    Relies on shared /style.css for :root vars, .top-bar, nav */
 
 /* ── Page shell ─────────────────────────────────────────────────────────── */
@@ -19,8 +19,10 @@
 .flora-header h1 {
   margin: 6px 0 10px;
   font-size: 28px;
-  font-family: var(--font-serif);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--ink);
   line-height: 1.2;
 }
@@ -49,8 +51,10 @@
   margin: 4px 0 8px;
   font-size: 24px;
   line-height: 1.2;
-  font-family: var(--font-serif);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--ink);
 }
 
@@ -692,3 +696,4 @@
     flex-wrap: wrap;
   }
 }
+

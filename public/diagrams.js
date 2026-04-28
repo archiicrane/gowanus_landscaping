@@ -1,4 +1,4 @@
-﻿// diagrams.js — Gowanus Tree Baseline Analysis
+﻿// diagrams.js - Gowanus Tree Baseline Analysis
 // Data source: /data/gowanus_trees_clean.json
 // All metrics and charts are derived from the existing Gowanus street tree dataset.
 
@@ -724,7 +724,7 @@ function makeWaterRetentionChart(speciesRetentionEntries) {
   });
 }
 
-// Tree Density by Block — bucket trees into ~100m lat/lon grid cells
+// Tree Density by Block - bucket trees into ~100m lat/lon grid cells
 // (rounds lat/lon to 3 decimal places ≈ one city block)
 function makeDensityByBlockChart(trees) {
   const blockCounts = {};
@@ -879,3 +879,4 @@ async function buildGowanusTreeDashboard() {
 }
 
 document.addEventListener('DOMContentLoaded', buildGowanusTreeDashboard);
+

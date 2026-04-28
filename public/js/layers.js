@@ -1,9 +1,9 @@
-// layers.js — Adds all GeoJSON layers to the Mapbox map
+// layers.js - Adds all GeoJSON layers to the Mapbox map
 //
 // Data sources (must be accessible at these paths in the deployment):
-//   /data/gowanus-buildings.geojson  — OSM polygons with `height` property
-//   /data/gowanus_trees_clean.json   — array of { tree_id, species, health, lat, lon }
-//   /data/park.geojson               — CAD-exported LineStrings for the park outline
+//   /data/gowanus-buildings.geojson  - OSM polygons with `height` property
+//   /data/gowanus_trees_clean.json   - array of { tree_id, species, health, lat, lon }
+//   /data/park.geojson               - CAD-exported LineStrings for the park outline
 //
 // Layer IDs:
 //   buildings-extrusion
@@ -224,7 +224,7 @@ function treesToGeoJSON(trees) {
 				properties: {
 					tree_id: t.tree_id,
 					species:  t.species  || 'Unknown',
-					health:   t.health   || '—',
+					health:   t.health   || '-',
 					dbh:      t.dbh      || null,
 				},
 			})),
@@ -418,7 +418,7 @@ export async function addTopographyHeatLayer(map) {
 
 	map.addSource('topography-heat', { type: 'geojson', data: sourceData });
 
-	// Use circle layer instead of heatmap — heatmap density saturates to one
+	// Use circle layer instead of heatmap - heatmap density saturates to one
 	// color when points are dense. Circles colored directly by elev value give
 	// a reliable red (high) → purple (low) gradient across the study area.
 	// Use reduce instead of spread to avoid stack overflow on large arrays.
@@ -726,7 +726,7 @@ export async function addNearbyParksLayer(map) {
 		},
 	});
 
-	// Hover highlight outline — only visible on the hovered feature
+	// Hover highlight outline - only visible on the hovered feature
 	map.addLayer({
 		id: 'nearby-parks-outline-hover',
 		type: 'line',
@@ -799,7 +799,7 @@ function makeCircleGeoJSON(centerLon, centerLat, radiusKm, steps = 96) {
 	return coords;
 }
 
-// Point on a given circle at bearing 90° (east) — used for label placement
+// Point on a given circle at bearing 90° (east) - used for label placement
 function circleLabelPoint(radiusKm) {
 	const toRad = (d) => (d * Math.PI) / 180;
 	const toDeg = (r) => (r * 180) / Math.PI;

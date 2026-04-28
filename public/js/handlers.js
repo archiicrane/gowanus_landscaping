@@ -1,4 +1,4 @@
-// handlers.js — Hover and click interactions for all map layers
+// handlers.js - Hover and click interactions for all map layers
 
 // ─── Park Tree Data Enrichment ────────────────────────────────────────────────
 // Published tree inventory data for parks with comprehensive catalogues.
@@ -924,10 +924,10 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			if (!props) return;
 
 		const rows = [
-			['Species', props.species || '—'],
-			['Health',  props.health  || '—'],
-			['DBH',     props.dbh ? `${props.dbh} in` : '—'],
-			['ID',      props.tree_id || '—'],
+			['Species', props.species || '-'],
+			['Health',  props.health  || '-'],
+			['DBH',     props.dbh ? `${props.dbh} in` : '-'],
+			['ID',      props.tree_id || '-'],
 		];
 
 		const html = `
@@ -958,8 +958,8 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			const props = e.features[0]?.properties;
 			if (!props) return;
 
-		const height = props.height || (props['building:levels'] ? `${Math.round(props['building:levels'] * 3.2)}m (est.)` : '—');
-		const addr   = [props['addr:housenumber'], props['addr:street']].filter(Boolean).join(' ') || '—';
+		const height = props.height || (props['building:levels'] ? `${Math.round(props['building:levels'] * 3.2)}m (est.)` : '-');
+		const addr   = [props['addr:housenumber'], props['addr:street']].filter(Boolean).join(' ') || '-';
 
 		const html = `
 			<div class="popup-inner">
@@ -989,7 +989,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 
 		map.on('click', 'cso-outfalls-circle', (e) => {
 			const props = e.features[0]?.properties || {};
-			const id = props.id || props.OBJECTID || props.FID || '—';
+			const id = props.id || props.OBJECTID || props.FID || '-';
 			const name = props.name || props.NAME || props.outfall || props.OUTFALL || 'CSO Outfall';
 
 		const html = `

@@ -1,4 +1,4 @@
-// layers.js — GeoJSON layer setup for the Gowanus map
+// layers.js - GeoJSON layer setup for the Gowanus map
 // Re-exported from /js/layers.js for backwards compatibility
 export { addBuildingLayer, addTreeLayer, addParkLayer } from '/js/layers.js';
 

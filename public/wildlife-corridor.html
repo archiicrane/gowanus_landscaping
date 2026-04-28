@@ -16,7 +16,9 @@
 		.page-hero h1 {
 			font-size: clamp(22px, 3vw, 36px);
 			font-weight: 700;
-			letter-spacing: -0.02em;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			font-family: var(--font-display);
 			margin: 0 0 10px;
 			color: var(--ink);
 		}
@@ -46,7 +48,9 @@
 			font-size: clamp(17px, 2vw, 24px);
 			font-weight: 700;
 			margin: 0 0 8px;
-			letter-spacing: -0.015em;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			font-family: var(--font-display);
 		}
 		.section-sub {
 			font-size: 13.5px;
@@ -204,6 +208,9 @@
 		.animal-card h3 {
 			font-size: 14px;
 			font-weight: 700;
+			font-family: var(--font-display);
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
 			margin: 0 0 4px;
 			color: var(--ink);
 		}
@@ -259,6 +266,9 @@
 		.verdict-box h3 {
 			font-size: 15px;
 			font-weight: 700;
+			font-family: var(--font-display);
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
 			margin: 0 0 10px;
 		}
 		.verdict-box ul {
@@ -302,14 +312,14 @@
 	<div class="page-hero">
 		<p class="section-title">Ecological Analysis</p>
 		<h1>Wildlife Corridor Feasibility</h1>
-		<p>Can Gowanus serve as a stepping-stone habitat node connecting the green spaces of South Brooklyn? This analysis maps target species across six nearby parks and evaluates which animals could colonize a rewilded Gowanus corridor — and which already exist in parks on both sides.</p>
+		<p>Can Gowanus serve as a stepping-stone habitat node connecting the green spaces of South Brooklyn? This analysis maps target species across six nearby parks and evaluates which animals could colonize a rewilded Gowanus corridor - and which already exist in parks on both sides.</p>
 	</div>
 
 	<!-- ── 1. Corridor Diagram ─────────────────────────────────── -->
 	<div class="section">
 		<p class="section-title">01 · Context</p>
 		<p class="section-heading">The Stepping-Stone Problem</p>
-		<p class="section-sub">Gowanus sits in a gap between two significant green masses: Prospect Park / Green-Wood Cemetery to the east/south and the Red Hook waterfront to the west. Without a continuous green corridor, wildlife cannot move between these nodes. The canal itself is an ecological barrier — rewilding the surrounding blocks converts the gap into a bridge.</p>
+		<p class="section-sub">Gowanus sits in a gap between two significant green masses: Prospect Park / Green-Wood Cemetery to the east/south and the Red Hook waterfront to the west. Without a continuous green corridor, wildlife cannot move between these nodes. The canal itself is an ecological barrier - rewilding the surrounding blocks converts the gap into a bridge.</p>
 		<div class="corridor-diagram">
 			<svg class="corridor-svg" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet" id="corridor-svg"></svg>
 		</div>
@@ -321,7 +331,7 @@
 	<div class="section">
 		<p class="section-title">02 · Presence Matrix</p>
 		<p class="section-heading">Which Animals Are Already in the Nearby Parks?</p>
-		<p class="section-sub">The 18 target species for Gowanus rewilding — selected for habitat suitability, ecological role, and NYC feasibility — mapped against confirmed presence in each surrounding park. Orange = Gowanus (proposed). Green = confirmed presence. A high overlap score means the species already exists in parks flanking the site and is likely to colonize once habitat is restored.</p>
+		<p class="section-sub">The 18 target species for Gowanus rewilding - selected for habitat suitability, ecological role, and NYC feasibility - mapped against confirmed presence in each surrounding park. Orange = Gowanus (proposed). Green = confirmed presence. A high overlap score means the species already exists in parks flanking the site and is likely to colonize once habitat is restored.</p>
 
 		<div class="legend-row">
 			<span><span class="dot-present"></span> Confirmed in park</span>
@@ -355,23 +365,23 @@
 			<div>
 				<h3>Strong Corridor Candidates</h3>
 				<ul>
-					<li><strong class="ok">Red-tailed Hawk</strong> — Already patrols the Gowanus blocks from Green-Wood and Prospect. A rewilded edge with perch trees closes the gap immediately.</li>
-					<li><strong class="ok">Eastern Gray Squirrel</strong> — Present in all six parks. Any planted street tree extends its range.</li>
-					<li><strong class="ok">Monarch Butterfly</strong> — Uses flowering corridors. The Gowanus planting plan (milkweed, asters, goldenrod) directly targets its migration route.</li>
-					<li><strong class="ok">Gray Catbird</strong> — Dense shrub nester. Coffey Park and Carroll Park populations would expand naturally into Gowanus edge plantings.</li>
-					<li><strong class="ok">American Robin</strong> — Lawn/edge species. Immediate colonizer once soil is unsealed.</li>
-					<li><strong class="ok">Yellow Warbler</strong> — Already at Coffey Park. Willow and elderberry plantings at the canal edge = direct habitat bridge.</li>
+					<li><strong class="ok">Red-tailed Hawk</strong> - Already patrols the Gowanus blocks from Green-Wood and Prospect. A rewilded edge with perch trees closes the gap immediately.</li>
+					<li><strong class="ok">Eastern Gray Squirrel</strong> - Present in all six parks. Any planted street tree extends its range.</li>
+					<li><strong class="ok">Monarch Butterfly</strong> - Uses flowering corridors. The Gowanus planting plan (milkweed, asters, goldenrod) directly targets its migration route.</li>
+					<li><strong class="ok">Gray Catbird</strong> - Dense shrub nester. Coffey Park and Carroll Park populations would expand naturally into Gowanus edge plantings.</li>
+					<li><strong class="ok">American Robin</strong> - Lawn/edge species. Immediate colonizer once soil is unsealed.</li>
+					<li><strong class="ok">Yellow Warbler</strong> - Already at Coffey Park. Willow and elderberry plantings at the canal edge = direct habitat bridge.</li>
 				</ul>
 			</div>
 			<div>
 				<h3>Longer-Term Corridor Goals</h3>
 				<ul>
-					<li><strong class="warn">Eastern Screech-Owl</strong> — Present at Prospect Park and Green-Wood. Needs mature hollow trees; box programs can accelerate colonization.</li>
-					<li><strong class="warn">Wood Thrush</strong> — Interior forest specialist. Gowanus cannot provide interior habitat alone — but it extends the Prospect-Green-Wood forest corridor's functional edge.</li>
-					<li><strong class="warn">Red Fox</strong> — Only at Prospect Park currently. Long-term: if the full corridor is planted, documented range expansion is plausible (they colonized Greenpoint in 2019).</li>
-					<li><strong class="warn">Painted Turtle</strong> — Canal water quality is improving post-Superfund. Present at Prospect Lake and Green-Wood ponds; canal edge bioswales with calm pools could support them.</li>
-					<li><strong class="bad">Great Blue Heron</strong> — Foraging range extends to Gowanus Canal now, but nesting requires tall isolated trees over water. Decades-long goal.</li>
-					<li><strong class="bad">Osprey</strong> — Active over Red Hook Bay. Canal mouth habitat could serve as foraging extension, but nesting requires dedicated platforms over open water.</li>
+					<li><strong class="warn">Eastern Screech-Owl</strong> - Present at Prospect Park and Green-Wood. Needs mature hollow trees; box programs can accelerate colonization.</li>
+					<li><strong class="warn">Wood Thrush</strong> - Interior forest specialist. Gowanus cannot provide interior habitat alone - but it extends the Prospect-Green-Wood forest corridor's functional edge.</li>
+					<li><strong class="warn">Red Fox</strong> - Only at Prospect Park currently. Long-term: if the full corridor is planted, documented range expansion is plausible (they colonized Greenpoint in 2019).</li>
+					<li><strong class="warn">Painted Turtle</strong> - Canal water quality is improving post-Superfund. Present at Prospect Lake and Green-Wood ponds; canal edge bioswales with calm pools could support them.</li>
+					<li><strong class="bad">Great Blue Heron</strong> - Foraging range extends to Gowanus Canal now, but nesting requires tall isolated trees over water. Decades-long goal.</li>
+					<li><strong class="bad">Osprey</strong> - Active over Red Hook Bay. Canal mouth habitat could serve as foraging extension, but nesting requires dedicated platforms over open water.</li>
 				</ul>
 			</div>
 		</div>
@@ -392,7 +402,7 @@
 
 	// target: true = we're designing for this at Gowanus
 	// parks: list of park IDs where confirmed
-	// score: 0–100 corridor feasibility for Gowanus
+	// score: 0-100 corridor feasibility for Gowanus
 	const SPECIES = [
 		{
 			icon: '🦅', name: 'Red-tailed Hawk', sci: 'Buteo jamaicensis',
@@ -404,7 +414,7 @@
 		{
 			icon: '🐿', name: 'Eastern Gray Squirrel', sci: 'Sciurus carolinensis',
 			role: 'Seed disperser / mast consumer',
-			desc: 'The most generalist urban mammal in NYC. Confirmed in every park surveyed. Will colonize any planted canopy corridor immediately — no special habitat requirements beyond scattered trees.',
+			desc: 'The most generalist urban mammal in NYC. Confirmed in every park surveyed. Will colonize any planted canopy corridor immediately - no special habitat requirements beyond scattered trees.',
 			parks: ['thomas','carroll','coffey','prospect','greenwood'],
 			target: true, score: 98,
 		},
@@ -432,28 +442,28 @@
 		{
 			icon: '🌿', name: 'Yellow Warbler', sci: 'Setophaga petechia',
 			role: 'Canopy insect predator / indicator species',
-			desc: 'Breeding at Coffey Park. Willows, alders, and elderberry along the Gowanus Canal edge provide direct habitat. The canal corridor is a natural migration pathway — this species would be an early arrival.',
+			desc: 'Breeding at Coffey Park. Willows, alders, and elderberry along the Gowanus Canal edge provide direct habitat. The canal corridor is a natural migration pathway - this species would be an early arrival.',
 			parks: ['coffey'],
 			target: true, score: 80,
 		},
 		{
 			icon: '🦉', name: 'Eastern Screech-Owl', sci: 'Megascops asio',
 			role: 'Nocturnal predator / cavity nester',
-			desc: 'Resident at both Prospect Park and Green-Wood Cemetery. Needs mature hollow trees or nest boxes. A box installation program at Gowanus could accelerate colonization within 3–5 years.',
+			desc: 'Resident at both Prospect Park and Green-Wood Cemetery. Needs mature hollow trees or nest boxes. A box installation program at Gowanus could accelerate colonization within 3-5 years.',
 			parks: ['prospect','greenwood'],
 			target: true, score: 68,
 		},
 		{
 			icon: '🎵', name: 'Wood Thrush', sci: 'Hylocichla mustelina',
 			role: 'Forest interior indicator / insect predator',
-			desc: 'Breeds in both Prospect Park Ravine and Green-Wood Cemetery. Requires shaded interior forest floor — Gowanus cannot provide this alone, but the corridor extends functional habitat connectivity toward these source populations.',
+			desc: 'Breeds in both Prospect Park Ravine and Green-Wood Cemetery. Requires shaded interior forest floor - Gowanus cannot provide this alone, but the corridor extends functional habitat connectivity toward these source populations.',
 			parks: ['prospect','greenwood'],
 			target: true, score: 52,
 		},
 		{
 			icon: '🦊', name: 'Red Fox', sci: 'Vulpes vulpes',
 			role: 'Mesopredator / ecosystem balancer',
-			desc: 'Reintroduced to Prospect Park in 2011. NYC foxes are expanding — documented in Greenpoint, Bushwick, and the Navy Yard. A fully planted Gowanus corridor creates a viable movement route from Prospect Park westward.',
+			desc: 'Reintroduced to Prospect Park in 2011. NYC foxes are expanding - documented in Greenpoint, Bushwick, and the Navy Yard. A fully planted Gowanus corridor creates a viable movement route from Prospect Park westward.',
 			parks: ['prospect'],
 			target: true, score: 45,
 		},
@@ -467,7 +477,7 @@
 		{
 			icon: '🦜', name: 'Monk Parakeet', sci: 'Myiopsitta monachus',
 			role: 'Community colonial nester',
-			desc: 'The Green-Wood colony (nesting on the Gothic arch since 1970s) is one of the oldest urban parakeet colonies in North America. Gowanus is within their foraging range — any open feeding stations or large communal trees could attract satellite colonies.',
+			desc: 'The Green-Wood colony (nesting on the Gothic arch since 1970s) is one of the oldest urban parakeet colonies in North America. Gowanus is within their foraging range - any open feeding stations or large communal trees could attract satellite colonies.',
 			parks: ['greenwood'],
 			target: false, score: 60,
 		},
@@ -516,7 +526,7 @@
 		{
 			icon: '🐇', name: 'Eastern Cottontail', sci: 'Sylvilagus floridanus',
 			role: 'Grazer / prey base anchor',
-			desc: 'Confirmed at Green-Wood Cemetery. Dense shrub plantings with undisturbed ground cover in the Gowanus corridor provide direct cottontail habitat — and a prey base that attracts hawks and owls.',
+			desc: 'Confirmed at Green-Wood Cemetery. Dense shrub plantings with undisturbed ground cover in the Gowanus corridor provide direct cottontail habitat - and a prey base that attracts hawks and owls.',
 			parks: ['greenwood'],
 			target: true, score: 62,
 		},

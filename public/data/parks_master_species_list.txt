@@ -1,4 +1,4 @@
-'Akebono' yoshino cherry
+﻿'Akebono' yoshino cherry
 'Amanogawa' flowering cherry
 'Aureocaulis' giant timber bamboo
 'Autumnalis' higan cherry
@@ -6,12 +6,12 @@
 'Black Swan' European beech
 'Grey Owl' red cedar
 'Gyoiko' cherry
-× Cuprocyparis leylandii
-× Gordlinia
-× Gordlinia grandiflora 'Sweet Tea'
+Ã- Cuprocyparis leylandii
+Ã- Gordlinia
+Ã- Gordlinia grandiflora 'Sweet Tea'
 Abelia
 Abelia 'Edward Goucher'
-Abelia × grandiflora
+Abelia Ã- grandiflora
 Abelia mosanensis
 Abies
 Abies balsamea
@@ -22,7 +22,7 @@ Abies koreana
 Abies koreana 'Silberlocke'
 Abies nordmanniana
 Abies sp.
-Accolade™ elm
+Accoladeâ„¢ elm
 Acer
 Acer buergerianum
 Acer campestre
@@ -54,17 +54,17 @@ Acer pseudoplatanus
 Acer pseudosieboldianum ssp. takesimense
 Acer rubrum
 Acer rubrum 'Autumn Flame'
-Acer rubrum 'Frank's Jr.' Redpointe®
-Acer rubrum 'Franksred' Red Sunset®
+Acer rubrum 'Frank's Jr.' RedpointeÂ®
+Acer rubrum 'Franksred' Red SunsetÂ®
 Acer rubrum 'October Glory'
 Acer rubrum 'Schlesingeri'
 Acer rubrum var. trilobum
 Acer saccharinum
 Acer saccharum
-Acer saccharum 'Bailsta' Fall Fiesta®
+Acer saccharum 'Bailsta' Fall FiestaÂ®
 Acer saccharum 'Green Mountain'
-Acer saccharum 'JFS-Caddo2' Flashfire®
-Acer saccharum 'Whit XLIX' Powder Keg®
+Acer saccharum 'JFS-Caddo2' FlashfireÂ®
+Acer saccharum 'Whit XLIX' Powder KegÂ®
 Acer saccharum 'Wright Brothers'
 Acer saccharum subsp. leucoderme
 Acer saccharum subsp. nigrum
@@ -72,14 +72,14 @@ Acer saccharum subsp. skutchii
 Acer sempervirens
 Acer spicatum
 Acer takesimense
-Acer tegmentosum ‘Joe Witt’
+Acer tegmentosum â€˜Joe Wittâ€™
 Acer triflorum
 Acer triflorum 'Hybrid #2'
 Acer triflorum 'HYBRID'
 Acer tsinglingense
 Acer x freemanii 'Bailston'
-Acer x freemanii 'DTR 102' Autumn Fantasy®
-Acer x freemanii ‘Jeffersred’
+Acer x freemanii 'DTR 102' Autumn FantasyÂ®
+Acer x freemanii â€˜Jeffersredâ€™
 Adina
 Adina rubella
 Aeculus
@@ -88,7 +88,7 @@ Aesculus 'Homestead'
 Aesculus flava
 Aesculus glabra
 Aesculus glabra 'Early Glow'
-Aesculus glabra ‘J.N. Select’ Early Glow™
+Aesculus glabra â€˜J.N. Selectâ€™ Early Glowâ„¢
 Aesculus hippocastanum
 Aesculus hippocastanum 'Baumannii'
 Aesculus octandra
@@ -103,7 +103,7 @@ Aesculus x arnoldiana 'Autumn Splendor'
 Aesculus x carnea
 Aesculus x carnea 'O'Neill'
 Aesculus x woerlitzensis 'Ellwangerii'
-Afterburner® tupelo
+AfterburnerÂ® tupelo
 Afterglow winterberry
 Ailanthus
 Ailanthus altissima
@@ -119,9 +119,9 @@ Alnus incana subsp. rugosa
 Amazing Grace katsura tree
 Ambrosia apple
 Amelanchier
-Amelanchier × grandiflora 'Autumn Brilliance'
-Amelanchier × grandiflora 'Princess Diana'
-Amelanchier × grandiflora 'Robin Hill Pink'
+Amelanchier Ã- grandiflora 'Autumn Brilliance'
+Amelanchier Ã- grandiflora 'Princess Diana'
+Amelanchier Ã- grandiflora 'Robin Hill Pink'
 Amelanchier alnifolia
 Amelanchier canadensis
 Amelanchier canadensis 'Glenn Form' RAINBOW PILLAR
@@ -153,7 +153,7 @@ American Kestrel
 American linden
 American plum
 American Robin
-American Sentry® linden
+American SentryÂ® linden
 American smoke tree
 American snowbell
 American sycamore
@@ -193,21 +193,21 @@ Asimina triloba
 Asimina triloba 'Mango'
 Asimina triloba 'Mitchell'
 Asimina triloba 'Pennsylvania Gold'
-Asimina triloba ‘Sunflower’
+Asimina triloba â€˜Sunflowerâ€™
 Asimina triloba 'Wilson'
 atlas cedar
 Atrovirens oriental spruce
 Aucuba
 Aucuba japonica 'Gold Dust'
 Austrian black pine
-Autumn Blaze® freemans maple
+Autumn BlazeÂ® freemans maple
 Autumn Brilliance apple serviceberry
 Autumn Brilliance Serviceberry
 Autumn Cascade tupelo
 Autumn Flame red maple
 Autumn Gold ginkgo
 Autumn Purple white ash
-Autumn Treasure® hop hornbeam
+Autumn TreasureÂ® hop hornbeam
 azalea
 Bailey Compact cranberrybush
 bald cypress
@@ -222,7 +222,7 @@ Barmstedt Gold witch hazel
 Baron's ash
 bastard oak
 bayberry
-Beale’s barberry
+Bealeâ€™s barberry
 Bear Oak
 bee bee tree
 Berberis
@@ -232,11 +232,11 @@ Bergmanii Japanese white pine
 Bernstein witch hazel
 Betula
 Betula alleghaniensis
-Betula chinensis 'KLMDD' Cinnamon Flakes™
+Betula chinensis 'KLMDD' Cinnamon Flakesâ„¢
 Betula lenta
 Betula nigra
 Betula nigra 'BNMTF' DURA-HEAT
-Betula nigra 'Cully' Heritage®
+Betula nigra 'Cully' HeritageÂ®
 Betula nigra 'Fox Valley'
 Betula papyrifera
 Betula pendula
@@ -323,9 +323,9 @@ Carpinus betulus 'Frans Fontaine'
 Carpinus betulus 'Vienna Weeping'
 Carpinus caroliniana
 Carpinus caroliniana 'Draves'
-Carpinus caroliniana 'Draves' Iron Cascade™
-Carpinus caroliniana ‘J.N. Upright’ Firespire®
-Carpinus caroliniana 'JFS-KW6' Native Flame®
+Carpinus caroliniana 'Draves' Iron Cascadeâ„¢
+Carpinus caroliniana â€˜J.N. Uprightâ€™ FirespireÂ®
+Carpinus caroliniana 'JFS-KW6' Native FlameÂ®
 Carpinus fanigiana
 Carpinus henryana var. simplicidentata
 Carpinus japonica
@@ -341,7 +341,7 @@ Cascade Falls bald cypress
 Castanea
 Castanea dentata
 Catalpa
-Catalpa × erubescens 'Purpurea'
+Catalpa Ã- erubescens 'Purpurea'
 Catalpa fargesii
 Catalpa speciosa
 Catawba rhododendron
@@ -363,7 +363,7 @@ Cedrus deodara 'Divinely Blue'
 Cedrus deodara 'Kashmir'
 Cedrus libani
 Cedrus sp.
-Celestial® dogwood
+CelestialÂ® dogwood
 Celtis
 Celtis occidentalis
 Celtis occidentalis 'Chicagoland'
@@ -378,7 +378,7 @@ Cercidiphyllum japonicum 'Amazing Grace'
 Cercis
 Cercis canadensis
 Cercis canadensis 'Appalachian Red'
-Cercis canadensis 'Covey' Lavender Twist™
+Cercis canadensis 'Covey' Lavender Twistâ„¢
 Cercis canadensis 'Forest Pansy'
 Cercis canadensis 'Hearts of Gold'
 Cercis canadensis 'Pauline Lily'
@@ -393,8 +393,8 @@ Cercis chinensis
 Cercis chinensis 'Don Egolf'
 Cercis sp.
 Chaenomeles
-Chaenomeles × superba 'Jet Trail'
-Chaenomeles × superba 'Texas Scarlet'
+Chaenomeles Ã- superba 'Jet Trail'
+Chaenomeles Ã- superba 'Texas Scarlet'
 Chaenomeles sp.
 Chalet Swiss stone pine
 chalk maple
@@ -402,7 +402,7 @@ Chamaecyparis
 Chamaecyparis nootkatensis
 Chamaecyparis nootkatensis 'Pendula'
 Chamaecyparis obtusa
-Chamaecyparis obtusa ‘Kosteri’
+Chamaecyparis obtusa â€˜Kosteriâ€™
 Chamaecyparis pisifera
 Chamaecyparis pisifera 'Filifera Aurea'
 Chamaecyparis pisifera 'Filifera'
@@ -411,13 +411,13 @@ Chamaecyparis thyoides
 Champlin Red witch-hazel
 Cherokee Brave flowering dogwood
 Cherokee Chief flowering dogwood
-Cherokee™ sweetgum
+Cherokeeâ„¢ sweetgum
 Cherry
 cherry bark oak
 cherry birch
 cherry plum
 chestnut oak
-Chicago Lustre® arrowwood viburnum
+Chicago LustreÂ® arrowwood viburnum
 Chimonanthus
 Chimonanthus praecox 'Luteus'
 Chinese bushcherry (Tsukuba No. 1)
@@ -454,7 +454,7 @@ Chionanthus virginicus
 chokeberry
 chokecherry
 Chokecherry Canada Red
-Cinnamon Flakes™ Chinese birch
+Cinnamon Flakesâ„¢ Chinese birch
 Cladastris
 Cladrastis
 Cladrastis kentukea
@@ -472,7 +472,7 @@ cloud forest maple
 cloud forest sugar maple
 Cloud Nine flowering dogwood
 coastal doghobble
-Cobblestone® bur oak
+CobblestoneÂ® bur oak
 Cockspur hawthorn
 cockspur thorn
 Cole's Select apple serviceberry
@@ -481,7 +481,7 @@ Colorado spruce
 columnar blue spruce
 columnar tulip tree
 Columnare maple
-COMMENDATION™ elm
+COMMENDATIONâ„¢ elm
 Common crapemyrtle
 Common fig
 Common Grackle
@@ -507,11 +507,11 @@ Cornelian cherry
 cornelian cherry dogwood
 Cornell hybrid oak
 Cornus
-Cornus 'Kn30 8' Venus®
-Cornus × rutgersensis 'Rutcan' Constellation®
-Cornus × rutgersensis 'Rutdan' Celestial®
-Cornus × rutgersensis 'Rutgan' Stellar Pink®
-Cornus × rutgersensis 'Rutlan' Ruth Ellen®
+Cornus 'Kn30 8' VenusÂ®
+Cornus Ã- rutgersensis 'Rutcan' ConstellationÂ®
+Cornus Ã- rutgersensis 'Rutdan' CelestialÂ®
+Cornus Ã- rutgersensis 'Rutgan' Stellar PinkÂ®
+Cornus Ã- rutgersensis 'Rutlan' Ruth EllenÂ®
 Cornus alba 'Aurea'
 Cornus alternifolia
 Cornus amomum
@@ -530,9 +530,9 @@ Cornus florida f. rubra
 Cornus florida subsp. urbiniana
 Cornus kousa
 Cornus kousa 'Gold Star'
-Cornus kousa 'Samzam' Samaritan®
+Cornus kousa 'Samzam' SamaritanÂ®
 Cornus kousa 'Satomi'
-Cornus kousa subsp. chinensis 'Madi-II' Mandarin Jewel®
+Cornus kousa subsp. chinensis 'Madi-II' Mandarin JewelÂ®
 Cornus kousa var. chinensis
 Cornus mas
 Cornus officinalis
@@ -602,19 +602,19 @@ Deutzia parviflora
 Deutzia scabra
 devilwood
 Diervilla
-Diervilla rivularis 'G2X88544' Kodiak®
+Diervilla rivularis 'G2X88544' KodiakÂ®
 Diospyros
 Diospyros kaki 'Hana Fuyu'
 Diospyros virginiana
 Diospyros virginiana 'Fall Gold'
 Diospyros virginiana 'Golden Delight'
-Diospyros virginiana 'JN5' Magic Fountain™
-Diospyros virginiana 'JN5' Magic Fountain™ PP 25689
+Diospyros virginiana 'JN5' Magic Fountainâ„¢
+Diospyros virginiana 'JN5' Magic Fountainâ„¢ PP 25689
 Diospyros virginiana 'John Rick'
 Diospyros virginiana 'Meadowland'
 Diospyros virginiana 'Morris Burton'
 Diospyros virginiana 'Prairie Dawn'
-Diospyros virginiana 'WFHgodel' Golden Delight™
+Diospyros virginiana 'WFHgodel' Golden Delightâ„¢
 Dirca
 Dirca palustris
 Dirr Selection tupelo
@@ -637,7 +637,7 @@ Dunlin
 Durand white oak
 dwarf sumac
 Early Fall black gum
-Early Glow™ Ohio buckeye
+Early Glowâ„¢ Ohio buckeye
 Eastern Cottontail
 eastern cottonwood
 Eastern Gray Squirrel
@@ -658,8 +658,8 @@ Edward Goucher abelia
 Elizabeth magnolia
 elm
 Emerald City tulip tree
-Emerald Sentinel™ red-cedar
-Emerald Sunshine® elm
+Emerald Sentinelâ„¢ red-cedar
+Emerald SunshineÂ® elm
 Emmenopterys
 Emmenopterys henryi
 English elm
@@ -715,22 +715,22 @@ fastigiate sweetgum
 February Gold Chinese witch hazel
 field maple
 fir
-Firespire® American hornbeam
-Firestarter® tupelo
-First Blush® Cherry
-Flashfire® maple
+FirespireÂ® American hornbeam
+FirestarterÂ® tupelo
+First BlushÂ® Cherry
+FlashfireÂ® maple
 Flowering crabapple
 flowering dogwood
 Flowering dogwood Cherokee Princess
 flowering quince
-Forest Fire™ black gum
+Forest Fireâ„¢ black gum
 Forest Pansy redbud
 Forest Sky pine
 Forsythia
 Forsythia x intermedia 'Karl Sax'
-Forum® tupelo
+ForumÂ® tupelo
 Fothergilla
-Fothergilla × intermedia 'Blue Shadow'
+Fothergilla Ã- intermedia 'Blue Shadow'
 fragrant abelia
 fragrant snowbell
 Franklin tree
@@ -773,7 +773,7 @@ Gleditsia triacanthos
 Gleditsia triacanthos f. inermis 'Impcole' IMPERIAL
 Gleditsia triacanthos f. inermis 'Moraine'
 Gleditsia triacanthos f. inermis 'Skycole' SKYLINE
-Gleditsia triacanthos f. inermis ‘Wandell' PERFECTION
+Gleditsia triacanthos f. inermis â€˜Wandell' PERFECTION
 Gleditsia triacanthos var. inermis
 Gleditsia triacanthos var. inermis 'Sunburst'
 Glenleven linden
@@ -781,7 +781,7 @@ glossy abelia
 Gold Dust spotted laurel
 Gold Star kousa dogwood
 Golden Delight persimmon
-Golden Delight™ persimmon
+Golden Delightâ„¢ persimmon
 Golden Gift magnolia
 golden rain tree
 golden Tartarean dogwood
@@ -800,23 +800,23 @@ Greater Scaup (winter)
 green ash
 Green Gable blackgum
 Green Mountain sugar maple
-Green Mountain® silver linden
-Green Mountain® sugar maple
+Green MountainÂ® silver linden
+Green MountainÂ® sugar maple
 Green Panda clumping bamboo
 Green Pillar pin oak
 Green Shadow swamp magnolia
-Green Spring™ overcup oak
+Green Springâ„¢ overcup oak
 Green Vase Japanese zelkova
-Green Whisper® baldcypress
+Green WhisperÂ® baldcypress
 Greenspire linden
-Greenstone™ elm
+Greenstoneâ„¢ elm
 Gro-Low fragrant sumac
-Gum Drop® blackgum
+Gum DropÂ® blackgum
 Gymnocladus
 Gymnocladus dioicus
 Gymnocladus dioicus 'Espresso'
-Gymnocladus dioicus 'J. C. McDaniel' Prairie Titan™
-Gymnocladus dioicus 'UMNSynergy' True North®
+Gymnocladus dioicus 'J. C. McDaniel' Prairie Titanâ„¢
+Gymnocladus dioicus 'UMNSynergy' True NorthÂ®
 Gyokuryu Japanese cedar
 Halesia
 Halesia carolina
@@ -827,13 +827,13 @@ Halesia tetraptera
 Hamamelis
 Hamamelis 'Amethyst'
 Hamamelis 'Dishi'
-Hamamelis × intermedia 'Barmstedt Gold'
-Hamamelis × intermedia 'Bernstein'
-Hamamelis × intermedia 'Candlelight Vigil'
-Hamamelis × intermedia 'Cyrill'
-Hamamelis × intermedia 'Harry'
-Hamamelis × intermedia 'Jelena'
-Hamamelis × intermedia 'Winter Dawn'
+Hamamelis Ã- intermedia 'Barmstedt Gold'
+Hamamelis Ã- intermedia 'Bernstein'
+Hamamelis Ã- intermedia 'Candlelight Vigil'
+Hamamelis Ã- intermedia 'Cyrill'
+Hamamelis Ã- intermedia 'Harry'
+Hamamelis Ã- intermedia 'Jelena'
+Hamamelis Ã- intermedia 'Winter Dawn'
 Hamamelis japonica 'Shibamichi Red'
 Hamamelis japonica var. obtusata 'Brotzman's #2013-1'
 Hamamelis mollis 'February Gold'
@@ -847,7 +847,7 @@ Hamamelis virginiana 'Ex Manor View'
 Hamamelis virginiana 'Harvest Moon'
 Hamamelis virginiana 'Ice Queen'
 Hamamelis virginiana 'Mohonk Red'
-Hamamelis virginiana 'Vincent’s Red'
+Hamamelis virginiana 'Vincentâ€™s Red'
 Hamamelis virginiana 'Winter Champagne'
 Hamamelis x 'Brotzman's Bicolor'
 Hamamelis X 'Winter Champagne'
@@ -867,8 +867,8 @@ Henry's honeysuckle
 Henry's lime
 Henry's linden
 Henry's stone oak
-Heritage® Macdaniel's oak
-Heritage® river birch
+HeritageÂ® Macdaniel's oak
+HeritageÂ® river birch
 Herring Gull
 Hibiscus
 Hibiscus syriacus
@@ -903,7 +903,7 @@ Hypericum frondosum 'Sunburst'
 Ilex
 Ilex 'Nellie R. Stevens'
 Ilex 'Scepter'
-Ilex × koehneana
+Ilex Ã- koehneana
 Ilex crenata 'Helleri'
 Ilex crenata 'Sky Pencil'
 Ilex crenata 'Steeds'
@@ -924,12 +924,12 @@ Ilex verticillata 'Red Sprite'
 Ilex verticillata 'Winter Red'
 Ilex x aquipernyi 'Meschick' DRAGON LADY
 Ilex x koehneana 'Martha Berry'
-Ilex x meserveae 'Mesid' BLUE MAID®
+Ilex x meserveae 'Mesid' BLUE MAIDÂ®
 imperial honey locust
 Indian Magic flowering crabapple
 Inman's Select coastal redwood
 intermediate yew
-Iron Cascade™ American hornbeam
+Iron Cascadeâ„¢ American hornbeam
 island ash
 Itea
 Itea virginica 'Henry's Garnet'
@@ -966,14 +966,14 @@ Japanese winter hazel
 Japanese zelkova
 Jasminum
 Jasminum nudiflorum
-Jean Louise™ magnolia
+Jean Louiseâ„¢ magnolia
 Jefferson elm
 Jersey Knight American holly
 Jet Trail flowering quince
 Joe McDaniel magnolia
 Jolly Rodger magnolia
-Jolly™ tupelo
-Jordan Street® oak
+Jollyâ„¢ tupelo
+Jordan StreetÂ® oak
 Judy Zuk magnolia
 Juglans
 Juglans cinerea
@@ -983,13 +983,13 @@ juneberry
 juniper
 Juniperus
 Juniperus chinensis
-Juniperus chinensis 'Kaizuka' Torulosa™
+Juniperus chinensis 'Kaizuka' Torulosaâ„¢
 Juniperus chinensis 'Keteleeri'
 Juniperus chinensis var. sargentii 'Viridis'
 Juniperus procumbens 'Nana'
 Juniperus sp.
 Juniperus virginiana
-Juniperus virginiana 'Corcorcor' Emerald Sentinel™
+Juniperus virginiana 'Corcorcor' Emerald Sentinelâ„¢
 Juniperus virginiana 'Grey Owl'
 Kalmia
 Kalmia latifolia
@@ -1006,9 +1006,9 @@ Kentucky coffee tree
 Kentucky Coffeetree
 Kentucky Coffeetree Espresso
 Keteleeri Chinese juniper
-Kindred Spirit® Ware's oak
+Kindred SpiritÂ® Ware's oak
 Kintoki Japanese cornelian cherry
-Kodiak® orange diervilla
+KodiakÂ® orange diervilla
 Koehne holly
 Koelreuteria
 Koelreuteria paniculata
@@ -1017,7 +1017,7 @@ Konara oak
 Korean fir
 Korean maple
 Korean pine
-‎Koreanspice viburnum
+â€ŽKoreanspice viburnum
 Kosar hybrid evergreen holly
 Kosteri hinoki cypress
 kousa dogwood
@@ -1030,7 +1030,7 @@ Lagerstroemia fauriei 'Fantasy'
 Lagerstroemia fauriei 'Townhouse'
 Lagerstroemia indica
 Lagerstroemia indica 'Tuscarora'
-Lagerstroemia indica 'Whit III' Pink Velour®
+Lagerstroemia indica 'Whit III' Pink VelourÂ®
 Lagerstroemia sp.
 LaNana cypress
 Lane Roberts sweetgum
@@ -1040,7 +1040,7 @@ Larix
 Larix kaempferi
 Laughing Gull
 laurel
-Lavender Twist™ redbud
+Lavender Twistâ„¢ redbud
 Least Tern
 Lennei Alba saucer magnolia
 Leucothoe
@@ -1058,18 +1058,18 @@ Liquidambar
 Liquidambar acalycina 'Burgundy Flush'
 Liquidambar styraciflua
 Liquidambar styraciflua 'Fastigiata'
-Liquidambar styraciflua 'Hapdell' Happidaze™
+Liquidambar styraciflua 'Hapdell' Happidazeâ„¢
 Liquidambar styraciflua 'Lane Roberts'
 Liquidambar styraciflua 'Moraine'
 Liquidambar styraciflua 'Rotundiloba'
-Liquidambar styraciflua 'Ward' Cherokee™
+Liquidambar styraciflua 'Ward' Cherokeeâ„¢
 Liquidambar styraciflua 'Worplesdon'
 Liriodendron
 Liriodendron tulipifera
 Liriodendron tulipifera 'Ardis'
 Liriodendron tulipifera 'Aureo-marginatum' MAJESTIC BEAUTY
-Liriodendron tulipifera ‘Fastigiatum’
-Liriodendron tulipifera 'JFS-Oz' Emerald City®
+Liriodendron tulipifera â€˜Fastigiatumâ€™
+Liriodendron tulipifera 'JFS-Oz' Emerald CityÂ®
 Liriodendron tulipifera x chinense
 Liriodenron
 Lithocarpus
@@ -1097,27 +1097,27 @@ Magic Fountain weeping persimmon
 Magnolia
 Magnolia 'Big Dude'
 Magnolia 'Butterflies'
-Magnolia ‘Evamaria’
+Magnolia â€˜Evamariaâ€™
 Magnolia 'Galaxy'
 Magnolia 'Jane'
 Magnolia 'Joe McDaniel'
 Magnolia 'Jolly Rodger'
 Magnolia 'Judy Zuk'
-Magnolia 'KLMVV' Jean Louise™
+Magnolia 'KLMVV' Jean Louiseâ„¢
 Magnolia 'Sayonara'
 Magnolia 'Spiced Spumoni'
 Magnolia 'Sun Spire'
 Magnolia 'Sunburst'
 Magnolia 'Sunset Swirl'
 Magnolia 'Susan'
-Magnolia × brooklynensis 'Woodsman'
-Magnolia × brooklynensis 'Yellow Bird'
-Magnolia × brooklynensis #204 (‘Black Beauty’)
-Magnolia × loebneri 'Merrill'
-Magnolia × soulangeana
-Magnolia × soulangeana 'Alexandrina'
-Magnolia × soulangeana ‘Alexandrina’
-Magnolia × soulangeana 'Lennei Alba'
+Magnolia Ã- brooklynensis 'Woodsman'
+Magnolia Ã- brooklynensis 'Yellow Bird'
+Magnolia Ã- brooklynensis #204 (â€˜Black Beautyâ€™)
+Magnolia Ã- loebneri 'Merrill'
+Magnolia Ã- soulangeana
+Magnolia Ã- soulangeana 'Alexandrina'
+Magnolia Ã- soulangeana â€˜Alexandrinaâ€™
+Magnolia Ã- soulangeana 'Lennei Alba'
 Magnolia acuminata
 Magnolia acuminata 'Moegi-dori'
 Magnolia acuminata x denudata 'Elizabeth'
@@ -1147,7 +1147,7 @@ Magnolia virginiana 'Jim Wilson' MOONGLOW
 Magnolia virginiana var. australis 'Green Shadow'
 Magnolia virginiana var. australis 'Santa Rosa'
 Magnolia x 'Golden Gift'
-Magnolia x ‘Judy Zuk’
+Magnolia x â€˜Judy Zukâ€™
 Magnolia x 'Royal Crown'
 Magnolia x brooklynensis 'Lois'
 Magnolia zenii 'Pink Parchment'
@@ -1155,19 +1155,19 @@ Magnolia zenii 'Spring Peppermint'
 Mahonia
 Mahonia bealei
 maidenhair tree (ginkgo)
-Majestic® blackgum
+MajesticÂ® blackgum
 Malus
 Malus 'Donald Wyman'
 Malus 'Granny Smith'
 Malus 'Indian Magic'
-Malus 'JFS-KW5' Royal Raindrops™
+Malus 'JFS-KW5' Royal Raindropsâ„¢
 Malus 'Katherine'
 Malus 'Morse Code 16'
 Malus 'Pink Spires'
 Malus 'Snowcloud'
-Malus 'Sutyzam' Sugar Tyme™
+Malus 'Sutyzam' Sugar Tymeâ„¢
 Malus 'Yellow Delicious'
-Malus × scheideckeri 'Red Jade'
+Malus Ã- scheideckeri 'Red Jade'
 Malus domestica ' Ambrosia'
 Malus domestica ' Arkansas Black'
 Malus domestica 'Arkansas Black'
@@ -1177,14 +1177,14 @@ Malus domestica 'Red Prairie Spy'
 Malus domestica 'Redlove Era'
 Malus hupehensis
 Malus sp.
-Mandarin Jewel® Chinese kousa dogwood
+Mandarin JewelÂ® Chinese kousa dogwood
 Mango pawpaw
 Manhattan euonymus
 Manoga Japanese flowering cherry
 maple-leaved oak
 mapleleaf viburnum
 Martha Berry holly
-Matador™ maple
+Matadorâ„¢ maple
 Meidomonac shrub rose
 Merlin
 Merrill magnolia
@@ -1227,7 +1227,7 @@ Nannyberry
 nannyberry viburnum
 Nantucket serviceberry
 Natchez crape myrtle
-Native Flame® American hornbeam
+Native FlameÂ® American hornbeam
 Nectarine
 Nellie R. Stevens holly
 New Jersey tea
@@ -1250,29 +1250,29 @@ Nyssa aquatica
 Nyssa sylvatica
 Nyssa sylvatica 'Afterburner'
 Nyssa sylvatica 'Autumn Cascade'
-Nyssa sylvatica 'Cherry Pie' PP27588 White Chapel®
+Nyssa sylvatica 'Cherry Pie' PP27588 White ChapelÂ®
 Nyssa sylvatica 'Daley'
-Nyssa sylvatica 'David Odom' Afterburner®
+Nyssa sylvatica 'David Odom' AfterburnerÂ®
 Nyssa sylvatica 'Dirr Selection'
 Nyssa sylvatica 'Early Fall'
 Nyssa sylvatica 'Forest Fire'
 Nyssa sylvatica 'Green Gable'
-Nyssa sylvatica 'JFS-PN Legacy1' Gum Drop®
-Nyssa sylvatica 'JFS-red' Firestarter®
-Nyssa sylvatica 'M.O.N. 2' Majestic®
-Nyssa sylvatica 'M.O.N.2' Majestic®
+Nyssa sylvatica 'JFS-PN Legacy1' Gum DropÂ®
+Nyssa sylvatica 'JFS-red' FirestarterÂ®
+Nyssa sylvatica 'M.O.N. 2' MajesticÂ®
+Nyssa sylvatica 'M.O.N.2' MajesticÂ®
 Nyssa sylvatica 'Northern Splendor'
-Nyssa sylvatica 'NSMTF' Red Splyndor®
-Nyssa sylvatica 'NSUHH' Green Gable™
-Nyssa sylvatica 'NXSXF' Forum®
+Nyssa sylvatica 'NSMTF' Red SplyndorÂ®
+Nyssa sylvatica 'NSUHH' Green Gableâ„¢
+Nyssa sylvatica 'NXSXF' ForumÂ®
 Nyssa sylvatica 'Red Vain'
 Nyssa sylvatica 'Sheffield Park'
 Nyssa sylvatica 'Sheri's Cloud'
-Nyssa sylvatica 'The James' Forest Fire™
-Nyssa sylvatica 'WFH1' Tupelo Tower™
+Nyssa sylvatica 'The James' Forest Fireâ„¢
+Nyssa sylvatica 'WFH1' Tupelo Towerâ„¢
 Nyssa sylvatica 'Wildfire'
 Nyssa sylvatica 'Wisley Bonfire'
-Nyssa sylvatica 'Yiping' Jolly™
+Nyssa sylvatica 'Yiping' Jollyâ„¢
 Nyssa sylvatica 'Zydeco Twist'
 Nyssa sylvatica var. biflora
 oak
@@ -1292,7 +1292,7 @@ Osmanthus armatus
 Osprey
 Ostrya
 Ostrya virginiana
-Ostrya virginiana 'JFS-KW5' Autumn Treasure®
+Ostrya virginiana 'JFS-KW5' Autumn TreasureÂ®
 Ostrya virginiana 'Midnight Green'
 Ouachita false indigo
 Ovenbird
@@ -1301,7 +1301,7 @@ Oxydendron arboreum
 Oxydendrum
 Oxydendrum arboreum
 Ozark witch hazel
-Pacific Heritage™ Garry Oak
+Pacific Heritageâ„¢ Garry Oak
 pagoda dogwood
 Painted Lady Butterfly
 Painted Turtle
@@ -1335,11 +1335,11 @@ Persian ironwood
 Persian oak
 Phellodendron
 Phellodendron amurense
-Phellodendron amurense 'PNI 4551' Shademaster®
+Phellodendron amurense 'PNI 4551' ShademasterÂ®
 Philadelphus
 Philadelphus inodorus
 Photinia
-Photinia × fraseri
+Photinia Ã- fraseri
 Photinia davidiana
 Phyllostachys
 Phyllostachys vivax 'Aureocaulis'
@@ -1349,7 +1349,7 @@ Physocarpus opulifolius 'Dart's Gold'
 Picea
 Picea abies
 Picea abies 'Inversa'
-Picea abies 'Noel' Royal Splendor®
+Picea abies 'Noel' Royal SplendorÂ®
 Picea abies 'Reflexa'
 Picea glauca
 Picea obovata 'Arctos'
@@ -1364,8 +1364,8 @@ Pieris japonica 'Dorothy Wyckoff'
 pignut hickory
 pin oak
 pine tree
-Pink Flair® Cherry
-Pink Flair® Sargent cherry
+Pink FlairÂ® Cherry
+Pink FlairÂ® Sargent cherry
 pink flowering dogwood
 Pink Lady apple
 Pink Parchment magnolia
@@ -1374,10 +1374,10 @@ Pink Spires crabapple
 Pink Velour crape myrtle
 Pinus
 Pinus 'Forest Sky'
-Pinus × schwerinii
-Pinus × schwerinii 'Miss Christel'
-Pinus × schwerinii 'Prairie Giant'
-Pinus × schwerinii 'Weithorst'
+Pinus Ã- schwerinii
+Pinus Ã- schwerinii 'Miss Christel'
+Pinus Ã- schwerinii 'Prairie Giant'
+Pinus Ã- schwerinii 'Weithorst'
 Pinus aristata
 Pinus bungeana
 Pinus cembra
@@ -1419,10 +1419,10 @@ Pinus wallichiana 'Zebrina'
 Pinus x holfordiana
 pitch pine
 Platanus
-Platanus × hispanica
-Platanus × hispanica 'Bloodgood'
-Platanus × hispanica 'Suttneri'
-Platanus × hispanica 'Yarwood'
+Platanus Ã- hispanica
+Platanus Ã- hispanica 'Bloodgood'
+Platanus Ã- hispanica 'Suttneri'
+Platanus Ã- hispanica 'Yarwood'
 Platanus acerifolia
 Platanus occidentalis
 Platanus occidentalis 'Dave's Selection'
@@ -1440,11 +1440,11 @@ Populus deltoides
 Populus tremuloides
 possumhaw
 post oak
-Powder Keg® Caddo sugar maple
+Powder KegÂ® Caddo sugar maple
 Prague viburnum
 Prairie Giant pine
-Prairie Stature™ oak
-Prairie Titan™ Kentucky coffee tree
+Prairie Statureâ„¢ oak
+Prairie Titanâ„¢ Kentucky coffee tree
 prairie willow
 Princess Diana apple serviceberry
 Princeton elm
@@ -1452,22 +1452,22 @@ Princeton Sentry ginkgo
 privet
 Prunus
 Prunus 'Gyoiko'
-Prunus 'JFS-KW14' First Blush® Cherry
+Prunus 'JFS-KW14' First BlushÂ® Cherry
 Prunus 'Manoga'
 Prunus 'Ohibayama'
 Prunus 'Okame'
-Prunus 'Snofozam' SNOW FOUNTAINS™
-Prunus × subhirtella
-Prunus × subhirtella 'Autumnalis'
-Prunus × subhirtella 'Pendula'
+Prunus 'Snofozam' SNOW FOUNTAINSâ„¢
+Prunus Ã- subhirtella
+Prunus Ã- subhirtella 'Autumnalis'
+Prunus Ã- subhirtella 'Pendula'
 Prunus avium
 Prunus cerasifera
 Prunus cerasifera 'Thundercloud'
-Prunus incisa 'CarltonLT' Little Twist®
+Prunus incisa 'CarltonLT' Little TwistÂ®
 Prunus japonica 'Tsukuba No. 1'
 Prunus pumila 'Big Red'
 Prunus sargentii
-Prunus sargentii 'JFS-KW58' Pink Flair®
+Prunus sargentii 'JFS-KW58' Pink FlairÂ®
 Prunus serotina
 Prunus serrulata
 Prunus serrulata 'Amanogawa'
@@ -1498,31 +1498,31 @@ purpleosier willow
 pussy willow
 pygmy fringetree
 Pyracantha
-Pyracantha angustifolia  'Monon' Yukon Belle®
+Pyracantha angustifolia  'Monon' Yukon BelleÂ®
 pyramid magnolia
 Pyrus
 Pyrus calleryana
 Pyrus calleryana 'Bradford'
-QinLing Chén
+QinLing ChÃ©n
 Qinling maple
 quaking aspen
 Quercus
-Quercus × comptoniae
-Quercus × macdaniellii 'Clemons' Heritage®
-Quercus × warei 'Nadler' Kindred Spirit®
-Quercus ×ludoviciana
+Quercus Ã- comptoniae
+Quercus Ã- macdaniellii 'Clemons' HeritageÂ®
+Quercus Ã- warei 'Nadler' Kindred SpiritÂ®
+Quercus Ã-ludoviciana
 Quercus acerifolia
 Quercus acutissima
 Quercus alba
 Quercus alba 'Greenspire'
-Quercus alba x macrocarpa 'Atwood' Jordan Street®
+Quercus alba x macrocarpa 'Atwood' Jordan StreetÂ®
 Quercus arkansana
 Quercus bicolor
-Quercus bicolor 'Green Nova' Sun Breaker®
-Quercus bicolor 'JFS-KW12' AMERICAN DREAM®
-Quercus bicolor × aliena var. acutiserrata
-Quercus bicolor × muehlenbergii
-Quercus bicolor × vaseyana
+Quercus bicolor 'Green Nova' Sun BreakerÂ®
+Quercus bicolor 'JFS-KW12' AMERICAN DREAMÂ®
+Quercus bicolor Ã- aliena var. acutiserrata
+Quercus bicolor Ã- muehlenbergii
+Quercus bicolor Ã- vaseyana
 Quercus bicolor x aliena
 Quercus bicolor x austrina
 Quercus bicolor x fabrei
@@ -1545,22 +1545,22 @@ Quercus glandulifera
 Quercus imbricaria
 Quercus incana
 Quercus lyrata
-Quercus lyrata 'Dahlonega' Green Spring™
+Quercus lyrata 'Dahlonega' Green Springâ„¢
 Quercus macranthera
 Quercus macrocarpa
-Quercus macrocarpa 'JFS-KW14' Cobblestone®
+Quercus macrocarpa 'JFS-KW14' CobblestoneÂ®
 Quercus macrocarpa x prinoides
 Quercus margarettae
 Quercus marilandica
 Quercus michauxii
 Quercus montana
-Quercus montana × geminata (mix)
+Quercus montana Ã- geminata (mix)
 Quercus muehlenbergii
 Quercus myrsinifolia
 Quercus nigra
 Quercus pagoda 'H10#3'
 Quercus palustris
-Quercus palustris 'Pringreen' GREEN PILLAR™
+Quercus palustris 'Pringreen' GREEN PILLARâ„¢
 Quercus palustris 'Sovereign'
 Quercus phellos
 Quercus phillyreoides
@@ -1576,13 +1576,13 @@ Quercus sp.
 Quercus stellata
 Quercus stellata x havardii 'King Canute'
 Quercus texana
-Quercus texana 'Betterred' Ruby Spring®
+Quercus texana 'Betterred' Ruby SpringÂ®
 Quercus variabilis
 Quercus velutina
 Quercus virginiana
-Quercus warei 'Long' × OPEN
+Quercus warei 'Long' Ã- OPEN
 Quercus warei 'Long' x comptoniae
-Quercus x bimundorum 'Midwest' Prairie Stature™
+Quercus x bimundorum 'Midwest' Prairie Statureâ„¢
 Querucs
 Raccoon
 Radicans Japanese cedar
@@ -1639,7 +1639,7 @@ rock elm
 Rock Pigeon
 Rogers bottlebrush buckeye
 Rosa
-Rosa 'Meidomonac' BONICA™
+Rosa 'Meidomonac' BONICAâ„¢
 Rosa virginiana
 Rose Lantern golden rain tree
 rose of Sharon
@@ -1650,17 +1650,17 @@ roundleaf sweetgum
 Royal Crown magnolia
 Royal paulownia
 Royal Purple smoketree
-Royal Raindrops™ flowering crabapple
+Royal Raindropsâ„¢ flowering crabapple
 Royal Red Norway maple
 Royal Splendor Norway spruce
 Royal White eastern redbud
 Rubus
 Rubus odoratus
 Ruby Falls eastern redbud
-Ruby Spring® nuttall Oak
+Ruby SpringÂ® nuttall Oak
 Ruby-throated Hummingbird (migration)
 Russian arborvitae
-Ruth Ellen® dogwood
+Ruth EllenÂ® dogwood
 Salix
 Salix alba 'Tristis'
 Salix babylonica var. pekinensis 'Tortuosa'
@@ -1669,12 +1669,12 @@ Salix humilis
 Salix integra 'Hakuro-nishiki'
 Salix nigra
 Salix pupurea
-Samaritan® Japanese dogwood
+SamaritanÂ® Japanese dogwood
 Sambucus
 Sambucus canadensis
 Sambucus canadensis 'Adams'
 Sambucus canadensis 'York'
-Sambucus nigra 'Eva' BLACK LACE™
+Sambucus nigra 'Eva' BLACK LACEâ„¢
 San Jose ginkgo
 sand post oak
 Santa Rosa sweet bay magnolia
@@ -1710,14 +1710,14 @@ Sequoiadendron giganteum 'Glaucum'
 Serbian spruce
 serviceberry
 seven-lobed Japanese maple
-Shademaster® Amur corktree
+ShademasterÂ® Amur corktree
 shagbark hickory
 Shamrock inkberry holly
-Shamrock® little-leaf linden
+ShamrockÂ® little-leaf linden
 Shangri-La ginkgo
 Sharp-shinned Hawk
 Sharp's Pigmy Japanese maple
-Shawnee Brave® bald cypress
+Shawnee BraveÂ® bald cypress
 Sheffield Park tupelo
 shellbark hickory
 Sheri's Cloud black tupelo
@@ -1736,7 +1736,7 @@ silver linden
 silver maple
 Silver Ray Korean pine
 Sky Pencil Japanese holly
-Skyline® honey locust
+SkylineÂ® honey locust
 slender deutzia
 smoketree
 smooth sumac
@@ -1765,7 +1765,7 @@ Splendens red buckeye
 spreading willowleaf cotoneaster
 Spring Grove flowering dogwood
 Spring Peppermint magnolia
-St. Croix™ American elm
+St. Croixâ„¢ American elm
 Stachyurus
 Stachyurus chinensis
 Stachyurus praecox
@@ -1774,7 +1774,7 @@ Staghorn sumac Tiger eyes
 star magnolia
 Starburst amur maackia
 Steeds Japanese holly
-Stellar Pink® dogwood
+Stellar PinkÂ® dogwood
 Stephanandra
 Stephanandra incisa 'Crispa'
 Stewartia
@@ -1795,9 +1795,9 @@ Styrax japonicus
 Styrax japonicus 'Carillon'
 Styrax obassia
 sugar maple
-Sugar Tyme™ flowering crabapple
+Sugar Tymeâ„¢ flowering crabapple
 Sumac
-Sun Breaker® swamp white oak
+Sun BreakerÂ® swamp white oak
 Sun Spire magnolia
 Sunburst cedarglade St. Johnswort
 Sunburst magnolia
@@ -1813,7 +1813,7 @@ sweet bay magnolia
 sweet box
 sweet gum
 sweet pepperbush
-Sweet Street™ linden
+Sweet Streetâ„¢ linden
 Sweet Tea mountain gordlinia
 Sweetbay magnolia
 sweetgum
@@ -1825,7 +1825,7 @@ Swiss stone pine
 sycamore maple
 sycoparrotia
 Symphoricarpos
-Symphoricarpos x doorenbosii 'Kordes' AMETHYST™
+Symphoricarpos x doorenbosii 'Kordes' AMETHYSTâ„¢
 Syringa
 Syringa reticulata
 Syringa reticulata 'Ivory Silk'
@@ -1837,15 +1837,15 @@ Taxodium
 Taxodium ascendens
 Taxodium distichum
 Taxodium distichum 'Cascade Falls'
-Taxodium distichum 'JFS-SGPN' Green Whisper®
-Taxodium distichum ‘Mickelson’ Shawnee Brave®
+Taxodium distichum 'JFS-SGPN' Green WhisperÂ®
+Taxodium distichum â€˜Mickelsonâ€™ Shawnee BraveÂ®
 Taxodium distichum 'Pendens'
 Taxodium distichum var. distichum
 Taxodium distichum var. imbricarium 'Nutans'
 Taxodium X 'LaNana'
 Taxus
-Taxus × media 'Hicksii'
-Taxus × media 'Viridis'
+Taxus Ã- media 'Hicksii'
+Taxus Ã- media 'Viridis'
 Taxus baccata
 Taxus baccata 'Repandens'
 Taxus chinensis
@@ -1853,7 +1853,7 @@ Taxus sp.
 Taxus wallichiana var. chinensis
 Taxus x 'Pyramidalis'
 Taxus x media 'Hicksii'
-Taxus x media ‘Viridis’
+Taxus x media â€˜Viridisâ€™
 tea crabapple
 Tetradium
 Tetradium daniellii
@@ -1870,7 +1870,7 @@ Thuja plicata
 Thundercloud purple-leaf plum
 Tilia
 Tilia 'Harvest Gold'
-Tilia × europaea
+Tilia Ã- europaea
 Tilia americana
 Tilia americana 'Fastigata'
 Tilia americana 'Fastigiata'
@@ -1881,7 +1881,7 @@ Tilia americana 'Redmond'
 Tilia americana 'Sweet Street'
 Tilia americana var. heterophylla 'Continental Appeal'
 Tilia cordata
-Tilia cordata 'Baileyi' Shamrock®
+Tilia cordata 'Baileyi' ShamrockÂ®
 Tilia cordata 'Greenspire'
 Tilia henryana
 Tilia henryana 'Arnold Select'
@@ -1892,7 +1892,7 @@ Tilia platyphyllos
 Tilia sp.
 Tilia tomentosa
 Tilia tomentosa 'Petiolaris'
-Tilia tomentosa 'PNI 6051' Green Mountain®
+Tilia tomentosa 'PNI 6051' Green MountainÂ®
 Tilia tomentosa 'Silver Lining'
 Tilia X euchlora
 Tilia x europaea
@@ -1905,10 +1905,10 @@ tree of heaven
 tri-color European beech
 trident maple
 trident red maple
-Triumph™ Elm
+Triumphâ„¢ Elm
 Trochodendron
 Trochodendron aralioides
-True North® Kentucky coffee tree
+True NorthÂ® Kentucky coffee tree
 Trump Hungarian oak
 trumpetcreeper
 Tsingling maple
@@ -1917,31 +1917,31 @@ Tsuga canadensis
 Tsuga chinensis
 Tsuri nishiki Japanese maple
 tulip tree
-Tupelo Tower™ black gum
+Tupelo Towerâ„¢ black gum
 turkey oak
 Turkish hazel
 Tuscarora crape myrtle
 two-winged silverbell
 Ulmus
 Ulmus 'Frontier'
-Ulmus 'Morton Glossy' TRIUMPH™
-Ulmus 'Morton Stalwart' COMMENDATION™
+Ulmus 'Morton Glossy' TRIUMPHâ„¢
+Ulmus 'Morton Stalwart' COMMENDATIONâ„¢
 Ulmus 'Morton' ACCOLADE
 Ulmus 'Patriot'
-Ulmus × hollandica 'Jacqueline Hillier'
+Ulmus Ã- hollandica 'Jacqueline Hillier'
 Ulmus americana
 Ulmus americana 'Jefferson'
 Ulmus americana 'New Harmony'
 Ulmus americana 'Princeton'
 Ulmus americana 'St. Croix'
 Ulmus americana 'Valley Forge'
-Ulmus davidiana ‘JFS-KW2UD’ Greenstone™
-Ulmus davidiana var. japonica 'Morton' Accolade™
+Ulmus davidiana â€˜JFS-KW2UDâ€™ Greenstoneâ„¢
+Ulmus davidiana var. japonica 'Morton' Accoladeâ„¢
 Ulmus glabra
 Ulmus glabra 'Camperdownii'
 Ulmus macrocarpa
 Ulmus parvifolia 'Emer II' ALLEE
-Ulmus propinqua 'JFS-Bieberich' Emerald Sunshine®
+Ulmus propinqua 'JFS-Bieberich' Emerald SunshineÂ®
 Ulmus sp.
 Ulmus thomasii
 umbrella magnolia
@@ -1955,14 +1955,14 @@ Vaccinium corymbosum 'Jersey'
 Vanderwolf's Pyramid limber pine
 Velvet Cloak smoketree
 Venessa Persian ironwood
-Venus® dogwood
+VenusÂ® dogwood
 Viburnum
 Viburnum 'Pragense'
-Viburnum × burkwoodii
+Viburnum Ã- burkwoodii
 Viburnum acerifolium
 Viburnum carlesii
 Viburnum cassinoides
-Viburnum dentatum ‘Synnestvedt’ Chicago Lustre®
+Viburnum dentatum â€˜Synnestvedtâ€™ Chicago LustreÂ®
 Viburnum dilatatum 'Asian Beauty'
 Viburnum lentago
 Viburnum macrocephalum f. macrocephalum
@@ -1975,7 +1975,7 @@ Viburnum trilobum 'Bailey Compact'
 Viburnum trilobum 'Wentworth'
 Viburnum x burkwoodii
 Viburnum x rhytidophylloides 'Alleghany'
-Viburnum x rhytidophylloides 'Interduke' Dart's Duke™
+Viburnum x rhytidophylloides 'Interduke' Dart's Dukeâ„¢
 Virginia meadowseet
 Virginia Opossum
 Virginia rose
@@ -2003,7 +2003,7 @@ Wentworth American cranberrybush
 western red cedar
 wheel tree
 white ash
-White Chapel® Tupelo
+White ChapelÂ® Tupelo
 white cypress
 white eastern redbud
 white enkianthus
@@ -2069,8 +2069,9 @@ Zelkova carpinifolia
 Zelkova serrata
 Zelkova serrata 'Goshiki'
 Zelkova serrata 'Green Vase'
-Zelkova serrata 'JFS KW4ZS' Zileration®
+Zelkova serrata 'JFS KW4ZS' ZilerationÂ®
 Zelkova sinica 'Discoverer'
-Zileration® zelkova
+ZilerationÂ® zelkova
 Zydeco Twist black gum
-庙台枫 (Miao Tai Feng), maple
+åº™å°æž« (Miao Tai Feng), maple
+

@@ -1,8 +1,8 @@
 ﻿/* flora-diagram.js
    Renders the Flora & Fauna diagram in three modes:
-     baseline  — reads gowanus_existing_flora_fauna.csv
-     proposed  — reads gowanus_proposed_flora_fauna.csv
-     growth    — reads gowanus_growth_timeline.csv (with year sub-tabs)
+     baseline  - reads gowanus_existing_flora_fauna.csv
+     proposed  - reads gowanus_proposed_flora_fauna.csv
+     growth    - reads gowanus_growth_timeline.csv (with year sub-tabs)
 */
 
 // ── Constants ─────────────────────────────────────────────────────────────
@@ -271,7 +271,7 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
   lc.appendChild(sub);
   row.appendChild(lc);
 
-  // Content grid — 4 layer columns + fauna
+  // Content grid - 4 layer columns + fauna
   const content = el('div', 'band-content');
   content.style.gridTemplateColumns = 'repeat(4, 1fr) 1fr';
 
@@ -988,3 +988,4 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+

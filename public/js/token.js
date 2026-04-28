@@ -1,4 +1,4 @@
-// token.js — Fetches the Mapbox token from the Vercel serverless API endpoint.
+// token.js - Fetches the Mapbox token from the Vercel serverless API endpoint.
 // The token is stored as the MAPBOX_TOKEN environment variable in Vercel.
 // API route: /api/mapbox-token.js → { token: process.env.MAPBOX_TOKEN }
 
