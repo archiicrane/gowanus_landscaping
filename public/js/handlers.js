@@ -375,13 +375,18 @@ function getEstimatedDotsCached(geom, count, seedKey) {
 async function loadOsmTreesForGeometry(geom, parkKey) {
 	if (osmDotCache.has(parkKey)) return osmDotCache.get(parkKey);
 
+	const bbox = geometryBounds(geom);
+	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
+		return [];
+	}
+
 	const staticSource = STATIC_PARK_TREE_SOURCES[parkKey];
 	if (staticSource) {
 		try {
 			const res = await fetch(staticSource);
 			if (res.ok) {
 				const data = await res.json();
-				const rows = (data?.features || [])
+				let rows = (data?.features || [])
 					.filter((f) => f?.geometry?.type === 'Point' && Array.isArray(f.geometry.coordinates))
 					.map((f) => {
 						const [lon, lat] = f.geometry.coordinates;
@@ -398,17 +403,22 @@ async function loadOsmTreesForGeometry(geom, parkKey) {
 					})
 					.filter((row) => Number.isFinite(row.lon) && Number.isFinite(row.lat));
 
+				// Keep Prospect points constrained to the clicked park bbox.
+				if (parkKey === 'prospect-park') {
+					rows = rows.filter((row) => (
+						row.lon >= bbox.minLon
+						&& row.lon <= bbox.maxLon
+						&& row.lat >= bbox.minLat
+						&& row.lat <= bbox.maxLat
+					));
+				}
+
 				osmDotCache.set(parkKey, rows);
 				return rows;
 			}
 		} catch (err) {
 			console.warn('[HANDLERS] Static park tree source failed, falling back to API:', err);
 		}
-	}
-
-	const bbox = geometryBounds(geom);
-	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
-		return [];
 	}
 
 	const params = new URLSearchParams({
@@ -542,8 +552,8 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	let mode = 'osm';
 	let effectiveTreeCount = mappedTrees.length;
 	let useEnrichedData = false;
-	const hasTreeKeeperSource = mappedTrees.some((row) => row.source === 'treekeeper_wfs');
-	const hasGreenWoodOfficialSource = mappedTrees.some((row) => row.source === 'greenwood_feature_service');
+	const hasTreeKeeperSource = mappedTrees.some((row) => String(row.source || '').startsWith('treekeeper_wfs'));
+	const hasGreenWoodOfficialSource = mappedTrees.some((row) => String(row.source || '').startsWith('greenwood_feature_service'));
 
 	if (hasTreeKeeperSource && mappedTrees.length > 0) {
 		mode = 'treekeeper';
