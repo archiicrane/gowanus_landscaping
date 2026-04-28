@@ -45,6 +45,11 @@ const PARK_TREE_ENRICHMENT = {
 	},
 };
 
+const STATIC_PARK_TREE_SOURCES = {
+	'prospect-park': '/data/prospect-park-trees.geojson',
+	'green-wood-cemetery': '/data/green-wood-trees.geojson',
+};
+
 // Normalize species names by parsing common OSM patterns
 function normalizeSpeciesName(row) {
 	if (!row) return 'Unknown';
@@ -369,6 +374,37 @@ function getEstimatedDotsCached(geom, count, seedKey) {
 
 async function loadOsmTreesForGeometry(geom, parkKey) {
 	if (osmDotCache.has(parkKey)) return osmDotCache.get(parkKey);
+
+	const staticSource = STATIC_PARK_TREE_SOURCES[parkKey];
+	if (staticSource) {
+		try {
+			const res = await fetch(staticSource);
+			if (res.ok) {
+				const data = await res.json();
+				const rows = (data?.features || [])
+					.filter((f) => f?.geometry?.type === 'Point' && Array.isArray(f.geometry.coordinates))
+					.map((f) => {
+						const [lon, lat] = f.geometry.coordinates;
+						const p = f.properties || {};
+						return {
+							id: p.id || null,
+							lon,
+							lat,
+							species: p.species || null,
+							genus: p.genus || null,
+							taxon: p.taxon || null,
+							source: p.source || 'static_geojson',
+						};
+					})
+					.filter((row) => Number.isFinite(row.lon) && Number.isFinite(row.lat));
+
+				osmDotCache.set(parkKey, rows);
+				return rows;
+			}
+		} catch (err) {
+			console.warn('[HANDLERS] Static park tree source failed, falling back to API:', err);
+		}
+	}
 
 	const bbox = geometryBounds(geom);
 	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
