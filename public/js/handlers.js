@@ -346,19 +346,23 @@ async function loadOsmTreesForGeometry(geom, parkKey) {
 	});
 
 	try {
-		const res = await fetch(`/api/osm-park-trees?${params.toString()}`);
+		const isProspectPark = parkKey === 'prospect-park';
+		const apiUrl = isProspectPark
+			? '/api/prospect-park-trees'
+			: `/api/osm-park-trees?${params.toString()}`;
+		const res = await fetch(apiUrl);
 		if (!res.ok) return [];
 		const data = await res.json();
 		const rows = (data.rows || []).filter((row) => pointInGeometry([row.lon, row.lat], geom));
 		osmDotCache.set(parkKey, rows);
 		return rows;
 	} catch (err) {
-		console.warn('[HANDLERS] OSM tree fetch failed:', err);
+		console.warn('[HANDLERS] Tree data fetch failed:', err);
 		return [];
 	}
 }
 
-function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compactness, topSpecies, mode }) {
+function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compactness, topSpecies, mode, parkEnrichment }) {
 	const metricsEl = document.getElementById('park-tree-metrics');
 	const barsEl = document.getElementById('park-tree-type-bars');
 	const noteEl = document.getElementById('park-tree-note');
@@ -370,6 +374,9 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	if (mode === 'osm') {
 		dataLabel = 'Mapped';
 		noteText = 'Dots are researched mapped tree locations from OpenStreetMap/Overpass inside this park boundary. Density reflects mapped tree points.';
+	} else if (mode === 'treekeeper') {
+		dataLabel = 'Mapped';
+		noteText = 'Dots are direct mapped tree points from Prospect Park TreeKeeper (GeoServer WFS), filtered to park boundary.';
 	} else if (mode === 'osm_with_reference') {
 		dataLabel = 'Mapped';
 		const source = parkEnrichment?.dataSource || 'Published';
@@ -431,6 +438,11 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	let mode = 'osm';
 	let effectiveTreeCount = mappedTrees.length;
 	let useEnrichedData = false;
+	const hasTreeKeeperSource = mappedTrees.some((row) => row.source === 'treekeeper_wfs');
+
+	if (hasTreeKeeperSource && mappedTrees.length > 0) {
+		mode = 'treekeeper';
+	}
 
 	// If OSM data is sparse, check for published inventory
 	if (mappedTrees.length === 0 && parkEnrichment && parkEnrichment.expectedTreeCount > 0) {
@@ -485,6 +497,7 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		compactness,
 		topSpecies,
 		mode,
+		parkEnrichment,
 	});
 }
 
