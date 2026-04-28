@@ -236,7 +236,62 @@ function geometryTouchesPark(geom, parkGeom) {
 	return samplePoints.some((point) => pointInGeometry(point, parkGeom));
 }
 
-function dedupeRenderedFeatures(features) {
+function clipLineToBbox(coords, bbox) {
+	const { minLon, minLat, maxLon, maxLat } = bbox;
+	const inBox = (pt) => pt[0] >= minLon && pt[0] <= maxLon && pt[1] >= minLat && pt[1] <= maxLat;
+	const segments = [];
+	let current = [];
+	for (const pt of coords) {
+		if (inBox(pt)) {
+			current.push(pt);
+		} else {
+			if (current.length >= 2) segments.push(current);
+			current = [];
+		}
+	}
+	if (current.length >= 2) segments.push(current);
+	return segments;
+}
+
+function clipGeometryToBbox(geom, bbox) {
+	if (!geom || !bbox) return geom;
+	if (geom.type === 'LineString') {
+		const segs = clipLineToBbox(geom.coordinates, bbox);
+		if (!segs.length) return null;
+		return segs.length === 1
+			? { type: 'LineString', coordinates: segs[0] }
+			: { type: 'MultiLineString', coordinates: segs };
+	}
+	if (geom.type === 'MultiLineString') {
+		const all = geom.coordinates.flatMap((line) => clipLineToBbox(line, bbox));
+		if (!all.length) return null;
+		return { type: 'MultiLineString', coordinates: all };
+	}
+	if (geom.type === 'Polygon') {
+		const { minLon, minLat, maxLon, maxLat } = bbox;
+		const filtered = (geom.coordinates[0] || []).filter(
+			(pt) => pt[0] >= minLon && pt[0] <= maxLon && pt[1] >= minLat && pt[1] <= maxLat
+		);
+		if (filtered.length < 3) return null;
+		return { type: 'Polygon', coordinates: [filtered] };
+	}
+	if (geom.type === 'MultiPolygon') {
+		const { minLon, minLat, maxLon, maxLat } = bbox;
+		const polys = geom.coordinates
+			.map((poly) => {
+				const filtered = (poly[0] || []).filter(
+					(pt) => pt[0] >= minLon && pt[0] <= maxLon && pt[1] >= minLat && pt[1] <= maxLat
+				);
+				return filtered.length >= 3 ? [filtered] : null;
+			})
+			.filter(Boolean);
+		if (!polys.length) return null;
+		return { type: 'MultiPolygon', coordinates: polys };
+	}
+	return geom;
+}
+
+function dedupeRenderedFeatures(features, bbox) {
 	const seen = new Set();
 	const unique = [];
 	for (const feature of features || []) {
@@ -245,10 +300,12 @@ function dedupeRenderedFeatures(features) {
 		const key = `${feature.layer?.id || ''}:${feature.geometry?.type || ''}:${idPart}:${coordsPart}`;
 		if (seen.has(key)) continue;
 		seen.add(key);
+		const geometry = bbox ? clipGeometryToBbox(feature.geometry, bbox) : feature.geometry;
+		if (!geometry) continue;
 		unique.push({
 			type: 'Feature',
 			properties: { ...(feature.properties || {}) },
-			geometry: feature.geometry,
+			geometry,
 		});
 	}
 	return unique;
@@ -267,7 +324,7 @@ function collectRenderedParkContextFeatures(map, parkFeature, layerIds) {
 	];
 	const rendered = map.queryRenderedFeatures(points, { layers: layerIds });
 	const filtered = rendered.filter((feature) => geometryTouchesPark(feature.geometry, parkFeature.geometry));
-	return dedupeRenderedFeatures(filtered);
+	return dedupeRenderedFeatures(filtered, bbox);
 }
 
 function ensureParkContextOverlayLayers(map) {
@@ -416,6 +473,7 @@ function setupPreceedenceParkCallouts(map, parksData) {
 		`;
 
 		el.addEventListener('click', async () => {
+			el.style.display = 'none';
 			fitFeatureToFramedViewport(map, feature);
 			openParkPanel(props);
 			try {
