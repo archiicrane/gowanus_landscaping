@@ -152,6 +152,56 @@ function faunaIconResolver(name) {
 	return makeColorDotSvgDataUri(getFaunaProfile(name).color);
 }
 
+function renderGroupedFaunaList(elId, items, emptyLabel = 'No fauna list') {
+	const el = document.getElementById(elId);
+	if (!el) return;
+	el.innerHTML = '';
+
+	const fauna = dedupeKeepOrder(items).slice(0, 20);
+	if (!fauna.length) {
+		const li = document.createElement('li');
+		li.textContent = emptyLabel;
+		el.appendChild(li);
+		return;
+	}
+
+	const groups = new Map();
+	for (const animal of fauna) {
+		const profile = getFaunaProfile(animal);
+		const key = `${profile.color}|${profile.habitat}`;
+		if (!groups.has(key)) {
+			groups.set(key, {
+				color: profile.color,
+				habitat: profile.habitat,
+				items: [],
+			});
+		}
+		groups.get(key).items.push(animal);
+	}
+
+	for (const group of groups.values()) {
+		const title = document.createElement('li');
+		title.className = 'park-list-group-title';
+		title.innerHTML = `<span class="park-group-dot" style="--group-dot:${group.color};"></span>${group.habitat}`;
+		el.appendChild(title);
+
+		for (const animal of group.items) {
+			const li = document.createElement('li');
+			li.className = 'park-list-item';
+			const img = document.createElement('img');
+			img.className = 'park-list-svg';
+			img.alt = '';
+			img.loading = 'lazy';
+			img.src = faunaIconResolver(animal);
+			const span = document.createElement('span');
+			span.textContent = animal;
+			li.appendChild(img);
+			li.appendChild(span);
+			el.appendChild(li);
+		}
+	}
+}
+
 function updateParkList(elId, items, emptyLabel = 'No data yet', svgFolder = null, iconResolver = null) {
 	const el = document.getElementById(elId);
 	if (!el) return;
@@ -641,7 +691,7 @@ function openParkPanel(props) {
 
 
 	const fauna = parseArrayProp(props.wildlife);
-	updateParkList('park-fauna-list', fauna, 'No fauna list', null, faunaIconResolver);
+	renderGroupedFaunaList('park-fauna-list', fauna, 'No fauna list');
 
 	panel.classList.add('active');
 }
@@ -912,12 +962,13 @@ function updatePreceedenceFaunaOverlays(map, feature, faunaItems) {
 
 	const fauna = dedupeKeepOrder(faunaItems).slice(0, 20);
 	const pointFeatures = [];
-	const rangeFeatures = [];
+	const groupAccumulator = new Map();
 
 	for (const animal of fauna) {
 		const profile = getFaunaProfile(animal);
 		const center = getHabitatPointForAnimal(feature.geometry, animal, profile.habitat);
 		const rangeM = Number.isFinite(profile.rangeM) ? profile.rangeM : DEFAULT_FAUNA_RANGE_M;
+		const groupKey = `${profile.color}|${profile.habitat}`;
 
 		pointFeatures.push({
 			type: 'Feature',
@@ -933,15 +984,32 @@ function updatePreceedenceFaunaOverlays(map, feature, faunaItems) {
 			},
 		});
 
+		if (!groupAccumulator.has(groupKey)) {
+			groupAccumulator.set(groupKey, {
+				color: profile.color,
+				habitat: profile.habitat,
+				rangeM,
+				centers: [],
+			});
+		}
+		const group = groupAccumulator.get(groupKey);
+		group.rangeM = Math.max(group.rangeM, rangeM);
+		group.centers.push(center);
+	}
+
+	const rangeFeatures = [];
+	for (const group of groupAccumulator.values()) {
+		const count = group.centers.length || 1;
+		const avgLon = group.centers.reduce((sum, c) => sum + c[0], 0) / count;
+		const avgLat = group.centers.reduce((sum, c) => sum + c[1], 0) / count;
 		rangeFeatures.push({
 			type: 'Feature',
 			properties: {
-				animal,
-				habitat: profile.habitat,
-				color: profile.color,
-				range_m: rangeM,
+				habitat: group.habitat,
+				color: group.color,
+				range_m: group.rangeM,
 			},
-			geometry: buildRangePolygon(center, rangeM),
+			geometry: buildRangePolygon([avgLon, avgLat], group.rangeM),
 		});
 	}
 
@@ -1293,7 +1361,7 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	updateParkList('park-tree-list', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
 	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
 	const faunaItems = parseArrayProp(feature?.properties?.wildlife);
-	updateParkList('park-fauna-list', faunaItems, 'No fauna list', null, faunaIconResolver);
+	renderGroupedFaunaList('park-fauna-list', faunaItems, 'No fauna list');
 	updatePreceedenceFaunaOverlays(map, feature, faunaItems);
 }
 

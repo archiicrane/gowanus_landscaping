@@ -809,6 +809,29 @@ body[data-map-page="preceedence"] #park-info-panel .park-list-item {
   gap: 7px;
 }
 
+body[data-map-page="preceedence"] #park-info-panel .park-list-group-title {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(120, 130, 120, 0.2);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5a685d;
+}
+
+body[data-map-page="preceedence"] #park-info-panel .park-group-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--group-dot, #7a7a7a);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55);
+  flex: 0 0 auto;
+}
+
 body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
   flex: 0 0 38px;
   width: 38px;
