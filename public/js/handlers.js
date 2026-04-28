@@ -73,32 +73,34 @@ function openParkPanel(props) {
 
 export function setupMapHandlers(map) {
 	// ─── Nearby Parks: click → side panel ────────────────────────────────────
-	map.on('click', 'nearby-parks-fill', (e) => {
-		const feature = e.features && e.features[0];
-		if (!feature) return;
-		openParkPanel(feature.properties);
-	});
+	if (map.getLayer('nearby-parks-fill')) {
+		map.on('click', 'nearby-parks-fill', (e) => {
+			const feature = e.features && e.features[0];
+			if (!feature) return;
+			openParkPanel(feature.properties);
+		});
 
-	// Hover highlight
-	let hoveredParkId = null;
-	map.on('mousemove', 'nearby-parks-fill', (e) => {
-		if (!e.features || !e.features.length) return;
-		const id = e.features[0].properties.id;
-		if (id !== hoveredParkId) {
-			hoveredParkId = id;
-			if (map.getLayer('nearby-parks-outline-hover')) {
-				map.setFilter('nearby-parks-outline-hover', ['==', ['get', 'id'], id]);
+		// Hover highlight
+		let hoveredParkId = null;
+		map.on('mousemove', 'nearby-parks-fill', (e) => {
+			if (!e.features || !e.features.length) return;
+			const id = e.features[0].properties.id;
+			if (id !== hoveredParkId) {
+				hoveredParkId = id;
+				if (map.getLayer('nearby-parks-outline-hover')) {
+					map.setFilter('nearby-parks-outline-hover', ['==', ['get', 'id'], id]);
+				}
 			}
-		}
-		map.getCanvas().style.cursor = 'pointer';
-	});
-	map.on('mouseleave', 'nearby-parks-fill', () => {
-		hoveredParkId = null;
-		if (map.getLayer('nearby-parks-outline-hover')) {
-			map.setFilter('nearby-parks-outline-hover', ['==', ['get', 'id'], '']);
-		}
-		map.getCanvas().style.cursor = '';
-	});
+			map.getCanvas().style.cursor = 'pointer';
+		});
+		map.on('mouseleave', 'nearby-parks-fill', () => {
+			hoveredParkId = null;
+			if (map.getLayer('nearby-parks-outline-hover')) {
+				map.setFilter('nearby-parks-outline-hover', ['==', ['get', 'id'], '']);
+			}
+			map.getCanvas().style.cursor = '';
+		});
+	}
 
 	// Close park panel
 	const closeBtn = document.getElementById('park-panel-close');
@@ -112,31 +114,34 @@ export function setupMapHandlers(map) {
 	const tooltip = document.getElementById('map-tooltip');
 
 	// ─── Trees: hover tooltip ─────────────────────────────────────────────────
-	map.on('mouseenter', 'trees-circles', (e) => {
-		map.getCanvas().style.cursor = 'pointer';
-		const props = e.features[0]?.properties;
-		if (!props || !tooltip) return;
-		tooltip.textContent = props.species || 'Unknown species';
-		tooltip.style.display = 'block';
-		tooltip.style.left = `${e.originalEvent.clientX + 12}px`;
-		tooltip.style.top  = `${e.originalEvent.clientY - 8}px`;
-	});
+	if (map.getLayer('trees-circles')) {
+		map.on('mouseenter', 'trees-circles', (e) => {
+			map.getCanvas().style.cursor = 'pointer';
+			const props = e.features[0]?.properties;
+			if (!props || !tooltip) return;
+			tooltip.textContent = props.species || 'Unknown species';
+			tooltip.style.display = 'block';
+			tooltip.style.left = `${e.originalEvent.clientX + 12}px`;
+			tooltip.style.top  = `${e.originalEvent.clientY - 8}px`;
+		});
 
-	map.on('mousemove', 'trees-circles', (e) => {
-		if (!tooltip) return;
-		tooltip.style.left = `${e.originalEvent.clientX + 12}px`;
-		tooltip.style.top  = `${e.originalEvent.clientY - 8}px`;
-	});
+		map.on('mousemove', 'trees-circles', (e) => {
+			if (!tooltip) return;
+			tooltip.style.left = `${e.originalEvent.clientX + 12}px`;
+			tooltip.style.top  = `${e.originalEvent.clientY - 8}px`;
+		});
 
-	map.on('mouseleave', 'trees-circles', () => {
-		map.getCanvas().style.cursor = '';
-		if (tooltip) tooltip.style.display = 'none';
-	});
+		map.on('mouseleave', 'trees-circles', () => {
+			map.getCanvas().style.cursor = '';
+			if (tooltip) tooltip.style.display = 'none';
+		});
+	}
 
 	// ─── Trees: click popup ───────────────────────────────────────────────────
-	map.on('click', 'trees-circles', (e) => {
-		const props = e.features[0]?.properties;
-		if (!props) return;
+	if (map.getLayer('trees-circles')) {
+		map.on('click', 'trees-circles', (e) => {
+			const props = e.features[0]?.properties;
+			if (!props) return;
 
 		const rows = [
 			['Species', props.species || '—'],
@@ -153,23 +158,25 @@ export function setupMapHandlers(map) {
 				</table>
 			</div>`;
 
-		new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
-			.setLngLat(e.lngLat)
-			.setHTML(html)
-			.addTo(map);
-	});
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+				.setLngLat(e.lngLat)
+				.setHTML(html)
+				.addTo(map);
+		});
+	}
 
 	// ─── Buildings: click popup ───────────────────────────────────────────────
-	map.on('mouseenter', 'buildings-extrusion', () => {
-		map.getCanvas().style.cursor = 'pointer';
-	});
-	map.on('mouseleave', 'buildings-extrusion', () => {
-		map.getCanvas().style.cursor = '';
-	});
+	if (map.getLayer('buildings-extrusion')) {
+		map.on('mouseenter', 'buildings-extrusion', () => {
+			map.getCanvas().style.cursor = 'pointer';
+		});
+		map.on('mouseleave', 'buildings-extrusion', () => {
+			map.getCanvas().style.cursor = '';
+		});
 
-	map.on('click', 'buildings-extrusion', (e) => {
-		const props = e.features[0]?.properties;
-		if (!props) return;
+		map.on('click', 'buildings-extrusion', (e) => {
+			const props = e.features[0]?.properties;
+			if (!props) return;
 
 		const height = props.height || (props['building:levels'] ? `${Math.round(props['building:levels'] * 3.2)}m (est.)` : '—');
 		const addr   = [props['addr:housenumber'], props['addr:street']].filter(Boolean).join(' ') || '—';
@@ -183,25 +190,27 @@ export function setupMapHandlers(map) {
 				</table>
 			</div>`;
 
-		new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
-			.setLngLat(e.lngLat)
-			.setHTML(html)
-			.addTo(map);
-	});
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+				.setLngLat(e.lngLat)
+				.setHTML(html)
+				.addTo(map);
+		});
+	}
 
 	// ─── CSO Outfalls: hover + popup ─────────────────────────────────────────
-	map.on('mouseenter', 'cso-outfalls-circle', () => {
-		map.getCanvas().style.cursor = 'pointer';
-	});
+	if (map.getLayer('cso-outfalls-circle')) {
+		map.on('mouseenter', 'cso-outfalls-circle', () => {
+			map.getCanvas().style.cursor = 'pointer';
+		});
 
-	map.on('mouseleave', 'cso-outfalls-circle', () => {
-		map.getCanvas().style.cursor = '';
-	});
+		map.on('mouseleave', 'cso-outfalls-circle', () => {
+			map.getCanvas().style.cursor = '';
+		});
 
-	map.on('click', 'cso-outfalls-circle', (e) => {
-		const props = e.features[0]?.properties || {};
-		const id = props.id || props.OBJECTID || props.FID || '—';
-		const name = props.name || props.NAME || props.outfall || props.OUTFALL || 'CSO Outfall';
+		map.on('click', 'cso-outfalls-circle', (e) => {
+			const props = e.features[0]?.properties || {};
+			const id = props.id || props.OBJECTID || props.FID || '—';
+			const name = props.name || props.NAME || props.outfall || props.OUTFALL || 'CSO Outfall';
 
 		const html = `
 			<div class="popup-inner">
@@ -212,9 +221,10 @@ export function setupMapHandlers(map) {
 				</table>
 			</div>`;
 
-		new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
-			.setLngLat(e.lngLat)
-			.setHTML(html)
-			.addTo(map);
-	});
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+				.setLngLat(e.lngLat)
+				.setHTML(html)
+				.addTo(map);
+		});
+	}
 }

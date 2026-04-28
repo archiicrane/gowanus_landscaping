@@ -17,7 +17,7 @@
 		<span class="brand">Rewilding Gowanus</span>
 		<span class="nav-links">
 			<a href="/index.html" class="nav-btn active">Site Analysis</a>
-			<a href="/map.html" class="nav-btn">Map</a>
+			<a href="/preceedence.html" class="nav-btn">Preceedence</a>
 			<a href="/site-plan.html" class="nav-btn">Site Plan</a>
 			<a href="/diagrams.html" class="nav-btn">Diagrams</a>
 			<a href="/flora-diagram.html" class="nav-btn">Flora</a>
@@ -30,16 +30,6 @@
 	<div id="sub-top-bar">
 		<div id="layer-panel">
 			<p class="layer-panel-title">Layers</p>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-nearby-parks" checked />
-				<span class="layer-dot" style="background:#4c8a5e"></span>
-				<span>Parks</span>
-			</label>
-			<label class="layer-toggle">
-				<input type="checkbox" id="toggle-distance-rings" checked />
-				<span class="layer-dot" style="background:#8a7a6a"></span>
-				<span>Distance</span>
-			</label>
 			<label class="layer-toggle">
 				<input type="checkbox" id="toggle-buildings" />
 				<span class="layer-dot" style="background:#9aa3ae"></span>
@@ -98,68 +88,8 @@
 		</div>
 	</div>
 
-	<!-- Park info panel — slides in from left on park click -->
-	<div id="park-info-panel" role="complementary" aria-label="Park information">
-		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
-		<div class="park-panel-image-wrap">
-			<img class="park-panel-image" id="park-panel-image" src="" alt="" />
-			<div class="park-panel-image-placeholder" id="park-panel-image-placeholder">
-				<span class="park-panel-image-icon">&#9752;</span>
-				<span>No photo available</span>
-			</div>
-		</div>
-		<div class="park-panel-body">
-			<p class="park-panel-distance" id="park-panel-distance">— km from site</p>
-			<h2 class="park-panel-name" id="park-panel-name">Park</h2>
-			<p class="park-panel-area-row">
-				<span id="park-panel-area"></span>
-				<span class="park-panel-sep">·</span>
-				<span id="park-panel-established"></span>
-			</p>
-			<p class="park-panel-desc" id="park-panel-desc"></p>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Ecology &amp; Context</h4>
-				<p class="park-panel-ecology" id="park-panel-ecology"></p>
-			</div>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Wildlife Observed</h4>
-				<ul class="park-panel-wildlife" id="park-panel-wildlife"></ul>
-			</div>
-			<div class="park-panel-section">
-				<h4 class="park-panel-section-title">Programs &amp; Facilities</h4>
-				<ul class="park-panel-programs" id="park-panel-programs"></ul>
-			</div>
-			<a class="park-panel-link" id="park-panel-link" href="#" target="_blank" rel="noopener noreferrer">View NYC Parks page &nearr;</a>
-		</div>
-	</div>
-
 	<div id="map-story-panels" aria-live="polite">
-		<section class="story-panel-group active" id="story-parks">
-			<article class="story-card">
-				<p class="story-eyebrow">Urban Context</p>
-				<h3>Surrounding Parks</h3>
-				<p class="story-metric">5 parks</p>
-				<p class="story-note">Ranging from 0.3 km to 2.4 km from the Gowanus study site — forming a green network across Brooklyn.</p>
-			</article>
-			<article class="story-card">
-				<p class="story-eyebrow">Ecological Network</p>
-				<h3>Park Connections</h3>
-				<p class="story-note">These parks collectively support 200+ bird species, nesting raptors, migratory corridors, and stormwater interception — all relevant to the Gowanus rewilding proposal.</p>
-				<ul class="story-park-list">
-					<li><span class="story-park-dot"></span>Thomas Greene <em>0.3 km</em></li>
-					<li><span class="story-park-dot"></span>Carroll Park <em>0.9 km</em></li>
-					<li><span class="story-park-dot"></span>Prospect Park <em>1.2 km</em></li>
-					<li><span class="story-park-dot"></span>Coffey Park <em>1.6 km</em></li>
-					<li><span class="story-park-dot"></span>Red Hook Rec. <em>2.4 km</em></li>
-				</ul>
-			</article>
-			<article class="story-card">
-				<p class="story-eyebrow">Explore</p>
-				<h3>Click Any Park</h3>
-				<p class="story-note">Click any green outline to open a detailed ecology panel with wildlife species, programs, and distance from site. Scroll to enter the Gowanus study area.</p>
-			</article>
-		</section>
-		<section class="story-panel-group" id="story-existing">
+		<section class="story-panel-group active" id="story-existing">
 			<article class="story-card">
 				<p class="story-eyebrow">Existing Size</p>
 				<h3>Gowanus Study Area</h3>

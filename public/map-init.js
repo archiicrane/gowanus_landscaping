@@ -21,6 +21,7 @@ import { setupMapHandlers } from '/js/handlers.js';
 
 export async function initMap() {
 	const mapPage = document.body?.dataset.mapPage || 'analysis';
+	const isPreceedencePage = mapPage === 'preceedence' || mapPage === 'map';
 	const mapDiv = document.getElementById('map');
 	if (!mapDiv) {
 		console.error('[MAP INIT] #map container not found');
@@ -71,23 +72,24 @@ export async function initMap() {
 			}
 		}
 
-		// Nearby parks first — sits under all other layers.
-		// Returns the Nominatim-resolved GeoJSON so distance spokes can use
-		// accurate centroids instead of stale fallback polygon centroids.
-		const resolvedParksData = await addNearbyParksLayer(map);
-		// Data layers — heatmap first so the clip mask can sit on top of it
-		await addBuildingLayer(map);
-		await addTreeLayer(map);
-		await addParkLayer(map);
-		await addTopographyHeatLayer(map);
-		addStudyClipMask(map);           // clips heatmap bleed at the boundary
-		await addStudyBoundaryLayer(map); // boundary line sits above the mask
-		await addContourLayer(map);
-		await addFloodLayer(map);
-		await addCsoOutfallsLayer(map);
-		await addRemediationSitesLayer(map);
-		await addBioswaleOpportunityLayer(map);
-		await addDistanceRingsLayer(map, resolvedParksData);
+		if (isPreceedencePage) {
+			// Preceedence page: surrounding parks context only.
+			const resolvedParksData = await addNearbyParksLayer(map);
+			await addDistanceRingsLayer(map, resolvedParksData);
+		} else {
+			// Site Analysis page: site analysis layers only (no surrounding parks).
+			await addBuildingLayer(map);
+			await addTreeLayer(map);
+			await addParkLayer(map);
+			await addTopographyHeatLayer(map);
+			addStudyClipMask(map);
+			await addStudyBoundaryLayer(map);
+			await addContourLayer(map);
+			await addFloodLayer(map);
+			await addCsoOutfallsLayer(map);
+			await addRemediationSitesLayer(map);
+			await addBioswaleOpportunityLayer(map);
+		}
 		setupMapHandlers(map);
 		wireLayerToggles(map);
 		applyPageProfile(mapPage);
@@ -113,7 +115,7 @@ export async function initMap() {
 			}
 		};
 
-		if (page === 'map') {
+		if (page === 'preceedence' || page === 'map') {
 			// Context map view: parks + distance only.
 			setChecked('toggle-nearby-parks', true);
 			setChecked('toggle-distance-rings', true);

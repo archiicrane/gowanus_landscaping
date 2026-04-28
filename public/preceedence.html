@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Rewilding Gowanus - Preceedence</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+	<link rel="stylesheet" href="/style.css" />
+	<link rel="stylesheet" href="/tree-info-panel.css" />
+</head>
+<body data-map-page="preceedence">
+	<nav class="top-bar">
+		<span class="brand">Rewilding Gowanus</span>
+		<span class="nav-links">
+			<a href="/index.html" class="nav-btn">Site Analysis</a>
+			<a href="/preceedence.html" class="nav-btn active">Preceedence</a>
+			<a href="/site-plan.html" class="nav-btn">Site Plan</a>
+			<a href="/diagrams.html" class="nav-btn">Diagrams</a>
+			<a href="/flora-diagram.html" class="nav-btn">Flora</a>
+			<a href="/wildlife-corridor.html" class="nav-btn">Wildlife</a>
+		</span>
+	</nav>
+
+	<div id="map"></div>
+
+	<div id="sub-top-bar">
+		<div id="layer-panel">
+			<p class="layer-panel-title">Layers</p>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-nearby-parks" checked />
+				<span class="layer-dot" style="background:#4c8a5e"></span>
+				<span>Parks</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-distance-rings" checked />
+				<span class="layer-dot" style="background:#8a7a6a"></span>
+				<span>Distance</span>
+			</label>
+		</div>
+	</div>
+
+	<div id="park-info-panel" role="complementary" aria-label="Park information">
+		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
+		<div class="park-panel-image-wrap">
+			<img class="park-panel-image" id="park-panel-image" src="" alt="" />
+			<div class="park-panel-image-placeholder" id="park-panel-image-placeholder">
+				<span class="park-panel-image-icon">&#9752;</span>
+				<span>No photo available</span>
+			</div>
+		</div>
+		<div class="park-panel-body">
+			<p class="park-panel-distance" id="park-panel-distance">-</p>
+			<h2 class="park-panel-name" id="park-panel-name">Park</h2>
+			<p class="park-panel-area-row">
+				<span id="park-panel-area"></span>
+				<span class="park-panel-sep">&middot;</span>
+				<span id="park-panel-established"></span>
+			</p>
+			<p class="park-panel-desc" id="park-panel-desc"></p>
+			<div class="park-panel-section">
+				<h4 class="park-panel-section-title">Ecology &amp; Context</h4>
+				<p class="park-panel-ecology" id="park-panel-ecology"></p>
+			</div>
+			<div class="park-panel-section">
+				<h4 class="park-panel-section-title">Wildlife Observed</h4>
+				<ul class="park-panel-wildlife" id="park-panel-wildlife"></ul>
+			</div>
+			<div class="park-panel-section">
+				<h4 class="park-panel-section-title">Programs &amp; Facilities</h4>
+				<ul class="park-panel-programs" id="park-panel-programs"></ul>
+			</div>
+			<a class="park-panel-link" id="park-panel-link" href="#" target="_blank" rel="noopener noreferrer">View source page &nearr;</a>
+		</div>
+	</div>
+
+	<div id="map-story-panels" aria-live="polite">
+		<section class="story-panel-group active" id="story-parks">
+			<article class="story-card">
+				<p class="story-eyebrow">Urban Context</p>
+				<h3>Surrounding Parks</h3>
+				<p class="story-metric">7 parks</p>
+				<p class="story-note">Regional preceedence study around Gowanus, including harbor and inland ecological anchors.</p>
+			</article>
+			<article class="story-card">
+				<p class="story-eyebrow">Network</p>
+				<h3>Distance + Ecological Reach</h3>
+				<p class="story-note">Dashed rings and spokes show how each park sits in relation to the Gowanus centerline and potential habitat stepping-stones.</p>
+			</article>
+			<article class="story-card">
+				<p class="story-eyebrow">Explore</p>
+				<h3>Click A Park Polygon</h3>
+				<p class="story-note">Open details for ecology notes, species observations, programs, and links for each surrounding park.</p>
+			</article>
+		</section>
+	</div>
+
+	<script type="module" src="/main.js"></script>
+</body>
+</html>
