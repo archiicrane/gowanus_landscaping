@@ -1,6 +1,6 @@
 // map-init.js — Creates and exports the Mapbox map instance
 
-import { resolveMapboxToken } from '/js/token.js';
+import { resolveMapboxToken } from './js/token.js';
 import {
 	addBuildingLayer,
 	addTreeLayer,
@@ -16,8 +16,8 @@ import {
 	addRemediationSitesLayer,
 	addNearbyParksLayer,
 	addDistanceRingsLayer,
-} from '/js/layers.js';
-import { setupMapHandlers } from '/js/handlers.js';
+} from './js/layers.js';
+import { setupMapHandlers } from './js/handlers.js';
 
 export async function initMap() {
 	const mapPage = document.body?.dataset.mapPage || 'analysis';
@@ -65,6 +65,7 @@ export async function initMap() {
 	map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
 	map.on('load', async () => {
+		let resolvedParksData = null;
 		// Hide road name labels from Mapbox basemap
 		for (const layer of map.getStyle().layers) {
 			if (layer.type === 'symbol' && layer['source-layer'] === 'road') {
@@ -74,7 +75,7 @@ export async function initMap() {
 
 		if (isPreceedencePage) {
 			// Preceedence page: surrounding parks context only.
-			const resolvedParksData = await addNearbyParksLayer(map);
+			resolvedParksData = await addNearbyParksLayer(map);
 			await addDistanceRingsLayer(map, resolvedParksData);
 		} else {
 			// Site Analysis page: site analysis layers only (no surrounding parks).
@@ -90,7 +91,7 @@ export async function initMap() {
 			await addRemediationSitesLayer(map);
 			await addBioswaleOpportunityLayer(map);
 		}
-		setupMapHandlers(map);
+		setupMapHandlers(map, resolvedParksData);
 		wireLayerToggles(map);
 		applyPageProfile(mapPage);
 	});

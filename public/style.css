@@ -609,6 +609,69 @@ main {
   flex-shrink: 0;
 }
 
+.park-callout {
+  display: grid;
+  gap: 3px;
+  min-width: 150px;
+  max-width: 190px;
+  text-align: left;
+  background: rgba(246, 241, 233, 0.96);
+  border: 1px solid rgba(74, 138, 94, 0.36);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 10px 26px rgba(40, 70, 48, 0.16);
+  color: #2f3f35;
+  cursor: pointer;
+}
+
+.park-callout:hover {
+  background: #f7f3ea;
+  border-color: rgba(58, 116, 82, 0.52);
+  transform: translateY(-1px);
+}
+
+.park-callout-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.park-callout-title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.park-callout-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.park-callout-meta {
+  font-size: 10px;
+  line-height: 1.35;
+  color: #57695f;
+}
+
+@media (max-width: 920px) {
+  .park-callout {
+    min-width: 126px;
+    max-width: 150px;
+    padding: 7px 8px;
+  }
+
+  .park-callout-title {
+    font-size: 11px;
+  }
+
+  .park-callout-meta {
+    font-size: 9px;
+  }
+}
+
 
 
 .arch-popup .mapboxgl-popup-content {

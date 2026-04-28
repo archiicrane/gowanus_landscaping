@@ -50,6 +50,158 @@ const STATIC_PARK_TREE_SOURCES = {
 	'green-wood-cemetery': '/data/green-wood-trees.geojson',
 };
 
+const PARK_CALLOUT_OFFSETS = {
+	'thomas-greene': [0.0062, 0.0005],
+	'carroll-park': [0.0068, -0.0014],
+	'coffey-park': [-0.0065, -0.0008],
+	'prospect-park': [0.0068, -0.0022],
+	'green-wood-cemetery': [-0.0075, -0.0018],
+	'red-hook-recreation': [-0.0064, 0.0018],
+	'governors-island': [0.0066, 0.0011],
+};
+
+const RACCOON_SVG_PATH = '/assets/fauna/racoon.svg';
+let parkCalloutMarkers = [];
+
+function getGeometryCentroid(geom) {
+	if (!geom) return null;
+	let ring = null;
+	if (geom.type === 'Polygon') ring = geom.coordinates?.[0] || null;
+	if (geom.type === 'MultiPolygon') ring = geom.coordinates?.[0]?.[0] || null;
+	if (!Array.isArray(ring) || ring.length < 3) return null;
+
+	let x = 0;
+	let y = 0;
+	let area = 0;
+	for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+		const xi = ring[i][0];
+		const yi = ring[i][1];
+		const xj = ring[j][0];
+		const yj = ring[j][1];
+		const f = xi * yj - xj * yi;
+		x += (xi + xj) * f;
+		y += (yi + yj) * f;
+		area += f;
+	}
+
+	if (Math.abs(area) < 1e-12) {
+		const avgLon = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+		const avgLat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+		return [avgLon, avgLat];
+	}
+
+	const factor = 1 / (3 * area);
+	return [x * factor, y * factor];
+}
+
+function clearParkCallouts() {
+	for (const marker of parkCalloutMarkers) marker.remove();
+	parkCalloutMarkers = [];
+}
+
+async function resolveNearbyParksForCallouts(fallbackData = null) {
+	if (fallbackData?.features?.length) return fallbackData;
+
+	const source = window._map?.getSource?.('nearby-parks');
+	const sourceData = source?._data;
+	if (sourceData?.features?.length) return sourceData;
+
+	try {
+		const res = await fetch('/data/nearby-parks.geojson');
+		if (!res.ok) return null;
+		const data = await res.json();
+		return data?.features?.length ? data : null;
+	} catch (err) {
+		console.warn('[HANDLERS] Nearby parks fallback load failed:', err);
+		return null;
+	}
+}
+
+function setupPreceedenceParkCallouts(map, parksData) {
+	if (!parksData?.features?.length) return;
+
+	clearParkCallouts();
+
+	if (map.getLayer('nearby-parks-label')) {
+		map.setLayoutProperty('nearby-parks-label', 'visibility', 'none');
+	}
+
+	const lineFeatures = [];
+
+	for (const feature of parksData.features) {
+		const props = feature?.properties || {};
+		const id = String(props.id || '');
+		const centroid = getGeometryCentroid(feature?.geometry);
+		if (!centroid) continue;
+
+		const [dx, dy] = PARK_CALLOUT_OFFSETS[id] || [0.0048, 0.0012];
+		const labelLngLat = [centroid[0] + dx, centroid[1] + dy];
+
+		lineFeatures.push({
+			type: 'Feature',
+			properties: { id },
+			geometry: {
+				type: 'LineString',
+				coordinates: [centroid, labelLngLat],
+			},
+		});
+
+		const wildlife = Array.isArray(props.wildlife) ? props.wildlife : [];
+		const wildlifePreview = wildlife.slice(0, 2).join(', ');
+
+		const el = document.createElement('button');
+		el.type = 'button';
+		el.className = 'park-callout';
+		el.innerHTML = `
+			<div class="park-callout-head">
+				<span class="park-callout-title">${props.name || 'Park'}</span>
+				<img class="park-callout-icon" src="${RACCOON_SVG_PATH}" alt="Racoon icon" loading="lazy">
+			</div>
+			<div class="park-callout-meta">${props.distance_label || ''}</div>
+			<div class="park-callout-meta">${props.area_acres || '?'} ac</div>
+			${wildlifePreview ? `<div class="park-callout-meta">${wildlifePreview}</div>` : ''}
+		`;
+
+		el.addEventListener('click', async () => {
+			openParkPanel(props);
+			try {
+				await analyzePreceedenceParkTrees(map, feature);
+			} catch (err) {
+				console.warn('[HANDLERS] Callout analysis failed:', err);
+			}
+		});
+
+		const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+			.setLngLat(labelLngLat)
+			.addTo(map);
+		parkCalloutMarkers.push(marker);
+	}
+
+	if (map.getLayer('park-callout-lines')) map.removeLayer('park-callout-lines');
+	if (map.getSource('park-callout-lines')) map.removeSource('park-callout-lines');
+
+	map.addSource('park-callout-lines', {
+		type: 'geojson',
+		data: {
+			type: 'FeatureCollection',
+			features: lineFeatures,
+		},
+	});
+
+	const beforeLayerId = map.getLayer('distance-rings-line') ? 'distance-rings-line' : undefined;
+
+	map.addLayer({
+		id: 'park-callout-lines',
+		type: 'line',
+		source: 'park-callout-lines',
+		paint: {
+			'line-color': 'rgba(58, 116, 82, 0.68)',
+			'line-width': 1.3,
+			'line-dasharray': [2.2, 1.2],
+		},
+	}, beforeLayerId);
+}
+
 // Normalize species names by parsing common OSM patterns
 function normalizeSpeciesName(row) {
 	if (!row) return 'Unknown';
@@ -635,9 +787,17 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	});
 }
 
-export function setupMapHandlers(map) {
+export function setupMapHandlers(map, nearbyParksData = null) {
 	const pageType = document.body?.dataset.mapPage || '';
 	const isPreceedencePage = pageType === 'preceedence' || pageType === 'map';
+
+	if (isPreceedencePage) {
+		resolveNearbyParksForCallouts(nearbyParksData)
+			.then((parksData) => {
+				if (parksData?.features?.length) setupPreceedenceParkCallouts(map, parksData);
+			})
+			.catch((err) => console.warn('[HANDLERS] Could not initialize park callouts:', err));
+	}
 
 	// ─── Nearby Parks: click → side panel ────────────────────────────────────
 	if (map.getLayer('nearby-parks-fill')) {
