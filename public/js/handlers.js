@@ -102,12 +102,57 @@ function dedupeKeepOrder(items) {
 const SPECIES_SVG_FOLDER = '/assets/species';
 const FAUNA_SVG_FOLDER = '/assets/fauna';
 const PLACEHOLDER_SVG = '/assets/placeholder.svg';
+const DEFAULT_FAUNA_RANGE_M = 800;
+
+const FAUNA_PROFILE_RULES = [
+	{ pattern: /heron|cormorant|tern|gull|osprey|sandpiper|scaup|merganser|bufflehead|dunlin|turtle|slider/i, habitat: 'waterfront', color: '#3b8ea5', rangeM: 2200 },
+	{ pattern: /hawk|falcon|kestrel|owl|eagle/i, habitat: 'canopy edge', color: '#b26b3b', rangeM: 3200 },
+	{ pattern: /warbler|oriole|grosbeak|hummingbird|thrush|sparrow|catbird|wren|robin|starling|grackle|dove|parakeet|blackpoll|wood thrush|ovenbird/i, habitat: 'woodland canopy', color: '#5b8f58', rangeM: 1300 },
+	{ pattern: /squirrel|rabbit|cottontail|fox|raccoon|opossum/i, habitat: 'woodland ground', color: '#7a6f58', rangeM: 1100 },
+	{ pattern: /butterfly|monarch|painted lady|pollinator/i, habitat: 'meadow / pollinator band', color: '#9a7ec2', rangeM: 900 },
+];
+
+const HABITAT_ANCHORS = {
+	'waterfront': [0.82, 0.78],
+	'canopy edge': [0.68, 0.32],
+	'woodland canopy': [0.35, 0.35],
+	'woodland ground': [0.42, 0.58],
+	'meadow / pollinator band': [0.58, 0.54],
+	default: [0.5, 0.5],
+};
 
 function slugifyName(name) {
 	return String(name).toLowerCase().replace(/[()\[\]]/g, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function updateParkList(elId, items, emptyLabel = 'No data yet', svgFolder = null) {
+function getFaunaProfile(name) {
+	const label = String(name || '').trim();
+	for (const rule of FAUNA_PROFILE_RULES) {
+		if (rule.pattern.test(label)) {
+			return {
+				habitat: rule.habitat,
+				color: rule.color,
+				rangeM: rule.rangeM,
+			};
+		}
+	}
+	return {
+		habitat: 'mixed urban edge',
+		color: '#6f7d90',
+		rangeM: DEFAULT_FAUNA_RANGE_M,
+	};
+}
+
+function makeColorDotSvgDataUri(color) {
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="12" fill="${color}"/><circle cx="20" cy="20" r="16" fill="none" stroke="${color}" stroke-opacity="0.38" stroke-width="2"/></svg>`;
+	return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function faunaIconResolver(name) {
+	return makeColorDotSvgDataUri(getFaunaProfile(name).color);
+}
+
+function updateParkList(elId, items, emptyLabel = 'No data yet', svgFolder = null, iconResolver = null) {
 	const el = document.getElementById(elId);
 	if (!el) return;
 	el.innerHTML = '';
@@ -125,7 +170,9 @@ function updateParkList(elId, items, emptyLabel = 'No data yet', svgFolder = nul
 		img.className = 'park-list-svg';
 		img.alt = '';
 		img.loading = 'lazy';
-		if (svgFolder) {
+		if (typeof iconResolver === 'function') {
+			img.src = iconResolver(item);
+		} else if (svgFolder) {
 			const slug = slugifyName(item);
 			img.src = `${svgFolder}/${slug}.svg`;
 			img.onerror = () => { img.src = PLACEHOLDER_SVG; img.onerror = null; };
@@ -415,8 +462,12 @@ function ensureParkContextOverlayLayers(map) {
 function clearSelectedParkContext(map) {
 	const waterSource = map.getSource('selected-park-water');
 	const pathSource = map.getSource('selected-park-paths');
+	const faunaRangeSource = map.getSource('preceedence-fauna-ranges');
+	const faunaPointSource = map.getSource('preceedence-fauna-points');
 	if (waterSource) waterSource.setData(EMPTY_FEATURE_COLLECTION);
 	if (pathSource) pathSource.setData(EMPTY_FEATURE_COLLECTION);
+	if (faunaRangeSource) faunaRangeSource.setData(EMPTY_FEATURE_COLLECTION);
+	if (faunaPointSource) faunaPointSource.setData(EMPTY_FEATURE_COLLECTION);
 }
 
 async function updateSelectedParkContext(map, parkFeature) {
@@ -590,7 +641,7 @@ function openParkPanel(props) {
 
 
 	const fauna = parseArrayProp(props.wildlife);
-	updateParkList('park-fauna-list', fauna, 'No fauna list', FAUNA_SVG_FOLDER);
+	updateParkList('park-fauna-list', fauna, 'No fauna list', null, faunaIconResolver);
 
 	panel.classList.add('active');
 }
@@ -750,6 +801,154 @@ function ensurePreceedenceTreeLayer(map) {
 			layout: { visibility: 'visible' },
 		}, 'nearby-parks-label');
 	}
+}
+
+function ensurePreceedenceFaunaLayers(map) {
+	if (!map.getSource('preceedence-fauna-ranges')) {
+		map.addSource('preceedence-fauna-ranges', {
+			type: 'geojson',
+			data: EMPTY_FEATURE_COLLECTION,
+		});
+	}
+
+	if (!map.getSource('preceedence-fauna-points')) {
+		map.addSource('preceedence-fauna-points', {
+			type: 'geojson',
+			data: EMPTY_FEATURE_COLLECTION,
+		});
+	}
+
+	if (!map.getLayer('preceedence-fauna-ranges-fill')) {
+		map.addLayer({
+			id: 'preceedence-fauna-ranges-fill',
+			type: 'fill',
+			source: 'preceedence-fauna-ranges',
+			paint: {
+				'fill-color': ['get', 'color'],
+				'fill-opacity': 0.08,
+			},
+		}, 'nearby-parks-label');
+	}
+
+	if (!map.getLayer('preceedence-fauna-ranges-line')) {
+		map.addLayer({
+			id: 'preceedence-fauna-ranges-line',
+			type: 'line',
+			source: 'preceedence-fauna-ranges',
+			paint: {
+				'line-color': ['get', 'color'],
+				'line-width': 1.6,
+				'line-opacity': 0.68,
+			},
+		}, 'nearby-parks-label');
+	}
+
+	if (!map.getLayer('preceedence-fauna-points')) {
+		map.addLayer({
+			id: 'preceedence-fauna-points',
+			type: 'circle',
+			source: 'preceedence-fauna-points',
+			paint: {
+				'circle-color': ['get', 'color'],
+				'circle-radius': [
+					'interpolate', ['linear'], ['zoom'],
+					10, 4,
+					14, 6,
+					17, 8,
+				],
+				'circle-opacity': 0.95,
+				'circle-stroke-color': 'rgba(255,255,255,0.75)',
+				'circle-stroke-width': 0.8,
+			},
+		}, 'nearby-parks-label');
+	}
+}
+
+function buildRangePolygon(center, radiusM, steps = 48) {
+	const [lon, lat] = center;
+	const latRad = (lat * Math.PI) / 180;
+	const mPerDegLat = 110540;
+	const mPerDegLon = Math.max(1e-6, 111320 * Math.cos(latRad));
+	const coords = [];
+	for (let i = 0; i <= steps; i += 1) {
+		const theta = (i / steps) * Math.PI * 2;
+		const dLon = (Math.cos(theta) * radiusM) / mPerDegLon;
+		const dLat = (Math.sin(theta) * radiusM) / mPerDegLat;
+		coords.push([lon + dLon, lat + dLat]);
+	}
+	return {
+		type: 'Polygon',
+		coordinates: [coords],
+	};
+}
+
+function getHabitatPointForAnimal(geom, animalName, habitat) {
+	const bbox = geometryBounds(geom);
+	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
+		return getGeometryCentroid(geom) || [0, 0];
+	}
+
+	const anchor = HABITAT_ANCHORS[habitat] || HABITAT_ANCHORS.default;
+	const w = bbox.maxLon - bbox.minLon;
+	const h = bbox.maxLat - bbox.minLat;
+	const rand = seededRandom(hashString(`${animalName}:${habitat}`));
+
+	for (let i = 0; i < 44; i += 1) {
+		const jitterX = (rand() - 0.5) * 0.22;
+		const jitterY = (rand() - 0.5) * 0.22;
+		const x = Math.min(0.92, Math.max(0.08, anchor[0] + jitterX));
+		const y = Math.min(0.92, Math.max(0.08, anchor[1] + jitterY));
+		const lon = bbox.minLon + w * x;
+		const lat = bbox.minLat + h * y;
+		if (pointInGeometry([lon, lat], geom)) return [lon, lat];
+	}
+
+	return getGeometryCentroid(geom) || [bbox.minLon + w * 0.5, bbox.minLat + h * 0.5];
+}
+
+function updatePreceedenceFaunaOverlays(map, feature, faunaItems) {
+	if (!feature?.geometry) return;
+	ensurePreceedenceFaunaLayers(map);
+
+	const fauna = dedupeKeepOrder(faunaItems).slice(0, 20);
+	const pointFeatures = [];
+	const rangeFeatures = [];
+
+	for (const animal of fauna) {
+		const profile = getFaunaProfile(animal);
+		const center = getHabitatPointForAnimal(feature.geometry, animal, profile.habitat);
+		const rangeM = Number.isFinite(profile.rangeM) ? profile.rangeM : DEFAULT_FAUNA_RANGE_M;
+
+		pointFeatures.push({
+			type: 'Feature',
+			properties: {
+				animal,
+				habitat: profile.habitat,
+				color: profile.color,
+				range_m: rangeM,
+			},
+			geometry: {
+				type: 'Point',
+				coordinates: center,
+			},
+		});
+
+		rangeFeatures.push({
+			type: 'Feature',
+			properties: {
+				animal,
+				habitat: profile.habitat,
+				color: profile.color,
+				range_m: rangeM,
+			},
+			geometry: buildRangePolygon(center, rangeM),
+		});
+	}
+
+	const rangeSource = map.getSource('preceedence-fauna-ranges');
+	const pointSource = map.getSource('preceedence-fauna-points');
+	if (rangeSource) rangeSource.setData({ type: 'FeatureCollection', features: rangeFeatures });
+	if (pointSource) pointSource.setData({ type: 'FeatureCollection', features: pointFeatures });
 }
 
 function hashString(seed) {
@@ -1093,7 +1292,9 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	const floraFromTrees = topSpecies.map((s) => s.species);
 	updateParkList('park-tree-list', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
 	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
-	updateParkList('park-fauna-list', parseArrayProp(feature?.properties?.wildlife), 'No fauna list', FAUNA_SVG_FOLDER);
+	const faunaItems = parseArrayProp(feature?.properties?.wildlife);
+	updateParkList('park-fauna-list', faunaItems, 'No fauna list', null, faunaIconResolver);
+	updatePreceedenceFaunaOverlays(map, feature, faunaItems);
 }
 
 export function setupMapHandlers(map, nearbyParksData = null) {
