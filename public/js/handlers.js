@@ -71,8 +71,7 @@ function openParkPanel(props) {
 	panel.classList.add('active');
 }
 
-let preceedenceTreesPromise = null;
-const satelliteDotCache = new Map();
+const osmDotCache = new Map();
 
 function pointInRing(point, ring) {
 	const x = point[0];
@@ -196,15 +195,6 @@ function geometryAreaPerimeter(geom) {
 	return { area, perimeter };
 }
 
-async function loadPreceedenceTrees() {
-	if (!preceedenceTreesPromise) {
-		preceedenceTreesPromise = fetch('/data/gowanus_trees_clean.json')
-			.then((res) => (res.ok ? res.json() : []))
-			.then((rows) => rows.filter((r) => Number.isFinite(r.lon) && Number.isFinite(r.lat)));
-	}
-	return preceedenceTreesPromise;
-}
-
 function ensurePreceedenceTreeLayer(map) {
 	if (!map.getSource('preceedence-park-tree-dots')) {
 		map.addSource('preceedence-park-tree-dots', {
@@ -276,95 +266,30 @@ function generateEstimatedDots(geom, count, seedKey) {
 	return dots;
 }
 
-function loadImageBitmap(url) {
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = 'anonymous';
-		img.onload = () => resolve(img);
-		img.onerror = () => reject(new Error('Failed to load satellite image'));
-		img.src = url;
-	});
-}
-
-function pixelIsCanopy(r, g, b) {
-	// RGB canopy heuristic tuned to reject water and shadow-heavy pixels.
-	const max = Math.max(r, g, b);
-	const min = Math.min(r, g, b);
-	const saturation = max > 0 ? (max - min) / max : 0;
-	const greenExcess = g - Math.max(r, b);
-	const vegetationScore = (1.25 * g) - (0.85 * r) - (0.7 * b);
-	const looksLikeWater = b > g + 8 && b > r + 8;
-	return !looksLikeWater && g > 58 && saturation > 0.12 && greenExcess > 10 && vegetationScore > 10;
-}
-
-function getWaterLayerIds(map) {
-	return (map.getStyle()?.layers || [])
-		.filter((layer) => layer.type === 'fill' && layer['source-layer'] === 'water')
-		.map((layer) => layer.id);
-}
-
-function pointHitsWaterLayer(map, lngLat, waterLayerIds) {
-	if (!waterLayerIds.length) return false;
-	const p = map.project(lngLat);
-	const hits = map.queryRenderedFeatures([p.x, p.y], { layers: waterLayerIds });
-	return hits.length > 0;
-}
-
-async function generateSatelliteCanopyDots(map, geom, parkKey, areaAcres) {
-	if (satelliteDotCache.has(parkKey)) return satelliteDotCache.get(parkKey);
-	if (!window.mapboxgl?.accessToken) return [];
+async function loadOsmTreesForGeometry(geom, parkKey) {
+	if (osmDotCache.has(parkKey)) return osmDotCache.get(parkKey);
 
 	const bbox = geometryBounds(geom);
 	if (!Number.isFinite(bbox.minLon) || !Number.isFinite(bbox.minLat) || !Number.isFinite(bbox.maxLon) || !Number.isFinite(bbox.maxLat)) {
 		return [];
 	}
 
-	const width = 640;
-	const height = 640;
-	const token = encodeURIComponent(window.mapboxgl.accessToken);
-	const bboxStr = `${bbox.minLon},${bbox.minLat},${bbox.maxLon},${bbox.maxLat}`;
-	const url = `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/[${bboxStr}]/${width}x${height}?access_token=${token}&logo=false&attribution=false`;
-	const waterLayerIds = getWaterLayerIds(map);
+	const params = new URLSearchParams({
+		minLon: String(bbox.minLon),
+		minLat: String(bbox.minLat),
+		maxLon: String(bbox.maxLon),
+		maxLat: String(bbox.maxLat),
+	});
 
 	try {
-		const img = await loadImageBitmap(url);
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		const ctx = canvas.getContext('2d', { willReadFrequently: true });
-		ctx.drawImage(img, 0, 0, width, height);
-		const imageData = ctx.getImageData(0, 0, width, height).data;
-
-		const rand = seededRandom(hashString(`${parkKey}-sat`));
-		const attempts = Math.max(600, Math.min(8500, Math.round(areaAcres * 28)));
-		const dots = [];
-		for (let i = 0; i < attempts; i++) {
-			const lon = bbox.minLon + rand() * (bbox.maxLon - bbox.minLon);
-			const lat = bbox.minLat + rand() * (bbox.maxLat - bbox.minLat);
-			if (!pointInGeometry([lon, lat], geom)) continue;
-			if (pointHitsWaterLayer(map, { lng: lon, lat }, waterLayerIds)) continue;
-
-			const px = Math.max(0, Math.min(width - 1, Math.floor(((lon - bbox.minLon) / (bbox.maxLon - bbox.minLon || 1e-9)) * (width - 1))));
-			const py = Math.max(0, Math.min(height - 1, Math.floor(((bbox.maxLat - lat) / (bbox.maxLat - bbox.minLat || 1e-9)) * (height - 1))));
-			const idx = (py * width + px) * 4;
-			const r = imageData[idx];
-			const g = imageData[idx + 1];
-			const b = imageData[idx + 2];
-
-			if (pixelIsCanopy(r, g, b)) {
-				dots.push({
-					type: 'Feature',
-					properties: { species: 'Satellite canopy proxy' },
-					geometry: { type: 'Point', coordinates: [lon, lat] },
-				});
-			}
-		}
-
-		const capped = dots.slice(0, 2200);
-		satelliteDotCache.set(parkKey, capped);
-		return capped;
+		const res = await fetch(`/api/osm-park-trees?${params.toString()}`);
+		if (!res.ok) return [];
+		const data = await res.json();
+		const rows = (data.rows || []).filter((row) => pointInGeometry([row.lon, row.lat], geom));
+		osmDotCache.set(parkKey, rows);
+		return rows;
 	} catch (err) {
-		console.warn('[HANDLERS] Satellite canopy sampling failed:', err);
+		console.warn('[HANDLERS] OSM tree fetch failed:', err);
 		return [];
 	}
 }
@@ -374,7 +299,7 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	const barsEl = document.getElementById('park-tree-type-bars');
 	const noteEl = document.getElementById('park-tree-note');
 	if (!metricsEl || !barsEl || !noteEl) return;
-	const dataLabel = mode === 'estimated' ? 'Estimated' : mode === 'satellite' ? 'Satellite' : 'Observed';
+	const dataLabel = mode === 'estimated' ? 'Estimated' : mode === 'osm' ? 'Mapped' : 'Observed';
 
 	metricsEl.innerHTML = `
 		<div class="park-tree-metric"><span>Trees (${dataLabel})</span><strong>${treeCount}</strong></div>
@@ -394,10 +319,10 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		`).join('')
 		: '<p class="park-tree-empty">Street-tree species breakdown is unavailable for this park in the source dataset.</p>';
 
-	noteEl.textContent = mode === 'satellite'
-		? 'Dots are generated from Mapbox satellite imagery using a canopy-color proxy inside the park polygon. Species bars still use street-tree records only.'
+	noteEl.textContent = mode === 'osm'
+		? 'Dots are researched mapped tree locations from OpenStreetMap/Overpass inside this park boundary. Density reflects mapped tree points.'
 		: mode === 'estimated'
-			? 'This park has no street-tree points in the NYC street-tree dataset. Dot pattern is an estimated canopy-density proxy based on park footprint area.'
+			? 'No mapped tree points were returned for this park. Dot pattern is an estimated fallback based on park area.'
 			: 'Dots on map represent observed street-tree records in this park. More dots = higher observed street-tree density.';
 }
 
@@ -408,17 +333,11 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	const geom = feature?.geometry;
 	if (!geom) return;
 
-	const rows = await loadPreceedenceTrees();
-	const bbox = geometryBounds(geom);
-	const selected = rows.filter((row) => {
-		if (row.lon < bbox.minLon || row.lon > bbox.maxLon || row.lat < bbox.minLat || row.lat > bbox.maxLat) {
-			return false;
-		}
-		return pointInGeometry([row.lon, row.lat], geom);
-	});
-	let dotFeatures = selected.map((row) => ({
+	const parkKey = String(feature?.properties?.id || feature?.properties?.name || 'park');
+	const mappedTrees = await loadOsmTreesForGeometry(geom, parkKey);
+	let dotFeatures = mappedTrees.map((row) => ({
 		type: 'Feature',
-		properties: { species: row.species || 'Unknown' },
+		properties: { species: row.species || row.genus || row.taxon || 'Unknown' },
 		geometry: { type: 'Point', coordinates: [row.lon, row.lat] },
 	}));
 
@@ -428,16 +347,10 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		? Number(feature.properties.area_acres)
 		: fallbackAreaAcres;
 
-	let mode = 'observed';
-	let effectiveTreeCount = selected.length;
+	let mode = 'osm';
+	let effectiveTreeCount = mappedTrees.length;
 
-	const parkKey = String(feature?.properties?.id || feature?.properties?.name || 'park');
-	const satelliteDots = areaAcres > 0 ? await generateSatelliteCanopyDots(map, geom, parkKey, areaAcres) : [];
-	if (satelliteDots.length > 0) {
-		mode = 'satellite';
-		dotFeatures = satelliteDots;
-		effectiveTreeCount = satelliteDots.length;
-	} else if (selected.length === 0 && areaAcres > 0) {
+	if (mappedTrees.length === 0 && areaAcres > 0) {
 		mode = 'estimated';
 		effectiveTreeCount = Math.round(Math.min(900, Math.max(24, areaAcres * 16)));
 		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, parkKey);
@@ -451,8 +364,8 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	const densityPerAcre = areaAcres > 0 ? effectiveTreeCount / areaAcres : 0;
 
 	const counts = new Map();
-	for (const row of selected) {
-		const key = String(row.species || 'Unknown').trim() || 'Unknown';
+	for (const row of mappedTrees) {
+		const key = String(row.species || row.genus || row.taxon || 'Unknown').trim() || 'Unknown';
 		counts.set(key, (counts.get(key) || 0) + 1);
 	}
 	const topSpecies = [...counts.entries()]
