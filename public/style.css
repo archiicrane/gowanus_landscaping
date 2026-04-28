@@ -684,7 +684,7 @@ body[data-map-page="preceedence"] #park-info-panel {
   top: 72px;
   left: 14px;
   right: 14px;
-  bottom: 72px;
+  bottom: 16px;
   width: auto;
   max-height: none;
   background: transparent;
@@ -723,12 +723,12 @@ body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
-  grid-template-rows: 1fr 1fr 1fr;
-  align-content: stretch;
+  grid-template-rows: auto auto auto;
+  align-content: start;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
-  grid-template-rows: auto minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-rows: auto minmax(0, 2fr) minmax(0, 1.5fr);
   align-content: stretch;
 }
 
@@ -775,12 +775,10 @@ body[data-map-page="preceedence"] #park-info-panel .park-list {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1 1 0;
-  overflow-y: auto;
-  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+  align-content: start;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-list li {
@@ -797,9 +795,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-list-item {
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
   border-radius: 6px;
   background: rgba(255,255,255,0.4);
@@ -833,8 +831,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-panel-desc {
 
 body[data-map-page="preceedence"] #park-info-panel .park-panel-ecology {
   font-size: 12px;
-  max-height: 145px;
-  overflow: auto;
+  overflow-y: auto;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
