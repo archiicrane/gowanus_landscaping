@@ -782,6 +782,21 @@ body[data-map-page="preceedence"] #park-info-panel .park-list li {
   padding: 2px 0;
 }
 
+body[data-map-page="preceedence"] #park-info-panel .park-list-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.4);
+}
+
 body[data-map-page="preceedence"] #park-info-panel .park-panel-close {
   pointer-events: auto;
   right: 18px;

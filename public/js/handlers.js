@@ -99,7 +99,15 @@ function dedupeKeepOrder(items) {
 	return out;
 }
 
-function updateParkList(elId, items, emptyLabel = 'No data yet') {
+const SPECIES_SVG_FOLDER = '/assets/species';
+const FAUNA_SVG_FOLDER = '/assets/fauna';
+const PLACEHOLDER_SVG = '/assets/placeholder.svg';
+
+function slugifyName(name) {
+	return String(name).toLowerCase().replace(/[()\[\]]/g, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function updateParkList(elId, items, emptyLabel = 'No data yet', svgFolder = null) {
 	const el = document.getElementById(elId);
 	if (!el) return;
 	el.innerHTML = '';
@@ -112,7 +120,22 @@ function updateParkList(elId, items, emptyLabel = 'No data yet') {
 	}
 	for (const item of values) {
 		const li = document.createElement('li');
-		li.textContent = item;
+		li.className = 'park-list-item';
+		const img = document.createElement('img');
+		img.className = 'park-list-svg';
+		img.alt = '';
+		img.loading = 'lazy';
+		if (svgFolder) {
+			const slug = slugifyName(item);
+			img.src = `${svgFolder}/${slug}.svg`;
+			img.onerror = () => { img.src = PLACEHOLDER_SVG; img.onerror = null; };
+		} else {
+			img.src = PLACEHOLDER_SVG;
+		}
+		const span = document.createElement('span');
+		span.textContent = item;
+		li.appendChild(img);
+		li.appendChild(span);
 		el.appendChild(li);
 	}
 }
@@ -567,7 +590,7 @@ function openParkPanel(props) {
 
 
 	const fauna = parseArrayProp(props.wildlife);
-	updateParkList('park-fauna-list', fauna, 'No fauna list');
+	updateParkList('park-fauna-list', fauna, 'No fauna list', FAUNA_SVG_FOLDER);
 
 	panel.classList.add('active');
 }
@@ -1068,9 +1091,9 @@ async function analyzePreceedenceParkTrees(map, feature) {
 
 	const floraProfile = PARK_FLORA_PROFILES[parkId] || [];
 	const floraFromTrees = topSpecies.map((s) => s.species);
-	updateParkList('park-tree-list', floraFromTrees, 'No tree species available');
-	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available');
-	updateParkList('park-fauna-list', parseArrayProp(feature?.properties?.wildlife), 'No fauna list');
+	updateParkList('park-tree-list', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
+	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
+	updateParkList('park-fauna-list', parseArrayProp(feature?.properties?.wildlife), 'No fauna list', FAUNA_SVG_FOLDER);
 }
 
 export function setupMapHandlers(map, nearbyParksData = null) {
