@@ -669,13 +669,23 @@ body[data-map-page="preceedence"] #park-info-panel {
   box-shadow: none;
   border-radius: 0;
   display: grid;
-  grid-template-columns: 330px 1fr 580px;
+  grid-template-columns: minmax(230px, 330px) minmax(420px, 580px);
+  justify-content: space-between;
+  align-items: start;
   gap: 12px;
   z-index: 3100;
   overflow: visible;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+
+body[data-map-page="preceedence"] #park-info-panel.active {
   opacity: 1;
-  transition: opacity 0.2s ease;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
@@ -783,7 +793,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 @media (max-width: 1300px) {
   body[data-map-page="preceedence"] #park-info-panel {
-    grid-template-columns: 280px 1fr 430px;
+    grid-template-columns: minmax(220px, 280px) minmax(340px, 430px);
   }
 }
 
