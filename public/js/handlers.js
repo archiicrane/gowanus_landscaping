@@ -516,7 +516,9 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	}
 
 	if (mappedTrees.length > 0) {
-		const maxRenderDots = (mode === 'treekeeper' || mode === 'greenwood_official') ? 1200 : 1600;
+		const maxRenderDots = (mode === 'treekeeper' || mode === 'greenwood_official')
+			? mappedTrees.length
+			: 1600;
 		dotFeatures = getMappedDotsCached(mappedTrees, maxRenderDots, `${parkId || parkKey}-${mode}`);
 	}
 
