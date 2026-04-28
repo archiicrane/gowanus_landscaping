@@ -70,8 +70,10 @@ export async function initMap() {
 			}
 		}
 
-		// Nearby parks first — sits under all other layers
-		await addNearbyParksLayer(map);
+		// Nearby parks first — sits under all other layers.
+		// Returns the Nominatim-resolved GeoJSON so distance spokes can use
+		// accurate centroids instead of stale fallback polygon centroids.
+		const resolvedParksData = await addNearbyParksLayer(map);
 		// Data layers — heatmap first so the clip mask can sit on top of it
 		await addBuildingLayer(map);
 		await addTreeLayer(map);
@@ -84,7 +86,7 @@ export async function initMap() {
 		await addCsoOutfallsLayer(map);
 		await addRemediationSitesLayer(map);
 		await addBioswaleOpportunityLayer(map);
-		await addDistanceRingsLayer(map);
+		await addDistanceRingsLayer(map, resolvedParksData);
 		setupMapHandlers(map);
 		wireLayerToggles(map);
 		initMapIntroSequence(map);

@@ -762,6 +762,11 @@ export async function addNearbyParksLayer(map) {
 			'text-halo-width': 1.4,
 		},
 	});
+
+	// Return the resolved data (with Nominatim-updated geometries) so callers
+	// (e.g. addDistanceRingsLayer) can compute accurate centroids without a
+	// second fetch that would get stale fallback polygons.
+	return data;
 }
 
 // ─── Distance Rings from Gowanus Site Center ─────────────────────────────────
@@ -819,7 +824,7 @@ function featureCentroid(geom) {
 	return [lon, lat];
 }
 
-export async function addDistanceRingsLayer(map) {
+export async function addDistanceRingsLayer(map, parksData = null) {
 	// Ring radii in km (≈ 0.25 mi, 0.5 mi, 1 mi, 1.5 mi, 2 mi)
 	const rings = [
 		{ km: 0.40, miles: '¼ mi' },
@@ -843,12 +848,14 @@ export async function addDistanceRingsLayer(map) {
 		geometry: { type: 'Point', coordinates: circleLabelPoint(r.km) },
 	}));
 
-	// Load park data for spokes
-	let parksData = null;
-	try {
-		const res = await fetch('/data/nearby-parks.geojson');
-		if (res.ok) parksData = await res.json();
-	} catch (_) { /* spoke layer optional */ }
+	// Use Nominatim-resolved park data passed from addNearbyParksLayer.
+	// Fallback: fetch fresh (gets fallback polygon geometry, not Nominatim-updated).
+	if (!parksData) {
+		try {
+			const res = await fetch('/data/nearby-parks.geojson');
+			if (res.ok) parksData = await res.json();
+		} catch (_) { /* spoke layer optional */ }
+	}
 
 	// Build spoke lines: site center → each park centroid
 	const spokeFeatures = [];

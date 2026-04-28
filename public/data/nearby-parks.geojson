@@ -188,6 +188,46 @@
           [-74.0215, 40.6700]
         ]]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "governors-island",
+        "osm_id": "R2389631",
+        "name": "Governors Island",
+        "distance_m": 2680,
+        "distance_label": "~2.7 km · 10 min ferry",
+        "area_acres": 172,
+        "established": 2005,
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Governors_Island_aerial_from_south.jpg/1280px-Governors_Island_aerial_from_south.jpg",
+        "description": "A 172-acre former military island in Upper New York Harbor, Governors Island is now one of New York City's most significant new public parks. Free of permanent residents and with no private vehicles, it offers a rare urban environment where wildlife is largely undisturbed. The island is accessible by ferry from Brooklyn Bridge Park (8 min) and Manhattan (7 min).",
+        "ecology_note": "Governors Island occupies a strategic location in New York Harbor along the Atlantic Flyway, making it a critically important stopover for migratory songbirds, raptors, and shorebirds in spring and fall. The island's managed meadows, gardens, and shoreline riprap provide habitat largely absent elsewhere in lower New York Harbor. Ospreys, Peregrine Falcons, and American Kestrels hunt over the island regularly. With no permanent residents and limited nighttime lighting, the island has exceptional potential as an urban wildlife sanctuary and stepping-stone in a Gowanus–Harbor ecological corridor.",
+        "wildlife": ["Osprey", "Peregrine Falcon", "American Kestrel", "Merlin", "Sharp-shinned Hawk", "Cooper's Hawk", "Red-tailed Hawk", "Common Tern", "Laughing Gull", "Great Black-backed Gull", "Double-crested Cormorant", "Monarch Butterfly (migration)", "Painted Lady Butterfly", "Ruby-throated Hummingbird (migration)", "Baltimore Oriole (migration)", "Blackpoll Warbler (migration)"],
+        "programs": ["The Hills public park with harbor views", "Seasonal programming (May–Oct)", "NYC Ferry access from Brooklyn Bridge Park", "Billion Oyster Project shoreline restoration", "Urban ecology and environmental education programs", "Art and cultural installations"],
+        "link": "https://govisland.com/"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-74.0264, 40.6857],
+          [-74.0255, 40.6843],
+          [-74.0240, 40.6840],
+          [-74.0210, 40.6840],
+          [-74.0175, 40.6847],
+          [-74.0149, 40.6862],
+          [-74.0131, 40.6882],
+          [-74.0123, 40.6900],
+          [-74.0122, 40.6911],
+          [-74.0132, 40.6921],
+          [-74.0148, 40.6929],
+          [-74.0165, 40.6933],
+          [-74.0194, 40.6932],
+          [-74.0226, 40.6920],
+          [-74.0250, 40.6897],
+          [-74.0264, 40.6876],
+          [-74.0264, 40.6857]
+        ]]
+      }
     }
   ]
 }
