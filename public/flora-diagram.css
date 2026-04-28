@@ -13,7 +13,14 @@
 }
 
 .flora-header {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
+  padding: 18px 22px;
+  border: 1px solid var(--glass-panel-border);
+  border-radius: 18px;
+  background: var(--glass-panel-bg-strong);
+  box-shadow: var(--glass-panel-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .flora-header h1 {
@@ -38,9 +45,12 @@
 .proposal-sankey {
   margin: 12px 0 28px;
   padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255,255,255,0.62);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: 18px;
+  background: var(--glass-panel-bg-strong);
+  box-shadow: var(--glass-panel-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .proposal-sankey-head {
@@ -78,9 +88,9 @@
 .proposal-sankey-ribbon-frame {
   width: 100%;
   min-height: 154px;
-  border: 1px solid rgba(86,73,53,0.16);
+  border: 1px solid var(--glass-panel-border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.74);
+  background: rgba(255,255,255,0.5);
   padding: 10px 12px 8px;
   margin-bottom: 12px;
 }
@@ -199,13 +209,19 @@
   display: flex;
   gap: 4px;
   margin-bottom: 8px;
+  padding: 6px;
+  width: fit-content;
+  border: 1px solid var(--glass-panel-border);
+  border-radius: 14px;
+  background: var(--glass-panel-bg);
+  box-shadow: var(--glass-panel-shadow);
 }
 
 .mode-tab {
   padding: 8px 18px;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   border-radius: 10px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.28);
   color: var(--ink-muted);
   font-size: 13px;
   font-weight: 500;
@@ -220,9 +236,9 @@
 }
 
 .mode-tab.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--glass-panel-bg-strong);
+  color: var(--ink);
+  border-color: var(--glass-panel-border);
 }
 
 /* ── Time sub-tabs ──────────────────────────────────────────────────────── */
@@ -231,8 +247,10 @@
   gap: 4px;
   margin-bottom: 18px;
   padding: 8px 12px;
-  background: rgba(86,73,53,0.05);
-  border-radius: 10px;
+  background: var(--glass-panel-bg);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: 12px;
+  box-shadow: var(--glass-panel-shadow);
   width: fit-content;
 }
 
@@ -263,16 +281,19 @@
 .flora-diagram-wrap {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
   margin-bottom: 28px;
 }
 
 .species-board {
   margin: 0 0 20px;
   padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.55);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: 18px;
+  background: var(--glass-panel-bg-strong);
+  box-shadow: var(--glass-panel-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .species-board-head {
@@ -343,10 +364,13 @@
   grid-template-columns: 140px 1fr;
   border-radius: 14px;
   overflow: hidden;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--glass-panel-border);
+  background: var(--glass-panel-bg-strong);
   min-height: 140px;
   transition: opacity 160ms ease;
+  box-shadow: var(--glass-panel-shadow);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
 
 .band-label-col {

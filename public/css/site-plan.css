@@ -1,30 +1,79 @@
-/* Site Strategy page styles */
+.site-plan-page {
+  background: var(--paper-wash);
+}
 
-.site-diagram-frame {
-  background: #f7f6f3;
-  border: 1px solid #d6d6d6;
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
-  margin: 2rem 0;
-  box-shadow: 0 2px 12px rgba(120, 180, 160, 0.04);
+.site-plan-main {
+  padding: 74px 16px 18px;
+  min-height: calc(100vh - 56px);
 }
-.site-diagram-title {
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #3a4632;
-  margin-bottom: 0.5rem;
+
+.site-plan-shell {
+  display: grid;
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+  gap: 16px;
+  height: calc(100vh - 92px);
 }
-.site-diagram-caption {
-  color: #7a7a7a;
-  font-size: 1rem;
-  margin-bottom: 1.2rem;
+
+.site-plan-brief,
+#site-plan-canvas-container {
+  border: 1px solid var(--glass-panel-border);
+  background: var(--glass-panel-bg-strong);
+  box-shadow: var(--glass-panel-shadow);
+  border-radius: 20px;
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
 }
-.site-research-paragraph {
-  font-size: 1.05rem;
-  color: #5a5a5a;
-  margin-top: 1.5rem;
-  line-height: 1.6;
+
+.site-plan-brief {
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.site-plan-brief h1 {
+  margin: 0;
+  font-size: clamp(24px, 2vw, 34px);
+  line-height: 1.05;
+}
+
+.site-plan-brief p:last-child {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+#site-plan-canvas-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+}
+
+canvas.site-plan-canvas {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(249, 247, 242, 0.96) 0%, rgba(239, 235, 227, 0.94) 100%);
+  display: block;
+}
+
+@media (max-width: 980px) {
+  .site-plan-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+    min-height: calc(100vh - 92px);
+  }
+
+  #site-plan-canvas-container {
+    min-height: 70vh;
+  }
 }

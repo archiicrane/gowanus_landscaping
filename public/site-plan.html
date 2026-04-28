@@ -6,9 +6,9 @@
 	<title>Rewilding Gowanus - Site Plan</title>
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="stylesheet" href="/style.css">
-	<link rel="stylesheet" href="/site-plan.css">
+	<link rel="stylesheet" href="/css/site-plan.css">
 </head>
-<body>
+<body class="site-plan-page">
 	<div class="top-bar">
 		<span class="brand">Rewilding Gowanus</span>
 		<span class="nav-links">
@@ -20,12 +20,21 @@
 			<a href="wildlife-corridor.html" class="nav-btn">Wildlife</a>
 		</span>
 	</div>
-	<main>
-		<div id="site-plan-canvas-container">
-			<!-- Three.js canvas will be injected here -->
-		</div>
+	<main class="site-plan-main">
+		<section class="site-plan-shell">
+			<aside class="site-plan-brief">
+				<p class="eyebrow">Project Vision</p>
+				<h1>Site Plan</h1>
+				<p>
+					A remediated public ground organized as woodland core, wet edge, and pollinator field,
+					shown here as the project-wide spatial composition rather than a single isolated object.
+				</p>
+			</aside>
+			<div id="site-plan-canvas-container">
+				<!-- Three.js canvas will be injected here -->
+			</div>
+		</section>
 	</main>
-	<script src="/vendor/three/three.min.js"></script>
 	<script type="module" src="/site-plan-main.js"></script>
 </body>
 </html>
