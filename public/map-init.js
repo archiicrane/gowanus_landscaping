@@ -41,8 +41,8 @@ export async function initMap() {
 	mapboxgl.accessToken = token;
 
 	const initialPadding = getInitialFitPadding();
-	// Wider initial bounds shows surrounding parks before the site intro zooms in
-	const contextBounds = [[-74.028, 40.650], [-73.948, 40.690]];
+	// Wider initial bounds shows the full analysis context on first load
+	const contextBounds = [[-74.040, 40.642], [-73.936, 40.704]];
 
 	const map = new mapboxgl.Map({
 		container: 'map',
