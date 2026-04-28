@@ -137,6 +137,7 @@ function openParkPanel(props) {
 
 const osmDotCache = new Map();
 const parkInventoryCache = new Map();
+const estimatedDotCache = new Map();
 
 function pointInRing(point, ring) {
 	const x = point[0];
@@ -331,6 +332,14 @@ function generateEstimatedDots(geom, count, seedKey) {
 	return dots;
 }
 
+function getEstimatedDotsCached(geom, count, seedKey) {
+	const key = `${seedKey}:${count}`;
+	if (estimatedDotCache.has(key)) return estimatedDotCache.get(key);
+	const dots = generateEstimatedDots(geom, count, seedKey);
+	estimatedDotCache.set(key, dots);
+	return dots;
+}
+
 async function loadOsmTreesForGeometry(geom, parkKey) {
 	if (osmDotCache.has(parkKey)) return osmDotCache.get(parkKey);
 
@@ -402,7 +411,7 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		noteText = 'Dots are direct mapped tree points from Green-Wood\'s official Living Tree Collection ArcGIS layer, filtered to park boundary.';
 	} else if (mode === 'governors_inventory') {
 		dataLabel = 'Published';
-		noteText = 'Counts and species come from Governors Island TreePlotter. Dot distribution is modeled because their public endpoint provides inventory metrics but not raw per-tree point export.';
+		noteText = 'Counts and species come from Governors Island TreePlotter. Dot distribution is modeled as a representative sample for faster interaction because their public endpoint provides inventory metrics but not raw per-tree point export.';
 	} else if (mode === 'osm_with_reference') {
 		dataLabel = 'Mapped';
 		const source = parkEnrichment?.dataSource || 'Published';
@@ -423,13 +432,16 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		<div class="park-tree-metric"><span>Shape</span><strong>${compactness.toFixed(2)}</strong></div>
 	`;
 
-	const max = Math.max(1, ...topSpecies.map((d) => d.count));
+	const countValues = topSpecies
+		.map((d) => Number(d.count))
+		.filter((v) => Number.isFinite(v) && v > 0);
+	const max = countValues.length ? Math.max(...countValues) : 1;
 	barsEl.innerHTML = topSpecies.length
 		? topSpecies.map((d) => `
 			<div class="park-tree-bar-row">
 				<span class="park-tree-bar-label">${d.species}</span>
-				<div class="park-tree-bar-track"><span class="park-tree-bar-fill" style="width:${(d.count / max) * 100}%"></span></div>
-				<span class="park-tree-bar-value">${d.count}</span>
+				<div class="park-tree-bar-track"><span class="park-tree-bar-fill" style="width:${Number.isFinite(Number(d.count)) && Number(d.count) > 0 ? (Number(d.count) / max) * 100 : 0}%"></span></div>
+				<span class="park-tree-bar-value">${Number.isFinite(Number(d.count)) && Number(d.count) > 0 ? Number(d.count) : '—'}</span>
 			</div>
 		`).join('')
 		: '<p class="park-tree-empty">Species breakdown not available for this park in the source dataset.</p>';
@@ -482,17 +494,18 @@ async function analyzePreceedenceParkTrees(map, feature) {
 		mode = 'governors_inventory';
 		effectiveTreeCount = governorsInventory.treeCount;
 		useEnrichedData = true;
-		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, parkId);
+		const displayDotCount = Math.min(900, effectiveTreeCount);
+		dotFeatures = getEstimatedDotsCached(geom, displayDotCount, `${parkId}-published`);
 	} else if (mappedTrees.length === 0 && parkEnrichment && parkEnrichment.expectedTreeCount > 0) {
 		mode = 'enriched';
 		effectiveTreeCount = parkEnrichment.expectedTreeCount;
 		useEnrichedData = true;
 		// Generate dots from enriched data with park-specific bias
-		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, parkId);
+		dotFeatures = getEstimatedDotsCached(geom, effectiveTreeCount, parkId);
 	} else if (mappedTrees.length === 0 && areaAcres > 0) {
 		mode = 'estimated';
 		effectiveTreeCount = Math.round(Math.min(900, Math.max(24, areaAcres * 16)));
-		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, parkId);
+		dotFeatures = getEstimatedDotsCached(geom, effectiveTreeCount, parkId);
 	} else if (mappedTrees.length > 0 && parkEnrichment) {
 		// OSM has good coverage; use it but note published inventory is available
 		effectiveTreeCount = mappedTrees.length;
@@ -511,7 +524,9 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	let topSpecies = [];
 	
 	if (mode === 'governors_inventory' && Array.isArray(governorsInventory?.topSpecies)) {
-		topSpecies = governorsInventory.topSpecies.slice(0, 6);
+		topSpecies = Array.isArray(governorsInventory?.speciesBreakdown)
+			? governorsInventory.speciesBreakdown
+			: governorsInventory.topSpecies;
 	} else if (useEnrichedData && parkEnrichment?.commonSpecies) {
 		// Use enriched species distribution from published inventory
 		topSpecies = parkEnrichment.commonSpecies.slice(0, 6);

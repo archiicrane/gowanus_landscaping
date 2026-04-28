@@ -31,6 +31,31 @@ export default async function handler(req, res) {
       }))
       .filter((item) => item.count > 0);
 
+    const knownCounts = new Map(
+      topSpecies.map((item) => [item.species.toLowerCase(), item.count])
+    );
+    const allSpecies = (speciesField?.values || [])
+      .map((item) => String(item?.alias || '').trim())
+      .filter(Boolean)
+      .map((species) => ({
+        species,
+        count: knownCounts.get(species.toLowerCase()) ?? null,
+      }));
+
+    // De-duplicate and keep a stable sort with known counts first.
+    const unique = new Map();
+    for (const item of allSpecies) {
+      const key = item.species.toLowerCase();
+      if (!unique.has(key)) unique.set(key, item);
+    }
+    const speciesBreakdown = [...unique.values()].sort((a, b) => {
+      const aKnown = Number.isFinite(a.count) ? 1 : 0;
+      const bKnown = Number.isFinite(b.count) ? 1 : 0;
+      if (aKnown !== bKnown) return bKnown - aKnown;
+      if (aKnown && bKnown) return b.count - a.count;
+      return a.species.localeCompare(b.species);
+    });
+
     const eco = config?.aggregateData?.ecobens || {};
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=86400');
@@ -38,6 +63,7 @@ export default async function handler(req, res) {
       source: 'governors_treeplotter_config',
       treeCount,
       topSpecies,
+      speciesBreakdown,
       benefits: {
         overallValueUsd: Number(eco?.overall_value_usd || 0),
         stormwaterValueUsd: Number(eco?.hydro_runoff_avoided_value_usd || 0),
