@@ -136,6 +136,7 @@ function openParkPanel(props) {
 }
 
 const osmDotCache = new Map();
+const parkInventoryCache = new Map();
 
 function pointInRing(point, ring) {
 	const x = point[0];
@@ -362,6 +363,22 @@ async function loadOsmTreesForGeometry(geom, parkKey) {
 	}
 }
 
+async function loadGovernorsIslandInventory() {
+	const cacheKey = 'governors-island';
+	if (parkInventoryCache.has(cacheKey)) return parkInventoryCache.get(cacheKey);
+
+	try {
+		const res = await fetch('/api/governors-island-trees');
+		if (!res.ok) return null;
+		const data = await res.json();
+		parkInventoryCache.set(cacheKey, data);
+		return data;
+	} catch (err) {
+		console.warn('[HANDLERS] Governors inventory fetch failed:', err);
+		return null;
+	}
+}
+
 function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compactness, topSpecies, mode, parkEnrichment }) {
 	const metricsEl = document.getElementById('park-tree-metrics');
 	const barsEl = document.getElementById('park-tree-type-bars');
@@ -377,6 +394,9 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	} else if (mode === 'treekeeper') {
 		dataLabel = 'Mapped';
 		noteText = 'Dots are direct mapped tree points from Prospect Park TreeKeeper (GeoServer WFS), filtered to park boundary.';
+	} else if (mode === 'governors_inventory') {
+		dataLabel = 'Published';
+		noteText = 'Counts and species come from Governors Island TreePlotter. Dot distribution is modeled because their public endpoint provides inventory metrics but not raw per-tree point export.';
 	} else if (mode === 'osm_with_reference') {
 		dataLabel = 'Mapped';
 		const source = parkEnrichment?.dataSource || 'Published';
@@ -434,6 +454,10 @@ async function analyzePreceedenceParkTrees(map, feature) {
 
 	const parkId = feature?.properties?.id || '';
 	const parkEnrichment = PARK_TREE_ENRICHMENT[parkId];
+	let governorsInventory = null;
+	if (parkId === 'governors-island') {
+		governorsInventory = await loadGovernorsIslandInventory();
+	}
 	
 	let mode = 'osm';
 	let effectiveTreeCount = mappedTrees.length;
@@ -445,7 +469,12 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	}
 
 	// If OSM data is sparse, check for published inventory
-	if (mappedTrees.length === 0 && parkEnrichment && parkEnrichment.expectedTreeCount > 0) {
+	if (mappedTrees.length === 0 && governorsInventory?.treeCount > 0 && parkId === 'governors-island') {
+		mode = 'governors_inventory';
+		effectiveTreeCount = governorsInventory.treeCount;
+		useEnrichedData = true;
+		dotFeatures = generateEstimatedDots(geom, effectiveTreeCount, parkId);
+	} else if (mappedTrees.length === 0 && parkEnrichment && parkEnrichment.expectedTreeCount > 0) {
 		mode = 'enriched';
 		effectiveTreeCount = parkEnrichment.expectedTreeCount;
 		useEnrichedData = true;
@@ -472,7 +501,9 @@ async function analyzePreceedenceParkTrees(map, feature) {
 	const counts = new Map();
 	let topSpecies = [];
 	
-	if (useEnrichedData && parkEnrichment?.commonSpecies) {
+	if (mode === 'governors_inventory' && Array.isArray(governorsInventory?.topSpecies)) {
+		topSpecies = governorsInventory.topSpecies.slice(0, 6);
+	} else if (useEnrichedData && parkEnrichment?.commonSpecies) {
 		// Use enriched species distribution from published inventory
 		topSpecies = parkEnrichment.commonSpecies.slice(0, 6);
 	} else if (mappedTrees.length > 0) {
