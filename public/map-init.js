@@ -208,23 +208,28 @@ function wireObservableOverlay(map) {
 	const SITE_SE = [-73.98916681, 40.67417027];
 	const SITE_SW = [-73.99646705, 40.67417072];
 
+	// Observable SVG native rendered size (from viewBox 985230 184895 2025 912,
+	// rendered at width="1350" height="608" as reported by the embed page).
+	// The iframe content does not auto-stretch, so we set the frame to this
+	// native size and use a CSS scale transform to fit the map projection.
+	const SVG_W = 1350;
+	const SVG_H = 608;
+
 	let renderListener = null;
 
 	function positionFrame() {
 		const nw = map.project(SITE_NW);
-		const ne = map.project(SITE_NE);
 		const se = map.project(SITE_SE);
-		const sw = map.project(SITE_SW);
-		const xs = [nw.x, ne.x, se.x, sw.x];
-		const ys = [nw.y, ne.y, se.y, sw.y];
-		const minX = Math.min(...xs);
-		const maxX = Math.max(...xs);
-		const minY = Math.min(...ys);
-		const maxY = Math.max(...ys);
-		frame.style.left   = minX + 'px';
-		frame.style.top    = minY + 'px';
-		frame.style.width  = (maxX - minX) + 'px';
-		frame.style.height = (maxY - minY) + 'px';
+		const projW = se.x - nw.x;
+		const projH = se.y - nw.y;
+		// Pin the frame at the projected NW corner, at SVG native size,
+		// then scale it so the SVG content maps exactly to the map bounds.
+		frame.style.left            = nw.x + 'px';
+		frame.style.top             = nw.y + 'px';
+		frame.style.width           = SVG_W + 'px';
+		frame.style.height          = SVG_H + 'px';
+		frame.style.transformOrigin = '0 0';
+		frame.style.transform       = `scale(${projW / SVG_W}, ${projH / SVG_H})`;
 	}
 
 	const setChecked = (id, checked) => {
