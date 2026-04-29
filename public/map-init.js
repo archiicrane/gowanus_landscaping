@@ -94,6 +94,7 @@ export async function initMap() {
 		setupMapHandlers(map, resolvedParksData);
 		wireLayerToggles(map);
 		applyPageProfile(mapPage);
+		wireObservableOverlay(map);
 	});
 
 	map.on('error', (e) => {
@@ -150,6 +151,7 @@ export async function initMap() {
 		setChecked('toggle-heat', true);
 		setChecked('toggle-bioswale', true);
 		setChecked('toggle-bounding', true);
+		setChecked('toggle-observable', false);
 
 		if (parksPanel) parksPanel.classList.remove('active');
 		if (existingPanel) existingPanel.classList.add('active');
@@ -189,6 +191,51 @@ function wireLayerToggles(map) {
 		});
 		applyVisibility();
 	}
+}
+
+function wireObservableOverlay(map) {
+	const toggle = document.getElementById('toggle-observable');
+	const overlay = document.getElementById('observable-overlay');
+	if (!toggle || !overlay) return;
+
+	const setChecked = (id, checked) => {
+		const input = document.getElementById(id);
+		if (!input) return;
+		if (input.checked !== checked) {
+			input.checked = checked;
+			input.dispatchEvent(new Event('change'));
+		}
+	};
+
+	const activateOverlay = () => {
+		overlay.classList.add('active');
+		setChecked('toggle-buildings', true);
+		setChecked('toggle-park', true);
+		map.easeTo({
+			center: [-73.9897, 40.6744],
+			zoom: 14.9,
+			pitch: 48,
+			bearing: -21,
+			duration: 1100,
+		});
+	};
+
+	const deactivateOverlay = () => {
+		overlay.classList.remove('active');
+		map.easeTo({
+			pitch: 0,
+			bearing: 0,
+			duration: 650,
+		});
+	};
+
+	toggle.addEventListener('change', () => {
+		if (toggle.checked) activateOverlay();
+		else deactivateOverlay();
+	});
+
+	if (toggle.checked) activateOverlay();
+	else deactivateOverlay();
 }
 
 function initMapIntroSequence(map) {
