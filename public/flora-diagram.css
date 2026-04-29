@@ -15,9 +15,9 @@
 .flora-header {
   margin-bottom: 20px;
   padding: 18px 22px;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 18px;
-  background: var(--glass-panel-bg-strong);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
@@ -45,9 +45,9 @@
 .proposal-sankey {
   margin: 12px 0 28px;
   padding: 18px;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 18px;
-  background: var(--glass-panel-bg-strong);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
@@ -88,9 +88,9 @@
 .proposal-sankey-ribbon-frame {
   width: 100%;
   min-height: 154px;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 12px;
-  background: rgba(255,255,255,0.5);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   padding: 10px 12px 8px;
   margin-bottom: 12px;
 }
@@ -211,9 +211,9 @@
   margin-bottom: 8px;
   padding: 6px;
   width: fit-content;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 14px;
-  background: var(--glass-panel-bg);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
 }
 
@@ -247,9 +247,9 @@
   gap: 4px;
   margin-bottom: 18px;
   padding: 8px 12px;
-  background: var(--glass-panel-bg);
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 12px;
+  background: var(--panel-glass-fill);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
   box-shadow: var(--glass-panel-shadow);
   width: fit-content;
 }
@@ -288,9 +288,9 @@
 .species-board {
   margin: 0 0 20px;
   padding: 14px 16px;
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 18px;
-  background: var(--glass-panel-bg-strong);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
@@ -633,6 +633,11 @@
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
+  .flora-main {
+    padding: 72px 14px 46px;
+    width: min(98vw, 1540px);
+  }
+
   .proposal-sankey {
     padding: 12px;
   }

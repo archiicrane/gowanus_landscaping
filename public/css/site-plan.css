@@ -1,5 +1,5 @@
 .site-plan-page {
-  background: var(--paper-wash);
+  background: transparent;
 }
 
 .site-plan-main {
@@ -16,10 +16,10 @@
 
 .site-plan-brief,
 #site-plan-canvas-container {
-  border: 1px solid var(--glass-panel-border);
-  background: var(--glass-panel-bg-strong);
+  border: 1.5px solid var(--panel-glass-border);
+  background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
-  border-radius: 20px;
+  border-radius: var(--panel-glass-radius);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
 }

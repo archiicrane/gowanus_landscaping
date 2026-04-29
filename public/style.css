@@ -11,6 +11,9 @@
   --glass-panel-bg-strong: rgba(248, 248, 246, 0.78);
   --glass-panel-border: rgba(120, 130, 120, 0.24);
   --glass-panel-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
+  --panel-glass-fill: rgba(248, 248, 246, 0.16);
+  --panel-glass-border: rgba(120, 130, 120, 0.35);
+  --panel-glass-radius: 12px;
   --map-wash-image: url('/assets/mapbox-nyc-wash.png');
   --map-wash-opacity: 0.2;
   --font-sans: "Helvetica Neue", Arial, sans-serif;
@@ -254,9 +257,9 @@ main {
 }
 
 .story-card {
-  background: var(--glass-panel-bg-strong);
-  border: 1px solid var(--glass-panel-border);
-  border-radius: 12px;
+  background: var(--panel-glass-fill);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
   padding: 12px;
   box-shadow: var(--glass-panel-shadow);
   backdrop-filter: blur(11px);
@@ -773,9 +776,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
 
 body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
   pointer-events: auto;
-  border-radius: 12px;
-  border: 1.5px solid rgba(120, 130, 120, 0.35);
-  background: rgba(248, 248, 246, 0.16);
+  border-radius: var(--panel-glass-radius);
+  border: 1.5px solid var(--panel-glass-border);
+  background: var(--panel-glass-fill);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
   box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
@@ -987,9 +990,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 .board-section {
   padding: 16px;
   margin-bottom: 18px;
-  border: 1.5px solid rgba(120, 130, 120, 0.35);
-  border-radius: 12px;
-  background: rgba(248, 248, 246, 0.16);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
+  background: var(--panel-glass-fill);
   box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
@@ -1049,12 +1052,22 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 .metric-card,
 .panel-card {
-  background: rgba(248, 248, 246, 0.16);
-  border: 1.5px solid rgba(120, 130, 120, 0.35);
-  border-radius: 12px;
+  background: var(--panel-glass-fill);
+  border: 1.5px solid var(--panel-glass-border);
+  border-radius: var(--panel-glass-radius);
   box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
   backdrop-filter: blur(11px);
   -webkit-backdrop-filter: blur(11px);
+}
+
+@media (max-width: 1220px) {
+  #map-story-panels {
+    width: min(40vw, 420px);
+  }
+
+  #layer-panel {
+    max-width: calc(100% - 230px);
+  }
 }
 
 .metric-card {
