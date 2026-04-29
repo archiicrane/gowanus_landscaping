@@ -195,91 +195,38 @@ function wireLayerToggles(map) {
 
 function wireObservableOverlay(map) {
 	const toggle = document.getElementById('toggle-observable');
-	const overlay = document.getElementById('observable-overlay');
-	const frame = overlay ? overlay.querySelector('.observable-overlay-frame') : null;
-	if (!toggle || !overlay || !frame) return;
+	const modal  = document.getElementById('observable-modal');
+	if (!toggle || !modal) return;
 
-	// Geographic bounding box matching the Observable SVG viewBox exactly.
-	// SVG viewBox = "985230 184895 2025 912" in EPSG:2263 (NY State Plane feet),
-	// converted to WGS84 using pyproj. This ensures the iframe covers the same
-	// geographic extent as the SVG canvas so all drawn features align precisely.
-	const SITE_NW = [-73.99646691, 40.67667396];
-	const SITE_NE = [-73.98916640, 40.67667350];
-	const SITE_SE = [-73.98916681, 40.67417027];
-	const SITE_SW = [-73.99646705, 40.67417072];
+	const closeBtn = modal.querySelector('.observable-modal-close');
+	const backdrop = modal.querySelector('.observable-modal-backdrop');
 
-	// Observable SVG native rendered size (from viewBox 985230 184895 2025 912,
-	// rendered at width="1350" height="608" as reported by the embed page).
-	// The iframe content does not auto-stretch, so we set the frame to this
-	// native size and use a CSS scale transform to fit the map projection.
-	const SVG_W = 1350;
-	const SVG_H = 608;
-
-	let renderListener = null;
-
-	function positionFrame() {
-		const nw = map.project(SITE_NW);
-		const se = map.project(SITE_SE);
-		const projW = se.x - nw.x;
-		const projH = se.y - nw.y;
-		// Pin the frame at the projected NW corner, at SVG native size,
-		// then scale it so the SVG content maps exactly to the map bounds.
-		frame.style.left            = nw.x + 'px';
-		frame.style.top             = nw.y + 'px';
-		frame.style.width           = SVG_W + 'px';
-		frame.style.height          = SVG_H + 'px';
-		frame.style.transformOrigin = '0 0';
-		frame.style.transform       = `scale(${projW / SVG_W}, ${projH / SVG_H})`;
-	}
-
-	const setChecked = (id, checked) => {
-		const input = document.getElementById(id);
-		if (!input) return;
-		if (input.checked !== checked) {
-			input.checked = checked;
-			input.dispatchEvent(new Event('change'));
-		}
+	const openModal = () => {
+		modal.classList.add('active');
+		modal.removeAttribute('aria-hidden');
+		toggle.checked = true;
 	};
 
-	const activateOverlay = () => {
-		overlay.classList.add('active');
-		setChecked('toggle-buildings', true);
-		setChecked('toggle-park', true);
-		map.easeTo({
-			center: [-73.99300255771038, 40.67590074647642],
-			zoom: 16.2,
-			pitch: 0,
-			bearing: 0,
-			duration: 1100,
-		});
-		// Re-position every render frame so it tracks map moves
-		if (!renderListener) {
-			renderListener = () => positionFrame();
-			map.on('render', renderListener);
-		}
-		positionFrame();
-	};
-
-	const deactivateOverlay = () => {
-		overlay.classList.remove('active');
-		if (renderListener) {
-			map.off('render', renderListener);
-			renderListener = null;
-		}
-		map.easeTo({
-			pitch: 0,
-			bearing: 0,
-			duration: 650,
-		});
+	const closeModal = () => {
+		modal.classList.remove('active');
+		modal.setAttribute('aria-hidden', 'true');
+		toggle.checked = false;
 	};
 
 	toggle.addEventListener('change', () => {
-		if (toggle.checked) activateOverlay();
-		else deactivateOverlay();
+		if (toggle.checked) openModal();
+		else closeModal();
 	});
 
-	if (toggle.checked) activateOverlay();
-	else deactivateOverlay();
+	if (closeBtn) closeBtn.addEventListener('click', closeModal);
+	if (backdrop) backdrop.addEventListener('click', closeModal);
+
+	// Close on Escape key
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+	});
+
+	if (toggle.checked) openModal();
 }
 
 function initMapIntroSequence(map) {
