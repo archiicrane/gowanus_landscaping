@@ -142,7 +142,7 @@ export async function initMap() {
 		setChecked('toggle-distance-rings', false);
 		setChecked('toggle-buildings', false);
 		setChecked('toggle-trees', false);
-		setChecked('toggle-park', false);
+		setChecked('toggle-park', true);
 		setChecked('toggle-contours', true);
 		setChecked('toggle-flood', true);
 		setChecked('toggle-cso', true);
