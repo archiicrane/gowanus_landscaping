@@ -240,11 +240,14 @@ main {
 #map-story-panels {
   position: fixed;
   top: 124px;
+  bottom: 14px;
   right: 16px;
   z-index: 2190;
-  width: min(33vw, 420px);
-  max-height: calc(100vh - 176px);
+  width: clamp(300px, 31vw, 430px);
+  max-height: none;
   pointer-events: none;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .story-panel-group {
@@ -254,6 +257,8 @@ main {
 
 .story-panel-group.active {
   display: grid;
+  grid-template-rows: auto auto minmax(180px, 1fr);
+  min-height: 100%;
 }
 
 .story-card {
@@ -266,6 +271,12 @@ main {
   -webkit-backdrop-filter: blur(11px);
   pointer-events: auto;
   overflow: hidden;
+  min-height: 0;
+}
+
+.story-media-slot {
+  display: flex;
+  flex-direction: column;
 }
 
 .story-eyebrow {
@@ -301,7 +312,8 @@ main {
 .story-media-slot .story-media-frame {
   border: 1px dashed rgba(86, 73, 53, 0.3);
   border-radius: 8px;
-  min-height: 86px;
+  min-height: 0;
+  flex: 1 1 auto;
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -1380,11 +1392,27 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   }
 
   #map-story-panels {
-    width: min(42vw, 360px);
+    width: min(48vw, 360px);
     right: 10px;
     top: 132px;
+    bottom: 10px;
   }
 
+}
+
+@media (max-width: 760px) {
+  #map-story-panels {
+    left: 8px;
+    right: 8px;
+    top: auto;
+    bottom: 8px;
+    width: auto;
+    max-height: 44vh;
+  }
+
+  .story-panel-group.active {
+    grid-template-rows: auto auto minmax(140px, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
