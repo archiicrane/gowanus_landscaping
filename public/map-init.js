@@ -199,11 +199,14 @@ function wireObservableOverlay(map) {
 	const frame = overlay ? overlay.querySelector('.observable-overlay-frame') : null;
 	if (!toggle || !overlay || !frame) return;
 
-	// Geographic bounding box of the site (from park.geojson)
-	const SITE_NW = [-73.99534025518315, 40.676742229734685];
-	const SITE_NE = [-73.99066486023763, 40.676742229734685];
-	const SITE_SE = [-73.99066486023763, 40.67505926321816];
-	const SITE_SW = [-73.99534025518315, 40.67505926321816];
+	// Geographic bounding box matching the Observable SVG viewBox exactly.
+	// SVG viewBox = "985230 184895 2025 912" in EPSG:2263 (NY State Plane feet),
+	// converted to WGS84 using pyproj. This ensures the iframe covers the same
+	// geographic extent as the SVG canvas so all drawn features align precisely.
+	const SITE_NW = [-73.99646691, 40.67667396];
+	const SITE_NE = [-73.98916640, 40.67667350];
+	const SITE_SE = [-73.98916681, 40.67417027];
+	const SITE_SW = [-73.99646705, 40.67417072];
 
 	let renderListener = null;
 
