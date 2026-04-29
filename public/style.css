@@ -166,14 +166,14 @@ main {
 
 .observable-overlay-frame {
   position: absolute;
-  left: calc(50% - 10vw);
-  top: 56%;
-  width: clamp(420px, 44vw, 700px);
-  height: clamp(900px, 140vh, 1500px);
-  transform: translate(-50%, -50%) rotate(-23deg) scale(0.54);
+  left: 49%;
+  top: 60%;
+  width: clamp(260px, 22vw, 390px);
+  height: clamp(520px, 90vh, 880px);
+  transform: translate(-50%, -50%) rotate(-18deg) scale(0.62);
   transform-origin: center;
   mix-blend-mode: multiply;
-  opacity: 0.78;
+  opacity: 0.58;
 }
 
 .observable-overlay-frame iframe {
@@ -1430,10 +1430,10 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
   .observable-overlay-frame {
     left: 50%;
-    top: 52%;
-    width: clamp(360px, 72vw, 560px);
-    height: clamp(760px, 120vh, 1180px);
-    transform: translate(-50%, -50%) rotate(-20deg) scale(0.5);
+    top: 56%;
+    width: clamp(260px, 50vw, 420px);
+    height: clamp(520px, 84vh, 760px);
+    transform: translate(-50%, -50%) rotate(-16deg) scale(0.56);
   }
 
   #layer-panel {
@@ -1483,10 +1483,10 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   }
 
   .observable-overlay-frame {
-    top: 50%;
-    width: clamp(300px, 88vw, 460px);
-    height: clamp(620px, 104vh, 920px);
-    transform: translate(-50%, -50%) rotate(-18deg) scale(0.48);
+    top: 54%;
+    width: clamp(240px, 80vw, 360px);
+    height: clamp(460px, 76vh, 640px);
+    transform: translate(-50%, -50%) rotate(-14deg) scale(0.56);
   }
 
   .primary-diagram-grid .chart-wrap,
