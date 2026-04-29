@@ -196,7 +196,33 @@ function wireLayerToggles(map) {
 function wireObservableOverlay(map) {
 	const toggle = document.getElementById('toggle-observable');
 	const overlay = document.getElementById('observable-overlay');
-	if (!toggle || !overlay) return;
+	const frame = overlay ? overlay.querySelector('.observable-overlay-frame') : null;
+	if (!toggle || !overlay || !frame) return;
+
+	// Geographic bounding box of the site (from park.geojson)
+	const SITE_NW = [-73.99534025518315, 40.676742229734685];
+	const SITE_NE = [-73.99066486023763, 40.676742229734685];
+	const SITE_SE = [-73.99066486023763, 40.67505926321816];
+	const SITE_SW = [-73.99534025518315, 40.67505926321816];
+
+	let renderListener = null;
+
+	function positionFrame() {
+		const nw = map.project(SITE_NW);
+		const ne = map.project(SITE_NE);
+		const se = map.project(SITE_SE);
+		const sw = map.project(SITE_SW);
+		const xs = [nw.x, ne.x, se.x, sw.x];
+		const ys = [nw.y, ne.y, se.y, sw.y];
+		const minX = Math.min(...xs);
+		const maxX = Math.max(...xs);
+		const minY = Math.min(...ys);
+		const maxY = Math.max(...ys);
+		frame.style.left   = minX + 'px';
+		frame.style.top    = minY + 'px';
+		frame.style.width  = (maxX - minX) + 'px';
+		frame.style.height = (maxY - minY) + 'px';
+	}
 
 	const setChecked = (id, checked) => {
 		const input = document.getElementById(id);
@@ -212,16 +238,26 @@ function wireObservableOverlay(map) {
 		setChecked('toggle-buildings', true);
 		setChecked('toggle-park', true);
 		map.easeTo({
-			center: [-73.9897, 40.6744],
-			zoom: 14.9,
-			pitch: 48,
-			bearing: -21,
+			center: [-73.99300255771038, 40.67590074647642],
+			zoom: 16.2,
+			pitch: 0,
+			bearing: 0,
 			duration: 1100,
 		});
+		// Re-position every render frame so it tracks map moves
+		if (!renderListener) {
+			renderListener = () => positionFrame();
+			map.on('render', renderListener);
+		}
+		positionFrame();
 	};
 
 	const deactivateOverlay = () => {
 		overlay.classList.remove('active');
+		if (renderListener) {
+			map.off('render', renderListener);
+			renderListener = null;
+		}
 		map.easeTo({
 			pitch: 0,
 			bearing: 0,

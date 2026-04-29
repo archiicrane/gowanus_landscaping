@@ -148,10 +148,10 @@ main {
 
 #observable-overlay {
   position: fixed;
-  top: 126px;
+  top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 0;
+  height: 0;
   z-index: 2150;
   pointer-events: none;
   opacity: 0;
@@ -166,14 +166,8 @@ main {
 
 .observable-overlay-frame {
   position: absolute;
-  left: 49%;
-  top: 60%;
-  width: clamp(260px, 22vw, 390px);
-  height: clamp(520px, 90vh, 880px);
-  transform: translate(-50%, -50%) rotate(-18deg) scale(0.62);
-  transform-origin: center;
   mix-blend-mode: multiply;
-  opacity: 0.75;
+  opacity: 0.82;
   overflow: hidden;
 }
 
