@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
 /* style.css - Dark architectural theme for Rewilding Gowanus */
 
 /* ─── Reset & base ─────────────────────────────────────────────────────────── */
@@ -10,7 +12,7 @@
 	--text:      #d4d9dc;
 	--text-dim:  #7a8490;
 	--accent:    #7aab6e;
-	--font:      'Helvetica Neue', Arial, sans-serif;
+	--font:      'Barlow', sans-serif;
 	--nav-h:     48px;
 }
 

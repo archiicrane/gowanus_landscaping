@@ -9,7 +9,7 @@
 }
 .planting-nav .subtab {
   color: #7a7a7a;
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -47,7 +47,7 @@
 }
 
 .band-title {
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
   text-transform: uppercase;

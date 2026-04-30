@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Barlow+Condensed:wght@400;600;700&display=swap');
+
 :root {
   --paper: #f2eee7;
   --paper-soft: rgba(246, 241, 233, 0.92);
@@ -16,9 +18,9 @@
   --panel-glass-radius: 12px;
   --map-wash-image: url('/assets/mapbox-nyc-wash.png');
   --map-wash-opacity: 0.2;
-  --font-sans: "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "Georgia", "Times New Roman", serif;
-  --font-display: "Helvetica Neue", Arial, sans-serif;
+  --font-sans: 'Barlow', sans-serif;
+  --font-serif: 'Barlow', sans-serif;
+  --font-display: 'Barlow Condensed', sans-serif;
 }
 
 * {
