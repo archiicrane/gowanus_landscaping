@@ -249,14 +249,49 @@ function addArchitecturalLayers(map, datasets) {
     id: 'buildings-fill',
     type: 'fill',
     source: 'buildings',
-    paint: { 'fill-color': '#cfcac2', 'fill-opacity': 0.72 },
+    paint: { 'fill-color': '#c2b09a', 'fill-opacity': 0.78 },
   });
   map.addLayer({
     id: 'buildings-outline',
     type: 'line',
     source: 'buildings',
-    paint: { 'line-color': '#a09a92', 'line-width': 0.75, 'line-opacity': 0.85 },
+    paint: { 'line-color': '#9a8878', 'line-width': 0.75, 'line-opacity': 0.90 },
   });
+
+  // ── Study area mask: world polygon with bbox hole ───────────────────────
+  if (window.turf && datasets.buildings && datasets.bioswales) {
+    const allFeatures = [
+      ...(datasets.buildings.features || []),
+      ...(datasets.bioswales.features || []),
+    ];
+    if (allFeatures.length) {
+      const [w, s, e, n] = window.turf.bbox({ type: 'FeatureCollection', features: allFeatures });
+      const pad = 0.004;
+      const studyRing = [
+        [w - pad, s - pad], [w - pad, n + pad],
+        [e + pad, n + pad], [e + pad, s - pad],
+        [w - pad, s - pad],
+      ];
+      const worldRing = [[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]];
+      map.addSource('study-mask', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [{
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'Polygon', coordinates: [worldRing, studyRing] },
+          }],
+        },
+      });
+      map.addLayer({
+        id: 'study-mask-fill',
+        type: 'fill',
+        source: 'study-mask',
+        paint: { 'fill-color': '#f5f3ee', 'fill-opacity': 0.52 },
+      });
+    }
+  }
 
   // ── Trees (local GeoJSON) ───────────────────────────────────────────────
   map.addSource('trees', { type: 'geojson', data: datasets.trees });
