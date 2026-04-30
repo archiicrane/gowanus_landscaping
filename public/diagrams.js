@@ -3,10 +3,6 @@
 //          flood-vulnerability.geojson, Citywide_Outfalls_20260416.geojson,
 //          gowanus_existing/proposed_flora_fauna.csv, planting-bands.geojson
 
-// Alias UMD globals for ES module scope (turf loaded via <script> tag as window.turf)
-/* global turf, Chart */
-const turf = window.turf;
-
 async function loadTreeData() {
   const response = await fetch('/data/gowanus_trees_clean.json');
   if (!response.ok) {
@@ -1467,8 +1463,29 @@ async function buildGowanusTreeDashboard() {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Canopy Performance Dashboard ─────────────────────────────────────────
-// Uses Turf.js (loaded as global via <script src="/vendor/turf.min.js">)
+// Spatial calculations use the existing polygonAreaM2 / inGowanusBox helpers
 // ═══════════════════════════════════════════════════════════════════════════
+
+// Point-in-axis-aligned-bbox test — sufficient for Gowanus building centroids
+function inTreeBbox(lon, lat, bbox) {
+  return lon >= bbox.minLon && lon <= bbox.maxLon && lat >= bbox.minLat && lat <= bbox.maxLat;
+}
+
+// Derive a bounding box from an array of {lon, lat} objects
+function treeBbox(trees) {
+  const lons = trees.map(t => t.lon);
+  const lats = trees.map(t => t.lat);
+  return { minLon: Math.min(...lons), maxLon: Math.max(...lons),
+           minLat: Math.min(...lats), maxLat: Math.max(...lats) };
+}
+
+// Bounding-box area in m² using the same formula as getBoundingBoxAreaKm2
+function bboxAreaM2(bbox) {
+  const meanLatRad = ((bbox.minLat + bbox.maxLat) / 2) * (Math.PI / 180);
+  const latM  = (bbox.maxLat - bbox.minLat) * 110540;
+  const lonM  = (bbox.maxLon - bbox.minLon) * 111320 * Math.cos(meanLatRad);
+  return Math.abs(latM * lonM);
+}
 
 const CANOPY_SCENARIOS = [
   { label: 'Existing Street Trees', pct: 4.1,  note: '1,017 mapped corridor trees' },
@@ -1490,10 +1507,9 @@ async function buildCanopyDashboard() {
       t => safeNumber(t.lat) !== null && safeNumber(t.lon) !== null
     );
 
-    // Study area: convex hull of all mapped tree points (more accurate than bbox)
-    const treeFC = turf.featureCollection(validTrees.map(t => turf.point([t.lon, t.lat])));
-    const studyHull = turf.convex(treeFC);
-    const studyAreaM2 = turf.area(studyHull);
+    // Study area: bounding box of all mapped tree points
+    const bbox      = treeBbox(validTrees);
+    const studyAreaM2 = bboxAreaM2(bbox);
     const studyAreaHa = studyAreaM2 / 10000;
 
     // Canopy constants — 4.1% is the established NYC figure for Gowanus street trees;
@@ -1505,20 +1521,23 @@ async function buildCanopyDashboard() {
     const gapPct = TARGET_PCT - EXISTING_PCT;
     const gapHa  = (targetCanopyM2 - existingCanopyM2) / 10000;
 
-    // Building footprints inside study hull
-    // Use centroid-in-polygon test for performance (booleanPointInPolygon is O(n) per building)
+    // Building footprints: centroid inside tree bounding box
     const buildingsInStudy = buildingGeo.features.filter(b => {
       try {
         const ring = b.geometry.coordinates[0];
         if (!ring || ring.length < 3) return false;
         const cx = ring.reduce((s, c) => s + c[0], 0) / ring.length;
         const cy = ring.reduce((s, c) => s + c[1], 0) / ring.length;
-        return turf.booleanPointInPolygon(turf.point([cx, cy]), studyHull);
+        return inTreeBbox(cx, cy, bbox);
       } catch { return false; }
     });
 
+    // Sum building footprint areas using existing polygonAreaM2 helper
     const buildingFootprintM2 = buildingsInStudy.reduce((s, b) => {
-      try { return s + turf.area(b); } catch { return s; }
+      try {
+        const ring = b.geometry.coordinates[0];
+        return ring ? s + polygonAreaM2(ring) : s;
+      } catch { return s; }
     }, 0);
 
     // Industrial buildings (OSM tags: industrial / warehouse) — contamination proxy
@@ -1526,33 +1545,36 @@ async function buildCanopyDashboard() {
       ['industrial', 'warehouse'].includes((b.properties || {}).building)
     );
     const industrialM2 = industrialBuildings.reduce((s, b) => {
-      try { return s + turf.area(b); } catch { return s; }
+      try {
+        const ring = b.geometry.coordinates[0];
+        return ring ? s + polygonAreaM2(ring) : s;
+      } catch { return s; }
     }, 0);
 
-    // CSO outfalls inside study hull — each buffered 50 m as contamination zone proxy
+    // CSO outfalls inside study bbox — each buffered 50 m as contamination zone proxy
     const CSO_RADIUS_M = 50;
     const csoFeats = outfallGeo.features.filter(f => {
       try {
-        return (f.properties || {}).outfall_ty === 'CSO' &&
-          turf.booleanPointInPolygon(f, studyHull);
+        const [lon, lat] = f.geometry.coordinates;
+        return (f.properties || {}).outfall_ty === 'CSO' && inTreeBbox(lon, lat, bbox);
       } catch { return false; }
     });
     const csoZoneM2 = csoFeats.length * Math.PI * CSO_RADIUS_M * CSO_RADIUS_M;
 
     // Open land & suitability zones
-    const openLandM2        = Math.max(0, studyAreaM2 - buildingFootprintM2);
-    const remediationM2     = Math.min(industrialM2, studyAreaM2 * 0.15);
-    const cappedM2          = Math.min(csoZoneM2, studyAreaM2 * 0.08);
-    const suitableM2        = Math.max(0, openLandM2 - remediationM2 - cappedM2);
-    const bioswaleOppM2     = suitableM2;
+    const openLandM2    = Math.max(0, studyAreaM2 - buildingFootprintM2);
+    const remediationM2 = Math.min(industrialM2, studyAreaM2 * 0.15);
+    const cappedM2      = Math.min(csoZoneM2, studyAreaM2 * 0.08);
+    const suitableM2    = Math.max(0, openLandM2 - remediationM2 - cappedM2);
+    const bioswaleOppM2 = suitableM2;
 
     // ── Metrics
-    renderMetric('canopyGoalExistingMetric',  `${EXISTING_PCT}%`, 'corridor street tree canopy');
-    renderMetric('canopyGoalTargetMetric',    `${TARGET_PCT}%`,   'NYC Urban Forest Agenda');
-    renderMetric('canopyGoalGapMetric',       `${gapPct.toFixed(0)}%`, `${formatNumber(gapHa, 0)} ha to plant`);
-    renderMetric('canopyGoalStudyMetric',     `${formatNumber(studyAreaHa, 0)} ha`, 'study corridor');
-    renderMetric('canopyGoalBioswaleMetric',  `${formatNumber(bioswaleOppM2 / 10000, 0)} ha`, 'open non-industrial land');
-    renderMetric('canopyGoalIndustrialMetric',`${industrialBuildings.length}`, 'industrial parcels in corridor');
+    renderMetric('canopyGoalExistingMetric',   `${EXISTING_PCT}%`, 'corridor street tree canopy');
+    renderMetric('canopyGoalTargetMetric',     `${TARGET_PCT}%`,   'NYC Urban Forest Agenda');
+    renderMetric('canopyGoalGapMetric',        `${gapPct.toFixed(0)}%`, `${formatNumber(gapHa, 0)} ha to plant`);
+    renderMetric('canopyGoalStudyMetric',      `${formatNumber(studyAreaHa, 0)} ha`, 'study corridor');
+    renderMetric('canopyGoalBioswaleMetric',   `${formatNumber(bioswaleOppM2 / 10000, 0)} ha`, 'open non-industrial land');
+    renderMetric('canopyGoalIndustrialMetric', `${industrialBuildings.length}`, 'industrial parcels in corridor');
 
     // ── Charts
     makeCanopyGapChart(EXISTING_PCT, TARGET_PCT);
