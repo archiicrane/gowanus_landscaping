@@ -72,20 +72,18 @@
       width: 160px;
       height: 160px;
       border-radius: 50%;
-      border: 2px dashed var(--habitat-stroke, #8c8479);
+      border: 2px dashed #1a1a1a;
       background: var(--habitat-fill, #e8e3d8);
       position: relative;
       display: grid;
       place-items: center;
-      overflow: visible;
+      overflow: hidden;
     }
     .flora-orb img {
-      width: var(--img-size, 122%);
-      height: var(--img-size, 122%);
+      width: 82%;
+      height: 82%;
       object-fit: contain;
       object-position: center center;
-      transform: translate(var(--img-shift-x, 0), var(--img-shift-y, 0)) scale(var(--img-zoom, 1));
-      transform-origin: center center;
       filter: drop-shadow(0 3px 5px rgba(35, 30, 24, 0.22));
       pointer-events: none;
     }
@@ -278,10 +276,7 @@
       '/assets/fauna/racoon.svg'
     ];
 
-    const ALL_LIBRARY_SVGS = Array.from(new Set([
-      ...FLORA_FAUNA_SVGS,
-      ...EXISTING_PROJECT_SVGS
-    ])).sort((a, b) => a.localeCompare(b));
+    const ALL_LIBRARY_SVGS = FLORA_FAUNA_SVGS.slice().sort((a, b) => a.localeCompare(b));
 
     const faunaTerms = [
       'ant', 'bat', 'bee', 'bird', 'butterfly', 'cormorant', 'dragonfl', 'egret', 'goose', 'gull', 'hawk', 'heron', 'honeybee', 'mallard', 'monarch', 'mosquito', 'mouse', 'mouse', 'opossum', 'pigeon', 'raccoon', 'racoon', 'rat', 'sparrow', 'squirrel', 'starling', 'falcon', 'dove'
