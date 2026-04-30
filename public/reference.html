@@ -56,11 +56,38 @@
 
     .library-head { display: flex; justify-content: space-between; gap: 12px; align-items: end; margin-top: 6px; }
     .library-count { font-size: 12px; color: var(--ink-muted); }
-    .flora-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
-    .flora-card { border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.65); padding: 8px; display: grid; gap: 7px; }
-    .flora-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f6f1e9; border-radius: 8px; }
-    .flora-name { font-size: 11px; color: #4f4740; line-height: 1.35; }
-    .flora-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #7f7567; }
+    .flora-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+    .flora-card {
+      background: rgba(255,255,255,0.32);
+      border: 1px solid rgba(47,42,36,0.09);
+      border-radius: 14px;
+      padding: 10px 8px 12px;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      min-height: 220px;
+    }
+    .flora-orb {
+      width: clamp(120px, 11vw, 160px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      border: 2px dashed var(--habitat-stroke, #8c8479);
+      background: var(--habitat-fill, #e8e3d8);
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+    }
+    .flora-orb img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      transform: translateY(4%);
+      filter: drop-shadow(0 3px 5px rgba(35, 30, 24, 0.22));
+      pointer-events: none;
+    }
+    .flora-name { font-size: 11px; color: #4f4740; line-height: 1.35; text-align: center; min-height: 28px; }
+    .flora-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #7f7567; text-align: center; }
 
     @media (max-width: 1300px) { .flora-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
     @media (max-width: 1100px) {
@@ -266,15 +293,46 @@
       return faunaTerms.some(term => text.includes(term));
     }
 
+    function getHabitatMeta(label, kind) {
+      const text = label.toLowerCase();
+
+      const wetTerms = ['cattail', 'sedge', 'phragmites', 'smartweed', 'mallard', 'heron', 'egret', 'cormorant', 'goose', 'gull', 'dragonfl'];
+      const pollinatorTerms = ['aster', 'coneflower', 'milkweed', 'goldenrod', 'switchgrass', 'bee', 'honeybee', 'butterfly', 'monarch'];
+      const woodlandTerms = ['oak', 'maple', 'birch', 'locust', 'serviceberry', 'mulberry', 'sumac', 'squirrel', 'raccoon', 'racoon', 'opossum', 'bat', 'hawk', 'falcon', 'dove', 'warbler', 'mockingbird'];
+      const urbanEdgeTerms = ['knotweed', 'lambsquarters', 'mugwort', 'tree of heaven', 'norway rat', 'house mouse', 'house sparrow', 'pigeon', 'starling', 'mosquito', 'lanternfly', 'callery pear', 'ivy', 'creeper', 'mosses', 'lichen'];
+
+      if (wetTerms.some(term => text.includes(term))) {
+        return { name: 'Wet Edge', fill: '#dfece9', stroke: '#4f8a80' };
+      }
+      if (pollinatorTerms.some(term => text.includes(term))) {
+        return { name: 'Pollinator Field', fill: '#f2ecd8', stroke: '#b59042' };
+      }
+      if (woodlandTerms.some(term => text.includes(term))) {
+        return { name: 'Woodland Core', fill: '#e2ebde', stroke: '#5f8762' };
+      }
+      if (urbanEdgeTerms.some(term => text.includes(term))) {
+        return { name: 'Urban Edge', fill: '#ece6dc', stroke: '#8b7a64' };
+      }
+
+      return kind === 'Fauna'
+        ? { name: 'General Habitat', fill: '#e8ece2', stroke: '#6f8270' }
+        : { name: 'General Flora', fill: '#ece7dc', stroke: '#8b8070' };
+    }
+
     ALL_LIBRARY_SVGS.forEach(path => {
       const label = labelFromPath(path);
       const kind = isFauna(label) ? 'Fauna' : 'Flora';
+      const habitat = getHabitatMeta(label, kind);
       const card = document.createElement('article');
       card.className = 'flora-card';
+      card.style.setProperty('--habitat-fill', habitat.fill);
+      card.style.setProperty('--habitat-stroke', habitat.stroke);
       card.innerHTML = `
-        <img src="${path}" alt="${label} SVG" loading="lazy" />
+        <div class="flora-orb">
+          <img src="${path}" alt="${label} SVG" loading="lazy" />
+        </div>
         <p class="flora-name">${label}</p>
-        <p class="flora-kind">${kind}</p>
+        <p class="flora-kind">${kind} • ${habitat.name}</p>
       `;
       floraGrid.appendChild(card);
     });
