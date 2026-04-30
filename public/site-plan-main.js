@@ -176,29 +176,70 @@ function addArchitecturalLayers(map, datasets) {
     paint: { 'line-color': '#ccc9c2', 'line-width': 0.5, 'line-opacity': 0.7 },
   });
 
-  // ── Roads (local GeoJSON) — surface + casing ────────────────────────────
-  map.addSource('roads', { type: 'geojson', data: datasets.roads });
-  map.addLayer({
-    id: 'road-fill',
-    type: 'line',
-    source: 'roads',
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: {
-      'line-color': '#d4d0c9',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3.5, 16, 9],
-      'line-opacity': 1,
-    },
-  });
+  // ── Roads: Mapbox Streets v8 vector tiles ───────────────────────────────
+  // Casing (darker outline rendered first, underneath fill)
   map.addLayer({
     id: 'road-casing',
     type: 'line',
-    source: 'roads',
-    layout: { 'line-cap': 'butt', 'line-join': 'round' },
+    source: 'mapbox-streets',
+    'source-layer': 'road',
+    filter: ['in', 'class',
+      'motorway', 'trunk', 'primary', 'secondary',
+      'tertiary', 'street', 'street_limited', 'residential',
+      'service', 'track', 'path',
+    ],
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': '#b8b5af',
-      'line-gap-width': ['interpolate', ['linear'], ['zoom'], 13, 3.5, 16, 9],
-      'line-width': 0.7,
-      'line-opacity': 0.55,
+      'line-width': [
+        'interpolate', ['linear'], ['zoom'],
+        13, ['match', ['get', 'class'],
+          ['motorway', 'trunk', 'primary'], 7,
+          ['secondary', 'tertiary'], 5.5,
+          4,
+        ],
+        16, ['match', ['get', 'class'],
+          ['motorway', 'trunk', 'primary'], 16,
+          ['secondary', 'tertiary'], 13,
+          10,
+        ],
+      ],
+      'line-opacity': 0.7,
+    },
+  });
+  // Road surface fill on top of casing
+  map.addLayer({
+    id: 'road-fill',
+    type: 'line',
+    source: 'mapbox-streets',
+    'source-layer': 'road',
+    filter: ['in', 'class',
+      'motorway', 'trunk', 'primary', 'secondary',
+      'tertiary', 'street', 'street_limited', 'residential',
+      'service', 'track', 'path',
+    ],
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': [
+        'match', ['get', 'class'],
+        ['motorway', 'trunk', 'primary'], '#d0cdc6',
+        ['secondary', 'tertiary'], '#d4d0c9',
+        '#dbd8d2',
+      ],
+      'line-width': [
+        'interpolate', ['linear'], ['zoom'],
+        13, ['match', ['get', 'class'],
+          ['motorway', 'trunk', 'primary'], 5,
+          ['secondary', 'tertiary'], 3.5,
+          2.5,
+        ],
+        16, ['match', ['get', 'class'],
+          ['motorway', 'trunk', 'primary'], 13,
+          ['secondary', 'tertiary'], 10,
+          7,
+        ],
+      ],
+      'line-opacity': 1,
     },
   });
 
