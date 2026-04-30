@@ -21,7 +21,7 @@ import { setupMapHandlers } from './js/handlers.js';
 
 export async function initMap() {
 	const mapPage = document.body?.dataset.mapPage || 'analysis';
-	const isPreceedencePage = mapPage === 'preceedence' || mapPage === 'map';
+	const isPrecedentsPage = mapPage === 'precedents' || mapPage === 'map';
 	const mapDiv = document.getElementById('map');
 	if (!mapDiv) {
 		console.error('[MAP INIT] #map container not found');
@@ -47,16 +47,16 @@ export async function initMap() {
 	const contextBounds = [[-74.040, 40.642], [-73.936, 40.704]];
 	const studyBounds = getStudyBounds(STUDY_RING);
 	const analysisBounds = getExpandedBounds(studyBounds, 0.2);
-	const initialBounds = isPreceedencePage ? contextBounds : analysisBounds;
+	const initialBounds = isPrecedentsPage ? contextBounds : analysisBounds;
 
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
 		bounds: initialBounds,
-		maxBounds: isPreceedencePage ? undefined : analysisBounds,
+		maxBounds: isPrecedentsPage ? undefined : analysisBounds,
 		fitBoundsOptions: {
 			padding: initialPadding,
-			maxZoom: isPreceedencePage ? 13.2 : 15,
+			maxZoom: isPrecedentsPage ? 13.2 : 15,
 		},
 		pitch: 0,
 		bearing: 0,
@@ -77,8 +77,8 @@ export async function initMap() {
 			}
 		}
 
-		if (isPreceedencePage) {
-			// Preceedence page: surrounding parks context only.
+		if (isPrecedentsPage) {
+			// Precedents page: surrounding parks context only.
 			resolvedParksData = await addNearbyParksLayer(map);
 			await addDistanceRingsLayer(map, resolvedParksData);
 		} else {
@@ -121,7 +121,7 @@ export async function initMap() {
 			}
 		};
 
-		if (page === 'preceedence' || page === 'map') {
+		if (page === 'precedents' || page === 'map') {
 			// Context map view: parks + distance only.
 			setChecked('toggle-nearby-parks', true);
 			setChecked('toggle-distance-rings', true);
