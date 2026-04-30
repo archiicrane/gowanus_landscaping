@@ -1870,5 +1870,16 @@ document.addEventListener('DOMContentLoaded', () => {
   buildGowanusTreeDashboard();
   buildUrbanAnalysis();
   buildCanopyDashboard();
+
+  // Resize all Chart.js instances when the window resizes
+  let _diagResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_diagResizeTimer);
+    _diagResizeTimer = setTimeout(() => {
+      Object.values(Chart.instances).forEach(chart => {
+        try { chart.resize(); } catch (_) {}
+      });
+    }, 100);
+  });
 });
 
