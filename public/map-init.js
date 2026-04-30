@@ -45,14 +45,18 @@ export async function initMap() {
 	const initialPadding = getInitialFitPadding();
 	// Wider initial bounds shows the full analysis context on first load
 	const contextBounds = [[-74.040, 40.642], [-73.936, 40.704]];
+	const studyBounds = getStudyBounds(STUDY_RING);
+	const analysisBounds = getExpandedBounds(studyBounds, 0.2);
+	const initialBounds = isPreceedencePage ? contextBounds : analysisBounds;
 
 	const map = new mapboxgl.Map({
 		container: 'map',
 		style: 'mapbox://styles/mapbox/light-v11',
-		bounds: contextBounds,
+		bounds: initialBounds,
+		maxBounds: isPreceedencePage ? undefined : analysisBounds,
 		fitBoundsOptions: {
 			padding: initialPadding,
-			maxZoom: 13.2,
+			maxZoom: isPreceedencePage ? 13.2 : 15,
 		},
 		pitch: 0,
 		bearing: 0,
@@ -544,6 +548,19 @@ function getStudyBounds(ring) {
 	return [
 		[minLng, minLat],
 		[maxLng, maxLat],
+	];
+}
+
+function getExpandedBounds(bounds, marginRatio = 0.2) {
+	const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+	const lngSpan = maxLng - minLng;
+	const latSpan = maxLat - minLat;
+	const lngPad = lngSpan * marginRatio;
+	const latPad = latSpan * marginRatio;
+
+	return [
+		[minLng - lngPad, minLat - latPad],
+		[maxLng + lngPad, maxLat + latPad],
 	];
 }
 
