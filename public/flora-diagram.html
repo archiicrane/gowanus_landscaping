@@ -17,7 +17,7 @@
     <div class="brand">Rewilding Gowanus</div>
     <div class="nav-links">
       <a href="index.html" class="nav-btn">References</a>
-      <a href="precedents.html" class="nav-btn">Precedents</a>
+      <a href="preceedence.html" class="nav-btn">Preceedence</a>
       <a href="site-analysis.html" class="nav-btn">Site Analysis</a>
       <a href="site-plan.html" class="nav-btn">Site Plan</a>
       <a href="drawings.html" class="nav-btn">Drawings</a>
@@ -33,7 +33,7 @@
       <p class="eyebrow">Ecological Inventory</p>
       <h1>Flora &amp; Fauna Diagram</h1>
       <p class="flora-intro">
-        Three ecological bands &mdash; Wet Edge, Woodland Core, and Pollinator Edge &mdash; organized by
+        Three ecological bands - Wet Edge, Woodland Core, and Pollinator Edge - organized by
         canopy layer, understory, ground plane, and associated fauna.
       </p>
     </header>
@@ -43,12 +43,12 @@
         <p class="eyebrow">Proposal Logic</p>
         <h2 id="proposalSankeyTitle">Ecological Relationship System</h2>
         <p class="proposal-sankey-intro">
-          Trace species and process relationships across ecological bands. Hover to preview; click to lock selection.
+          Use the ribbon to trace connected relationships directly into the band chart below.
         </p>
       </div>
       <div class="proposal-sankey-ribbon-frame">
         <div class="sankey-toolbar">
-          <p class="sankey-toolbar-note">Hover to highlight · Click to lock</p>
+          <p class="sankey-toolbar-note">Hover to preview relationships. Click to lock selection.</p>
           <button id="sankeyResetBtn" class="sankey-reset-btn" type="button">Reset Highlight</button>
         </div>
         <svg id="proposalSankeyRibbonSvg" role="img" aria-label="Overview relationship ribbon Sankey"></svg>
@@ -56,7 +56,7 @@
     </section>
 
     <div class="mode-tabs" role="tablist" aria-label="Diagram mode">
-      <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Existing Baseline</button>
+      <button class="mode-tab active" data-mode="baseline" role="tab" aria-selected="true">Baseline Existing</button>
       <button class="mode-tab" data-mode="proposed" role="tab" aria-selected="false">Proposed Ecology</button>
       <button class="mode-tab" data-mode="growth" role="tab" aria-selected="false">Growth Over Time</button>
     </div>
@@ -72,7 +72,7 @@
     <section class="species-board" aria-labelledby="speciesBoardTitle">
       <div class="species-board-head">
         <h2 id="speciesBoardTitle">Proposed Tree Palette</h2>
-        <p>Proposed canopy species drawn as architectural silhouettes for use in legend and diagram composition.</p>
+        <p>SVG silhouettes from the proposed planting set, aligned as architectural legend assets.</p>
       </div>
       <div class="species-board-grid" id="species-board-grid"></div>
     </section>

@@ -413,7 +413,7 @@ function calculateParkContribution() {
     id: 'park',
     label: 'Park Intervention',
     available: true,
-    scopeNote: 'Calculated from park band areas and planting density assumptions.',
+    scopeNote: 'Based on park band areas and planting density assumptions.',
     areasSqFt: {
       site: areasSqFt.site,
       intervention: areasSqFt.forest + areasSqFt.wet + areasSqFt.pollinator,
@@ -443,9 +443,9 @@ function calculateParkContribution() {
     },
     conceptualBenefitByBand: conceptualBenefitWeights,
     growthSeries: [
-      { label: 'Years 0\u20132', factor: 0.35 },
-      { label: 'Years 3\u20135', factor: 0.7 },
-      { label: 'Years 5\u201310', factor: 1.0 }
+      { label: '0-2 yrs', factor: 0.35 },
+      { label: '3-5 yrs', factor: 0.7 },
+      { label: '5-10 yrs', factor: 1.0 }
     ]
   };
 }
@@ -455,7 +455,7 @@ function createUnavailableContributor(id, label) {
     id,
     label,
     available: false,
-    scopeNote: `${label} planting quantities are pending input.`,
+    scopeNote: `${label} quantities are not entered yet.`,
     areasSqFt: {
       site: PROJECT_INPUTS.areasSqFt.site,
       intervention: null,
@@ -469,9 +469,9 @@ function createUnavailableContributor(id, label) {
     futureCanopySqFt: { rawByBand: { forest: null, wet: null, pollinator: null }, rawTotal: null, displayTotal: null },
     conceptualBenefitByBand: null,
     growthSeries: [
-      { label: 'Years 0\u20132', factor: 0 },
-      { label: 'Years 3\u20135', factor: 0 },
-      { label: 'Years 5\u201310', factor: 0 }
+      { label: '0-2 yrs', factor: 0 },
+      { label: '3-5 yrs', factor: 0 },
+      { label: '5-10 yrs', factor: 0 }
     ]
   };
 }
@@ -490,7 +490,7 @@ function buildProjectScopes() {
     available: active.length > 0,
     isPartial: active.length < contributors.length,
     scopeNote: active.length < contributors.length
-      ? 'Partial total \u2014 Park intervention only. Bioswale and Street Tree contributions pending.'
+      ? 'Partial total: Park only. Bioswales and Street Trees pending.'
       : 'Complete total across all contributors.',
     areasSqFt: {
       site: PROJECT_INPUTS.areasSqFt.site,
@@ -525,9 +525,9 @@ function buildProjectScopes() {
     },
     conceptualBenefitByBand: active.length ? PROJECT_INPUTS.conceptualBenefitWeights : null,
     growthSeries: [
-      { label: 'Years 0\u20132', factor: 0.35 },
-      { label: 'Years 3\u20135', factor: 0.7 },
-      { label: 'Years 5\u201310', factor: 1.0 }
+      { label: '0-2 yrs', factor: 0.35 },
+      { label: '3-5 yrs', factor: 0.7 },
+      { label: '5-10 yrs', factor: 1.0 }
     ]
   };
 
@@ -560,7 +560,7 @@ function makeBenefitBandChart(scope) {
         labels: ['Canopy', 'Bird Habitat', 'Cooling', 'Stormwater', 'Pollinator', 'Amphibian/Insect'],
         datasets: [
           {
-            label: 'Awaiting input',
+            label: 'Pending data',
             data: [0, 0, 0, 0, 0, 0],
             backgroundColor: CHART_PALETTE.neutralFill,
             borderColor: CHART_PALETTE.neutralStroke,
@@ -576,7 +576,7 @@ function makeBenefitBandChart(scope) {
           tooltip: {
             ...baseChartOptions().plugins.tooltip,
             callbacks: {
-              label: () => 'Bioswale and street-tree data pending'
+              label: () => 'Awaiting bioswale/street-tree assumptions'
             }
           }
         }
@@ -689,7 +689,7 @@ function makeImprovementGrowthChart(scope) {
           pointRadius: 3
         },
         {
-          label: 'Ground Plane / Perennials (count)',
+          label: 'Ground / Perennials (count)',
           data: groundSeries,
           borderColor: '#7d8470',
           backgroundColor: 'rgba(125,132,112,0.12)',
@@ -2025,5 +2025,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   });
 });
-
 
