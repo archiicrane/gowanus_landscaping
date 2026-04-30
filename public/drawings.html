@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rewilding Gowanus - Drawings</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body.drawings-page {
+      padding-top: 56px;
+      background: transparent;
+    }
+
+    .drawings-layout {
+      width: min(95vw, 1560px);
+      margin: 20px auto 64px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .drawings-panel {
+      border: 1.5px solid var(--panel-glass-border);
+      border-radius: var(--panel-glass-radius);
+      background: var(--panel-glass-fill);
+      box-shadow: 0 12px 28px rgba(32, 44, 38, 0.12);
+      backdrop-filter: blur(11px);
+      -webkit-backdrop-filter: blur(11px);
+      padding: 20px;
+    }
+
+    .drawings-panel h1 {
+      margin: 6px 0 8px;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1.06;
+      font-family: var(--font-display);
+      letter-spacing: 0.02em;
+      color: var(--ink);
+    }
+
+    .drawings-panel p {
+      margin: 0;
+      max-width: 86ch;
+      color: var(--ink-muted);
+      line-height: 1.68;
+    }
+
+    .kicker {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+      color: #8d867c;
+    }
+
+    .observable-frame {
+      border: 1px solid rgba(47, 42, 36, 0.14);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f2eee7;
+      min-height: 860px;
+    }
+
+    .observable-frame iframe {
+      width: 100%;
+      min-height: 860px;
+      border: 0;
+      display: block;
+      background: #f2eee7;
+    }
+
+    @media (max-width: 900px) {
+      .observable-frame,
+      .observable-frame iframe {
+        min-height: 720px;
+      }
+    }
+  </style>
+</head>
+<body class="drawings-page">
+  <nav class="top-bar">
+    <span class="brand">Rewilding Gowanus</span>
+    <span class="nav-links">
+      <a href="/index.html" class="nav-btn">References</a>
+      <a href="/preceedence.html" class="nav-btn">Preceedence</a>
+      <a href="/site-analysis.html" class="nav-btn">Site Analysis</a>
+      <a href="/site-plan.html" class="nav-btn">Site Plan</a>
+      <a href="/drawings.html" class="nav-btn active">Drawings</a>
+      <a href="/diagrams.html" class="nav-btn">Diagrams</a>
+      <a href="/flora-diagram.html" class="nav-btn">Flora</a>
+      <a href="/wildlife-corridor.html" class="nav-btn">Wildlife</a>
+    </span>
+  </nav>
+
+  <main class="drawings-layout">
+    <section class="drawings-panel">
+      <p class="kicker">Observable Drawing</p>
+      <h1>Interactive Building Drawing</h1>
+      <p>
+        This page embeds the Observable drawing with the same control buttons and required dependent cells,
+        including <strong>viewof view</strong> and <strong>bldgDrawing2</strong>, so the interactive drawing renders
+        with its original behavior.
+      </p>
+    </section>
+
+    <section class="drawings-panel">
+      <div class="observable-frame">
+        <iframe
+          title="Gowanus Observable Drawing"
+          allow="fullscreen"
+          loading="eager"
+          src="https://observablehq.com/embed/4f11dfdf7a715ebe@622?cells=wetTreestxt%2CwetTrees%2CwoodlandTreestxt%2CwoodlandTrees%2CpollinatorTreestxt%2CpollinatorTrees%2Cpathstxt%2Cpaths%2CpathStubborntxt%2CpathStubborn%2CwaterLinestxt%2Cwater%2CparksOutlinetxt%2CparksOutline%2CtreeBandstxt%2CtreeBands%2Cbushes1txt%2Cbushes1%2Cbushes2txt%2Cbushes2%2Cbushes3txt%2Cbushes3%2Cbridgestxt%2Cbridges%2Ccirculationtxt%2Ccirculation%2CcircLinetxt%2CcircLine%2Cbushestxt%2Cbushes%2Chabitatstxt%2Chabitats%2CforestInfoLink%2CforestInfo%2Cviewof+view%2CbldgDrawing2&api_key=a179cd31f7162f6ef1777ec6d823ac4e7db1f771&banner=false">
+        </iframe>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
