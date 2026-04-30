@@ -1,5 +1,6 @@
 // site-plan-main.js
-// Mapbox-based architectural site plan with bioswale analytics
+// Architectural site plan: Mapbox Streets v8 tiles for water,
+// local GeoJSON for roads, sidewalks, buildings, trees, bioswales.
 
 import { resolveMapboxToken } from '/js/token.js';
 import {
@@ -16,19 +17,47 @@ const INITIAL_VIEW = {
   bearing: -18,
 };
 
-const ARCHITECT_STYLE = {
-  version: 8,
-  sources: {},
-  layers: [
-    {
-      id: 'paper',
-      type: 'background',
-      paint: {
-        'background-color': '#f6f2ea',
+// Build the blank architectural style — Mapbox Streets v8 as vector source for water
+function buildArchitectStyle() {
+  return {
+    version: 8,
+    glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}',
+    sources: {
+      'mapbox-streets': {
+        type: 'vector',
+        url: 'mapbox://mapbox.mapbox-streets-v8',
       },
     },
-  ],
-};
+    layers: [
+      {
+        id: 'background',
+        type: 'background',
+        paint: { 'background-color': '#f5f3ee' },
+      },
+    ],
+  };
+}
+
+// Create a diagonal-hatch canvas image for water fill pattern
+function createWaterHatchPattern(map) {
+  const size = 14;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#dbeaf2';
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = '#a8c4d6';
+  ctx.lineWidth = 0.75;
+  ctx.globalAlpha = 0.7;
+  const line = (x1, y1, x2, y2) => {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  };
+  line(0, size, size, 0);
+  line(-size, size, 0, 0);
+  line(size, size, size * 2, 0);
+  map.addImage('water-hatch', canvas);
+}
 
 function formatNumber(value) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
@@ -101,80 +130,119 @@ function renderMiniDashboard(stats, progress) {
 }
 
 function addArchitecturalLayers(map, datasets) {
+  // ── Water: hatch fill + edge from Mapbox Streets v8 ────────────────────
+  createWaterHatchPattern(map);
+
+  map.addLayer({
+    id: 'water-fill',
+    type: 'fill',
+    source: 'mapbox-streets',
+    'source-layer': 'water',
+    paint: { 'fill-pattern': 'water-hatch', 'fill-opacity': 1 },
+  });
+  map.addLayer({
+    id: 'waterway-fill',
+    type: 'line',
+    source: 'mapbox-streets',
+    'source-layer': 'waterway',
+    paint: {
+      'line-color': '#a8c4d6',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 1.8, 16, 5],
+      'line-opacity': 0.85,
+    },
+  });
+  map.addLayer({
+    id: 'water-outline',
+    type: 'line',
+    source: 'mapbox-streets',
+    'source-layer': 'water',
+    paint: { 'line-color': '#a8c4d6', 'line-width': 1.1, 'line-opacity': 0.9 },
+  });
+
+  // ── Sidewalks (local GeoJSON) ───────────────────────────────────────────
+  map.addSource('sidewalks', { type: 'geojson', data: datasets.sidewalks });
+  map.addLayer({
+    id: 'sidewalk-fill',
+    type: 'fill',
+    source: 'sidewalks',
+    paint: { 'fill-color': '#e6e3dd', 'fill-opacity': 0.92 },
+  });
+  map.addLayer({
+    id: 'sidewalk-outline',
+    type: 'line',
+    source: 'sidewalks',
+    paint: { 'line-color': '#ccc9c2', 'line-width': 0.5, 'line-opacity': 0.7 },
+  });
+
+  // ── Roads (local GeoJSON) — surface + casing ────────────────────────────
   map.addSource('roads', { type: 'geojson', data: datasets.roads });
   map.addLayer({
-    id: 'roads-line',
+    id: 'road-fill',
     type: 'line',
     source: 'roads',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
-      'line-color': '#d8d2c8',
-      'line-width': 1.2,
-      'line-opacity': 0.9,
+      'line-color': '#d4d0c9',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3.5, 16, 9],
+      'line-opacity': 1,
+    },
+  });
+  map.addLayer({
+    id: 'road-casing',
+    type: 'line',
+    source: 'roads',
+    layout: { 'line-cap': 'butt', 'line-join': 'round' },
+    paint: {
+      'line-color': '#b8b5af',
+      'line-gap-width': ['interpolate', ['linear'], ['zoom'], 13, 3.5, 16, 9],
+      'line-width': 0.7,
+      'line-opacity': 0.55,
     },
   });
 
+  // ── Buildings (local GeoJSON) ───────────────────────────────────────────
   map.addSource('buildings', { type: 'geojson', data: datasets.buildings });
   map.addLayer({
     id: 'buildings-fill',
     type: 'fill',
     source: 'buildings',
-    paint: {
-      'fill-color': '#b5b0a8',
-      'fill-opacity': 0.62,
-    },
+    paint: { 'fill-color': '#cfcac2', 'fill-opacity': 0.72 },
   });
   map.addLayer({
     id: 'buildings-outline',
     type: 'line',
     source: 'buildings',
-    paint: {
-      'line-color': '#8c877f',
-      'line-width': 0.85,
-      'line-opacity': 0.9,
-    },
+    paint: { 'line-color': '#a09a92', 'line-width': 0.75, 'line-opacity': 0.85 },
   });
 
+  // ── Trees (local GeoJSON) ───────────────────────────────────────────────
   map.addSource('trees', { type: 'geojson', data: datasets.trees });
   map.addLayer({
     id: 'trees-circle',
     type: 'circle',
     source: 'trees',
     paint: {
-      'circle-color': '#7fa07f',
-      'circle-opacity': 0.55,
+      'circle-color': '#88a98a',
+      'circle-opacity': 0.48,
       'circle-stroke-color': '#6f8f6f',
-      'circle-stroke-width': 0.6,
-      'circle-radius': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        13,
-        1.6,
-        16,
-        3.8,
-      ],
+      'circle-stroke-width': 0.5,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 1.4, 16, 3.2],
     },
   });
 
+  // ── Bioswale site highlight (local GeoJSON) ─────────────────────────────
   map.addSource('bioswales', { type: 'geojson', data: datasets.bioswales });
   map.addLayer({
     id: 'bioswales-fill',
     type: 'fill',
     source: 'bioswales',
-    paint: {
-      'fill-color': '#4f8b4f',
-      'fill-opacity': 0.24,
-    },
+    paint: { 'fill-color': '#4f7d57', 'fill-opacity': 0.20 },
   });
   map.addLayer({
     id: 'bioswales-outline',
     type: 'line',
     source: 'bioswales',
-    paint: {
-      'line-color': '#356b35',
-      'line-width': 2,
-      'line-opacity': 0.9,
-    },
+    paint: { 'line-color': '#4f7d57', 'line-width': 2.2, 'line-opacity': 0.92 },
   });
 }
 
@@ -255,9 +323,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mapboxgl.accessToken = token;
 
-  const [buildings, roads, treesRaw, bioswalesRaw] = await Promise.all([
+  const [buildings, roads, sidewalks, treesRaw, bioswalesRaw] = await Promise.all([
     fetchJson('/data/gowanus-buildings.geojson'),
     fetchJson('/data/roads.geojson'),
+    fetchJson('/data/sidewalks.geojson'),
     fetchJson('/data/gowanus_trees_clean.json'),
     loadBioswaleGeoJSON(),
   ]);
@@ -285,7 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const map = new mapboxgl.Map({
     container: 'site-plan-map',
-    style: ARCHITECT_STYLE,
+    style: buildArchitectStyle(),
     center: INITIAL_VIEW.center,
     zoom: INITIAL_VIEW.zoom,
     pitch: INITIAL_VIEW.pitch,
@@ -306,6 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     addArchitecturalLayers(map, {
       buildings,
       roads,
+      sidewalks,
       trees: treeFeatures,
       bioswales,
     });
