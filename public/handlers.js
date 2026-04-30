@@ -114,7 +114,7 @@ export function setupMapHandlers(map) {
     const feature = e.features && e.features[0];
     if (!feature) return;
     const props = feature.properties;
-    new mapboxgl.Popup()
+    new mapboxgl.Popup({ closeButton: false, focusAfterOpen: false })
       .setLngLat(e.lngLat)
       .setHTML(`<b>CSO Outfall</b><br>ID: ${props.id || ''}`)
       .addTo(map);

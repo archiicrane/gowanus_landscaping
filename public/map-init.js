@@ -160,6 +160,94 @@ export async function initMap() {
 }
 
 function wireLayerToggles(map) {
+	const isAnalysisPage = (document.body?.dataset.mapPage || 'analysis') === 'analysis';
+	const relatedPanel = document.getElementById('story-related');
+	const existingPanel = document.getElementById('story-existing');
+	const bioswalePanel = document.getElementById('story-bioswale');
+	const relatedTitle = document.getElementById('related-panel-title');
+	const relatedNote = document.getElementById('related-panel-note');
+	const relatedIframe = document.getElementById('related-diagrams-iframe');
+
+	const diagramByToggle = {
+		'toggle-trees': {
+			title: 'Tree Baseline Graphs',
+			note: 'Street-tree species, health, interception, and density visuals.',
+			section: 'section-supporting',
+		},
+		'toggle-buildings': {
+			title: 'Urban Fabric Analysis',
+			note: 'Building mix, industrial footprint, and structural intensity.',
+			section: 'section-urban',
+		},
+		'toggle-park': {
+			title: 'Rewilding Scenario',
+			note: 'Before/after planting composition and ecological role distribution.',
+			section: 'section-rewilding',
+		},
+		'toggle-flood': {
+			title: 'Flood and Stormwater',
+			note: 'Current/future flood pressure and outfall type distribution.',
+			section: 'section-flood',
+		},
+		'toggle-cso': {
+			title: 'Outfall and Flood Risk',
+			note: 'CSO-linked vulnerability and stormwater network effects.',
+			section: 'section-flood',
+		},
+		'toggle-remediation': {
+			title: 'Planting Suitability',
+			note: 'Contamination constraints translated into planting opportunity zones.',
+			section: 'section-suitability',
+		},
+		'toggle-heat': {
+			title: 'Suitability and Bioswale Opportunity',
+			note: 'Low-point and hydrology-informed intervention potential.',
+			section: 'section-suitability',
+		},
+		'toggle-bioswale': {
+			title: 'Bioswale Opportunity',
+			note: 'Open-corridor suitability scoring for bioswale deployment.',
+			section: 'section-suitability',
+		},
+		'toggle-contours': {
+			title: 'Canopy and Land-Cover Structure',
+			note: 'Topographic and area context linked to canopy coverage targets.',
+			section: 'section-canopy-goal',
+		},
+		'toggle-bounding': {
+			title: 'Canopy Target Dashboard',
+			note: 'Study-boundary metrics and canopy gap framing.',
+			section: 'section-canopy-goal',
+		},
+	};
+
+	const activateStoryPanel = (panelId) => {
+		if (existingPanel) existingPanel.classList.remove('active');
+		if (bioswalePanel) bioswalePanel.classList.remove('active');
+		if (relatedPanel) relatedPanel.classList.remove('active');
+
+		if (panelId === 'story-existing' && existingPanel) existingPanel.classList.add('active');
+		if (panelId === 'story-bioswale' && bioswalePanel) bioswalePanel.classList.add('active');
+		if (panelId === 'story-related' && relatedPanel) relatedPanel.classList.add('active');
+	};
+
+	const showRelatedDiagram = (toggleId) => {
+		const config = diagramByToggle[toggleId];
+		if (!config || !isAnalysisPage || !relatedPanel || !relatedIframe) return;
+
+		if (relatedTitle) relatedTitle.textContent = config.title;
+		if (relatedNote) relatedNote.textContent = config.note;
+
+		const nextSrc = `/diagrams.html#${config.section}`;
+		if (relatedIframe.getAttribute('src') !== nextSrc) {
+			relatedIframe.setAttribute('src', nextSrc);
+		}
+
+		activateStoryPanel('story-related');
+	};
+
+	let lastUserToggleId = null;
+
 	const toggles = [
 		{ id: 'toggle-nearby-parks', layers: ['nearby-parks-fill', 'nearby-parks-outline', 'nearby-parks-outline-hover', 'nearby-parks-label'] },
 		{ id: 'toggle-distance-rings', layers: ['distance-rings-line', 'distance-ring-labels', 'distance-spokes', 'distance-spoke-labels'] },
@@ -186,8 +274,31 @@ function wireLayerToggles(map) {
 				}
 			}
 		};
-		el.addEventListener('change', () => {
+		el.addEventListener('change', (event) => {
 			applyVisibility();
+
+			if (!isAnalysisPage || !event.isTrusted) return;
+
+			if (el.checked && diagramByToggle[id]) {
+				lastUserToggleId = id;
+				showRelatedDiagram(id);
+				return;
+			}
+
+			if (!el.checked && id === lastUserToggleId) {
+				const nextToggleId = Object.keys(diagramByToggle).find((toggleId) => {
+					const input = document.getElementById(toggleId);
+					return input?.checked;
+				});
+
+				if (nextToggleId) {
+					lastUserToggleId = nextToggleId;
+					showRelatedDiagram(nextToggleId);
+				} else {
+					lastUserToggleId = null;
+					activateStoryPanel('story-existing');
+				}
+			}
 		});
 		applyVisibility();
 	}

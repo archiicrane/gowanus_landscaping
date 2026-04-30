@@ -1466,7 +1466,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 				</table>
 			</div>`;
 
-			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup', closeButton: false, focusAfterOpen: false })
 				.setLngLat(e.lngLat)
 				.setHTML(html)
 				.addTo(map);
@@ -1498,7 +1498,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 				</table>
 			</div>`;
 
-			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup', closeButton: false, focusAfterOpen: false })
 				.setLngLat(e.lngLat)
 				.setHTML(html)
 				.addTo(map);
@@ -1529,7 +1529,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 				</table>
 			</div>`;
 
-			new mapboxgl.Popup({ offset: 8, className: 'arch-popup' })
+			new mapboxgl.Popup({ offset: 8, className: 'arch-popup', closeButton: false, focusAfterOpen: false })
 				.setLngLat(e.lngLat)
 				.setHTML(html)
 				.addTo(map);
