@@ -156,15 +156,13 @@ function generateProposedTrees(bioswales) {
 }
 
 function addArchitecturalLayers(map, datasets) {
-  // ── Water: hatch fill + edge from Mapbox Streets v8 ────────────────────
-  createWaterHatchPattern(map);
-
+  // ── Water: plain light fill + edge from Mapbox Streets v8 ──────────────
   map.addLayer({
     id: 'water-fill',
     type: 'fill',
     source: 'mapbox-streets',
     'source-layer': 'water',
-    paint: { 'fill-pattern': 'water-hatch', 'fill-opacity': 1 },
+    paint: { 'fill-color': '#d6e8f2', 'fill-opacity': 0.75 },
   });
   map.addLayer({
     id: 'waterway-fill',
