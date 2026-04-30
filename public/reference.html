@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/style.css" />
   <style>
     .reference-page { padding-top: 56px; }
-    .reference-layout { width: min(94vw, 1460px); margin: 20px auto 70px; display: grid; gap: 18px; }
+    .reference-layout { width: min(95vw, 1560px); margin: 20px auto 70px; display: grid; gap: 18px; }
     .reference-panel {
       border: 1.5px solid var(--panel-glass-border);
       border-radius: var(--panel-glass-radius);
@@ -19,8 +19,8 @@
       -webkit-backdrop-filter: blur(11px);
       padding: 20px;
     }
-    .reference-hero h1 { margin: 8px 0; font-family: var(--font-display); font-size: clamp(30px, 4vw, 54px); line-height: 1.05; letter-spacing: 0.02em; }
-    .reference-hero p { margin: 0; max-width: 76ch; color: var(--ink-muted); line-height: 1.7; }
+    .reference-hero h1 { margin: 8px 0; font-family: var(--font-display); font-size: clamp(30px, 4vw, 56px); line-height: 1.04; letter-spacing: 0.02em; }
+    .reference-hero p { margin: 0; max-width: 86ch; color: var(--ink-muted); line-height: 1.7; }
     .kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.12em; font-size: 11px; color: #8d867c; }
 
     .asset-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 14px; }
@@ -29,36 +29,47 @@
     .asset-card h3 { font: 600 14px/1.2 var(--font-display); margin: 10px 0 4px; }
     .asset-card p { margin: 0; font-size: 12px; color: var(--ink-muted); }
 
+    .overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; margin-top: 14px; }
+    .overview-card { border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,0.62); padding: 12px; }
+    .overview-card h3 { margin: 0 0 8px; font: 600 15px/1.2 var(--font-display); }
+    .overview-map {
+      position: relative; min-height: 360px; border-radius: 10px; border: 1px solid rgba(47,42,36,0.18);
+      background: linear-gradient(180deg, #f8f4ec, #ece5d9); overflow: hidden;
+    }
+    .overview-map img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .pin {
+      position: absolute; width: 18px; height: 18px; border-radius: 50%; transform: translate(-50%, -50%);
+      background: #4f7f63; border: 2px solid #f2eee7; box-shadow: 0 1px 8px rgba(0,0,0,0.25);
+    }
+    .pin.alt { background: #b36d45; }
+    .pin-label {
+      position: absolute; transform: translate(8px, -14px); font-size: 11px; line-height: 1.3;
+      background: rgba(255,255,255,0.9); border: 1px solid rgba(47,42,36,0.15); border-radius: 8px; padding: 4px 7px;
+      color: #4a433b;
+    }
+
     .photo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
     .photo-card { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #efe8de; }
     .photo-card img { width: 100%; height: 170px; object-fit: cover; display: block; }
     .photo-card figcaption { padding: 8px 10px; font-size: 11px; line-height: 1.45; color: #615a51; }
     .photo-card a { color: #3f6e56; text-decoration: none; }
 
-    .diagram-wrap { margin-top: 14px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
-    .diagram-board {
-      position: relative;
-      min-height: 360px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: radial-gradient(circle at 20% 20%, #f9f6f0, #ebe3d8);
-      overflow: hidden;
-    }
-    .diagram-board img.layer { position: absolute; width: 44%; border: 1px solid rgba(47,42,36,0.2); background: rgba(255,255,255,0.75); border-radius: 10px; padding: 8px; }
-    .diagram-board .layer.base { left: 5%; top: 6%; width: 90%; height: 88%; object-fit: contain; opacity: 0.44; border-style: dashed; }
-    .diagram-board .layer.urban { left: 7%; top: 14%; }
-    .diagram-board .layer.bioswale { right: 7%; bottom: 14%; }
-    .diagram-board svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .library-head { display: flex; justify-content: space-between; gap: 12px; align-items: end; margin-top: 6px; }
+    .library-count { font-size: 12px; color: var(--ink-muted); }
+    .flora-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .flora-card { border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.65); padding: 8px; display: grid; gap: 7px; }
+    .flora-card img { width: 100%; aspect-ratio: 1 / 1; object-fit: contain; background: #f6f1e9; border-radius: 8px; }
+    .flora-name { font-size: 11px; color: #4f4740; line-height: 1.35; }
+    .flora-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #7f7567; }
 
-    .diagram-notes { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: rgba(255,255,255,0.62); }
-    .diagram-notes h3 { margin: 0 0 8px; font: 600 16px/1.2 var(--font-display); }
-    .diagram-notes p { margin: 0 0 10px; color: var(--ink-muted); font-size: 13px; line-height: 1.6; }
-
+    @media (max-width: 1300px) { .flora-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
     @media (max-width: 1100px) {
       .asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .overview-grid { grid-template-columns: 1fr; }
       .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .diagram-wrap { grid-template-columns: 1fr; }
+      .flora-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
+    @media (max-width: 780px) { .flora-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 680px) {
       .asset-grid, .photo-grid { grid-template-columns: 1fr; }
       .asset-card img, .photo-card img { height: 220px; }
@@ -82,12 +93,12 @@
   <main class="reference-layout">
     <section class="reference-panel reference-hero">
       <p class="kicker">Reference Page</p>
-      <h1>Gowanus Context + Field Imagery</h1>
-      <p>This board combines your uploaded context SVG assets with public Gowanus reference photographs from Wikimedia Commons. The composite diagram below shows how urban condition, bioswale opportunities, and base map wash graphics can be layered into one analytical story frame.</p>
+      <h1>Gowanus Context + Full Flora/Fauna Library</h1>
+      <p>The diagrams now use both overview outline files as base maps and include the complete flora/fauna icon set you added. Pins below call out where the web image references are situated in the study context, then the full species library is rendered for direct diagram picking.</p>
     </section>
 
     <section class="reference-panel">
-      <p class="kicker">Local SVG Assets</p>
+      <p class="kicker">Local Context SVG Assets</p>
       <div class="asset-grid">
         <article class="asset-card">
           <img src="/assets/Urban%20condition.svg" alt="Urban condition context SVG" />
@@ -102,7 +113,31 @@
         <article class="asset-card">
           <img src="/assets/map-wash.svg" alt="Map wash context SVG" />
           <h3>Map Wash</h3>
-          <p>Base atmospheric map layer for diagram composition.</p>
+          <p>Base atmospheric map layer for board composition.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="reference-panel">
+      <p class="kicker">Overview Outlines + Image Locations</p>
+      <div class="overview-grid">
+        <article class="overview-card">
+          <h3>Overview Site</h3>
+          <div class="overview-map">
+            <img src="/assets/svg-library/overview-site.svg" alt="Overview outline of the site" />
+            <span class="pin" style="left:28%;top:34%"></span><span class="pin-label" style="left:28%;top:34%">Img 1: July 2024 canal view</span>
+            <span class="pin alt" style="left:64%;top:41%"></span><span class="pin-label" style="left:64%;top:41%">Img 2: Union St bridge</span>
+            <span class="pin" style="left:47%;top:66%"></span><span class="pin-label" style="left:47%;top:66%">Img 3: 9th St corridor</span>
+          </div>
+        </article>
+        <article class="overview-card">
+          <h3>Overview Site (Zoomed In)</h3>
+          <div class="overview-map">
+            <img src="/assets/svg-library/overview-site-zoomedin.svg" alt="Zoomed in overview outline of the site" />
+            <span class="pin alt" style="left:36%;top:36%"></span><span class="pin-label" style="left:36%;top:36%">Img 4: waterfront edge</span>
+            <span class="pin" style="left:70%;top:52%"></span><span class="pin-label" style="left:70%;top:52%">Bioswale opportunity run</span>
+            <span class="pin alt" style="left:50%;top:22%"></span><span class="pin-label" style="left:50%;top:22%">Urban pressure cluster</span>
+          </div>
         </article>
       </div>
     </section>
@@ -112,50 +147,139 @@
       <div class="photo-grid">
         <figure class="photo-card">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_July_2024.jpg" alt="Gowanus Canal, July 2024" loading="lazy" />
-          <figcaption>Gowanus Canal July 2024 (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_July_2024.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
+          <figcaption>Img 1 - Gowanus Canal July 2024 (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_July_2024.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Union_Street_Bridge_View.jpg" alt="Union Street Bridge view over the Gowanus Canal" loading="lazy" />
-          <figcaption>Union Street Bridge View (<a href="https://commons.wikimedia.org/wiki/File:Union_Street_Bridge_View.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
+          <figcaption>Img 2 - Union Street Bridge View (<a href="https://commons.wikimedia.org/wiki/File:Union_Street_Bridge_View.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" alt="Gowanus Canal from 9th Street" loading="lazy" />
-          <figcaption>Gowanus Canal from 9th Street (2014) (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
+          <figcaption>Img 3 - Gowanus Canal from 9th Street (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
           <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Waterfront_Park_010.jpg" alt="Gowanus Waterfront Park" loading="lazy" />
-          <figcaption>Gowanus Waterfront Park 010 (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Waterfront_Park_010.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
+          <figcaption>Img 4 - Gowanus Waterfront Park (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Waterfront_Park_010.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
       </div>
     </section>
 
     <section class="reference-panel">
-      <p class="kicker">Composite Diagram</p>
-      <div class="diagram-wrap">
-        <div class="diagram-board" aria-label="Composite context diagram">
-          <img class="layer base" src="/assets/map-wash.svg" alt="Base map wash layer" />
-          <img class="layer urban" src="/assets/Urban%20condition.svg" alt="Urban condition layer" />
-          <img class="layer bioswale" src="/assets/bio-swale.svg" alt="Bioswale layer" />
-          <svg viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L6,3 z" fill="#4f7f63"/>
-              </marker>
-            </defs>
-            <path d="M300 220 C430 240, 470 270, 620 370" stroke="#4f7f63" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-            <path d="M760 500 C650 520, 470 520, 260 560" stroke="#7f6a55" stroke-width="2" stroke-dasharray="8 8" fill="none" marker-end="url(#arrow)"/>
-            <text x="330" y="205" fill="#3a5143" font-size="20">Urban pressure zones</text>
-            <text x="570" y="360" fill="#3a5143" font-size="20">Intervention corridors</text>
-            <text x="260" y="545" fill="#6a5847" font-size="20">Hydrology + base wash</text>
-          </svg>
-        </div>
-        <aside class="diagram-notes">
-          <h3>How To Read This</h3>
-          <p>The composed board stacks a soft map wash under two authored SVG layers: urban condition and bioswale opportunity. Arrowed traces indicate the design logic from constraint to intervention.</p>
-          <p>This gives you a reusable precedent sheet format for pinups: references from the web on one side, authored context diagrams on the other, with one integrated synthesis frame.</p>
-        </aside>
+      <p class="kicker">Complete Flora/Fauna SVG Library</p>
+      <div class="library-head">
+        <p class="library-count" id="libraryCount"></p>
       </div>
+      <div class="flora-grid" id="floraGrid"></div>
     </section>
   </main>
+
+  <script>
+    const FLORA_FAUNA_SVGS = [
+      '/assets/svg-library/Ants.svg',
+      '/assets/svg-library/Asters.svg',
+      '/assets/svg-library/Big brown bat.svg',
+      '/assets/svg-library/Black Locust.svg',
+      '/assets/svg-library/Black-crowned night heron.svg',
+      '/assets/svg-library/Bumblebee.svg',
+      '/assets/svg-library/Cabbage white butterfly.svg',
+      '/assets/svg-library/Callery Pear.svg',
+      '/assets/svg-library/Canada goose.svg',
+      '/assets/svg-library/Cattails.svg',
+      '/assets/svg-library/Coneflower.svg',
+      '/assets/svg-library/Cormorant.svg',
+      '/assets/svg-library/Dragonflies.svg',
+      '/assets/svg-library/Eastern gray squirrel.svg',
+      '/assets/svg-library/European starling.svg',
+      '/assets/svg-library/Goldenrod.svg',
+      '/assets/svg-library/Great egret.svg',
+      '/assets/svg-library/Herring gull.svg',
+      '/assets/svg-library/Honey locust.svg',
+      '/assets/svg-library/Honeybee.svg',
+      '/assets/svg-library/House mouse.svg',
+      '/assets/svg-library/House sparrow.svg',
+      '/assets/svg-library/Ivy _ Virginia creeper.svg',
+      '/assets/svg-library/Knotweed.svg',
+      '/assets/svg-library/Lambsquarters.svg',
+      '/assets/svg-library/London plane tree.svg',
+      '/assets/svg-library/Mallard duck.svg',
+      '/assets/svg-library/Milkweed.svg',
+      '/assets/svg-library/Monarch butterfly.svg',
+      '/assets/svg-library/Mosquitoes.svg',
+      '/assets/svg-library/Mosses _ lichens on masonry.svg',
+      '/assets/svg-library/Mourning dove.svg',
+      '/assets/svg-library/Mugwort.svg',
+      '/assets/svg-library/Mulberry.svg',
+      '/assets/svg-library/Norway maple.svg',
+      '/assets/svg-library/Norway rat.svg',
+      '/assets/svg-library/Opossum.svg',
+      '/assets/svg-library/Peregrine falcon.svg',
+      '/assets/svg-library/Phragmites.svg',
+      '/assets/svg-library/Raccoon.svg',
+      '/assets/svg-library/racoon.svg',
+      '/assets/svg-library/Ragweed.svg',
+      '/assets/svg-library/Red maple.svg',
+      '/assets/svg-library/Red-tailed hawk.svg',
+      '/assets/svg-library/Ring-billed gull.svg',
+      '/assets/svg-library/River birch.svg',
+      '/assets/svg-library/Rock pigeon.svg',
+      '/assets/svg-library/Sedges.svg',
+      '/assets/svg-library/Serviceberry.svg',
+      '/assets/svg-library/Smartweed.svg',
+      '/assets/svg-library/Spotted lanternfly.svg',
+      '/assets/svg-library/Sumac.svg',
+      '/assets/svg-library/Switchgrass.svg',
+      '/assets/svg-library/Tree of Heaven.svg',
+      '/assets/svg-library/Wild grass - setaria viridis.svg'
+    ];
+
+    const EXISTING_PROJECT_SVGS = [
+      '/assets/species/bald-cypress.svg',
+      '/assets/species/black-gum.svg',
+      '/assets/species/eastern-redcedar.svg',
+      '/assets/species/northern-red-oak.svg',
+      '/assets/species/serviceberry.svg',
+      '/assets/species/sweetgum.svg',
+      '/assets/fauna/Northern Mockingbird.svg',
+      '/assets/fauna/Yellow Warbler.svg',
+      '/assets/fauna/racoon.svg'
+    ];
+
+    const ALL_LIBRARY_SVGS = Array.from(new Set([
+      ...FLORA_FAUNA_SVGS,
+      ...EXISTING_PROJECT_SVGS
+    ])).sort((a, b) => a.localeCompare(b));
+
+    const faunaTerms = [
+      'ant', 'bat', 'bee', 'bird', 'butterfly', 'cormorant', 'dragonfl', 'egret', 'goose', 'gull', 'hawk', 'heron', 'honeybee', 'mallard', 'monarch', 'mosquito', 'mouse', 'mouse', 'opossum', 'pigeon', 'raccoon', 'racoon', 'rat', 'sparrow', 'squirrel', 'starling', 'falcon', 'dove'
+    ];
+
+    const floraGrid = document.getElementById('floraGrid');
+    const libraryCount = document.getElementById('libraryCount');
+
+    function labelFromPath(path) {
+      const file = path.split('/').pop() || '';
+      return decodeURIComponent(file).replace(/\.svg$/i, '').replace(/[_-]/g, ' ');
+    }
+
+    function isFauna(label) {
+      const text = label.toLowerCase();
+      return faunaTerms.some(term => text.includes(term));
+    }
+
+    ALL_LIBRARY_SVGS.forEach(path => {
+      const label = labelFromPath(path);
+      const kind = isFauna(label) ? 'Fauna' : 'Flora';
+      const card = document.createElement('article');
+      card.className = 'flora-card';
+      card.innerHTML = `
+        <img src="${path}" alt="${label} SVG" loading="lazy" />
+        <p class="flora-name">${label}</p>
+        <p class="flora-kind">${kind}</p>
+      `;
+      floraGrid.appendChild(card);
+    });
+
+    libraryCount.textContent = `${ALL_LIBRARY_SVGS.length} flora/fauna SVGs loaded from your full project set`;
+  </script>
 </body>
 </html>
