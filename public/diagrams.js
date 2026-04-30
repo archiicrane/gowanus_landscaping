@@ -3,6 +3,10 @@
 //          flood-vulnerability.geojson, Citywide_Outfalls_20260416.geojson,
 //          gowanus_existing/proposed_flora_fauna.csv, planting-bands.geojson
 
+// Alias UMD globals for ES module scope (turf loaded via <script> tag as window.turf)
+/* global turf, Chart */
+const turf = window.turf;
+
 async function loadTreeData() {
   const response = await fetch('/data/gowanus_trees_clean.json');
   if (!response.ok) {
