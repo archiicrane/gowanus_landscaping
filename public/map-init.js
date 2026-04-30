@@ -143,13 +143,13 @@ export async function initMap() {
 		setChecked('toggle-distance-rings', false);
 		setChecked('toggle-buildings', false);
 		setChecked('toggle-trees', false);
-		setChecked('toggle-park', true);
-		setChecked('toggle-contours', true);
-		setChecked('toggle-flood', true);
-		setChecked('toggle-cso', true);
-		setChecked('toggle-remediation', true);
-		setChecked('toggle-heat', true);
-		setChecked('toggle-bioswale', true);
+		setChecked('toggle-park', false);
+		setChecked('toggle-contours', false);
+		setChecked('toggle-flood', false);
+		setChecked('toggle-cso', false);
+		setChecked('toggle-remediation', false);
+		setChecked('toggle-heat', false);
+		setChecked('toggle-bioswale', false);
 		setChecked('toggle-bounding', true);
 		setChecked('toggle-observable', false);
 
@@ -166,58 +166,79 @@ function wireLayerToggles(map) {
 	const bioswalePanel = document.getElementById('story-bioswale');
 	const relatedTitle = document.getElementById('related-panel-title');
 	const relatedNote = document.getElementById('related-panel-note');
-	const relatedIframe = document.getElementById('related-diagrams-iframe');
+	const relatedImage = document.getElementById('related-diagram-image');
+	const relatedLink = document.getElementById('related-diagram-link');
 
 	const diagramByToggle = {
 		'toggle-trees': {
 			title: 'Tree Baseline Graphs',
 			note: 'Street-tree species, health, interception, and density visuals.',
 			section: 'section-supporting',
+			image: '/assets/species/serviceberry.svg',
+			alt: 'Tree species diagram',
 		},
 		'toggle-buildings': {
 			title: 'Urban Fabric Analysis',
 			note: 'Building mix, industrial footprint, and structural intensity.',
 			section: 'section-urban',
+			image: '/assets/Urban%20condition.svg',
+			alt: 'Urban condition diagram',
 		},
 		'toggle-park': {
 			title: 'Rewilding Scenario',
 			note: 'Before/after planting composition and ecological role distribution.',
 			section: 'section-rewilding',
+			image: '/assets/svg-library/overview-site.svg',
+			alt: 'Rewilding overview diagram',
 		},
 		'toggle-flood': {
 			title: 'Flood and Stormwater',
 			note: 'Current/future flood pressure and outfall type distribution.',
 			section: 'section-flood',
+			image: '/assets/map-wash.svg',
+			alt: 'Flood wash diagram',
 		},
 		'toggle-cso': {
 			title: 'Outfall and Flood Risk',
 			note: 'CSO-linked vulnerability and stormwater network effects.',
 			section: 'section-flood',
+			image: '/assets/mapbox-nyc-wash.png',
+			alt: 'CSO and flood risk wash diagram',
 		},
 		'toggle-remediation': {
 			title: 'Planting Suitability',
 			note: 'Contamination constraints translated into planting opportunity zones.',
 			section: 'section-suitability',
+			image: '/assets/svg-library/overview-site-zoomedin.svg',
+			alt: 'Planting suitability diagram',
 		},
 		'toggle-heat': {
 			title: 'Suitability and Bioswale Opportunity',
 			note: 'Low-point and hydrology-informed intervention potential.',
 			section: 'section-suitability',
+			image: '/assets/mapbox-nyc-wash.png',
+			alt: 'Low-point opportunity diagram',
 		},
 		'toggle-bioswale': {
 			title: 'Bioswale Opportunity',
 			note: 'Open-corridor suitability scoring for bioswale deployment.',
 			section: 'section-suitability',
+			image: '/assets/bio-swale.svg',
+			alt: 'Bioswale opportunity diagram',
 		},
 		'toggle-contours': {
 			title: 'Canopy and Land-Cover Structure',
 			note: 'Topographic and area context linked to canopy coverage targets.',
 			section: 'section-canopy-goal',
+			image: '/assets/svg-library/overview-site-zoomedin.svg',
+			alt: 'Topography and canopy structure diagram',
 		},
 		'toggle-bounding': {
 			title: 'Canopy Target Dashboard',
 			note: 'Study-boundary metrics and canopy gap framing.',
 			section: 'section-canopy-goal',
+			image: '/assets/svg-library/overview-site.svg',
+			alt: 'Study boundary diagram',
 		},
 	};
 
@@ -233,14 +254,16 @@ function wireLayerToggles(map) {
 
 	const showRelatedDiagram = (toggleId) => {
 		const config = diagramByToggle[toggleId];
-		if (!config || !isAnalysisPage || !relatedPanel || !relatedIframe) return;
+		if (!config || !isAnalysisPage || !relatedPanel || !relatedImage) return;
 
 		if (relatedTitle) relatedTitle.textContent = config.title;
 		if (relatedNote) relatedNote.textContent = config.note;
+		relatedImage.setAttribute('src', config.image || '/assets/placeholder.svg');
+		relatedImage.setAttribute('alt', config.alt || config.title || 'Related diagram preview');
 
 		const nextSrc = `/diagrams.html#${config.section}`;
-		if (relatedIframe.getAttribute('src') !== nextSrc) {
-			relatedIframe.setAttribute('src', nextSrc);
+		if (relatedLink) {
+			relatedLink.setAttribute('href', nextSrc);
 		}
 
 		activateStoryPanel('story-related');
@@ -266,6 +289,12 @@ function wireLayerToggles(map) {
 	for (const { id, layers } of toggles) {
 		const el = document.getElementById(id);
 		if (!el) continue;
+		const label = el.closest('.layer-toggle');
+		const syncToggleVisual = () => {
+			if (label) {
+				label.classList.toggle('is-checked', !!el.checked);
+			}
+		};
 		const applyVisibility = () => {
 			const vis = el.checked ? 'visible' : 'none';
 			for (const layerId of layers) {
@@ -273,6 +302,7 @@ function wireLayerToggles(map) {
 					map.setLayoutProperty(layerId, 'visibility', vis);
 				}
 			}
+			syncToggleVisual();
 		};
 		el.addEventListener('change', (event) => {
 			applyVisibility();
