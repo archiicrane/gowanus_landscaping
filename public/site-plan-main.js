@@ -38,9 +38,9 @@ function buildArchitectStyle() {
   };
 }
 
-// Create a diagonal-hatch canvas image for water fill pattern
+// Create a diagonal-hatch SDF pattern for water fill
 function createWaterHatchPattern(map) {
-  const size = 14;
+  const size = 16;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -48,15 +48,17 @@ function createWaterHatchPattern(map) {
   ctx.fillStyle = '#dbeaf2';
   ctx.fillRect(0, 0, size, size);
   ctx.strokeStyle = '#a8c4d6';
-  ctx.lineWidth = 0.75;
-  ctx.globalAlpha = 0.7;
+  ctx.lineWidth = 0.8;
   const line = (x1, y1, x2, y2) => {
     ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
   };
+  // diagonal lines tiling at 45°
   line(0, size, size, 0);
   line(-size, size, 0, 0);
   line(size, size, size * 2, 0);
-  map.addImage('water-hatch', canvas);
+  // pass ImageData (not canvas) to avoid Mapbox buffer size mismatch
+  const imageData = ctx.getImageData(0, 0, size, size);
+  map.addImage('water-hatch', imageData);
 }
 
 function formatNumber(value) {
