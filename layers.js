@@ -383,9 +383,9 @@ export function setupMapLayers(map) {
         source: 'composite',
         'source-layer': 'road',
         paint: {
-          'line-color': '#bdbdbd',
-          'line-width': [ 'interpolate', ['linear'], ['zoom'], 14, 1.2, 18, 3.2 ],
-          'line-opacity': 0.85
+          'line-color': '#d9d9d9',
+          'line-width': [ 'interpolate', ['linear'], ['zoom'], 14, 0.8, 18, 1.8 ],
+          'line-opacity': 0.6
         },
         filter: ['all', ['!=', ['get', 'class'], 'path']]
       }, 'arch-buildings-outline');
