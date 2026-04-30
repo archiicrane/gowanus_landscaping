@@ -166,7 +166,7 @@ function wireLayerToggles(map) {
 	const bioswalePanel = document.getElementById('story-bioswale');
 	const relatedTitle = document.getElementById('related-panel-title');
 	const relatedNote = document.getElementById('related-panel-note');
-	const relatedImage = document.getElementById('related-diagram-image');
+	const relatedFrame = document.getElementById('related-diagram-frame');
 	const relatedLink = document.getElementById('related-diagram-link');
 
 	const diagramByToggle = {
@@ -174,71 +174,51 @@ function wireLayerToggles(map) {
 			title: 'Tree Baseline Graphs',
 			note: 'Street-tree species, health, interception, and density visuals.',
 			section: 'section-supporting',
-			image: '/assets/species/serviceberry.svg',
-			alt: 'Tree species diagram',
 		},
 		'toggle-buildings': {
 			title: 'Urban Fabric Analysis',
 			note: 'Building mix, industrial footprint, and structural intensity.',
 			section: 'section-urban',
-			image: '/assets/Urban%20condition.svg',
-			alt: 'Urban condition diagram',
 		},
 		'toggle-park': {
 			title: 'Rewilding Scenario',
 			note: 'Before/after planting composition and ecological role distribution.',
 			section: 'section-rewilding',
-			image: '/assets/svg-library/overview-site.svg',
-			alt: 'Rewilding overview diagram',
 		},
 		'toggle-flood': {
 			title: 'Flood and Stormwater',
 			note: 'Current/future flood pressure and outfall type distribution.',
 			section: 'section-flood',
-			image: '/assets/map-wash.svg',
-			alt: 'Flood wash diagram',
 		},
 		'toggle-cso': {
 			title: 'Outfall and Flood Risk',
 			note: 'CSO-linked vulnerability and stormwater network effects.',
 			section: 'section-flood',
-			image: '/assets/mapbox-nyc-wash.png',
-			alt: 'CSO and flood risk wash diagram',
 		},
 		'toggle-remediation': {
 			title: 'Planting Suitability',
 			note: 'Contamination constraints translated into planting opportunity zones.',
 			section: 'section-suitability',
-			image: '/assets/svg-library/overview-site-zoomedin.svg',
-			alt: 'Planting suitability diagram',
 		},
 		'toggle-heat': {
 			title: 'Suitability and Bioswale Opportunity',
 			note: 'Low-point and hydrology-informed intervention potential.',
 			section: 'section-suitability',
-			image: '/assets/mapbox-nyc-wash.png',
-			alt: 'Low-point opportunity diagram',
 		},
 		'toggle-bioswale': {
 			title: 'Bioswale Opportunity',
 			note: 'Open-corridor suitability scoring for bioswale deployment.',
 			section: 'section-suitability',
-			image: '/assets/bio-swale.svg',
-			alt: 'Bioswale opportunity diagram',
 		},
 		'toggle-contours': {
 			title: 'Canopy and Land-Cover Structure',
 			note: 'Topographic and area context linked to canopy coverage targets.',
 			section: 'section-canopy-goal',
-			image: '/assets/svg-library/overview-site-zoomedin.svg',
-			alt: 'Topography and canopy structure diagram',
 		},
 		'toggle-bounding': {
 			title: 'Canopy Target Dashboard',
 			note: 'Study-boundary metrics and canopy gap framing.',
 			section: 'section-canopy-goal',
-			image: '/assets/svg-library/overview-site.svg',
-			alt: 'Study boundary diagram',
 		},
 	};
 
@@ -254,14 +234,16 @@ function wireLayerToggles(map) {
 
 	const showRelatedDiagram = (toggleId) => {
 		const config = diagramByToggle[toggleId];
-		if (!config || !isAnalysisPage || !relatedPanel || !relatedImage) return;
+		if (!config || !isAnalysisPage || !relatedPanel || !relatedFrame) return;
 
 		if (relatedTitle) relatedTitle.textContent = config.title;
 		if (relatedNote) relatedNote.textContent = config.note;
-		relatedImage.setAttribute('src', config.image || '/assets/placeholder.svg');
-		relatedImage.setAttribute('alt', config.alt || config.title || 'Related diagram preview');
 
 		const nextSrc = `/diagrams.html#${config.section}`;
+		const embedSrc = `/diagrams.html?embed=1&focus=${config.section}`;
+		if (relatedFrame.getAttribute('src') !== embedSrc) {
+			relatedFrame.setAttribute('src', embedSrc);
+		}
 		if (relatedLink) {
 			relatedLink.setAttribute('href', nextSrc);
 		}

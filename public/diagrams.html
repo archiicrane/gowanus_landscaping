@@ -229,5 +229,20 @@ to the NYC Urban Forest Agenda target of 30%?
 
 </main>
 <script type="module" src="/diagrams.js"></script>
+<script>
+(() => {
+	const params = new URLSearchParams(window.location.search);
+	if (params.get('embed') !== '1') return;
+
+	const focusId = params.get('focus') || 'section-canopy-goal';
+	document.body.classList.add('diagrams-embed-mode');
+	document.body.dataset.embedFocus = focusId;
+
+	const sections = document.querySelectorAll('.board-section');
+	sections.forEach((section) => {
+		section.style.display = section.id === focusId ? '' : 'none';
+	});
+})();
+</script>
 </body>
 </html>
