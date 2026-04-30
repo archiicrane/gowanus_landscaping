@@ -1,0 +1,71 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bs-01",
+        "name": "Canal Edge Linear Bioswale",
+        "zone": "Wet Edge",
+        "area_sqft": 0,
+        "area_acres": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.99735, 40.67335],
+            [-73.99690, 40.67347],
+            [-73.99682, 40.67334],
+            [-73.99727, 40.67322],
+            [-73.99735, 40.67335]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bs-02",
+        "name": "Union Street Catchment Run",
+        "zone": "Urban Edge",
+        "area_sqft": 0,
+        "area_acres": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.99598, 40.67446],
+            [-73.99552, 40.67460],
+            [-73.99543, 40.67445],
+            [-73.99590, 40.67432],
+            [-73.99598, 40.67446]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "bs-03",
+        "name": "9th Street Infiltration Pocket",
+        "zone": "Pollinator Edge",
+        "area_sqft": 0,
+        "area_acres": 0
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73.99485, 40.67266],
+            [-73.99442, 40.67277],
+            [-73.99433, 40.67260],
+            [-73.99476, 40.67249],
+            [-73.99485, 40.67266]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -6,6 +6,7 @@
 	<title>Rewilding Gowanus - Site Plan</title>
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
 	<link rel="stylesheet" href="/style.css">
 	<link rel="stylesheet" href="/css/site-plan.css">
 </head>
@@ -32,12 +33,23 @@
 					A remediated public ground organized as woodland core, wet edge, and pollinator field,
 					shown here as the project-wide spatial composition rather than a single isolated object.
 				</p>
+				<section class="site-plan-stats" aria-label="Bioswale metrics">
+					<p class="stats-title">Bioswale Metrics</p>
+					<div class="stats-grid">
+						<p><span>Total bioswale area</span><strong id="stat-area">--</strong></p>
+						<p><span>Estimated tree capacity</span><strong id="stat-trees">--</strong></p>
+						<p><span>Estimated canopy area</span><strong id="stat-canopy">--</strong></p>
+						<p><span>Estimated stormwater capture</span><strong id="stat-stormwater">--</strong></p>
+					</div>
+				</section>
 			</aside>
-			<div id="site-plan-canvas-container">
-				<!-- Three.js canvas will be injected here -->
+			<div id="site-plan-map-container">
+				<div id="site-plan-map" role="img" aria-label="Architectural site plan map"></div>
 			</div>
 		</section>
 	</main>
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+	<script src="/vendor/turf.min.js"></script>
 	<script type="module" src="/site-plan-main.js"></script>
 </body>
 </html>
