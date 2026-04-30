@@ -59,22 +59,15 @@
       border-radius: 12px;
       overflow: hidden;
       background: #f2eee7;
-      min-height: 860px;
     }
 
     .observable-frame iframe {
       width: 100%;
-      min-height: 860px;
+      height: 600px;
       border: 0;
       display: block;
       background: #f2eee7;
-    }
-
-    @media (max-width: 900px) {
-      .observable-frame,
-      .observable-frame iframe {
-        min-height: 720px;
-      }
+      overflow: hidden;
     }
   </style>
 </head>
@@ -100,7 +93,8 @@
           title="Gowanus Observable Drawing"
           allow="fullscreen"
           loading="eager"
-          src="https://observablehq.com/embed/4f11dfdf7a715ebe@622?cells=viewof+view%2CbldgDrawing2&api_key=a179cd31f7162f6ef1777ec6d823ac4e7db1f771&banner=false">
+          src="https://observablehq.com/embed/4f11dfdf7a715ebe@622?cells=viewof+view%2CbldgDrawing2&api_key=a179cd31f7162f6ef1777ec6d823ac4e7db1f771&banner=false"
+          scrolling="no">
         </iframe>
       </div>
     </section>
@@ -112,7 +106,8 @@
           title="Building Drawing"
           allow="fullscreen"
           loading="lazy"
-          src="https://observablehq.com/embed/3b74ad909b2fe86e?cells=bldgDrawing&banner=false">
+          src="https://observablehq.com/embed/3b74ad909b2fe86e?cells=bldgDrawing&banner=false"
+          scrolling="no">
         </iframe>
       </div>
     </section>
@@ -124,10 +119,33 @@
           title="Soil Diagram"
           allow="fullscreen"
           loading="lazy"
-          src="https://observablehq.com/embed/3b74ad909b2fe86e?cells=soilDiagram&banner=false">
+          src="https://observablehq.com/embed/3b74ad909b2fe86e?cells=soilDiagram&banner=false"
+          scrolling="no">
         </iframe>
       </div>
     </section>
   </main>
+<script>
+  // Auto-resize iframes to match their Observable canvas height
+  window.addEventListener('message', (event) => {
+    if (!event.origin.includes('observablehq.com')) return;
+    const data = event.data;
+    if (!data || typeof data !== 'object') return;
+
+    // Observable sends {type: 'observablehq:resize', height: N} or plain {height: N}
+    const height = data.height ?? (data.type === 'observablehq:resize' ? data.height : null);
+    if (!height || height < 100) return;
+
+    const iframes = document.querySelectorAll('.observable-frame iframe');
+    iframes.forEach((iframe) => {
+      try {
+        if (iframe.contentWindow === event.source) {
+          iframe.style.height = height + 'px';
+          iframe.closest('.observable-frame').style.height = height + 'px';
+        }
+      } catch (_) {}
+    });
+  });
+</script>
 </body>
 </html>
