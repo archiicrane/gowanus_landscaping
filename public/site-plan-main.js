@@ -214,7 +214,7 @@ function addArchitecturalLayers(map, datasets) {
     ],
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
-      'line-color': '#b8b5af',
+      'line-color': '#a8a5a0',
       'line-width': [
         'interpolate', ['linear'], ['zoom'],
         13, ['match', ['get', 'class'],
@@ -228,7 +228,7 @@ function addArchitecturalLayers(map, datasets) {
           10,
         ],
       ],
-      'line-opacity': 0.7,
+      'line-opacity': 0.75,
     },
   });
   // Road surface fill on top of casing
@@ -246,9 +246,9 @@ function addArchitecturalLayers(map, datasets) {
     paint: {
       'line-color': [
         'match', ['get', 'class'],
-        ['motorway', 'trunk', 'primary'], '#d0cdc6',
-        ['secondary', 'tertiary'], '#d4d0c9',
-        '#dbd8d2',
+        ['motorway', 'trunk', 'primary'], '#c8c5c0',
+        ['secondary', 'tertiary'], '#cccac4',
+        '#d2d0cb',
       ],
       'line-width': [
         'interpolate', ['linear'], ['zoom'],
@@ -273,13 +273,13 @@ function addArchitecturalLayers(map, datasets) {
     id: 'buildings-fill',
     type: 'fill',
     source: 'buildings',
-    paint: { 'fill-color': '#c2b09a', 'fill-opacity': 0.78 },
+    paint: { 'fill-color': '#e0deda', 'fill-opacity': 0.85 },
   });
   map.addLayer({
     id: 'buildings-outline',
     type: 'line',
     source: 'buildings',
-    paint: { 'line-color': '#9a8878', 'line-width': 0.75, 'line-opacity': 0.90 },
+    paint: { 'line-color': '#b8b5b0', 'line-width': 0.75, 'line-opacity': 0.90 },
   });
 
   // ── Study area mask: world polygon with bbox hole ───────────────────────
