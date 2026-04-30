@@ -208,7 +208,7 @@ function getSpeciesSvgPath(name, options = {}) {
   if (direct) return direct;
 
   if (options.isFauna) {
-    return FAUNA_SVG_MAP[normalized] || faunaFallbackSvgPath(normalized);
+    return null;
   }
 
   return null;
