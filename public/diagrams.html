@@ -56,7 +56,7 @@
 				</article>
 
 				<article class="metric-card">
-					<p class="metric-label">Estimated Water Retention</p>
+					<p class="metric-label">Annual Rainfall Intercepted</p>
 					<div id="waterMetric"></div>
 				</article>
 
@@ -99,17 +99,29 @@
 				</article>
 			</section>
 
-			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
+		<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
 				<article class="panel-card quiet-support-card">
 					<div class="panel-header">
 						<h2>Water Retention by Species</h2>
-						<p>Estimated retention capacity per dominant species.</p>
+						<p>Estimated soil storage capacity per dominant species.</p>
 					</div>
 					<div class="chart-wrap">
 						<canvas id="waterRetentionChart"></canvas>
 					</div>
 				</article>
 
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Annual Interception by Canopy Type</h2>
+						<p>Existing trees intercept rainfall before it becomes stormwater runoff. Wetland-adapted species have higher interception rates.</p>
+					</div>
+					<div class="chart-wrap">
+						<canvas id="waterCategoryChart"></canvas>
+					</div>
+				</article>
+			</section>
+
+			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
 				<article class="panel-card quiet-support-card">
 					<div class="panel-header">
 						<h2>Density by Block</h2>

@@ -66,15 +66,107 @@ function getBoundingBoxAreaKm2(trees) {
   return Math.abs(latKm * lonKm);
 }
 
-// ── Canopy + water retention estimates ──────────────────────────────────
+// ── Species-specific canopy lookup (mature canopy diameter in feet) ──────
+// Derived from NYC Parks tree species metadata. Keys lowercase-normalized.
+const SPECIES_CANOPY_FT = {
+  "'schubert' chokecherry": 25,
+  'american elm': 60,
+  'american linden': 65,
+  'amur maackia': 60,
+  'amur maple': 40,
+  'ash': 65,
+  'bald cypress': 50,
+  'black walnut': 62,
+  'blackgum': 40,
+  'bur oak': 75,
+  'callery pear': 40,
+  'cherry': 30,
+  'chinese chestnut': 50,
+  'chinese elm': 45,
+  'chinese fringetree': 20,
+  'common hackberry': 50,
+  'cornelian cherry': 20,
+  'crab apple': 28,
+  'crimson king maple': 40,
+  'douglas-fir': 85,
+  'eastern redbud': 25,
+  'english oak': 85,
+  'flowering dogwood': 22,
+  'ginkgo': 40,
+  'golden raintree': 35,
+  'green ash': 60,
+  'hardy rubber tree': 50,
+  'honeylocust': 50,
+  'japanese hornbeam': 25,
+  'japanese maple': 20,
+  'japanese snowbell': 25,
+  'japanese tree lilac': 25,
+  'japanese zelkova': 50,
+  'katsura tree': 50,
+  'kentucky coffeetree': 68,
+  'kentucky yellowwood': 40,
+  'littleleaf linden': 40,
+  'london planetree': 55,
+  'northern red oak': 68,
+  'oklahoma redbud': 20,
+  'pine': 75,
+  'pin oak': 55,
+  'pond cypress': 50,
+  'purple-leaf plum': 20,
+  'red maple': 50,
+  'schumard\'s oak': 60,
+  'siberian elm': 60,
+  'silver birch': 40,
+  'silver linden': 60,
+  'silver maple': 60,
+  'smoketree': 12,
+  'sophora': 40,
+  'sugar maple': 68,
+  'swamp white oak': 55,
+  'sweetgum': 68,
+  'tree of heaven': 50,
+  'white oak': 90,
+  'willow oak': 70,
+  'norway maple': 45,
+};
 
-function estimateCanopyDiameterMeters(dbhInches) {
-  if (!Number.isFinite(dbhInches) || dbhInches <= 0) return 12;
-  return Math.max(6, Math.min(18, 4 + dbhInches * 0.35));
+// Water retention category per species (High = tolerates flooding / wetland adapted)
+const SPECIES_WATER_CATEGORY = {
+  'american elm': 'High',
+  'blackgum': 'High',
+  'pond cypress': 'High',
+  'swamp white oak': 'High',
+  'bald cypress': 'High',
+  'red maple': 'High',
+  'pin oak': 'High',
+  'sweetgum': 'High',
+  'green ash': 'High',
+  'silver maple': 'High',
+};
+
+// Interception rate by category (fraction of rainfall captured annually)
+const INTERCEPTION_RATE = { High: 0.20, Medium: 0.14 };
+// NYC average annual rainfall: 46.5 inches
+const NYC_ANNUAL_RAINFALL_FT = 46.5 / 12;
+
+function speciesCanopyDiameterM(speciesName) {
+  const key = speciesName ? speciesName.toLowerCase().trim() : '';
+  const canopyFt = SPECIES_CANOPY_FT[key];
+  if (canopyFt) return canopyFt * 0.3048;
+  return 12; // default 12m (~40 ft) when species unknown
 }
 
-function estimateCanopyAreaM2(dbhInches) {
-  const diameter = estimateCanopyDiameterMeters(dbhInches);
+// ── Canopy + water retention estimates ──────────────────────────────────
+
+function estimateCanopyDiameterMeters(dbhInches, speciesName) {
+  if (Number.isFinite(dbhInches) && dbhInches > 0) {
+    return Math.max(6, Math.min(18, 4 + dbhInches * 0.35));
+  }
+  return speciesCanopyDiameterM(speciesName);
+}
+
+function estimateCanopyAreaM2(dbhInches, speciesName) {
+  const diameter = estimateCanopyDiameterMeters(dbhInches, speciesName);
   const radius = diameter / 2;
   return Math.PI * radius * radius;
 }
@@ -82,9 +174,20 @@ function estimateCanopyAreaM2(dbhInches) {
 const EFFECTIVE_SOIL_DEPTH_M = 0.9144;    // 3 ft
 const AVAILABLE_WATER_FRACTION = 0.20;
 
-function estimateWaterRetentionM3(dbhInches) {
-  const canopyArea = estimateCanopyAreaM2(dbhInches);
+function estimateWaterRetentionM3(dbhInches, speciesName) {
+  const canopyArea = estimateCanopyAreaM2(dbhInches, speciesName);
   return canopyArea * EFFECTIVE_SOIL_DEPTH_M * AVAILABLE_WATER_FRACTION;
+}
+
+// Annual rainfall interception in gallons (i-Tree simplified model)
+function estimateAnnualInterceptionGallons(speciesName, dbhInches) {
+  const key = speciesName ? speciesName.toLowerCase().trim() : '';
+  const category = SPECIES_WATER_CATEGORY[key] || 'Medium';
+  const rate = INTERCEPTION_RATE[category];
+  const canopyAreaM2 = estimateCanopyAreaM2(dbhInches, speciesName);
+  const canopyAreaFt2 = canopyAreaM2 * 10.7639;
+  const interceptedFt3 = canopyAreaFt2 * NYC_ANNUAL_RAINFALL_FT * rate;
+  return interceptedFt3 * 7.48052; // ft³ → gallons
 }
 
 // ── DOM helpers ──────────────────────────────────────────────────────────
@@ -724,6 +827,48 @@ function makeWaterRetentionChart(speciesRetentionEntries) {
   });
 }
 
+// Annual Interception by Water Category - donut chart
+function makeWaterCategoryChart(categoryInterception) {
+  const highGal   = categoryInterception.High   || 0;
+  const mediumGal = categoryInterception.Medium  || 0;
+  const total = highGal + mediumGal;
+
+  destroyChart('waterCategoryChart');
+  new Chart(document.getElementById('waterCategoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Wetland-Adapted (High)', 'Deciduous Shade (Medium)'],
+      datasets: [{
+        data: [
+          Number((highGal / 1000).toFixed(0)),
+          Number((mediumGal / 1000).toFixed(0))
+        ],
+        backgroundColor: ['#5a8fa3', '#9cae99'],
+        borderColor: 'rgba(86,73,53,0.18)',
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      ...baseChartOptions(),
+      cutout: '60%',
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 14, boxWidth: 14 } },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: {
+            label: (item) => {
+              const val = item.raw;
+              const pct = total > 0 ? ((val / (total / 1000)) * 100).toFixed(1) : 0;
+              return ` ${formatNumber(val, 0)}K gal/yr  (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
 // Tree Density by Block - bucket trees into ~100m lat/lon grid cells
 // (rounds lat/lon to 3 decimal places ≈ one city block)
 function makeDensityByBlockChart(trees) {
@@ -838,7 +983,7 @@ async function buildGowanusTreeDashboard() {
     const densityPerKm2   = studyAreaKm2 > 0 ? totalTrees / studyAreaKm2 : 0;
 
     const totalEstimatedCanopyM2 = sumBy(validTrees, (t) =>
-      estimateCanopyAreaM2(safeNumber(t.dbh))
+      estimateCanopyAreaM2(safeNumber(t.dbh), t.species)
     );
     const totalEstimatedCanopyHa = totalEstimatedCanopyM2 / 10000;
     const studyAreaM2 = studyAreaKm2 * 1_000_000;
@@ -847,14 +992,25 @@ async function buildGowanusTreeDashboard() {
       : 0;
 
     const totalEstimatedRetentionM3 = sumBy(validTrees, (t) =>
-      estimateWaterRetentionM3(safeNumber(t.dbh))
+      estimateWaterRetentionM3(safeNumber(t.dbh), t.species)
+    );
+
+    // Annual rainfall interception (gallons/year) using NYC precipitation data
+    const totalAnnualInterceptionGal = sumBy(validTrees, (t) =>
+      estimateAnnualInterceptionGallons(t.species, safeNumber(t.dbh))
     );
 
     const speciesRetention = {};
+    const categoryInterception = { High: 0, Medium: 0 };
     for (const tree of validTrees) {
       const species   = String(tree.species || 'Unknown').trim();
-      const retention = estimateWaterRetentionM3(safeNumber(tree.dbh));
+      const retention = estimateWaterRetentionM3(safeNumber(tree.dbh), species);
       speciesRetention[species] = (speciesRetention[species] || 0) + retention;
+
+      const catKey = species.toLowerCase().trim();
+      const cat = SPECIES_WATER_CATEGORY[catKey] || 'Medium';
+      categoryInterception[cat] = (categoryInterception[cat] || 0) +
+        estimateAnnualInterceptionGallons(species, safeNumber(tree.dbh));
     }
     const speciesRetentionEntries = sortEntriesDesc(speciesRetention);
 
@@ -872,8 +1028,12 @@ async function buildGowanusTreeDashboard() {
       'Trees per km²');
 
     renderMetric('waterMetric',
-      `${formatNumber(totalEstimatedRetentionM3, 0)} m³`,
-      `${formatNumber(totalEstimatedRetentionM3 * 1000, 0)} L storage`);
+      `${formatNumber(totalAnnualInterceptionGal / 1_000_000, 2)}M gal/yr`,
+      `${formatNumber(totalEstimatedRetentionM3, 0)} m³ soil storage`);
+
+    renderMetric('annualInterceptionMetric',
+      `${formatNumber(totalAnnualInterceptionGal / 1_000, 0)}K gal`,
+      'Intercepted annually (NYC 46.5″/yr avg)');
 
     renderMetric('studyAreaMetric',
       `${formatNumber(studyAreaKm2, 2)} km²`,
@@ -889,6 +1049,7 @@ async function buildGowanusTreeDashboard() {
     makeHealthChart(healthCounts);
     makeWaterRetentionChart(speciesRetentionEntries);
     makeDensityByBlockChart(validTrees);
+    makeWaterCategoryChart(categoryInterception);
 
   } catch (error) {
     console.error('Failed to build diagrams page:', error);
