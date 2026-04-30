@@ -6,6 +6,9 @@ Wet Edge,perennial,soft rush,proposed,added,ground,water uptake,small,phase_1,sh
 Wet Edge,perennial,blue flag iris,proposed,added,ground,wetland planting,small,phase_1,seasonal color and habitat
 Wet Edge,fauna,dragonfly,proposed,target_fauna,fauna,wetland indicator,small,phase_2,expected with improved habitat
 Wet Edge,fauna,red-winged blackbird,proposed,target_fauna,fauna,wetland bird presence,small,phase_3,possible seasonal use
+Wet Edge,fauna,american robin,proposed,target_fauna,fauna,edge habitat foraging,small,phase_2,observed blue-band fauna set
+Wet Edge,fauna,northern flicker,proposed,target_fauna,fauna,edge woodland transition use,small,phase_2,observed blue-band fauna set
+Wet Edge,fauna,yellow warbler,proposed,target_fauna,fauna,canal-edge nesting and forage,small,phase_2,observed blue-band fauna set
 Woodland Core,tree,red maple,proposed,added,canopy,seasonal canopy,large,phase_1,core canopy framework
 Woodland Core,tree,pin oak,proposed,added,canopy,shade and habitat,large,phase_1,long-term canopy structure
 Woodland Core,tree,serviceberry,proposed,added,understory_tree,pollinator support,medium,phase_1,flowering understory tree
@@ -14,6 +17,15 @@ Woodland Core,shrub,winterberry,proposed,added,understory,bird forage,small,phas
 Woodland Core,perennial,fern mix,proposed,added,ground,groundcover,small,phase_2,woodland layer
 Woodland Core,fauna,songbird,proposed,target_fauna,fauna,nesting habitat,small,phase_3,increased habitat quality
 Woodland Core,fauna,gray squirrel,proposed,target_fauna,fauna,woodland use,small,phase_3,more stable habitat use
+Woodland Core,fauna,northern mockingbird,proposed,target_fauna,fauna,urban woodland edge use,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,baltimore oriole,proposed,target_fauna,fauna,canopy foraging and nesting,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,northern cardinal,proposed,target_fauna,fauna,understory and edge habitat use,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,cooper's hawk,proposed,target_fauna,fauna,predator using woodland corridors,small,phase_3,observed woodland fauna set
+Woodland Core,fauna,eastern gray squirrel,proposed,target_fauna,fauna,woodland canopy and ground use,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,eastern chipmunk,proposed,target_fauna,fauna,ground-layer habitat use,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,eastern rabbit,proposed,target_fauna,fauna,edge forage and cover,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,white-footed mouse,proposed,target_fauna,fauna,ground habitat indicator,small,phase_2,observed woodland fauna set
+Woodland Core,fauna,raccoon,proposed,target_fauna,fauna,generalist urban woodland use,small,phase_2,observed woodland fauna set
 Pollinator Edge,tree,honeylocust,proposed,added,canopy,light shade,large,phase_1,filtered canopy at edge
 Pollinator Edge,tree,serviceberry,proposed,added,understory_tree,pollinator support,medium,phase_1,flowering support tree
 Pollinator Edge,shrub,bayberry,proposed,added,understory,bird and pollinator support,small,phase_2,edge habitat
@@ -23,3 +35,4 @@ Pollinator Edge,perennial,aster mix,proposed,added,ground,late season nectar,sma
 Pollinator Edge,perennial,goldenrod,proposed,added,ground,pollinator nectar,small,phase_2,late season support
 Pollinator Edge,fauna,native bee,proposed,target_fauna,fauna,pollination,small,phase_2,increased pollinator activity
 Pollinator Edge,fauna,monarch butterfly,proposed,target_fauna,fauna,host plant relationship,small,phase_3,expected with milkweed establishment
+Pollinator Edge,fauna,honeybee,proposed,target_fauna,fauna,pollination support,small,phase_2,observed pollinator fauna set
