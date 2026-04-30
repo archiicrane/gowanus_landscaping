@@ -63,12 +63,17 @@
 
     .observable-frame iframe {
       width: 100%;
-      height: 600px;
+      height: 600px; /* overridden per-iframe below */
       border: 0;
       display: block;
       background: #f2eee7;
       overflow: hidden;
     }
+
+    /* Per-canvas heights derived from Observable viewBox dimensions */
+    #frame-park    { height: 800px;  } /* bldgDrawing2: 1000×700 + viewof controls */
+    #frame-bldg    { height: 1040px; } /* bldgDrawing:  1000×1000 */
+    #frame-soil    { height: 540px;  } /* soilDiagram:  700×500 */
   </style>
 </head>
 <body class="drawings-page">
@@ -90,6 +95,7 @@
     <section class="drawings-panel">
       <div class="observable-frame">
         <iframe
+          id="frame-park"
           title="Gowanus Observable Drawing"
           allow="fullscreen"
           loading="eager"
@@ -103,6 +109,7 @@
       <p class="kicker">Building Drawing</p>
       <div class="observable-frame">
         <iframe
+          id="frame-bldg"
           title="Building Drawing"
           allow="fullscreen"
           loading="lazy"
@@ -116,6 +123,7 @@
       <p class="kicker">Soil Diagram</p>
       <div class="observable-frame">
         <iframe
+          id="frame-soil"
           title="Soil Diagram"
           allow="fullscreen"
           loading="lazy"
