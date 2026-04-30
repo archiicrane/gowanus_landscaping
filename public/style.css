@@ -177,8 +177,8 @@ main {
 .observable-modal-panel {
   position: relative;
   z-index: 1;
-  width: min(92vw, 1420px);
-  height: min(90vh, 1000px);
+  width: min(88vw, 1100px);
+  height: min(82vh, 820px);
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 24px 64px rgba(0,0,0,0.45);
