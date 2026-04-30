@@ -302,6 +302,23 @@ function wireLayerToggles(map) {
 		});
 		applyVisibility();
 	}
+
+	if (isAnalysisPage) {
+		window.setTimeout(() => {
+			const activeToggleId = toggles
+				.map(({ id }) => id)
+				.filter((id) => diagramByToggle[id])
+				.reverse()
+				.find((id) => document.getElementById(id)?.checked);
+
+			if (activeToggleId) {
+				lastUserToggleId = activeToggleId;
+				showRelatedDiagram(activeToggleId);
+			} else {
+				activateStoryPanel('story-existing');
+			}
+		}, 0);
+	}
 }
 
 function wireObservableOverlay(map) {
