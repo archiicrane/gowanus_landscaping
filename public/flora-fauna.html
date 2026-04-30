@@ -1,16 +1,16 @@
-﻿/* flora-diagram.js
+/* flora-diagram.js
    Renders the Flora & Fauna diagram in three modes:
      baseline  - reads gowanus_existing_flora_fauna.csv
      proposed  - reads gowanus_proposed_flora_fauna.csv
      growth    - reads gowanus_growth_timeline.csv (with year sub-tabs)
 */
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// -- Constants -------------------------------------------------------------
 
 const BANDS = [
-  { key: 'Wet Edge',       slug: 'wet',         subtitle: 'Tidal margin · stormwater edge' },
-  { key: 'Woodland Core',  slug: 'woodland',     subtitle: 'Interior canopy · understory structure' },
-  { key: 'Pollinator Edge',slug: 'pollinator',   subtitle: 'Open edge · flowering corridor' },
+  { key: 'Wet Edge',       slug: 'wet',         subtitle: 'Tidal margin � stormwater edge' },
+  { key: 'Woodland Core',  slug: 'woodland',     subtitle: 'Interior canopy � understory structure' },
+  { key: 'Pollinator Edge',slug: 'pollinator',   subtitle: 'Open edge � flowering corridor' },
 ];
 
 const LAYERS = [
@@ -119,7 +119,7 @@ const BAND_TOKEN_MAP = {
   pollinator: ['pollinator', 'bee', 'butterfly', 'nectar', 'flower']
 };
 
-// ── CSV parser ────────────────────────────────────────────────────────────
+// -- CSV parser ------------------------------------------------------------
 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
@@ -138,7 +138,7 @@ async function loadCSV(path) {
   return parseCSV(await res.text());
 }
 
-// ── Rendering helpers ─────────────────────────────────────────────────────
+// -- Rendering helpers -----------------------------------------------------
 
 function el(tag, cls, attrs = {}) {
   const e = document.createElement(tag);
@@ -256,7 +256,7 @@ function capitalise(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// ── Band row builder ───────────────────────────────────────────────────────
+// -- Band row builder -------------------------------------------------------
 
 function buildBandRow(band, layerData, faunaData, showPhase = false) {
   const row = el('div', 'band-row');
@@ -326,7 +326,7 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
   return row;
 }
 
-// ── Mode: Baseline ────────────────────────────────────────────────────────
+// -- Mode: Baseline --------------------------------------------------------
 
 function renderBaseline(rows, container) {
   container.innerHTML = '';
@@ -347,7 +347,7 @@ function renderBaseline(rows, container) {
   });
 }
 
-// ── Mode: Proposed ────────────────────────────────────────────────────────
+// -- Mode: Proposed --------------------------------------------------------
 
 function renderProposed(rows, container) {
   container.innerHTML = '';
@@ -368,7 +368,7 @@ function renderProposed(rows, container) {
   });
 }
 
-// ── Mode: Growth ──────────────────────────────────────────────────────────
+// -- Mode: Growth ----------------------------------------------------------
 
 function buildGrowthSpeciesItem(item) {
   const sizeCls = sizeClassFor(item.future_size);
@@ -435,7 +435,7 @@ function renderGrowth(rows, yearRange, container) {
   }
 }
 
-// ── Tab wiring ────────────────────────────────────────────────────────────
+// -- Tab wiring ------------------------------------------------------------
 
 function setActiveTab(tabs, active) {
   tabs.forEach(t => {
@@ -920,7 +920,7 @@ async function initProposalSankey() {
   }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
+// -- Init ------------------------------------------------------------------
 
 async function init() {
   initProposalSankey();
