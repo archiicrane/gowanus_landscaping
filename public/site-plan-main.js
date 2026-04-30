@@ -131,6 +131,30 @@ function renderMiniDashboard(stats, progress) {
   if (fill) fill.style.width = `${Math.max(0, Math.min(100, progress.proposedPct))}%`;
 }
 
+// Generate point features placed on a grid inside each bioswale polygon.
+// spacing in decimal degrees (~0.000054° ≈ 6 m at NYC latitude)
+function generateProposedTrees(bioswales) {
+  if (!window.turf || !bioswales?.features?.length) {
+    return { type: 'FeatureCollection', features: [] };
+  }
+  const LAT_STEP = 0.000054;  // ~6 m
+  const LNG_STEP = 0.000071;  // ~6 m at 40.7° N
+  const pts = [];
+  bioswales.features.forEach((poly) => {
+    if (!poly.geometry) return;
+    const [minX, minY, maxX, maxY] = window.turf.bbox(poly);
+    for (let lat = minY + LAT_STEP / 2; lat < maxY; lat += LAT_STEP) {
+      for (let lng = minX + LNG_STEP / 2; lng < maxX; lng += LNG_STEP) {
+        const pt = window.turf.point([lng, lat]);
+        if (window.turf.booleanPointInPolygon(pt, poly)) {
+          pts.push({ type: 'Feature', properties: { type: 'proposed' }, geometry: { type: 'Point', coordinates: [lng, lat] } });
+        }
+      }
+    }
+  });
+  return { type: 'FeatureCollection', features: pts };
+}
+
 function addArchitecturalLayers(map, datasets) {
   // ── Water: hatch fill + edge from Mapbox Streets v8 ────────────────────
   createWaterHatchPattern(map);
@@ -321,6 +345,22 @@ function addArchitecturalLayers(map, datasets) {
     type: 'line',
     source: 'bioswales',
     paint: { 'line-color': '#4f7d57', 'line-width': 2.2, 'line-opacity': 0.92 },
+  });
+
+  // ── Proposed trees: grid-placed inside bioswale polygons ─────────────────
+  const proposedTrees = generateProposedTrees(datasets.bioswales);
+  map.addSource('proposed-trees', { type: 'geojson', data: proposedTrees });
+  map.addLayer({
+    id: 'proposed-trees-circle',
+    type: 'circle',
+    source: 'proposed-trees',
+    paint: {
+      'circle-color': '#d4883a',
+      'circle-opacity': 0.85,
+      'circle-stroke-color': '#a05e1e',
+      'circle-stroke-width': 0.8,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.2, 16, 5],
+    },
   });
 }
 
