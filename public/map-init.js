@@ -29,14 +29,14 @@ export async function initMap() {
 	}
 
 	if (typeof mapboxgl === 'undefined') {
-		console.error('[MAP INIT] Mapbox GL JS is not loaded. Check the <script> tag in index.html.');
+		console.error('[MAP INIT] Mapbox GL JS is not loaded. Check the <script> tag in site-analysis.html.');
 		mapDiv.innerHTML = '<p style="color:#e05;padding:2rem">Mapbox GL JS failed to load. Check console.</p>';
 		return;
 	}
 
 	const token = await resolveMapboxToken();
 	if (!token) {
-		mapDiv.innerHTML = '<p style="color:#e05;padding:2rem">Mapbox token missing. Add your token to the &lt;meta name="mapbox-token"&gt; tag in index.html.</p>';
+		mapDiv.innerHTML = '<p style="color:#e05;padding:2rem">Mapbox token missing. Add your token to the &lt;meta name="mapbox-token"&gt; tag in site-analysis.html.</p>';
 		return;
 	}
 

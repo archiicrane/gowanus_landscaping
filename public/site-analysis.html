@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Rewilding Gowanus - Site Analysis</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+	<!-- Mapbox GL JS -->
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+	<link rel="stylesheet" href="/style.css" />
+	<link rel="stylesheet" href="/tree-info-panel.css" />
+</head>
+<body data-map-page="analysis">
+	<nav class="top-bar">
+		<span class="brand">Rewilding Gowanus</span>
+		<span class="nav-links">
+			<a href="/index.html" class="nav-btn">References</a>
+			<a href="/preceedence.html" class="nav-btn">Preceedence</a>
+			<a href="/site-analysis.html" class="nav-btn active">Site Analysis</a>
+			<a href="/site-plan.html" class="nav-btn">Site Plan</a>
+			<a href="/diagrams.html" class="nav-btn">Diagrams</a>
+			<a href="/flora-diagram.html" class="nav-btn">Flora</a>
+			<a href="/wildlife-corridor.html" class="nav-btn">Wildlife</a>
+		</span>
+	</nav>
+
+	<div id="map"></div>
+
+	<div id="observable-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Proposed Plan">
+		<div class="observable-modal-backdrop"></div>
+		<div class="observable-modal-panel">
+			<button class="observable-modal-close" aria-label="Close proposed plan">&#x2715;</button>
+			<iframe
+				title="Gowanus Proposed Plan"
+				frameborder="0"
+				allowtransparency="true"
+			src="https://observablehq.com/embed/4f11dfdf7a715ebe@622?cells=viewof+view%2CbldgDrawing2%2CforestInfo&api_key=a179cd31f7162f6ef1777ec6d823ac4e7db1f771&banner=false">
+			</iframe>
+		</div>
+	</div>
+
+	<div id="sub-top-bar">
+		<div id="layer-panel">
+			<p class="layer-panel-title">Layers</p>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-buildings" />
+				<span class="layer-dot" style="background:#9aa3ae"></span>
+				<span>Bldgs</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-trees" />
+				<span class="layer-dot" style="background:#7aab6e"></span>
+				<span>Trees</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-park" />
+				<span class="layer-dot" style="background:#4e7e5a"></span>
+				<span>Site</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-contours" />
+				<span class="layer-dot" style="background:#8e959f"></span>
+				<span>Contours</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-flood" />
+				<span class="layer-dot" style="background:#8da8b3"></span>
+				<span>Flood</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-cso" />
+				<span class="layer-dot" style="background:#c9863f"></span>
+				<span>CSO</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-remediation" checked />
+				<span class="layer-dot" style="background:#c23d3d"></span>
+				<span>Toxic Cleanup</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-heat" />
+				<span class="layer-dot" style="background:#6f8173"></span>
+				<span>Low Points</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-bioswale" />
+				<span class="layer-dot" style="background:#6f8a78"></span>
+				<span>Bioswales</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-bounding" checked />
+				<span class="layer-dot" style="background:#b26f57"></span>
+				<span>Boundary</span>
+			</label>
+			<label class="layer-toggle">
+				<input type="checkbox" id="toggle-observable" />
+				<span class="layer-dot" style="background:#79688f"></span>
+				<span>Observable</span>
+			</label>
+		</div>
+
+		<div id="mode-toggle">
+			<label for="mode-plan"><input type="radio" id="mode-plan" name="mode" value="renderedPlan" checked>Rendered Plan</label>
+			<label for="mode-analysis"><input type="radio" id="mode-analysis" name="mode" value="analysis">Analysis</label>
+		</div>
+	</div>
+
+	<div id="map-story-panels" aria-live="polite">
+		<section class="story-panel-group active" id="story-existing">
+			<article class="story-card">
+				<p class="story-eyebrow">Existing Size</p>
+				<h3>Gowanus Study Area</h3>
+				<p class="story-metric">2.79 km²</p>
+				<p class="story-note">Bounded site focus used for all clipped overlays and analysis layers.</p>
+			</article>
+			<article class="story-card">
+				<p class="story-eyebrow">History Snapshot</p>
+				<h3>Industrial Waterway Legacy</h3>
+				<p class="story-note">A dense, mixed-use district shaped by canal industry, fill, and evolving ecological pressures.</p>
+			</article>
+			<article class="story-card story-media-slot">
+				<p class="story-eyebrow">Image / SVG Slot</p>
+				<h3>Reference Board</h3>
+				<div class="story-media-frame">
+					<img src="/assets/Urban%20condition.svg" alt="Urban condition reference board" />
+				</div>
+			</article>
+		</section>
+
+		<section class="story-panel-group" id="story-bioswale">
+			<article class="story-card">
+				<p class="story-eyebrow">Bioswale Layer</p>
+				<h3>Opportunity Corridors</h3>
+				<p class="story-note">Street-edge opportunities are shown with flood context and contour influence.</p>
+			</article>
+			<article class="story-card">
+				<p class="story-eyebrow">Layer Stack</p>
+				<h3>Low Points + Topography + Flood</h3>
+				<p class="story-note">Contour-derived low points, 1ft contours, and flood polygons are staged together for bioswale siting review.</p>
+			</article>
+			<article class="story-card story-media-slot">
+				<p class="story-eyebrow">Image / SVG Slot</p>
+				<h3>Bioswale Detail Frame</h3>
+				<div class="story-media-frame">
+					<img src="/assets/bio-swale.svg" alt="Bioswale detail diagram" />
+				</div>
+			</article>
+		</section>
+	</div>
+
+	<!-- Hover tooltip -->
+	<div id="map-tooltip"></div>
+
+	<script type="module" src="/main.js"></script>
+</body>
+</html>
