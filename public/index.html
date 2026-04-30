@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -129,27 +129,110 @@
       <p>The diagrams now use both overview outline files as base maps and include the complete flora/fauna icon set you added. Pins below call out where the web image references are situated in the study context, then the full species library is rendered for direct diagram picking.</p>
     </section>
 
-    <section class="reference-panel">
-      <p class="kicker">Overview Outlines + Image Locations</p>
-      <div class="overview-grid">
-        <article class="overview-card">
-          <h3>Overview Site</h3>
-          <div class="overview-map">
-            <img src="/assets/svg-library/overview-site.svg" alt="Overview outline of the site" />
-            <span class="pin" style="left:28%;top:34%"></span><span class="pin-label" style="left:28%;top:34%">Img 1: July 2024 canal view</span>
-            <span class="pin alt" style="left:64%;top:41%"></span><span class="pin-label" style="left:64%;top:41%">Img 2: Union St bridge</span>
-            <span class="pin" style="left:47%;top:66%"></span><span class="pin-label" style="left:47%;top:66%">Img 3: 9th St corridor</span>
+    <section class="reference-panel site-conditions-board">
+      <style>
+        .site-conditions-board { padding: 28px 28px 32px; }
+        .scb-header { margin-bottom: 22px; border-bottom: 1px solid rgba(86,73,53,0.12); padding-bottom: 16px; }
+        .scb-title { font-family: var(--font-display); font-size: clamp(16px, 2vw, 24px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink); margin: 4px 0 6px; }
+        .scb-subtitle { font-size: 12px; color: var(--ink-muted); line-height: 1.6; margin: 0; max-width: 70ch; }
+        .scb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; position: relative; }
+        .scb-grid::after { content: ''; position: absolute; top: 50%; left: calc(50% - 12px); width: 24px; height: 0; border-top: 1.5px dashed rgba(86,73,53,0.22); pointer-events: none; z-index: 1; }
+        .scb-panel { border: 1px solid rgba(86,73,53,0.13); border-radius: 12px; background: rgba(255,255,255,0.42); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+        .scb-panel-title { font-family: var(--font-display); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin: 0 0 2px; }
+        .scb-panel-title.ecology  { color: #4a7a5a; }
+        .scb-panel-title.pressure { color: #b87240; }
+        .scb-panel-sub { font-size: 11px; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+        .scb-map { position: relative; border-radius: 8px; overflow: hidden; background: linear-gradient(180deg, #f5f1ea, #ece5d9); border: 1px solid rgba(86,73,53,0.10); }
+        .scb-map img { width: 100%; height: auto; display: block; object-fit: contain; }
+        .scb-pin { position: absolute; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-display); color: #fff; transform: translate(-50%,-50%); box-shadow: 0 1px 6px rgba(0,0,0,0.2); z-index: 2; }
+        .scb-pin.ecology  { background: #4a7a5a; }
+        .scb-pin.pressure { background: #b87240; }
+        .scb-pin.zone     { background: #b8617a; }
+        .scb-callouts { display: flex; flex-direction: column; gap: 8px; }
+        .scb-callout { display: flex; align-items: flex-start; gap: 10px; }
+        .scb-callout-num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; font-family: var(--font-display); color: #fff; }
+        .scb-callout-num.ecology  { background: #4a7a5a; }
+        .scb-callout-num.pressure { background: #b87240; }
+        .scb-callout-num.zone     { background: #b8617a; }
+        .scb-callout-label { font-size: 11.5px; font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.2; display: block; }
+        .scb-callout-note  { font-size: 10.5px; color: var(--ink-muted); line-height: 1.4; display: block; }
+        .scb-legend { display: flex; gap: 18px; flex-wrap: wrap; padding-top: 18px; margin-top: 4px; border-top: 1px solid rgba(86,73,53,0.10); }
+        .scb-legend-item { display: flex; align-items: center; gap: 7px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-muted); }
+        .scb-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .scb-legend-dot.ecology  { background: #4a7a5a; }
+        .scb-legend-dot.pressure { background: #b87240; }
+        .scb-legend-dot.zone     { background: #b8617a; }
+        .scb-legend-hatch { width: 14px; height: 10px; background: repeating-linear-gradient(45deg,rgba(86,73,53,0.3) 0,rgba(86,73,53,0.3) 1px,transparent 1px,transparent 4px); border: 1px solid rgba(86,73,53,0.25); border-radius: 2px; flex-shrink: 0; }
+        @media (max-width: 860px) { .scb-grid { grid-template-columns: 1fr; } .scb-grid::after { display: none; } }
+      </style>
+
+      <div class="scb-header">
+        <p class="kicker">Site Analysis</p>
+        <h2 class="scb-title">Site Conditions + Image References</h2>
+        <p class="scb-subtitle">Wildlife presence, urban pressure, circulation corridors, and landscape opportunities across the Gowanus study area.</p>
+      </div>
+
+      <div class="scb-grid">
+        <div class="scb-panel">
+          <div>
+            <p class="scb-panel-title ecology">Existing Conditions</p>
+            <p class="scb-panel-sub">Ecological context &middot; as found &middot; July 2024</p>
           </div>
-        </article>
-        <article class="overview-card">
-          <h3>Overview Site (Zoomed In)</h3>
-          <div class="overview-map">
-            <img src="/assets/svg-library/overview-site-zoomedin.svg" alt="Zoomed in overview outline of the site" />
-            <span class="pin alt" style="left:36%;top:36%"></span><span class="pin-label" style="left:36%;top:36%">Img 4: waterfront edge</span>
-            <span class="pin" style="left:70%;top:52%"></span><span class="pin-label" style="left:70%;top:52%">Bioswale opportunity run</span>
-            <span class="pin alt" style="left:50%;top:22%"></span><span class="pin-label" style="left:50%;top:22%">Urban pressure cluster</span>
+          <div class="scb-map">
+            <img src="/assets/svg-library/overview-site.svg" alt="Overview site outline" />
+            <span class="scb-pin ecology"  style="left:28%;top:34%">01</span>
+            <span class="scb-pin ecology"  style="left:64%;top:41%">02</span>
+            <span class="scb-pin pressure" style="left:47%;top:66%">03</span>
           </div>
-        </article>
+          <div class="scb-callouts">
+            <div class="scb-callout">
+              <span class="scb-callout-num ecology">01</span>
+              <div><span class="scb-callout-label">Canal Edge Habitat</span><span class="scb-callout-note">July 2024 &middot; tidal margin + phragmites colonisation</span></div>
+            </div>
+            <div class="scb-callout">
+              <span class="scb-callout-num ecology">02</span>
+              <div><span class="scb-callout-label">Urban Crossing Route</span><span class="scb-callout-note">Union St bridge &middot; primary wildlife crossing vector</span></div>
+            </div>
+            <div class="scb-callout">
+              <span class="scb-callout-num pressure">03</span>
+              <div><span class="scb-callout-label">9th Street Corridor</span><span class="scb-callout-note">High traffic edge &middot; fragmentation pressure zone</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scb-panel">
+          <div>
+            <p class="scb-panel-title pressure">Intervention Zones</p>
+            <p class="scb-panel-sub">Opportunity sites &middot; proposed ecology &middot; programme zones</p>
+          </div>
+          <div class="scb-map">
+            <img src="/assets/svg-library/overview-site-zoomedin.svg" alt="Zoomed overview site" />
+            <span class="scb-pin zone"     style="left:36%;top:36%">04</span>
+            <span class="scb-pin ecology"  style="left:70%;top:52%">05</span>
+            <span class="scb-pin pressure" style="left:50%;top:22%">06</span>
+          </div>
+          <div class="scb-callouts">
+            <div class="scb-callout">
+              <span class="scb-callout-num zone">04</span>
+              <div><span class="scb-callout-label">Waterfront Restoration Edge</span><span class="scb-callout-note">Gowanus Waterfront Park &middot; soft edge regrading zone</span></div>
+            </div>
+            <div class="scb-callout">
+              <span class="scb-callout-num ecology">05</span>
+              <div><span class="scb-callout-label">Bioswale Opportunity Run</span><span class="scb-callout-note">Street-level stormwater capture &middot; low-point alignment</span></div>
+            </div>
+            <div class="scb-callout">
+              <span class="scb-callout-num pressure">06</span>
+              <div><span class="scb-callout-label">Urban Pressure Cluster</span><span class="scb-callout-note">Rezoning boundary &middot; development displacement risk</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scb-legend">
+        <div class="scb-legend-item"><span class="scb-legend-dot ecology"></span> Ecology / Habitat</div>
+        <div class="scb-legend-item"><span class="scb-legend-dot pressure"></span> Urban Pressure</div>
+        <div class="scb-legend-item"><span class="scb-legend-dot zone"></span> Intervention Zone</div>
+        <div class="scb-legend-item"><span class="scb-legend-hatch"></span> Study Area</div>
       </div>
     </section>
 
@@ -317,7 +400,7 @@
           <img src="${path}" alt="${label} SVG" />
         </div>
         <p class="flora-name">${label}</p>
-        <p class="flora-kind">${kind} • ${habitat.name}</p>
+        <p class="flora-kind">${kind} � ${habitat.name}</p>
       `;
       floraGrid.appendChild(card);
     });
