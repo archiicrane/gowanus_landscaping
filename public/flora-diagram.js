@@ -334,11 +334,6 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
 function renderBaseline(rows, container) {
   container.innerHTML = '';
 
-  // Header note explaining the view
-  const note = el('div', 'baseline-note');
-  note.textContent = 'All existing and contextually present species shown by ecological layer — not separated by design zone, as the proposed zones reflect future intent.';
-  container.appendChild(note);
-
   // Single unified band-row spanning all rows
   const row = el('div', 'band-row');
 
