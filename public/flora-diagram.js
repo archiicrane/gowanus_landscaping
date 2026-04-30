@@ -327,24 +327,86 @@ function buildBandRow(band, layerData, faunaData, showPhase = false) {
 }
 
 // ── Mode: Baseline ────────────────────────────────────────────────────────
+// Baseline shows all existing flora/fauna in a single unified view by layer
+// (not split by design zones — those zones are a proposed design intent, not
+// how the existing plants actually grow on site).
 
 function renderBaseline(rows, container) {
   container.innerHTML = '';
-  BANDS.forEach(band => {
-    const bandRows = rows.filter(r => r.zone === band.key);
-    const layerData = {};
-    LAYERS.forEach(l => {
-      layerData[l.key] = bandRows.filter(r =>
-        r.category !== 'fauna' && (
-          r.canopy_class === l.key ||
-          (l.key === 'shrub' && r.canopy_class === 'understory') ||
-          (l.key === 'understory_tree' && r.canopy_class === 'understory_tree')
-        )
+
+  // Header note explaining the view
+  const note = el('div', 'baseline-note');
+  note.textContent = 'All existing and contextually present species shown by ecological layer — not separated by design zone, as the proposed zones reflect future intent.';
+  container.appendChild(note);
+
+  // Single unified band-row spanning all rows
+  const row = el('div', 'band-row');
+
+  // Label column
+  const lc = el('div', 'band-label-col wet');
+  const nm = el('p', 'band-name'); nm.textContent = 'Existing Ecology';
+  const sub = el('p', 'band-subtitle'); sub.textContent = 'All species present on or adjacent to site';
+  lc.appendChild(nm);
+  lc.appendChild(sub);
+  row.appendChild(lc);
+
+  const content = el('div', 'band-content');
+  content.style.gridTemplateColumns = 'repeat(4, 1fr) 1fr';
+
+  LAYERS.forEach(layer => {
+    const col = el('div', 'layer-col');
+    col.dataset.layerName = normalizeName(layer.label);
+    col.dataset.layerKey = normalizeName(layer.key);
+    const hd = el('p', 'layer-heading'); hd.textContent = layer.label;
+    col.appendChild(hd);
+
+    const items = rows.filter(r =>
+      r.category !== 'fauna' && (
+        r.canopy_class === layer.key ||
+        (layer.key === 'shrub' && r.canopy_class === 'understory') ||
+        (layer.key === 'understory_tree' && r.canopy_class === 'understory_tree')
+      )
+    );
+    items.forEach(item => {
+      const si = buildSpeciesItem(
+        item.name,
+        item.ecological_role,
+        layerClassFor(item.canopy_class || layer.key),
+        sizeClassFor(item.diagram_size),
+        null,
+        getSpeciesSvgPath(item.name)
       );
+      // Tag which zone this plant is associated with as a subtle label
+      const zoneLbl = el('span', 'baseline-zone-tag');
+      zoneLbl.textContent = item.zone || '';
+      si.querySelector('.species-info').appendChild(zoneLbl);
+      col.appendChild(si);
     });
-    const faunaData = bandRows.filter(r => r.category === 'fauna');
-    container.appendChild(buildBandRow(band, layerData, faunaData, false));
+
+    content.appendChild(col);
   });
+
+  // Fauna column
+  const faunaCol = el('div', 'layer-col');
+  faunaCol.dataset.layerName = 'fauna';
+  faunaCol.dataset.layerKey = 'fauna';
+  const fhd = el('p', 'layer-heading'); fhd.textContent = 'Fauna';
+  faunaCol.appendChild(fhd);
+  rows.filter(r => r.category === 'fauna').forEach(item => {
+    const si = buildSpeciesItem(
+      item.name,
+      item.ecological_role,
+      'lc-fauna',
+      sizeClassFor(item.diagram_size),
+      null,
+      getSpeciesSvgPath(item.name, { isFauna: true })
+    );
+    faunaCol.appendChild(si);
+  });
+  content.appendChild(faunaCol);
+
+  row.appendChild(content);
+  container.appendChild(row);
 }
 
 // ── Mode: Proposed ────────────────────────────────────────────────────────

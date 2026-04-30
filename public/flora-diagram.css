@@ -359,6 +359,30 @@
 }
 
 /* ── Band row ───────────────────────────────────────────────────────────── */
+
+/* Baseline-mode note bar */
+.baseline-note {
+  font-size: 12px;
+  color: var(--ink-muted);
+  font-style: italic;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  border-left: 3px solid var(--glass-panel-border);
+  background: var(--glass-panel-bg);
+  border-radius: 4px;
+}
+
+/* Small zone tag shown on each species card in baseline mode */
+.baseline-zone-tag {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-top: 2px;
+  opacity: 0.7;
+}
+
 .band-row {
   display: grid;
   grid-template-columns: 140px 1fr;
