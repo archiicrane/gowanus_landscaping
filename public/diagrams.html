@@ -7,6 +7,7 @@
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="stylesheet" href="/style.css" />
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="/vendor/turf.min.js"></script>
 </head>
 <body class="diagrams-page">
 	<nav class="top-bar">
@@ -27,14 +28,75 @@
 		<section class="board-section board-intro" id="section-intro">
 			<div class="diagrams-header">
 				<p class="eyebrow">Environmental Analysis</p>
-				<h1>Gowanus — Existing Conditions &amp; Rewilding Scenario</h1>
-				<p class="diagrams-intro">
-					Spatial analysis drawn from mapped GeoJSON layers: street trees, buildings,
-					flood vulnerability, stormwater outfalls, and proposed planting data.
-					All values calculated directly from geometry and attributes.
-				</p>
-			</div>
-			<div id="diagramError" class="diagram-error" style="display: none;"></div>
+					<h1>Gowanus — Existing Conditions &amp; Rewilding Scenario</h1>
+					<p class="diagrams-intro">
+						Spatial analysis drawn from mapped GeoJSON layers: street trees, buildings,
+						flood vulnerability, stormwater outfalls, and proposed planting data.
+						The central question: how does Gowanus move from ~4% existing canopy cover
+						to the NYC Urban Forest Agenda target of 30%?
+					</p>
+				</div>
+				<div id="diagramError" class="diagram-error" style="display: none;"></div>
+			</section>
+
+			<!-- ── Canopy Coverage Goal ──────────────────────────────────────────────── -->
+			<section class="board-section board-canopy-goal" id="section-canopy-goal">
+				<div class="board-header-row">
+					<p class="eyebrow">Ecological Performance</p>
+					<h2>Canopy Coverage: 4% → 30%</h2>
+					<p class="board-subhead">Gowanus holds ~4% canopy coverage from mapped street trees — against NYC's 30% Urban Forest Agenda target. Closing the gap requires strategic rewilding across open land, bioswale corridors, and contamination-cleared zones. Site area and building footprints computed with Turf.js from the mapped datasets.</p>
+				</div>
+				<section class="metrics-grid">
+					<article class="metric-card metric-card--accent">
+						<p class="metric-label">Existing Canopy</p>
+						<div id="canopyGoalExistingMetric"></div>
+					</article>
+					<article class="metric-card">
+						<p class="metric-label">NYC 2030 Target</p>
+						<div id="canopyGoalTargetMetric"></div>
+					</article>
+					<article class="metric-card">
+						<p class="metric-label">Coverage Gap</p>
+						<div id="canopyGoalGapMetric"></div>
+					</article>
+					<article class="metric-card">
+						<p class="metric-label">Study Corridor</p>
+						<div id="canopyGoalStudyMetric"></div>
+					</article>
+					<article class="metric-card">
+						<p class="metric-label">Bioswale Opportunity</p>
+						<div id="canopyGoalBioswaleMetric"></div>
+					</article>
+					<article class="metric-card">
+						<p class="metric-label">Industrial Parcels</p>
+						<div id="canopyGoalIndustrialMetric"></div>
+					</article>
+				</section>
+				<section class="charts-grid supporting-diagram-grid">
+					<article class="panel-card">
+						<div class="panel-header">
+							<h2>Canopy Coverage Gap</h2>
+							<p>Street tree canopy today vs the 30% NYC Urban Forest Agenda target. The gap — 25.9 pp — represents the scale of rewilding needed across the corridor.</p>
+						</div>
+						<div class="chart-wrap chart-wrap--short"><canvas id="canopyGapChart"></canvas></div>
+					</article>
+				</section>
+				<section class="charts-grid two-col supporting-diagram-grid">
+					<article class="panel-card">
+						<div class="panel-header">
+							<h2>Rewilding Scenarios</h2>
+							<p>Cumulative canopy coverage under five intervention scenarios, from existing street trees to full rewilding. Each step adds structural planting across a new zone type.</p>
+						</div>
+						<div class="chart-wrap"><canvas id="canopyScenariosChart"></canvas></div>
+					</article>
+					<article class="panel-card">
+						<div class="panel-header">
+							<h2>Land Cover Breakdown</h2>
+							<p>Estimated land cover distribution across the study corridor, derived from building footprints (Turf.js area sums) and established canopy data.</p>
+						</div>
+						<div class="chart-wrap"><canvas id="landCoverChart"></canvas></div>
+					</article>
+				</section>
 		</section>
 
 		<!-- ── Tree Baseline Metrics ──────────────────────────────── -->
@@ -192,6 +254,30 @@
 						<p>DEP-mapped outfalls within the Gowanus study corridor. CSO = Combined Sewer Overflow, the highest pollutant load type.</p>
 					</div>
 					<div class="chart-wrap"><canvas id="outfallTypesChart"></canvas></div>
+				</article>
+			</section>
+		</section>
+
+		<!-- ── Planting Suitability ──────────────────────────────── -->
+		<section class="board-section" id="section-suitability">
+			<div class="board-header-row">
+				<p class="eyebrow">Site Constraints</p>
+				<h2>Planting Suitability &amp; Bioswale Opportunity</h2>
+			</div>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Soil Suitability by Zone Type</h2>
+						<p>Derived from industrial building footprints and 50 m CSO outfall proximity buffers. Industrial parcels require soil remediation; CSO-adjacent zones suit capped raised-bed planting. Remaining open land is suitable for direct ground planting.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="plantingSuitabilityChart"></canvas></div>
+				</article>
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Bioswale Opportunity by Zone</h2>
+						<p>Open corridor land ranked by planting type. Flood-vulnerable open land scores highest for green infrastructure. Industrial and CSO-affected land requires prior remediation. Building footprints excluded.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="bioswaleScoreChart"></canvas></div>
 				</article>
 			</section>
 		</section>

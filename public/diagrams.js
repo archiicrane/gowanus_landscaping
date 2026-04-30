@@ -1461,9 +1461,388 @@ async function buildGowanusTreeDashboard() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ── Canopy Performance Dashboard ─────────────────────────────────────────
+// Uses Turf.js (loaded as global via <script src="/vendor/turf.min.js">)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CANOPY_SCENARIOS = [
+  { label: 'Existing Street Trees', pct: 4.1,  note: '1,017 mapped corridor trees' },
+  { label: '+ Street Tree Expansion', pct: 10,   note: '+500 trees along sidewalk corridors' },
+  { label: '+ Bioswale Planting',     pct: 16,   note: 'Wet-edge & riparian species, 3 bands' },
+  { label: '+ Woodland Core',         pct: 22,   note: 'Dense canopy in proposed planting zones' },
+  { label: 'Full Rewilding Target',   pct: 30,   note: 'NYC Urban Forest Agenda 30% goal' },
+];
+
+async function buildCanopyDashboard() {
+  try {
+    const [buildingGeo, outfallGeo, treesRaw] = await Promise.all([
+      loadGeoJSON('/data/gowanus-buildings.geojson'),
+      loadGeoJSON('/data/Citywide_Outfalls_20260416.geojson'),
+      loadTreeData(),
+    ]);
+
+    const validTrees = treesRaw.filter(
+      t => safeNumber(t.lat) !== null && safeNumber(t.lon) !== null
+    );
+
+    // Study area: convex hull of all mapped tree points (more accurate than bbox)
+    const treeFC = turf.featureCollection(validTrees.map(t => turf.point([t.lon, t.lat])));
+    const studyHull = turf.convex(treeFC);
+    const studyAreaM2 = turf.area(studyHull);
+    const studyAreaHa = studyAreaM2 / 10000;
+
+    // Canopy constants — 4.1% is the established NYC figure for Gowanus street trees;
+    // 30% is the NYC Urban Forest Agenda target.
+    const EXISTING_PCT = 4.1;
+    const TARGET_PCT   = 30;
+    const existingCanopyM2 = studyAreaM2 * (EXISTING_PCT / 100);
+    const targetCanopyM2   = studyAreaM2 * (TARGET_PCT   / 100);
+    const gapPct = TARGET_PCT - EXISTING_PCT;
+    const gapHa  = (targetCanopyM2 - existingCanopyM2) / 10000;
+
+    // Building footprints inside study hull
+    // Use centroid-in-polygon test for performance (booleanPointInPolygon is O(n) per building)
+    const buildingsInStudy = buildingGeo.features.filter(b => {
+      try {
+        const ring = b.geometry.coordinates[0];
+        if (!ring || ring.length < 3) return false;
+        const cx = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+        const cy = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+        return turf.booleanPointInPolygon(turf.point([cx, cy]), studyHull);
+      } catch { return false; }
+    });
+
+    const buildingFootprintM2 = buildingsInStudy.reduce((s, b) => {
+      try { return s + turf.area(b); } catch { return s; }
+    }, 0);
+
+    // Industrial buildings (OSM tags: industrial / warehouse) — contamination proxy
+    const industrialBuildings = buildingsInStudy.filter(b =>
+      ['industrial', 'warehouse'].includes((b.properties || {}).building)
+    );
+    const industrialM2 = industrialBuildings.reduce((s, b) => {
+      try { return s + turf.area(b); } catch { return s; }
+    }, 0);
+
+    // CSO outfalls inside study hull — each buffered 50 m as contamination zone proxy
+    const CSO_RADIUS_M = 50;
+    const csoFeats = outfallGeo.features.filter(f => {
+      try {
+        return (f.properties || {}).outfall_ty === 'CSO' &&
+          turf.booleanPointInPolygon(f, studyHull);
+      } catch { return false; }
+    });
+    const csoZoneM2 = csoFeats.length * Math.PI * CSO_RADIUS_M * CSO_RADIUS_M;
+
+    // Open land & suitability zones
+    const openLandM2        = Math.max(0, studyAreaM2 - buildingFootprintM2);
+    const remediationM2     = Math.min(industrialM2, studyAreaM2 * 0.15);
+    const cappedM2          = Math.min(csoZoneM2, studyAreaM2 * 0.08);
+    const suitableM2        = Math.max(0, openLandM2 - remediationM2 - cappedM2);
+    const bioswaleOppM2     = suitableM2;
+
+    // ── Metrics
+    renderMetric('canopyGoalExistingMetric',  `${EXISTING_PCT}%`, 'corridor street tree canopy');
+    renderMetric('canopyGoalTargetMetric',    `${TARGET_PCT}%`,   'NYC Urban Forest Agenda');
+    renderMetric('canopyGoalGapMetric',       `${gapPct.toFixed(0)}%`, `${formatNumber(gapHa, 0)} ha to plant`);
+    renderMetric('canopyGoalStudyMetric',     `${formatNumber(studyAreaHa, 0)} ha`, 'study corridor');
+    renderMetric('canopyGoalBioswaleMetric',  `${formatNumber(bioswaleOppM2 / 10000, 0)} ha`, 'open non-industrial land');
+    renderMetric('canopyGoalIndustrialMetric',`${industrialBuildings.length}`, 'industrial parcels in corridor');
+
+    // ── Charts
+    makeCanopyGapChart(EXISTING_PCT, TARGET_PCT);
+    makeCanopyScenariosChart();
+    makeLandCoverChart(studyAreaM2, existingCanopyM2, buildingFootprintM2);
+    makePlantingSuitabilityChart(suitableM2, cappedM2, remediationM2, buildingFootprintM2);
+    makeBioswaleScoreChart(bioswaleOppM2, csoZoneM2, industrialM2, buildingFootprintM2);
+
+  } catch (err) {
+    console.error('Canopy dashboard error:', err);
+  }
+}
+
+// ── Canopy Gap — single horizontal stacked bar ────────────────────────────
+
+function makeCanopyGapChart(existingPct, targetPct) {
+  const gapPct    = targetPct - existingPct;
+  const beyondPct = 100 - targetPct;
+
+  // Inline plugin draws the 30% dashed target line without a separate annotation lib
+  const targetLinePlugin = {
+    id: 'canopyTargetLine',
+    afterDraw(chart) {
+      const ctx    = chart.ctx;
+      const xScale = chart.scales.x;
+      const meta   = chart.getDatasetMeta(0);
+      if (!meta.data[0]) return;
+      const bar = meta.data[0];
+      const x   = xScale.getPixelForValue(targetPct);
+      const top    = bar.y - bar.height / 2 - 10;
+      const bottom = bar.y + bar.height / 2 + 10;
+      ctx.save();
+      ctx.setLineDash([5, 3]);
+      ctx.strokeStyle = 'rgba(79,127,99,0.85)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(79,127,99,0.9)';
+      ctx.font = "10px 'Barlow Condensed', Barlow, sans-serif";
+      ctx.textAlign = 'left';
+      ctx.fillText('30% target', x + 5, top + 3);
+      ctx.restore();
+    }
+  };
+
+  destroyChart('canopyGapChart');
+  new Chart(document.getElementById('canopyGapChart'), {
+    type: 'bar',
+    plugins: [targetLinePlugin],
+    data: {
+      labels: ['Canopy coverage'],
+      datasets: [
+        {
+          label: `Existing  ${existingPct}%`,
+          data: [existingPct],
+          backgroundColor: 'rgba(100,130,105,0.85)',
+          borderColor: 'rgba(100,130,105,1)',
+          borderWidth: 0,
+          barThickness: 42,
+        },
+        {
+          label: `Gap to 30%  (${gapPct.toFixed(1)} pp)`,
+          data: [gapPct],
+          backgroundColor: 'rgba(100,130,105,0.13)',
+          borderColor: 'rgba(100,130,105,0.42)',
+          borderWidth: 1,
+          barThickness: 42,
+        },
+        {
+          label: 'Beyond target',
+          data: [beyondPct],
+          backgroundColor: 'rgba(170,162,150,0.07)',
+          borderWidth: 0,
+          barThickness: 42,
+        },
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          stacked: true,
+          max: 100,
+          ticks: { callback: v => `${v}%`, color: chartFontColor(), font: { size: 11 } },
+          grid: { color: chartGridColor() }
+        },
+        y: { stacked: true, display: false }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: chartFontColor(), boxWidth: 12, padding: 16, font: { size: 11 } }
+        },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: i => ` ${i.dataset.label}` }
+        }
+      }
+    }
+  });
+}
+
+// ── Canopy Scenarios — horizontal bar per rewilding step ──────────────────
+
+function makeCanopyScenariosChart() {
+  const labels = CANOPY_SCENARIOS.map(s => s.label);
+  const values = CANOPY_SCENARIOS.map(s => s.pct);
+  const notes  = CANOPY_SCENARIOS.map(s => s.note);
+  const alphas = [0.42, 0.54, 0.66, 0.78, 0.92];
+
+  destroyChart('canopyScenariosChart');
+  new Chart(document.getElementById('canopyScenariosChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Canopy coverage (%)',
+        data: values,
+        backgroundColor: alphas.map(a => `rgba(79,127,99,${a})`),
+        borderColor:      alphas.map(a => `rgba(79,127,99,${Math.min(a + 0.1, 1)})`),
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          max: 32,
+          ticks: { callback: v => `${v}%`, color: chartFontColor(), font: { size: 11 } },
+          grid: { color: chartGridColor() },
+          title: { display: true, text: 'Canopy Coverage (%)', color: chartFontColor(), font: { size: 10 } }
+        },
+        y: {
+          ticks: { color: chartFontColor(), font: { size: 11 } },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: {
+            title: items => `${items[0].raw}% canopy`,
+            label: items => ` ${notes[items.dataIndex]}`
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Land Cover Breakdown — donut ──────────────────────────────────────────
+
+function makeLandCoverChart(studyAreaM2, canopyM2, buildingM2) {
+  const openM2 = Math.max(0, studyAreaM2 - canopyM2 - buildingM2);
+  const toHa = m2 => Math.round(m2 / 10000);
+  const studyHa = studyAreaM2 / 10000;
+
+  const labels = ['Building Footprint', 'Existing Canopy', 'Open / Permeable Land'];
+  const values = [toHa(buildingM2), toHa(canopyM2), toHa(openM2)];
+  const colors = ['#8a7d6d', '#9cae99', '#c5bfb3'];
+
+  destroyChart('landCoverChart');
+  new Chart(document.getElementById('landCoverChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors, borderColor: '#f2eee7', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '58%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 12, boxWidth: 12 } },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: {
+            label: i => {
+              const pct = studyHa > 0 ? ((i.raw / studyHa) * 100).toFixed(1) : '—';
+              return ` ${formatNumber(i.raw)} ha  (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Planting Suitability — donut ──────────────────────────────────────────
+
+function makePlantingSuitabilityChart(suitableM2, cappedM2, remediationM2, buildingM2) {
+  const toHa = m2 => Math.max(0, Math.round(m2 / 10000));
+  const labels = [
+    'Direct Planting (Suitable)',
+    'Capped / Raised Beds (Near CSO)',
+    'Remediation Required (Industrial)',
+    'Building Footprint (Excluded)',
+  ];
+  const values = [toHa(suitableM2), toHa(cappedM2), toHa(remediationM2), toHa(buildingM2)];
+  const colors = ['#9cae99', '#c5a882', '#8a7d6d', '#c5bfb3'];
+  const total  = values.reduce((a, b) => a + b, 0);
+
+  destroyChart('plantingSuitabilityChart');
+  new Chart(document.getElementById('plantingSuitabilityChart'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors, borderColor: '#f2eee7', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '55%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 10, boxWidth: 12, font: { size: 11 } } },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: {
+            label: i => {
+              const pct = total > 0 ? ((i.raw / total) * 100).toFixed(1) : '—';
+              return ` ${formatNumber(i.raw)} ha  (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Bioswale Opportunity — horizontal bar by zone ─────────────────────────
+
+function makeBioswaleScoreChart(bioswaleM2, csoZoneM2, industrialM2, buildingM2) {
+  const toHa = m2 => Math.max(0, parseFloat((m2 / 10000).toFixed(1)));
+  const labels = [
+    'Open land — direct planting',
+    'CSO-adjacent — capped systems',
+    'Industrial — remediate first',
+    'Building footprint — excluded',
+  ];
+  const values = [toHa(bioswaleM2), toHa(csoZoneM2), toHa(industrialM2), toHa(buildingM2)];
+  const colors = ['#9cae99', '#c5a882', '#8a7d6d', '#c5bfb3'];
+
+  destroyChart('bioswaleScoreChart');
+  new Chart(document.getElementById('bioswaleScoreChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Area (ha)',
+        data: values,
+        backgroundColor: colors,
+        borderColor: 'rgba(86,73,53,0.18)',
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      ...baseChartOptions(),
+      indexAxis: 'y',
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { display: false },
+        tooltip: {
+          ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: i => ` ${i.raw} ha` }
+        }
+      },
+      scales: {
+        x: {
+          ...baseChartOptions().scales.x,
+          title: { display: true, text: 'Area (ha)', color: chartFontColor(), font: { size: 10 } }
+        },
+        y: {
+          ticks: { color: chartFontColor(), font: { size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', () => {
   initDiagramsBackgroundParallax();
   buildGowanusTreeDashboard();
   buildUrbanAnalysis();
+  buildCanopyDashboard();
 });
 
