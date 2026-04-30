@@ -1,1 +1,9 @@
 data/trees.csv
+node_modules/
+package-lock.json
+package.json
+embed_content.html
+fetch_svg.py
+get_svg.js
+inspect_site.py
+svg/
