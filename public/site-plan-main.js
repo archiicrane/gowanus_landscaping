@@ -2,10 +2,12 @@
 // Mapbox-based architectural site plan with bioswale analytics
 
 import { resolveMapboxToken } from '/js/token.js';
-
-const TREE_SPACING_SQFT = 150;
-const CANOPY_RADIUS_FT = 12;
-const GALLONS_PER_SQFT = 7.48;
+import {
+  calculateBioswaleMetrics,
+  canopyProgressFromBioswales,
+  formatCompact,
+  loadBioswaleGeoJSON,
+} from '/js/bioswale-metrics.js';
 
 const INITIAL_VIEW = {
   center: [-73.992, 40.675],
@@ -67,47 +69,6 @@ function toTreeFeatureCollection(rawTrees) {
   return { type: 'FeatureCollection', features: [] };
 }
 
-function calculateBioswaleStats(bioswaleGeojson) {
-  const turf = window.turf;
-  if (!turf || !bioswaleGeojson?.features) {
-    return {
-      totalAreaSqFt: 0,
-      totalAreaAcres: 0,
-      estimatedTrees: 0,
-      estimatedCanopySqFt: 0,
-      stormwaterGallons: 0,
-    };
-  }
-
-  let totalAreaSqFt = 0;
-  bioswaleGeojson.features.forEach((feature, idx) => {
-    const areaSqM = turf.area(feature);
-    const areaSqFt = areaSqM * 10.7639;
-    const areaAcres = areaSqFt / 43560;
-    totalAreaSqFt += areaSqFt;
-
-    feature.properties = feature.properties || {};
-    feature.properties.id = feature.properties.id || `bioswale-${idx + 1}`;
-    feature.properties.name = feature.properties.name || `Bioswale ${idx + 1}`;
-    feature.properties.zone = feature.properties.zone || 'Proposed';
-    feature.properties.area_sqft = Number(areaSqFt.toFixed(2));
-    feature.properties.area_acres = Number(areaAcres.toFixed(4));
-  });
-
-  const totalAreaAcres = totalAreaSqFt / 43560;
-  const estimatedTrees = Math.floor(totalAreaSqFt / TREE_SPACING_SQFT);
-  const estimatedCanopySqFt = estimatedTrees * Math.PI * CANOPY_RADIUS_FT * CANOPY_RADIUS_FT;
-  const stormwaterGallons = totalAreaSqFt * GALLONS_PER_SQFT;
-
-  return {
-    totalAreaSqFt,
-    totalAreaAcres,
-    estimatedTrees,
-    estimatedCanopySqFt,
-    stormwaterGallons,
-  };
-}
-
 function renderStats(stats) {
   const areaEl = document.getElementById('stat-area');
   const treesEl = document.getElementById('stat-trees');
@@ -118,8 +79,25 @@ function renderStats(stats) {
 
   areaEl.textContent = `${formatNumber(stats.totalAreaSqFt)} sq ft (${formatAcres(stats.totalAreaAcres)} ac)`;
   treesEl.textContent = `${formatNumber(stats.estimatedTrees)} trees`;
-  canopyEl.textContent = `${formatNumber(stats.estimatedCanopySqFt)} sq ft`;
+  canopyEl.textContent = `${formatNumber(stats.addedCanopySqFt)} sq ft`;
   stormwaterEl.textContent = `${formatNumber(stats.stormwaterGallons)} gal`;
+}
+
+function renderMiniDashboard(stats, progress) {
+  const setText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+
+  setText('mini-area', `${formatCompact(stats.totalAreaSqFt)} sq ft`);
+  setText('mini-trees', `${formatCompact(stats.estimatedTrees)} trees`);
+  setText('mini-canopy', `${formatCompact(stats.addedCanopySqFt)} sq ft`);
+  setText('mini-water', `${formatCompact(stats.stormwaterGallons)} gal`);
+  setText('mini-existing', `${progress.existingPct.toFixed(1)}%`);
+  setText('mini-proposed', `${progress.proposedPct.toFixed(1)}%`);
+
+  const fill = document.getElementById('mini-progress-fill');
+  if (fill) fill.style.width = `${Math.max(0, Math.min(100, progress.proposedPct))}%`;
 }
 
 function addArchitecturalLayers(map, datasets) {
@@ -219,6 +197,44 @@ function enableAltOnlyScrollZoom(map, container) {
   );
 }
 
+function fitArchitecturalBounds(map, featureCollections) {
+  if (!window.turf) return;
+
+  const features = featureCollections
+    .filter(Boolean)
+    .flatMap((fc) => (fc.features || []));
+  if (!features.length) return;
+
+  const merged = { type: 'FeatureCollection', features };
+  const [minX, minY, maxX, maxY] = window.turf.bbox(merged);
+  const bounds = new mapboxgl.LngLatBounds([minX, minY], [maxX, maxY]);
+
+  const padding = { top: 52, right: 52, bottom: 52, left: 52 };
+  map.fitBounds(bounds, {
+    padding,
+    bearing: INITIAL_VIEW.bearing,
+    pitch: INITIAL_VIEW.pitch,
+    duration: 0,
+    maxZoom: 15.7,
+  });
+
+  // If projected bounds still exceed the available frame, step zoom out.
+  const container = map.getContainer();
+  const fits = () => {
+    const nw = map.project([minX, maxY]);
+    const se = map.project([maxX, minY]);
+    const contentW = container.clientWidth;
+    const contentH = container.clientHeight;
+    return nw.x >= 24 && nw.y >= 24 && se.x <= contentW - 24 && se.y <= contentH - 24;
+  };
+
+  let guard = 0;
+  while (!fits() && guard < 5) {
+    map.zoomTo(map.getZoom() - 0.35, { duration: 0 });
+    guard += 1;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const mapContainer = document.getElementById('site-plan-map');
   if (!mapContainer) {
@@ -239,16 +255,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mapboxgl.accessToken = token;
 
-  const [buildings, roads, treesRaw, bioswales] = await Promise.all([
+  const [buildings, roads, treesRaw, bioswalesRaw] = await Promise.all([
     fetchJson('/data/gowanus-buildings.geojson'),
     fetchJson('/data/roads.geojson'),
     fetchJson('/data/gowanus_trees_clean.json'),
-    fetchJson('/data/bioswales.geojson'),
+    loadBioswaleGeoJSON(),
   ]);
 
   const treeFeatures = toTreeFeatureCollection(treesRaw);
-  const stats = calculateBioswaleStats(bioswales);
+  const bioswaleResults = calculateBioswaleMetrics(bioswalesRaw);
+  const bioswales = bioswaleResults.featureCollection;
+  const stats = bioswaleResults.totals;
   renderStats(stats);
+
+  // Study area approximation from buildings + roads extents.
+  let studySqFt = 0;
+  if (window.turf) {
+    const studyFeatureCollection = {
+      type: 'FeatureCollection',
+      features: [...(buildings.features || []), ...(roads.features || [])],
+    };
+    const studyBbox = window.turf.bbox(studyFeatureCollection);
+    const studyPoly = window.turf.bboxPolygon(studyBbox);
+    studySqFt = window.turf.area(studyPoly) * 10.7639;
+  }
+
+  const progress = canopyProgressFromBioswales(4.1, studySqFt, stats.addedCanopySqFt);
+  renderMiniDashboard(stats, progress);
 
   const map = new mapboxgl.Map({
     container: 'site-plan-map',
@@ -277,12 +310,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       bioswales,
     });
 
+    fitArchitecturalBounds(map, [buildings, bioswales, roads]);
     map.resize();
   });
 
   window.addEventListener('resize', () => {
+    fitArchitecturalBounds(map, [buildings, bioswales, roads]);
     map.resize();
   });
 
-  requestAnimationFrame(() => map.resize());
+  requestAnimationFrame(() => {
+    fitArchitecturalBounds(map, [buildings, bioswales, roads]);
+    map.resize();
+  });
 });

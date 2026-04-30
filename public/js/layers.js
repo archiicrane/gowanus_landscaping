@@ -497,52 +497,51 @@ export function addStudyClipMask(map) {
 }
 
 export async function addBioswaleOpportunityLayer(map) {
-	const roadFilter = [
-		'all',
-		['within', { type: 'Polygon', coordinates: [STUDY_RING] }],
-		['match', ['get', 'class'], ['primary', 'secondary', 'tertiary', 'street', 'service', 'residential'], true, false],
-	];
+	let bioswaleData;
+	try {
+		const res = await fetch('/data/bioswales.geojson');
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		bioswaleData = await res.json();
+	} catch (err) {
+		console.error('[LAYERS] Failed to load shared bioswale geometry:', err);
+		return;
+	}
 
-	if (map.getLayer('bioswale-corridor-core')) map.removeLayer('bioswale-corridor-core');
-	if (map.getLayer('bioswale-corridor-glow')) map.removeLayer('bioswale-corridor-glow');
+	if (map.getLayer('bioswale-corridor-outline')) map.removeLayer('bioswale-corridor-outline');
+	if (map.getLayer('bioswale-corridor-fill')) map.removeLayer('bioswale-corridor-fill');
+	if (map.getSource('bioswale-corridor')) map.removeSource('bioswale-corridor');
+
+	map.addSource('bioswale-corridor', {
+		type: 'geojson',
+		data: bioswaleData,
+	});
 
 	map.addLayer({
-		id: 'bioswale-corridor-glow',
-		type: 'line',
-		source: 'composite',
-		'source-layer': 'road',
-		filter: roadFilter,
+		id: 'bioswale-corridor-fill',
+		type: 'fill',
+		source: 'bioswale-corridor',
 		paint: {
-			'line-color': '#95b29c',
-			'line-width': [
-				'interpolate', ['linear'], ['zoom'],
-				12, 5,
-				17, 14,
-			],
-			'line-opacity': 0.2,
-			'line-blur': 0.8,
+			'fill-color': '#7ea081',
+			'fill-opacity': 0.24,
 		},
 	}, 'building');
 
 	map.addLayer({
-		id: 'bioswale-corridor-core',
+		id: 'bioswale-corridor-outline',
 		type: 'line',
-		source: 'composite',
-		'source-layer': 'road',
-		filter: roadFilter,
+		source: 'bioswale-corridor',
 		layout: {
 			'line-cap': 'round',
 			'line-join': 'round',
 		},
 		paint: {
-			'line-color': '#6f8a78',
+			'line-color': '#4f7656',
 			'line-width': [
 				'interpolate', ['linear'], ['zoom'],
 				12, 1.4,
-				17, 4.2,
+				17, 3.2,
 			],
 			'line-opacity': 0.9,
-			'line-dasharray': [2, 1.4],
 		},
 	}, 'building');
 }

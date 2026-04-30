@@ -1,4 +1,11 @@
-﻿// diagrams.js - Gowanus Environmental Analysis Dashboard
+﻿import {
+  calculateBioswaleMetrics,
+  canopyProgressFromBioswales,
+  formatCompact,
+  loadBioswaleGeoJSON,
+} from '/js/bioswale-metrics.js';
+
+// diagrams.js - Gowanus Environmental Analysis Dashboard
 // Sources: gowanus_trees_clean.json, gowanus-buildings.geojson,
 //          flood-vulnerability.geojson, Citywide_Outfalls_20260416.geojson,
 //          gowanus_existing/proposed_flora_fauna.csv, planting-bands.geojson
@@ -1865,11 +1872,147 @@ function makeBioswaleScoreChart(bioswaleM2, csoZoneM2, industrialM2, buildingM2)
 
 // ═══════════════════════════════════════════════════════════════════════════
 
+function makeBioswaleCanopyChart(progress) {
+  destroyChart('bioswaleCanopyChart');
+  const canvas = document.getElementById('bioswaleCanopyChart');
+  if (!canvas) return;
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['Canopy Coverage'],
+      datasets: [
+        {
+          label: 'Existing',
+          data: [Number(progress.existingPct.toFixed(2))],
+          backgroundColor: 'rgba(150, 158, 146, 0.72)',
+          borderColor: 'rgba(106, 102, 93, 0.55)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Proposed',
+          data: [Number(progress.proposedPct.toFixed(2))],
+          backgroundColor: 'rgba(99, 136, 101, 0.72)',
+          borderColor: 'rgba(75, 109, 78, 0.62)',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      ...baseChartOptions(),
+      scales: {
+        x: { ...baseChartOptions().scales.x },
+        y: {
+          ...baseChartOptions().scales.y,
+          max: 35,
+          ticks: {
+            color: chartFontColor(),
+            callback: (v) => `${v}%`,
+          },
+        },
+      },
+    },
+  });
+}
+
+function makeBioswaleTreeChart(existingTreeCount, addedTrees) {
+  destroyChart('bioswaleTreeChart');
+  const canvas = document.getElementById('bioswaleTreeChart');
+  if (!canvas) return;
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['Existing Street Trees', 'Added Bioswale Trees'],
+      datasets: [{
+        data: [existingTreeCount, addedTrees],
+        backgroundColor: ['rgba(156, 174, 153, 0.74)', 'rgba(98, 141, 101, 0.74)'],
+        borderColor: ['rgba(90, 96, 87, 0.55)', 'rgba(70, 108, 73, 0.6)'],
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins, legend: { display: false } },
+    },
+  });
+}
+
+function makeBioswaleBenefitsChart(metrics) {
+  destroyChart('bioswaleBenefitsChart');
+  const canvas = document.getElementById('bioswaleBenefitsChart');
+  if (!canvas) return;
+
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['Bioswale Area (ac)', 'Stormwater (M gal)', 'Soil Remediation (ac)'],
+      datasets: [{
+        data: [
+          Number(metrics.totalAreaAcres.toFixed(2)),
+          Number((metrics.stormwaterGallons / 1_000_000).toFixed(2)),
+          Number(metrics.soilRemediationAcres.toFixed(2)),
+        ],
+        backgroundColor: ['rgba(142, 164, 140, 0.76)', 'rgba(122, 154, 172, 0.7)', 'rgba(168, 155, 133, 0.72)'],
+        borderColor: 'rgba(86,73,53,0.2)',
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins, legend: { display: false } },
+    },
+  });
+}
+
+async function buildBioswaleImpactDashboard() {
+  try {
+    const [bioswaleRaw, treesRaw] = await Promise.all([
+      loadBioswaleGeoJSON(),
+      loadTreeData(),
+    ]);
+
+    const { totals } = calculateBioswaleMetrics(bioswaleRaw);
+    const validTrees = treesRaw.filter(
+      (t) => safeNumber(t.lat) !== null && safeNumber(t.lon) !== null
+    );
+    const studyAreaKm2 = getBoundingBoxAreaKm2(validTrees);
+    const studyAreaSqFt = studyAreaKm2 * 1_000_000 * 10.7639;
+    const progress = canopyProgressFromBioswales(4.1, studyAreaSqFt, totals.addedCanopySqFt);
+
+    renderMetric(
+      'bioAreaMetric',
+      `${formatCompact(totals.totalAreaSqFt)} sq ft`,
+      `${formatCompact(totals.totalAreaAcres, 2)} acres`
+    );
+    renderMetric('bioTreesMetric', formatCompact(totals.estimatedTrees), 'bioswale tree capacity');
+    renderMetric('bioCanopyMetric', `${formatCompact(totals.addedCanopySqFt)} sq ft`, 'added future canopy');
+    renderMetric('bioStormwaterMetric', `${formatCompact(totals.stormwaterGallons)} gal`, 'potential retention volume');
+    renderMetric(
+      'bioSoilMetric',
+      `${formatCompact(totals.soilRemediationSqFt)} sq ft`,
+      `${formatCompact(totals.soilRemediationAcres, 2)} acres remediation planting`
+    );
+    renderMetric(
+      'bioProgressMetric',
+      `${progress.proposedPct.toFixed(1)}%`,
+      `+${progress.gainPct.toFixed(1)} pp from 4.1% existing canopy`
+    );
+
+    makeBioswaleCanopyChart(progress);
+    makeBioswaleTreeChart(validTrees.length, totals.estimatedTrees);
+    makeBioswaleBenefitsChart(totals);
+  } catch (error) {
+    console.error('Bioswale dashboard failed:', error);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initDiagramsBackgroundParallax();
   buildGowanusTreeDashboard();
   buildUrbanAnalysis();
   buildCanopyDashboard();
+  buildBioswaleImpactDashboard();
 
   // Resize all Chart.js instances when the window resizes
   let _diagResizeTimer;

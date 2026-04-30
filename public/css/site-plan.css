@@ -52,16 +52,99 @@
   position: relative;
   overflow: hidden;
   padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #site-plan-map {
   width: 100%;
   height: 100%;
   min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
   box-shadow: none;
   border-radius: 14px;
   background: #f6f2ea;
   display: block;
+}
+
+#site-plan-mini-dashboard {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: min(280px, 36%);
+  min-width: 220px;
+  border: 1px solid rgba(86, 73, 53, 0.2);
+  border-radius: 12px;
+  background: rgba(246, 242, 234, 0.92);
+  box-shadow: 0 8px 18px rgba(42, 37, 30, 0.14);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 12px;
+  z-index: 3;
+}
+
+.mini-title {
+  margin: 0 0 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #5f5a50;
+}
+
+.mini-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 8px;
+  margin-bottom: 8px;
+}
+
+.mini-metrics p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mini-metrics span {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #736d61;
+}
+
+.mini-metrics strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2f2a24;
+}
+
+.mini-progress {
+  border-top: 1px solid rgba(86, 73, 53, 0.16);
+  padding-top: 7px;
+}
+
+.mini-progress-label {
+  margin: 0 0 6px;
+  font-size: 10px;
+  color: #60594f;
+  line-height: 1.4;
+}
+
+.mini-progress-track {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(132, 124, 112, 0.24);
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  width: 4.1%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7ea081 0%, #4f8b4f 100%);
+  transition: width 320ms ease;
 }
 
 .site-plan-stats {
@@ -120,5 +203,11 @@
 
   #site-plan-map-container {
     min-height: 70vh;
+  }
+
+  #site-plan-mini-dashboard {
+    width: min(320px, calc(100% - 36px));
+    right: 18px;
+    bottom: 18px;
   }
 }
