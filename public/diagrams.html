@@ -22,49 +22,48 @@
 	</nav>
 
 	<main class="diagrams-layout">
+
+		<!-- ── Intro ──────────────────────────────────────────────── -->
 		<section class="board-section board-intro" id="section-intro">
 			<div class="diagrams-header">
-				<p class="eyebrow">Overview</p>
-				<h1>Gowanus Trees: Existing Conditions to Projected Change</h1>
+				<p class="eyebrow">Environmental Analysis</p>
+				<h1>Gowanus — Existing Conditions &amp; Rewilding Scenario</h1>
 				<p class="diagrams-intro">
-					Start with the current tree inventory, then transition to intervention assumptions
-					and projected ecological outcomes.
+					Spatial analysis drawn from mapped GeoJSON layers: street trees, buildings,
+					flood vulnerability, stormwater outfalls, and proposed planting data.
+					All values calculated directly from geometry and attributes.
 				</p>
 			</div>
 			<div id="diagramError" class="diagram-error" style="display: none;"></div>
 		</section>
 
+		<!-- ── Tree Baseline Metrics ──────────────────────────────── -->
 		<section class="board-section board-baseline" id="section-baseline">
 			<div class="board-header-row">
 				<p class="eyebrow">Existing Conditions</p>
-				<h2>Baseline Metrics</h2>
+				<h2>Tree Canopy Metrics</h2>
 			</div>
 			<section class="metrics-grid">
 				<article class="metric-card">
 					<p class="metric-label">Street Trees</p>
 					<div id="totalTreesMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Estimated Canopy Coverage</p>
 					<div id="canopyMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Tree Density</p>
 					<div id="densityMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Annual Rainfall Intercepted</p>
 					<div id="waterMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Study Area</p>
 					<div id="studyAreaMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Good Health Share</p>
 					<div id="healthMetric"></div>
@@ -72,10 +71,11 @@
 			</section>
 		</section>
 
+		<!-- ── Tree Baseline Graphs ───────────────────────────────── -->
 		<section class="board-section board-supporting" id="section-supporting">
 			<div class="board-header-row">
 				<p class="eyebrow">Existing Conditions</p>
-				<h2>Baseline Graphs</h2>
+				<h2>Tree Baseline Graphs</h2>
 			</div>
 			<section class="charts-grid two-col supporting-diagram-grid">
 				<article class="panel-card">
@@ -83,57 +83,170 @@
 						<h2>Top Species</h2>
 						<p>Most frequent species in the current inventory.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="speciesChart"></canvas>
-					</div>
+					<div class="chart-wrap"><canvas id="speciesChart"></canvas></div>
 				</article>
-
 				<article class="panel-card">
 					<div class="panel-header">
 						<h2>Health Distribution</h2>
-						<p>Current health classes across mapped trees.</p>
+						<p>Current health classes across mapped street trees.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="healthChart"></canvas>
-					</div>
+					<div class="chart-wrap"><canvas id="healthChart"></canvas></div>
 				</article>
 			</section>
-
-		<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
-				<article class="panel-card quiet-support-card">
-					<div class="panel-header">
-						<h2>Water Retention by Species</h2>
-						<p>Estimated soil storage capacity per dominant species.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="waterRetentionChart"></canvas>
-					</div>
-				</article>
-
-				<article class="panel-card quiet-support-card">
-					<div class="panel-header">
-						<h2>Annual Interception by Canopy Type</h2>
-						<p>Existing trees intercept rainfall before it becomes stormwater runoff. Wetland-adapted species have higher interception rates.</p>
-					</div>
-					<div class="chart-wrap">
-						<canvas id="waterCategoryChart"></canvas>
-					</div>
-				</article>
-			</section>
-
 			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
 				<article class="panel-card quiet-support-card">
 					<div class="panel-header">
-						<h2>Density by Block</h2>
-						<p>Distribution of trees per block across the study area.</p>
+						<h2>Water Retention by Species</h2>
+						<p>Estimated soil storage capacity per dominant species, weighted by mature canopy size.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="densityChart"></canvas>
+					<div class="chart-wrap"><canvas id="waterRetentionChart"></canvas></div>
+				</article>
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Annual Interception by Canopy Type</h2>
+						<p>Wetland-adapted species intercept 20% of annual rainfall; general canopy trees ~14%. NYC avg 46.5 in/yr.</p>
 					</div>
+					<div class="chart-wrap"><canvas id="waterCategoryChart"></canvas></div>
+				</article>
+			</section>
+			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Tree Density by Block</h2>
+						<p>Distribution of trees per ~100 m block across the study area.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="densityChart"></canvas></div>
 				</article>
 			</section>
 		</section>
 
+		<!-- ── Urban Fabric ───────────────────────────────────────── -->
+		<section class="board-section" id="section-urban">
+			<div class="board-header-row">
+				<p class="eyebrow">Built Environment</p>
+				<h2>Urban Fabric Analysis</h2>
+			</div>
+			<section class="metrics-grid">
+				<article class="metric-card">
+					<p class="metric-label">Mapped Buildings</p>
+					<div id="urbanBuildingsMetric"></div>
+				</article>
+				<article class="metric-card">
+					<p class="metric-label">Industrial Land Use</p>
+					<div id="urbanIndustrialMetric"></div>
+				</article>
+			</section>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Building Height Distribution</h2>
+						<p>Heights from OSM/NYC data across 1,771 mapped buildings in the Gowanus study corridor.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="buildingHeightChart"></canvas></div>
+				</article>
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Building Use Mix</h2>
+						<p>Land use categories derived from OpenStreetMap building tags.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="buildingTypeChart"></canvas></div>
+				</article>
+			</section>
+		</section>
+
+		<!-- ── Flood & Stormwater ─────────────────────────────────── -->
+		<section class="board-section" id="section-flood">
+			<div class="board-header-row">
+				<p class="eyebrow">Resilience</p>
+				<h2>Flood &amp; Stormwater</h2>
+			</div>
+			<section class="metrics-grid">
+				<article class="metric-card">
+					<p class="metric-label">High Flood Risk Today</p>
+					<div id="floodHighRiskMetric"></div>
+				</article>
+				<article class="metric-card">
+					<p class="metric-label">High Flood Risk by 2050s</p>
+					<div id="floodFutureMetric"></div>
+				</article>
+				<article class="metric-card">
+					<p class="metric-label">Corridor Outfalls</p>
+					<div id="outfallsTotalMetric"></div>
+				</article>
+				<article class="metric-card">
+					<p class="metric-label">Combined Sewer Overflows</p>
+					<div id="outfallsCSOMetric"></div>
+				</article>
+			</section>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Flood Risk: Current vs 2050s</h2>
+						<p>Storm surge vulnerability scores 1–5 (NYC flood hazard census tracts). Current vs projected 2050s exposure based on sea level rise scenarios.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="floodRiskChart"></canvas></div>
+				</article>
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Stormwater Outfall Types</h2>
+						<p>DEP-mapped outfalls within the Gowanus study corridor. CSO = Combined Sewer Overflow, the highest pollutant load type.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="outfallTypesChart"></canvas></div>
+				</article>
+			</section>
+		</section>
+
+		<!-- ── Rewilding Scenario ─────────────────────────────────── -->
+		<section class="board-section" id="section-rewilding">
+			<div class="board-header-row">
+				<p class="eyebrow">Rewilding Scenario</p>
+				<h2>Before / After Planting</h2>
+			</div>
+			<section class="metrics-grid">
+				<article class="metric-card">
+					<p class="metric-label">Baseline Species</p>
+					<div id="rewildingExistingMetric"></div>
+				</article>
+				<article class="metric-card">
+					<p class="metric-label">Net Species Gain</p>
+					<div id="rewildingProposedMetric"></div>
+				</article>
+			</section>
+			<section class="charts-grid two-col supporting-diagram-grid">
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Species Count: Existing vs Proposed</h2>
+						<p>Baseline and proposed species broken down by plant category across all planting zones.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="beforeAfterChart"></canvas></div>
+				</article>
+				<article class="panel-card">
+					<div class="panel-header">
+						<h2>Species by Planting Zone</h2>
+						<p>Existing and proposed species distributed across Wet Edge, Forest, and Pollinator Edge zones.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="zoneBreakdownChart"></canvas></div>
+				</article>
+			</section>
+			<section class="charts-grid two-col supporting-diagram-grid secondary-support-grid">
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Ecological Role Breakdown</h2>
+						<p>Proposed species classified by primary ecological function in the rewilded landscape.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="ecologicalRoleChart"></canvas></div>
+				</article>
+				<article class="panel-card quiet-support-card">
+					<div class="panel-header">
+						<h2>Planting Phase Distribution</h2>
+						<p>Species allocated across implementation phases — Phase 1 establishes structural canopy and wet-edge framework.</p>
+					</div>
+					<div class="chart-wrap"><canvas id="proposedPhaseChart"></canvas></div>
+				</article>
+			</section>
+		</section>
+
+		<!-- ── Intervention Scope (existing) ─────────────────────── -->
 		<section class="board-section board-intervention" id="section-intervention">
 			<div class="board-header-row">
 				<p class="eyebrow">Project Scenario</p>
@@ -141,9 +254,7 @@
 			</div>
 			<div class="panel-card presentation-toggle-card">
 				<div class="panel-header">
-					<p>
-						Select a contribution scope to preview quantity and growth assumptions.
-					</p>
+					<p>Select a contribution scope to preview quantity and growth assumptions.</p>
 				</div>
 				<div class="improvement-toggle" role="tablist" aria-label="Proposal contribution scope">
 					<button class="improvement-tab active" data-scope="park" role="tab" aria-selected="true">Park</button>
@@ -155,6 +266,7 @@
 			</div>
 		</section>
 
+		<!-- ── Impact Metrics (existing) ─────────────────────────── -->
 		<section class="board-section board-impact" id="section-impact">
 			<div class="board-header-row">
 				<p class="eyebrow">Project Change</p>
@@ -165,27 +277,22 @@
 					<p class="metric-label">Added Tree Count</p>
 					<div id="addedTreesMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Estimated Added Future Canopy</p>
 					<div id="addedCanopyMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Shrub Quantity</p>
 					<div id="addedShrubsMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Ground / Perennial Quantity</p>
 					<div id="addedGroundMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Intervention Area</p>
 					<div id="interventionAreaMetric"></div>
 				</article>
-
 				<article class="metric-card">
 					<p class="metric-label">Project Coverage State</p>
 					<div id="coverageStateMetric"></div>
@@ -193,6 +300,7 @@
 			</div>
 		</section>
 
+		<!-- ── Performance Graphs (existing) ─────────────────────── -->
 		<section class="board-section board-primary-diagrams" id="section-primary-diagrams">
 			<div class="board-header-row">
 				<p class="eyebrow">Project Change</p>
@@ -204,22 +312,18 @@
 						<h2>Benefit by Band</h2>
 						<p>Relative contribution across canopy, habitat, cooling, stormwater, and pollination.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="benefitBandChart"></canvas>
-					</div>
+					<div class="chart-wrap"><canvas id="benefitBandChart"></canvas></div>
 				</article>
-
 				<article class="panel-card">
 					<div class="panel-header">
 						<h2>Growth by Scope</h2>
-						<p>Projected trajectory for 0-2, 3-5, and 5-10 years.</p>
+						<p>Projected trajectory for 0–2, 3–5, and 5–10 years.</p>
 					</div>
-					<div class="chart-wrap">
-						<canvas id="improvementGrowthChart"></canvas>
-					</div>
+					<div class="chart-wrap"><canvas id="improvementGrowthChart"></canvas></div>
 				</article>
 			</section>
 		</section>
+
 	</main>
 	<script type="module" src="/diagrams.js"></script>
 </body>

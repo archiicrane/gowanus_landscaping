@@ -1,6 +1,7 @@
-﻿// diagrams.js - Gowanus Tree Baseline Analysis
-// Data source: /data/gowanus_trees_clean.json
-// All metrics and charts are derived from the existing Gowanus street tree dataset.
+﻿// diagrams.js - Gowanus Environmental Analysis Dashboard
+// Sources: gowanus_trees_clean.json, gowanus-buildings.geojson,
+//          flood-vulnerability.geojson, Citywide_Outfalls_20260416.geojson,
+//          gowanus_existing/proposed_flora_fauna.csv, planting-bands.geojson
 
 async function loadTreeData() {
   const response = await fetch('/data/gowanus_trees_clean.json');
@@ -10,6 +11,56 @@ async function loadTreeData() {
   const rawText = await response.text();
   const cleanedText = rawText.replace(/\bNaN\b/g, 'null');
   return JSON.parse(cleanedText);
+}
+
+// ── Generic loaders ───────────────────────────────────────────────────────
+
+async function loadGeoJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
+  return res.json();
+}
+
+async function loadCSV(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load CSV ${url}: ${res.status}`);
+  const text = await res.text();
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',');
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim().replace(/^"|"$/g, ''); });
+    return obj;
+  });
+}
+
+// ── Spatial helpers ───────────────────────────────────────────────────────
+
+// Bounding box for the Gowanus study corridor (WGS84)
+const GOWANUS_BBOX = { minLon: -74.003, minLat: 40.662, maxLon: -73.973, maxLat: 40.692 };
+
+function inGowanusBox(lon, lat) {
+  return lon >= GOWANUS_BBOX.minLon && lon <= GOWANUS_BBOX.maxLon
+      && lat >= GOWANUS_BBOX.minLat && lat <= GOWANUS_BBOX.maxLat;
+}
+
+// Shoelace polygon area in m² (lat/lon coords)
+function polygonAreaM2(ring) {
+  const RAD = Math.PI / 180;
+  let area = 0;
+  const n = ring.length;
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const [lon1, lat1] = ring[i];
+    const [lon2, lat2] = ring[j];
+    const x1 = lon1 * 111320 * Math.cos(lat1 * RAD);
+    const y1 = lat1 * 110540;
+    const x2 = lon2 * 111320 * Math.cos(lat2 * RAD);
+    const y2 = lat2 * 110540;
+    area += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(area) / 2;
 }
 
 function safeNumber(value) {
@@ -934,6 +985,355 @@ function makeDensityByBlockChart(trees) {
   });
 }
 
+// ── Urban Fabric Charts ───────────────────────────────────────────────────
+
+function makeBuildingHeightChart(buildings) {
+  const bins = { '<5 m': 0, '5–10 m': 0, '10–20 m': 0, '20–35 m': 0, '>35 m': 0 };
+  for (const feat of buildings) {
+    const h = parseFloat((feat.properties || {}).height);
+    if (!isFinite(h)) continue;
+    if (h < 5)        bins['<5 m']++;
+    else if (h < 10)  bins['5–10 m']++;
+    else if (h < 20)  bins['10–20 m']++;
+    else if (h < 35)  bins['20–35 m']++;
+    else              bins['>35 m']++;
+  }
+  const palette = ['#c5bfb3', '#b3aa98', '#9f9483', '#8a7d6d', '#756858'];
+  destroyChart('buildingHeightChart');
+  new Chart(document.getElementById('buildingHeightChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(bins),
+      datasets: [{ label: 'Buildings', data: Object.values(bins),
+        backgroundColor: palette, borderColor: 'rgba(86,73,53,0.18)', borderWidth: 1 }]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins, legend: { display: false },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: (i) => ` ${formatNumber(i.raw)} buildings` } } },
+      scales: {
+        x: { ...baseChartOptions().scales.x, title: { display: true, text: 'Height Class', color: chartFontColor(), font: { size: 10 } } },
+        y: { ...baseChartOptions().scales.y, title: { display: true, text: 'Count', color: chartFontColor(), font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function makeBuildingTypeChart(buildings) {
+  const rawCounts = {};
+  for (const feat of buildings) {
+    const t = (feat.properties || {}).building || 'untagged';
+    rawCounts[t] = (rawCounts[t] || 0) + 1;
+  }
+  // Collapse minor types
+  const merged = { Industrial: 0, Residential: 0, Hotel: 0, 'Mixed / Other': 0 };
+  for (const [type, count] of Object.entries(rawCounts)) {
+    if (['industrial', 'warehouse'].includes(type))                       merged.Industrial += count;
+    else if (['apartments', 'residential', 'yes'].includes(type))         merged.Residential += count;
+    else if (type === 'hotel')                                            merged.Hotel += count;
+    else                                                                  merged['Mixed / Other'] += count;
+  }
+  const labels = Object.keys(merged).filter(k => merged[k] > 0);
+  const values = labels.map(k => merged[k]);
+  const colors = ['#8a7d6d', '#9cae99', '#7a9aac', '#c5bfb3'];
+  destroyChart('buildingTypeChart');
+  new Chart(document.getElementById('buildingTypeChart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length),
+        borderColor: 'rgba(86,73,53,0.12)', borderWidth: 1.5 }] },
+    options: {
+      ...baseChartOptions(), cutout: '58%',
+      plugins: { ...baseChartOptions().plugins,
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 14, boxWidth: 14 } },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: (i) => ` ${formatNumber(i.raw)} buildings (${((i.raw / buildings.length) * 100).toFixed(1)}%)` } } }
+    }
+  });
+}
+
+// ── Flood & Stormwater Charts ─────────────────────────────────────────────
+
+function makeFloodRiskChart(floodFeats) {
+  // ss_cur: current storm surge vulnerability 1 (low) → 5 (high)
+  const labels = ['1 — Low', '2', '3', '4', '5 — High'];
+  const cur   = [0, 0, 0, 0, 0];
+  const fut50 = [0, 0, 0, 0, 0];
+  for (const feat of floodFeats) {
+    const p = feat.properties || {};
+    const c = parseInt(p.ss_cur); const f = parseInt(p.ss_50s);
+    if (c >= 1 && c <= 5) cur[c - 1]++;
+    if (f >= 1 && f <= 5) fut50[f - 1]++;
+  }
+  destroyChart('floodRiskChart');
+  new Chart(document.getElementById('floodRiskChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Current', data: cur, backgroundColor: 'rgba(122,154,172,0.7)', borderColor: 'rgba(122,154,172,0.9)', borderWidth: 1 },
+        { label: '2050s Projection', data: fut50, backgroundColor: 'rgba(168,107,90,0.65)', borderColor: 'rgba(168,107,90,0.9)', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins,
+        legend: { labels: { color: chartFontColor(), boxWidth: 12 } },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { title: (i) => `Risk Level ${i[0].label}`, label: (i) => ` ${i.dataset.label}: ${formatNumber(i.raw)} parcels` } } },
+      scales: {
+        x: { ...baseChartOptions().scales.x, stacked: false },
+        y: { ...baseChartOptions().scales.y, title: { display: true, text: 'Parcels', color: chartFontColor(), font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function makeOutfallTypesChart(outfallFeats) {
+  // Filter to Gowanus bounding box
+  const nearby = outfallFeats.filter(f => {
+    const [lon, lat] = f.geometry.coordinates;
+    return inGowanusBox(lon, lat);
+  });
+  const counts = {};
+  for (const f of nearby) {
+    const t = (f.properties || {}).outfall_ty || 'Unknown';
+    counts[t] = (counts[t] || 0) + 1;
+  }
+  const LABELS = {
+    CSO: 'Combined Sewer Overflow',
+    DIRECT: 'Direct Discharge',
+    MS4: 'Separate Storm Sewer',
+    HIGHWAY: 'Highway Runoff',
+    ABND: 'Abandoned',
+    STATE: 'State-Permitted',
+    PLANT: 'Treatment Plant',
+  };
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const labels = entries.map(([k]) => LABELS[k] || k);
+  const values = entries.map(([, v]) => v);
+  const palette = ['#a86b5a', '#7a9aac', '#9cae99', '#c5bfb3', '#8a7d6d', '#b3aa98', '#9f9483'];
+  destroyChart('outfallTypesChart');
+  new Chart(document.getElementById('outfallTypesChart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length),
+        borderColor: 'rgba(86,73,53,0.12)', borderWidth: 1.5 }] },
+    options: {
+      ...baseChartOptions(), cutout: '55%',
+      plugins: { ...baseChartOptions().plugins,
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 10, boxWidth: 12, font: { size: 11 } } },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: (i) => ` ${formatNumber(i.raw)} outfalls (${((i.raw / nearby.length) * 100).toFixed(1)}%)` } } }
+    }
+  });
+}
+
+// ── Rewilding Scenario Charts ─────────────────────────────────────────────
+
+function makeBeforeAfterChart(existingRows, proposedRows) {
+  const CATEGORIES = ['tree', 'shrub', 'perennial', 'grass', 'vine'];
+  const existCounts = Object.fromEntries(CATEGORIES.map(c => [c, 0]));
+  const propCounts  = Object.fromEntries(CATEGORIES.map(c => [c, 0]));
+  for (const r of existingRows) { const c = (r.category || '').toLowerCase(); if (c in existCounts) existCounts[c]++; }
+  for (const r of proposedRows) { const c = (r.category || '').toLowerCase(); if (c in propCounts)  propCounts[c]++; }
+  const labels = CATEGORIES.map(c => c.charAt(0).toUpperCase() + c.slice(1) + 's');
+  destroyChart('beforeAfterChart');
+  new Chart(document.getElementById('beforeAfterChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Existing', data: CATEGORIES.map(c => existCounts[c]),
+          backgroundColor: 'rgba(155,174,152,0.7)', borderColor: 'rgba(155,174,152,0.9)', borderWidth: 1 },
+        { label: 'Proposed', data: CATEGORIES.map(c => propCounts[c]),
+          backgroundColor: 'rgba(122,154,172,0.7)', borderColor: 'rgba(122,154,172,0.9)', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins,
+        legend: { labels: { color: chartFontColor(), boxWidth: 12 } } },
+      scales: {
+        x: { ...baseChartOptions().scales.x },
+        y: { ...baseChartOptions().scales.y, title: { display: true, text: 'Species count', color: chartFontColor(), font: { size: 10 } },
+          ticks: { ...baseChartOptions().scales.y.ticks, precision: 0 } }
+      }
+    }
+  });
+}
+
+function makeProposedPhaseChart(proposedRows) {
+  const phases = {};
+  for (const r of proposedRows) {
+    const p = r.phase ? r.phase.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Unphased';
+    phases[p] = (phases[p] || 0) + 1;
+  }
+  const labels = Object.keys(phases);
+  const values = Object.values(phases);
+  const palette = ['#9cae99', '#7a9aac', '#c5a882', '#c5bfb3'];
+  destroyChart('proposedPhaseChart');
+  new Chart(document.getElementById('proposedPhaseChart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: palette.slice(0, labels.length),
+        borderColor: 'rgba(86,73,53,0.12)', borderWidth: 1.5 }] },
+    options: {
+      ...baseChartOptions(), cutout: '58%',
+      plugins: { ...baseChartOptions().plugins,
+        legend: { position: 'bottom', labels: { color: chartFontColor(), padding: 14, boxWidth: 14 } },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: (i) => ` ${formatNumber(i.raw)} species` } } }
+    }
+  });
+}
+
+function makeEcologicalRoleChart(proposedRows) {
+  const roles = {};
+  for (const r of proposedRows) {
+    const role = (r.ecological_role || 'other').trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+    roles[role] = (roles[role] || 0) + 1;
+  }
+  const entries = Object.entries(roles).sort((a, b) => b[1] - a[1]);
+  const labels = entries.map(([k]) => k);
+  const values = entries.map(([, v]) => v);
+  destroyChart('ecologicalRoleChart');
+  new Chart(document.getElementById('ecologicalRoleChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Proposed Species', data: values,
+        backgroundColor: 'rgba(156,174,153,0.75)', borderColor: 'rgba(86,73,53,0.2)', borderWidth: 1 }]
+    },
+    options: {
+      ...baseChartOptions(), indexAxis: 'y',
+      plugins: { ...baseChartOptions().plugins, legend: { display: false },
+        tooltip: { ...baseChartOptions().plugins.tooltip,
+          callbacks: { label: (i) => ` ${i.raw} species` } } },
+      scales: {
+        x: { ...baseChartOptions().scales.x, ticks: { ...baseChartOptions().scales.x.ticks, precision: 0 } },
+        y: { ...baseChartOptions().scales.y, ticks: { ...baseChartOptions().scales.y.ticks, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function makeZoneBreakdownChart(existingRows, proposedRows) {
+  const zones = [...new Set([...existingRows, ...proposedRows].map(r => r.zone))].filter(Boolean);
+  const existByZone = Object.fromEntries(zones.map(z => [z, 0]));
+  const propByZone  = Object.fromEntries(zones.map(z => [z, 0]));
+  for (const r of existingRows) { if (r.zone in existByZone) existByZone[r.zone]++; }
+  for (const r of proposedRows)  { if (r.zone in propByZone)  propByZone[r.zone]++; }
+  destroyChart('zoneBreakdownChart');
+  new Chart(document.getElementById('zoneBreakdownChart'), {
+    type: 'bar',
+    data: {
+      labels: zones,
+      datasets: [
+        { label: 'Existing', data: zones.map(z => existByZone[z]),
+          backgroundColor: 'rgba(155,174,152,0.72)', borderColor: 'rgba(155,174,152,0.92)', borderWidth: 1 },
+        { label: 'Proposed', data: zones.map(z => propByZone[z]),
+          backgroundColor: 'rgba(122,154,172,0.65)', borderColor: 'rgba(122,154,172,0.92)', borderWidth: 1 }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: { ...baseChartOptions().plugins, legend: { labels: { color: chartFontColor(), boxWidth: 12 } } },
+      scales: {
+        x: { ...baseChartOptions().scales.x, ticks: { ...baseChartOptions().scales.x.ticks, font: { size: 11 } } },
+        y: { ...baseChartOptions().scales.y, title: { display: true, text: 'Species count', color: chartFontColor(), font: { size: 10 } },
+          ticks: { ...baseChartOptions().scales.y.ticks, precision: 0 } }
+      }
+    }
+  });
+}
+
+// ── Urban analysis orchestrator ───────────────────────────────────────────
+
+async function buildUrbanAnalysis() {
+  try {
+    const [buildingGeo, floodGeo, outfallGeo, existingFlora, proposedFlora] = await Promise.all([
+      loadGeoJSON('/data/gowanus-buildings.geojson'),
+      loadGeoJSON('/data/flood-vulnerability.geojson'),
+      loadGeoJSON('/data/Citywide_Outfalls_20260416.geojson'),
+      loadCSV('/data/gowanus_existing_flora_fauna.csv'),
+      loadCSV('/data/gowanus_proposed_flora_fauna.csv'),
+    ]);
+
+    const buildings    = buildingGeo.features || [];
+    const floodFeats   = floodGeo.features    || [];
+    const outfallFeats = outfallGeo.features   || [];
+
+    // ── Urban fabric metrics
+    const totalBuildings = buildings.length;
+    const heights = buildings.map(f => parseFloat((f.properties || {}).height)).filter(isFinite);
+    const avgHeight = heights.length ? heights.reduce((a, b) => a + b, 0) / heights.length : 0;
+    const industrialCount = buildings.filter(f =>
+      ['industrial', 'warehouse'].includes((f.properties || {}).building)
+    ).length;
+
+    renderMetric('urbanBuildingsMetric',
+      formatNumber(totalBuildings),
+      `avg ${formatNumber(avgHeight, 1)} m height`);
+    renderMetric('urbanIndustrialMetric',
+      `${formatNumber((industrialCount / totalBuildings) * 100, 1)}%`,
+      `${industrialCount} industrial / warehouse`);
+
+    // ── Flood metrics
+    const highRisk = floodFeats.filter(f => {
+      const v = parseInt((f.properties || {}).ss_cur);
+      return v >= 4;
+    }).length;
+    const futureHighRisk = floodFeats.filter(f => {
+      const v = parseInt((f.properties || {}).ss_50s);
+      return v >= 4;
+    }).length;
+    renderMetric('floodHighRiskMetric',
+      formatNumber(highRisk),
+      `parcels at risk today (level 4–5)`);
+    renderMetric('floodFutureMetric',
+      formatNumber(futureHighRisk),
+      'parcels at risk by 2050s');
+
+    // ── Outfall metrics
+    const nearbyOutfalls = outfallFeats.filter(f => {
+      const [lon, lat] = f.geometry.coordinates;
+      return inGowanusBox(lon, lat);
+    });
+    const csoCount = nearbyOutfalls.filter(f => (f.properties || {}).outfall_ty === 'CSO').length;
+    const directCount = nearbyOutfalls.filter(f => (f.properties || {}).outfall_ty === 'DIRECT').length;
+    renderMetric('outfallsTotalMetric',
+      formatNumber(nearbyOutfalls.length),
+      'stormwater outfalls in corridor');
+    renderMetric('outfallsCSOMetric',
+      formatNumber(csoCount),
+      `combined sewer overflows + ${directCount} direct discharge`);
+
+    // ── Rewilding metrics
+    const existingCount = existingFlora.length;
+    const proposedCount = proposedFlora.length;
+    const netGain = proposedCount - existingCount;
+    renderMetric('rewildingExistingMetric',
+      formatNumber(existingCount),
+      'baseline species in study area');
+    renderMetric('rewildingProposedMetric',
+      `+${formatNumber(netGain)}`,
+      `${formatNumber(proposedCount)} species proposed total`);
+
+    // ── Charts
+    makeBuildingHeightChart(buildings);
+    makeBuildingTypeChart(buildings);
+    makeFloodRiskChart(floodFeats);
+    makeOutfallTypesChart(outfallFeats);
+    makeBeforeAfterChart(existingFlora, proposedFlora);
+    makeProposedPhaseChart(proposedFlora);
+    makeEcologicalRoleChart(proposedFlora);
+    makeZoneBreakdownChart(existingFlora, proposedFlora);
+
+  } catch (err) {
+    console.error('Urban analysis failed:', err);
+  }
+}
+
 function initDiagramsBackgroundParallax() {
   const page = document.body;
   if (!page || !page.classList.contains('diagrams-page')) return;
@@ -1064,5 +1464,6 @@ async function buildGowanusTreeDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
   initDiagramsBackgroundParallax();
   buildGowanusTreeDashboard();
+  buildUrbanAnalysis();
 });
 
