@@ -68,8 +68,8 @@
       min-height: 220px;
     }
     .flora-orb {
-      width: clamp(120px, 11vw, 160px);
-      aspect-ratio: 1 / 1;
+      width: 160px;
+      height: 160px;
       border-radius: 50%;
       border: 2px dashed var(--habitat-stroke, #8c8479);
       background: var(--habitat-fill, #e8e3d8);
@@ -79,10 +79,10 @@
       overflow: visible;
     }
     .flora-orb img {
-      width: 90%;
-      height: 90%;
+      width: 132%;
+      height: 132%;
       object-fit: contain;
-      transform: translateY(4%);
+      transform: translateY(var(--img-shift-y, 5%)) scale(var(--img-zoom, 1.08));
       filter: drop-shadow(0 3px 5px rgba(35, 30, 24, 0.22));
       pointer-events: none;
     }
@@ -96,7 +96,10 @@
       .photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .flora-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
-    @media (max-width: 780px) { .flora-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 780px) {
+      .flora-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flora-orb { width: 148px; height: 148px; }
+    }
     @media (max-width: 680px) {
       .asset-grid, .photo-grid { grid-template-columns: 1fr; }
       .asset-card img, .photo-card img { height: 220px; }
@@ -173,19 +176,19 @@
       <p class="kicker">Web Image References (Wikimedia Commons)</p>
       <div class="photo-grid">
         <figure class="photo-card">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_July_2024.jpg" alt="Gowanus Canal, July 2024" loading="lazy" />
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_July_2024.jpg" alt="Gowanus Canal, July 2024" />
           <figcaption>Img 1 - Gowanus Canal July 2024 (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_July_2024.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Union_Street_Bridge_View.jpg" alt="Union Street Bridge view over the Gowanus Canal" loading="lazy" />
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Union_Street_Bridge_View.jpg" alt="Union Street Bridge view over the Gowanus Canal" />
           <figcaption>Img 2 - Union Street Bridge View (<a href="https://commons.wikimedia.org/wiki/File:Union_Street_Bridge_View.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" alt="Gowanus Canal from 9th Street" loading="lazy" />
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" alt="Gowanus Canal from 9th Street" />
           <figcaption>Img 3 - Gowanus Canal from 9th Street (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Canal_from_9th_Street,_Brooklyn,_New_York_City,_2014.JPG" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
         <figure class="photo-card">
-          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Waterfront_Park_010.jpg" alt="Gowanus Waterfront Park" loading="lazy" />
+          <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Gowanus_Waterfront_Park_010.jpg" alt="Gowanus Waterfront Park" />
           <figcaption>Img 4 - Gowanus Waterfront Park (<a href="https://commons.wikimedia.org/wiki/File:Gowanus_Waterfront_Park_010.jpg" target="_blank" rel="noopener noreferrer">source</a>)</figcaption>
         </figure>
       </div>
@@ -327,9 +330,11 @@
       card.className = 'flora-card';
       card.style.setProperty('--habitat-fill', habitat.fill);
       card.style.setProperty('--habitat-stroke', habitat.stroke);
+      card.style.setProperty('--img-zoom', kind === 'Fauna' ? '1.12' : '1.06');
+      card.style.setProperty('--img-shift-y', kind === 'Fauna' ? '6%' : '4%');
       card.innerHTML = `
         <div class="flora-orb">
-          <img src="${path}" alt="${label} SVG" loading="lazy" />
+          <img src="${path}" alt="${label} SVG" />
         </div>
         <p class="flora-name">${label}</p>
         <p class="flora-kind">${kind} • ${habitat.name}</p>
