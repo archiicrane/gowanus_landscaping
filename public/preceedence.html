@@ -29,7 +29,7 @@
 	<div id="map"></div>
 
 	<div id="park-info-panel" role="complementary" aria-label="Park information">
-		<div class="mobile-info-drawer__header" id="mobile-info-drawer-header" role="button" tabindex="0" aria-expanded="false" aria-controls="mobile-info-drawer-content">
+		<div class="mobile-info-drawer__header mobile-info-summary" id="mobile-info-drawer-header" role="button" tabindex="0" aria-expanded="false" aria-controls="mobile-info-drawer-content">
 			<div class="mobile-info-drawer__meta">
 				<p class="mobile-info-drawer__title" id="mobile-drawer-title">Select a park</p>
 				<p class="mobile-info-drawer__subtitle" id="mobile-drawer-subtitle">Tap Info to expand details</p>
@@ -39,10 +39,10 @@
 				<span class="mobile-info-drawer__chevron" aria-hidden="true">⌃</span>
 			</button>
 		</div>
-		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
-		<div class="detail-panel__scroll" id="mobile-info-drawer-content">
+		<button class="park-panel-close" id="park-panel-close" type="button" aria-label="Close park panel">&times;</button>
+		<div class="detail-panel__scroll mobile-info-content" id="mobile-info-drawer-content">
 			<!-- Mobile: Tabbed interface -->
-			<div class="mobile-panel-tabs" id="mobile-panel-tabs">
+			<div class="mobile-panel-tabs mobile-info-tabs" id="mobile-panel-tabs">
 				<button class="mobile-panel-tab-btn" data-tab="trees" type="button" aria-label="Trees tab">Trees</button>
 				<button class="mobile-panel-tab-btn" data-tab="plants" type="button" aria-label="Plants tab">Plants</button>
 				<button class="mobile-panel-tab-btn" data-tab="fauna" type="button" aria-label="Fauna tab">Fauna</button>
@@ -50,28 +50,28 @@
 				<button class="mobile-panel-tab-btn" data-tab="diagram" type="button" aria-label="Diagram tab">Diagram</button>
 			</div>
 
-			<section class="mobile-panel-content" data-tab="trees">
+			<section class="mobile-panel-content mobile-tab-panel" data-tab="trees">
 				<h4 class="park-panel-section-title">Trees</h4>
 				<ul class="park-list" id="park-tree-list">
 					<li>Select a park</li>
 				</ul>
 			</section>
 
-			<section class="mobile-panel-content" data-tab="plants">
+			<section class="mobile-panel-content mobile-tab-panel" data-tab="plants">
 				<h4 class="park-panel-section-title">Plants</h4>
 				<ul class="park-list" id="park-flora-list">
 					<li>Select a park</li>
 				</ul>
 			</section>
 
-			<section class="mobile-panel-content" data-tab="fauna">
+			<section class="mobile-panel-content mobile-tab-panel" data-tab="fauna">
 				<h4 class="park-panel-section-title">Fauna</h4>
 				<ul class="park-list" id="park-fauna-list">
 					<li>Select a park</li>
 				</ul>
 			</section>
 
-			<section class="mobile-panel-content" data-tab="description">
+			<section class="mobile-panel-content mobile-tab-panel" data-tab="description">
 				<h4 class="park-panel-section-title">Description</h4>
 				<p class="park-panel-distance" id="park-panel-distance">Click any park</p>
 				<h2 class="park-panel-name" id="park-panel-name">Park title</h2>
@@ -85,7 +85,7 @@
 				<a class="park-panel-link" id="park-panel-link" href="#" target="_blank" rel="noopener noreferrer">View source page &nearr;</a>
 			</section>
 
-			<section class="mobile-panel-content" data-tab="diagram">
+			<section class="mobile-panel-content mobile-tab-panel" data-tab="diagram">
 				<h4 class="park-panel-section-title">Diagram</h4>
 				<div class="park-tree-metrics" id="park-tree-metrics"></div>
 				<div class="park-tree-type-bars" id="park-tree-type-bars"></div>
@@ -93,7 +93,7 @@
 			</section>
 
 			<!-- Desktop: Original two-column layout -->
-			<div class="park-layout-col park-layout-left">
+			<div class="park-layout-col park-layout-left desktop-info-sections">
 				<section class="park-glass-box park-box-trees">
 					<h4 class="park-panel-section-title">Trees</h4>
 					<ul class="park-list" id="park-tree-list-desktop">
@@ -116,7 +116,7 @@
 				</section>
 			</div>
 
-			<div class="park-layout-col park-layout-right">
+			<div class="park-layout-col park-layout-right desktop-info-sections">
 				<section class="park-glass-box park-box-title">
 					<p class="park-panel-distance" id="park-panel-distance-desktop">Click any park</p>
 					<h2 class="park-panel-name" id="park-panel-name-desktop">Park title</h2>
@@ -143,12 +143,6 @@
 			</div>
 		</div>
 
-		<!-- Fixed title bar with menu for mobile -->
-		<div class="mobile-panel-footer">
-			<div class="mobile-panel-title-area">
-				<h2 class="mobile-panel-title" id="mobile-panel-title">Select a park</h2>
-			</div>
-		</div>
 	</div>
 
 	<script src="/mobile-nav.js"></script>

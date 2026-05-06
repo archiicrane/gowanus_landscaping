@@ -664,101 +664,80 @@ function isMobileDrawerViewport() {
 	return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 }
 
-function setMobileDrawerExpanded(panel, expanded) {
-	if (!panel || !isMobileDrawerViewport()) return;
-	panel.classList.toggle('is-expanded', !!expanded);
-	panel.classList.toggle('is-collapsed', !expanded);
+let isMobileInfoOpen = false;
+let activeMobileTab = 'trees';
+
+function applyMobileDrawerState() {
+	const panel = document.getElementById('park-info-panel');
 	const header = document.getElementById('mobile-info-drawer-header');
-	if (header) header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+	if (!panel || !isMobileDrawerViewport()) return;
+
+	panel.classList.toggle('is-expanded', isMobileInfoOpen);
+	panel.classList.toggle('is-collapsed', !isMobileInfoOpen);
+	if (header) header.setAttribute('aria-expanded', isMobileInfoOpen ? 'true' : 'false');
+
+	const tabs = document.querySelectorAll('.mobile-panel-tab-btn');
+	const contentPanels = document.querySelectorAll('.mobile-panel-content');
+	tabs.forEach((btn) => {
+		btn.classList.toggle('active', btn.dataset.tab === activeMobileTab);
+	});
+	contentPanels.forEach((section) => {
+		const isActive = section.dataset.tab === activeMobileTab;
+		section.classList.toggle('active', isActive);
+		if (isActive) section.scrollTop = 0;
+	});
+}
+
+function setMobileInfoOpen(next) {
+	isMobileInfoOpen = !!next;
+	applyMobileDrawerState();
+}
+
+function setActiveMobileTab(nextTab) {
+	activeMobileTab = nextTab || 'trees';
+	setMobileInfoOpen(true);
 }
 
 function ensureMobileDrawerWiring() {
 	const panel = document.getElementById('park-info-panel');
 	const header = document.getElementById('mobile-info-drawer-header');
 	const toggle = document.getElementById('mobile-info-drawer-toggle');
-	if (!panel || !header || !toggle || toggle.dataset.drawerBound === '1') return;
+	const tabsContainer = document.getElementById('mobile-panel-tabs');
+	if (!panel || !header || !toggle || !tabsContainer || panel.dataset.mobileBound === '1') return;
 
 	const toggleDrawer = (event) => {
 		if (!isMobileDrawerViewport()) return;
+		if (event) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
 		if (!panel.classList.contains('active')) panel.classList.add('active');
-		const shouldExpand = !panel.classList.contains('is-expanded');
-		setMobileDrawerExpanded(panel, shouldExpand);
+		setMobileInfoOpen(!isMobileInfoOpen);
 	};
 
-	// Only bind to the button, not the header
-	// On mobile: use touchend (fires reliably before synthetic click)
-	// On desktop: use click (works with mouse)
-	if (window.matchMedia('(hover: none)').matches) {
-		// Touch device
-		toggle.addEventListener('touchend', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			toggleDrawer(e);
-		}, { passive: false });
-	} else {
-		// Desktop/mouse device
-		toggle.addEventListener('click', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			toggleDrawer(e);
-		});
-	}
+	header.addEventListener('click', (event) => {
+		if (event.target.closest('#mobile-info-drawer-toggle')) return;
+		toggleDrawer(event);
+	});
+	toggle.addEventListener('click', toggleDrawer);
 
-	// Keyboard support on the header
 	header.addEventListener('keydown', (event) => {
-		if ((event.key === 'Enter' || event.key === ' ') && isMobileDrawerViewport()) {
-			event.preventDefault();
+		if (!isMobileDrawerViewport()) return;
+		if (event.key === 'Enter' || event.key === ' ') {
 			toggleDrawer(event);
 		}
 	});
 
-	toggle.dataset.drawerBound = '1';
-}
-
-function setupMobilePanelTabs() {
-	const tabsContainer = document.getElementById('mobile-panel-tabs');
-	if (!tabsContainer) return;
-
-	// Remove existing listeners first (prevent duplicates)
-	const newTabsContainer = tabsContainer.cloneNode(true);
-	tabsContainer.parentNode.replaceChild(newTabsContainer, tabsContainer);
-
-	// Re-query after replacement
-	const allTabBtns = document.querySelectorAll('.mobile-panel-tab-btn');
-	const allTabContents = document.querySelectorAll('.mobile-panel-content');
-
-	if (!allTabBtns.length || !allTabContents.length) return;
-
-	// Activate first tab by default
-	const firstBtn = allTabBtns[0];
-	if (firstBtn) {
-		firstBtn.classList.add('active');
-		const firstContent = document.querySelector('.mobile-panel-content[data-tab="' + firstBtn.dataset.tab + '"]');
-		if (firstContent) firstContent.classList.add('active');
-	}
-
-	// Listen on all tab buttons
-	allTabBtns.forEach(btn => {
-		btn.addEventListener('click', (e) => {
-			e.preventDefault();
-			e.stopPropagation();
-			
-			const tabName = btn.dataset.tab;
-			if (!tabName) return;
-
-			// Deactivate all
-			allTabBtns.forEach(b => b.classList.remove('active'));
-			allTabContents.forEach(c => c.classList.remove('active'));
-
-			// Activate current
-			btn.classList.add('active');
-			const activeContent = document.querySelector('.mobile-panel-content[data-tab="' + tabName + '"]');
-			if (activeContent) {
-				activeContent.classList.add('active');
-				activeContent.scrollTop = 0;
-			}
-		});
+	tabsContainer.addEventListener('click', (event) => {
+		const btn = event.target.closest('.mobile-panel-tab-btn');
+		if (!btn) return;
+		event.preventDefault();
+		event.stopPropagation();
+		setActiveMobileTab(btn.dataset.tab || 'trees');
 	});
+
+	panel.dataset.mobileBound = '1';
+	applyMobileDrawerState();
 }
 
 // ─── Park info panel ──────────────────────────────────────────────────────────
@@ -821,18 +800,14 @@ function openParkPanel(props) {
 		mobileSubtitle.textContent = distanceText;
 	}
 
-	// Update mobile panel footer title
-	const mobilePanelTitle = document.getElementById('mobile-panel-title');
-	if (mobilePanelTitle) mobilePanelTitle.textContent = props.name || 'Park';
-
 	const fauna = parseArrayProp(props.wildlife);
 	renderGroupedFaunaList('park-fauna-list', fauna, 'No fauna list');
 
 	panel.classList.add('active');
 	ensureMobileDrawerWiring();
-	setupMobilePanelTabs();
 	if (isMobileDrawerViewport()) {
-		setMobileDrawerExpanded(panel, false);
+		activeMobileTab = 'trees';
+		setMobileInfoOpen(false);
 	} else {
 		panel.classList.remove('is-collapsed', 'is-expanded');
 	}
@@ -1582,7 +1557,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			const panel = document.getElementById('park-info-panel');
 			if (!panel) return;
 			if (isMobileDrawerViewport()) {
-				setMobileDrawerExpanded(panel, false);
+				setMobileInfoOpen(false);
 				return;
 			}
 			panel.classList.remove('active');
