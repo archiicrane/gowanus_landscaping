@@ -94,7 +94,7 @@
 
 		/* ── Species matrix ───────────────────────── */
 		.matrix-wrap {
-			overflow-x: visible;
+			overflow-x: auto;
 			-webkit-overflow-scrolling: touch;
 			border: 1.5px solid var(--panel-glass-border);
 			border-radius: var(--panel-glass-radius);
@@ -339,6 +339,16 @@
 
 			hr.divider {
 				margin: 0 10px 20px;
+			}
+		}
+
+		@media (max-width: 760px) {
+			.matrix-table {
+				min-width: 760px;
+			}
+
+			.corridor-diagram {
+				height: 180px;
 			}
 		}
 	</style>

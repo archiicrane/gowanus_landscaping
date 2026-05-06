@@ -60,6 +60,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+img,
+svg,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
 body {
   position: relative;
   isolation: isolate;
@@ -100,6 +107,7 @@ body.diagrams-page::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   padding: 0 24px;
   z-index: 2000;
 }
@@ -137,6 +145,7 @@ h4,
   display: flex;
   gap: 6px;
   align-items: center;
+  min-width: 0;
 }
 
 .nav-btn {
@@ -147,6 +156,7 @@ h4,
   padding: 6px 10px;
   border-radius: 8px;
   transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
 }
 
 .nav-btn:hover,
@@ -1445,12 +1455,67 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   .diagrams-layout { padding-bottom: 50px; }
   .board-header-row h2 { font-size: 20px; }
   .metric-value { font-size: 28px; }
-  .top-bar { padding: 0 12px; }
+  .top-bar { padding: 0 10px; }
   .brand { font-size: 11px; letter-spacing: 0.08em; }
-  .nav-btn { padding: 5px 6px; font-size: 12px; }
+  .nav-btn { padding: 5px 9px; font-size: 12px; }
   #mode-toggle { transform: none; padding: 4px 6px; gap: 6px; }
-  #sub-top-bar { flex-direction: column; align-items: stretch; min-height: 110px; gap: 6px; padding: 6px 8px; }
-  #layer-panel { max-width: 100%; overflow: visible; flex-wrap: wrap; padding-bottom: 0; }
-  #map { top: 168px; }
-  #map-story-panels { left: 8px; right: 8px; width: auto; top: 156px; max-height: calc(100vh - 220px); }
+  .top-bar {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .brand {
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+  .nav-links {
+    flex: 1 1 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  #sub-top-bar {
+    min-height: 68px;
+    gap: 8px;
+    padding: 8px;
+    align-items: center;
+    overflow: hidden;
+  }
+  #layer-panel {
+    max-width: 100%;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 2px;
+  }
+  #map { top: 124px; }
+  #map-story-panels { left: 8px; right: 8px; width: auto; top: 132px; max-height: calc(100vh - 184px); }
+}
+
+@media (max-width: 520px) {
+  .brand {
+    display: none;
+  }
+  .top-bar {
+    justify-content: flex-start;
+  }
+  .nav-links {
+    width: 100%;
+  }
+  .layer-panel-title {
+    display: none;
+  }
+  #park-info-panel {
+    top: 116px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-height: calc(100vh - 132px);
+  }
 }

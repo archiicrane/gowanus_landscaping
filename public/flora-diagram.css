@@ -215,6 +215,10 @@
   border-radius: var(--panel-glass-radius);
   background: var(--panel-glass-fill);
   box-shadow: var(--glass-panel-shadow);
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mode-tab {
@@ -252,6 +256,10 @@
   border-radius: var(--panel-glass-radius);
   box-shadow: var(--glass-panel-shadow);
   width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .time-tabs.hidden {
@@ -747,6 +755,31 @@
   }
   .mode-tabs {
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .mode-tab,
+  .time-tab {
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .band-content {
+    grid-template-columns: 1fr;
+  }
+
+  .layer-col {
+    border-right: none;
+    border-bottom: 1px solid rgba(86,73,53,0.08);
+  }
+
+  .layer-col:last-child {
+    border-bottom: none;
   }
 }
 

@@ -211,3 +211,35 @@
     bottom: 18px;
   }
 }
+
+@media (max-width: 640px) {
+  .site-plan-main {
+    padding: 68px 10px 12px;
+  }
+
+  .site-plan-brief {
+    padding: 14px 12px;
+  }
+
+  #site-plan-map-container {
+    min-height: 56vh;
+    padding: 8px;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  #site-plan-map {
+    min-height: 46vh;
+  }
+
+  #site-plan-mini-dashboard {
+    position: static;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mini-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+}

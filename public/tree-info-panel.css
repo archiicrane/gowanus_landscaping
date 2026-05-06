@@ -68,3 +68,18 @@
 	font-size: 1rem;
 	color: #3b3a2f;
 }
+
+@media (max-width: 760px) {
+	#tree-info-panel {
+		right: 8px;
+		top: 118px;
+		width: calc(100vw - 16px);
+		min-width: 0;
+		max-height: calc(100vh - 132px);
+	}
+
+	@keyframes fadeSlideInPanel {
+		from { right: -30px; opacity: 0; }
+		to { right: 8px; opacity: 1; }
+	}
+}
