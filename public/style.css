@@ -1524,13 +1524,22 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 @media (max-width: 520px) {
   .brand {
-    display: none;
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.9;
   }
   .top-bar {
-    justify-content: flex-start;
+    justify-content: space-between;
   }
   .nav-links {
-    width: 100%;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    padding-left: 6px;
   }
   .layer-panel-title {
     display: none;
@@ -1541,5 +1550,51 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     right: 8px;
     width: auto;
     max-height: calc(100vh - 132px);
+  }
+}
+
+/* Mobile scrollbar styling for touch-scrollable UI elements */
+@media (max-width: 760px) {
+  html,
+  body,
+  .nav-links,
+  #layer-panel,
+  #map-story-panels,
+  #tree-info-panel,
+  #park-info-panel,
+  .matrix-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(111, 100, 88, 0.55) rgba(242, 238, 231, 0.55);
+  }
+
+  .nav-links::-webkit-scrollbar,
+  #layer-panel::-webkit-scrollbar,
+  #map-story-panels::-webkit-scrollbar,
+  #tree-info-panel::-webkit-scrollbar,
+  #park-info-panel::-webkit-scrollbar,
+  .matrix-wrap::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  .nav-links::-webkit-scrollbar-track,
+  #layer-panel::-webkit-scrollbar-track,
+  #map-story-panels::-webkit-scrollbar-track,
+  #tree-info-panel::-webkit-scrollbar-track,
+  #park-info-panel::-webkit-scrollbar-track,
+  .matrix-wrap::-webkit-scrollbar-track {
+    background: rgba(242, 238, 231, 0.5);
+    border-radius: 999px;
+  }
+
+  .nav-links::-webkit-scrollbar-thumb,
+  #layer-panel::-webkit-scrollbar-thumb,
+  #map-story-panels::-webkit-scrollbar-thumb,
+  #tree-info-panel::-webkit-scrollbar-thumb,
+  #park-info-panel::-webkit-scrollbar-thumb,
+  .matrix-wrap::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(111, 100, 88, 0.62) 0%, rgba(96, 123, 102, 0.68) 100%);
+    border: 1px solid rgba(242, 238, 231, 0.65);
+    border-radius: 999px;
   }
 }
