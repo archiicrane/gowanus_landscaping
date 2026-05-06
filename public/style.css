@@ -2106,7 +2106,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     display: none;
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-tabs {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-tabs {
     display: flex;
     gap: 8px;
     overflow-x: auto;
@@ -2117,11 +2117,11 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     background: rgba(246, 241, 233, 0.9);
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-tabs::-webkit-scrollbar {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-tab-btn {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-tab-btn {
     min-height: 40px;
     padding: 0 16px;
     border-radius: 999px;
@@ -2134,13 +2134,13 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     font-weight: 600;
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-tab-btn.active {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-tab-btn.active {
     background: #3f6e56;
     color: #f6f1e9;
     border-color: #3f6e56;
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-content {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-content {
     display: none;
     flex: 1;
     min-height: 0;
@@ -2150,7 +2150,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     overscroll-behavior: contain;
   }
 
-  body[data-map-page="preceedence"] .mobile-panel-content.active {
+  body[data-map-page="preceedence"] #park-info-panel .mobile-panel-content.active {
     display: block;
   }
 
