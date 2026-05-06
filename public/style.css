@@ -2242,6 +2242,12 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     white-space: nowrap;
     flex-shrink: 0;
     transition: all 200ms ease;
+    position: relative;
+    z-index: 11;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-tab-btn:active {
+    transform: scale(0.98);
   }
 
   body[data-map-page="preceedence"] .mobile-panel-tab-btn:hover {
@@ -2269,6 +2275,40 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     display: grid;
     gap: 10px;
     align-content: start;
+  }
+
+  /* Hide mobile on desktop, show desktop layout */
+  @media (min-width: 769px) {
+    body[data-map-page="preceedence"] .mobile-info-drawer__header {
+      display: none;
+    }
+
+    body[data-map-page="preceedence"] .mobile-panel-tabs {
+      display: none;
+    }
+
+    body[data-map-page="preceedence"] .mobile-panel-content {
+      display: none !important;
+    }
+
+    body[data-map-page="preceedence"] .mobile-panel-footer {
+      display: none;
+    }
+
+    body[data-map-page="preceedence"] .park-layout-col {
+      display: grid;
+    }
+  }
+
+  /* On mobile: hide desktop layout, show mobile tabs */
+  @media (max-width: 768px) {
+    body[data-map-page="preceedence"] .park-layout-col {
+      display: none;
+    }
+
+    body[data-map-page="preceedence"] .mobile-panel-tabs {
+      display: flex;
+    }
   }
 
   body[data-map-page="preceedence"] .mobile-panel-footer {

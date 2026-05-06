@@ -716,35 +716,47 @@ function ensureMobileDrawerWiring() {
 }
 
 function setupMobilePanelTabs() {
-	const tabBtns = document.querySelectorAll('.mobile-panel-tab-btn');
-	const panelContents = document.querySelectorAll('.mobile-panel-content');
-	const mobileTitleEl = document.getElementById('mobile-panel-title');
+	const tabsContainer = document.getElementById('mobile-panel-tabs');
+	if (!tabsContainer) return;
 
-	if (!tabBtns.length || !panelContents.length) return;
+	// Remove existing listeners first (prevent duplicates)
+	const newTabsContainer = tabsContainer.cloneNode(true);
+	tabsContainer.parentNode.replaceChild(newTabsContainer, tabsContainer);
 
-	// Set first tab active by default
-	const firstTab = tabBtns[0];
-	if (firstTab && !firstTab.classList.contains('active')) {
-		firstTab.classList.add('active');
-		const firstContent = document.querySelector('.mobile-panel-content[data-tab="' + firstTab.dataset.tab + '"]');
+	// Re-query after replacement
+	const allTabBtns = document.querySelectorAll('.mobile-panel-tab-btn');
+	const allTabContents = document.querySelectorAll('.mobile-panel-content');
+
+	if (!allTabBtns.length || !allTabContents.length) return;
+
+	// Activate first tab by default
+	const firstBtn = allTabBtns[0];
+	if (firstBtn) {
+		firstBtn.classList.add('active');
+		const firstContent = document.querySelector('.mobile-panel-content[data-tab="' + firstBtn.dataset.tab + '"]');
 		if (firstContent) firstContent.classList.add('active');
 	}
 
-	// Listen for tab clicks
-	tabBtns.forEach(btn => {
+	// Listen on all tab buttons
+	allTabBtns.forEach(btn => {
 		btn.addEventListener('click', (e) => {
 			e.preventDefault();
 			e.stopPropagation();
+			
 			const tabName = btn.dataset.tab;
+			if (!tabName) return;
 
-			// Deactivate all tabs and contents
-			tabBtns.forEach(b => b.classList.remove('active'));
-			panelContents.forEach(p => p.classList.remove('active'));
+			// Deactivate all
+			allTabBtns.forEach(b => b.classList.remove('active'));
+			allTabContents.forEach(c => c.classList.remove('active'));
 
-			// Activate selected tab and content
+			// Activate current
 			btn.classList.add('active');
 			const activeContent = document.querySelector('.mobile-panel-content[data-tab="' + tabName + '"]');
-			if (activeContent) activeContent.classList.add('active');
+			if (activeContent) {
+				activeContent.classList.add('active');
+				activeContent.scrollTop = 0;
+			}
 		});
 	});
 }
@@ -764,8 +776,18 @@ function openParkPanel(props) {
 	const programsEl = document.getElementById('park-panel-programs');
 	const linkEl     = document.getElementById('park-panel-link');
 
+	// Desktop versions
+	const nameElDT    = document.getElementById('park-panel-name-desktop');
+	const distElDT    = document.getElementById('park-panel-distance-desktop');
+	const areaElDT    = document.getElementById('park-panel-area-desktop');
+	const estElDT     = document.getElementById('park-panel-established-desktop');
+	const descElDT    = document.getElementById('park-panel-desc-desktop');
+	const ecoElDT     = document.getElementById('park-panel-ecology-desktop');
+	const linkElDT    = document.getElementById('park-panel-link-desktop');
+
 	if (!panel) return;
 
+	// Update mobile versions
 	if (nameEl) nameEl.textContent = props.name || 'Park';
 	if (distEl) distEl.textContent = props.distance_label || '';
 	if (areaEl) areaEl.textContent = props.area_acres ? `${props.area_acres} ac` : '';
@@ -776,6 +798,19 @@ function openParkPanel(props) {
 	if (linkEl) {
 		linkEl.href = props.link || '#';
 		linkEl.style.display = props.link ? 'inline-block' : 'none';
+	}
+
+	// Update desktop versions
+	if (nameElDT) nameElDT.textContent = props.name || 'Park';
+	if (distElDT) distElDT.textContent = props.distance_label || '';
+	if (areaElDT) areaElDT.textContent = props.area_acres ? `${props.area_acres} ac` : '';
+	if (estElDT) estElDT.textContent  = props.established ? `Est. ${props.established}` : '';
+	if (descElDT) descElDT.textContent = props.description || '';
+	if (ecoElDT) ecoElDT.textContent  = props.ecology_note || '';
+
+	if (linkElDT) {
+		linkElDT.href = props.link || '#';
+		linkElDT.style.display = props.link ? 'inline-block' : 'none';
 	}
 
 	const mobileTitle = document.getElementById('mobile-drawer-title');
@@ -1300,6 +1335,12 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	const metricsEl = document.getElementById('park-tree-metrics');
 	const barsEl = document.getElementById('park-tree-type-bars');
 	const noteEl = document.getElementById('park-tree-note');
+	
+	// Desktop versions
+	const metricsElDT = document.getElementById('park-tree-metrics-desktop');
+	const barsElDT = document.getElementById('park-tree-type-bars-desktop');
+	const noteElDT = document.getElementById('park-tree-note-desktop');
+	
 	if (!metricsEl || !barsEl || !noteEl) return;
 	
 	let dataLabel = 'Observed';
@@ -1337,11 +1378,15 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		<div class="park-tree-metric"><span>Shape</span><strong>${compactness.toFixed(2)}</strong></div>
 	`;
 
+	if (metricsElDT) {
+		metricsElDT.innerHTML = metricsEl.innerHTML;
+	}
+
 	const countValues = topSpecies
 		.map((d) => Number(d.count))
 		.filter((v) => Number.isFinite(v) && v > 0);
 	const max = countValues.length ? Math.max(...countValues) : 1;
-	barsEl.innerHTML = topSpecies.length
+	const barsHtml = topSpecies.length
 		? topSpecies.map((d) => `
 			<div class="park-tree-bar-row">
 				<span class="park-tree-bar-label">${d.species}</span>
@@ -1351,7 +1396,15 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		`).join('')
 		: '<p class="park-tree-empty">Species breakdown not available for this park in the source dataset.</p>';
 
+	barsEl.innerHTML = barsHtml;
+	if (barsElDT) {
+		barsElDT.innerHTML = barsHtml;
+	}
+
 	noteEl.textContent = noteText;
+	if (noteElDT) {
+		noteElDT.textContent = noteText;
+	}
 }
 
 async function analyzePreceedenceParkTrees(map, feature) {
@@ -1465,10 +1518,16 @@ async function analyzePreceedenceParkTrees(map, feature) {
 
 	const floraProfile = PARK_FLORA_PROFILES[parkId] || [];
 	const floraFromTrees = topSpecies.map((s) => s.species);
+	
+	// Update both mobile and desktop versions
 	updateParkList('park-tree-list', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
+	updateParkList('park-tree-list-desktop', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
 	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
+	updateParkList('park-flora-list-desktop', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
+	
 	const faunaItems = parseArrayProp(feature?.properties?.wildlife);
 	renderGroupedFaunaList('park-fauna-list', faunaItems, 'No fauna list');
+	renderGroupedFaunaList('park-fauna-list-desktop', faunaItems, 'No fauna list');
 	updatePreceedenceFaunaOverlays(map, feature, faunaItems);
 }
 

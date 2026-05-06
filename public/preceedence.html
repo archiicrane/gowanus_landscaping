@@ -41,13 +41,13 @@
 		</div>
 		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
 		<div class="detail-panel__scroll" id="mobile-info-drawer-content">
-			<!-- Tabbed panel content for mobile -->
-			<div class="mobile-panel-tabs">
-				<button class="mobile-panel-tab-btn" data-tab="trees" aria-label="Trees tab">Trees</button>
-				<button class="mobile-panel-tab-btn" data-tab="plants" aria-label="Plants tab">Plants</button>
-				<button class="mobile-panel-tab-btn" data-tab="fauna" aria-label="Fauna tab">Fauna</button>
-				<button class="mobile-panel-tab-btn" data-tab="description" aria-label="Description tab">Description</button>
-				<button class="mobile-panel-tab-btn" data-tab="diagram" aria-label="Diagram tab">Diagram</button>
+			<!-- Mobile: Tabbed interface -->
+			<div class="mobile-panel-tabs" id="mobile-panel-tabs">
+				<button class="mobile-panel-tab-btn" data-tab="trees" type="button" aria-label="Trees tab">Trees</button>
+				<button class="mobile-panel-tab-btn" data-tab="plants" type="button" aria-label="Plants tab">Plants</button>
+				<button class="mobile-panel-tab-btn" data-tab="fauna" type="button" aria-label="Fauna tab">Fauna</button>
+				<button class="mobile-panel-tab-btn" data-tab="description" type="button" aria-label="Description tab">Description</button>
+				<button class="mobile-panel-tab-btn" data-tab="diagram" type="button" aria-label="Diagram tab">Diagram</button>
 			</div>
 
 			<section class="mobile-panel-content" data-tab="trees">
@@ -91,6 +91,56 @@
 				<div class="park-tree-type-bars" id="park-tree-type-bars"></div>
 				<p class="park-tree-note" id="park-tree-note"></p>
 			</section>
+
+			<!-- Desktop: Original two-column layout -->
+			<div class="park-layout-col park-layout-left">
+				<section class="park-glass-box park-box-trees">
+					<h4 class="park-panel-section-title">Trees</h4>
+					<ul class="park-list" id="park-tree-list-desktop">
+						<li>Select a park</li>
+					</ul>
+				</section>
+
+				<section class="park-glass-box park-box-plants">
+					<h4 class="park-panel-section-title">Plants</h4>
+					<ul class="park-list" id="park-flora-list-desktop">
+						<li>Select a park</li>
+					</ul>
+				</section>
+
+				<section class="park-glass-box park-box-fauna">
+					<h4 class="park-panel-section-title">Fauna</h4>
+					<ul class="park-list" id="park-fauna-list-desktop">
+						<li>Select a park</li>
+					</ul>
+				</section>
+			</div>
+
+			<div class="park-layout-col park-layout-right">
+				<section class="park-glass-box park-box-title">
+					<p class="park-panel-distance" id="park-panel-distance-desktop">Click any park</p>
+					<h2 class="park-panel-name" id="park-panel-name-desktop">Park title</h2>
+					<p class="park-panel-area-row">
+						<span id="park-panel-area-desktop"></span>
+						<span class="park-panel-sep">&middot;</span>
+						<span id="park-panel-established-desktop"></span>
+					</p>
+				</section>
+
+				<section class="park-glass-box park-box-description">
+					<h4 class="park-panel-section-title">Description</h4>
+					<p class="park-panel-desc" id="park-panel-desc-desktop">Click a park to load details.</p>
+					<p class="park-panel-ecology" id="park-panel-ecology-desktop"></p>
+					<a class="park-panel-link" id="park-panel-link-desktop" href="#" target="_blank" rel="noopener noreferrer">View source page &nearr;</a>
+				</section>
+
+				<section class="park-glass-box park-box-diagram">
+					<h4 class="park-panel-section-title">Diagram</h4>
+					<div class="park-tree-metrics" id="park-tree-metrics-desktop"></div>
+					<div class="park-tree-type-bars" id="park-tree-type-bars-desktop"></div>
+					<p class="park-tree-note" id="park-tree-note-desktop"></p>
+				</section>
+			</div>
 		</div>
 
 		<!-- Fixed title bar with menu for mobile -->
