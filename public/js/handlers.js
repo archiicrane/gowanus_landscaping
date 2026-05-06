@@ -680,7 +680,8 @@ function ensureMobileDrawerWiring() {
 
 	const toggleDrawer = (event) => {
 		if (event) event.preventDefault();
-		if (!isMobileDrawerViewport() || !panel.classList.contains('active')) return;
+		if (!isMobileDrawerViewport()) return;
+		if (!panel.classList.contains('active')) panel.classList.add('active');
 		const shouldExpand = !panel.classList.contains('is-expanded');
 		setMobileDrawerExpanded(panel, shouldExpand);
 	};
@@ -692,6 +693,10 @@ function ensureMobileDrawerWiring() {
 		}
 	});
 	toggle.addEventListener('click', (event) => {
+		event.stopPropagation();
+		toggleDrawer(event);
+	});
+	toggle.addEventListener('pointerup', (event) => {
 		event.stopPropagation();
 		toggleDrawer(event);
 	});
