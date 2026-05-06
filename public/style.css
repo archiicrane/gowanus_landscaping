@@ -1997,19 +1997,87 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     position: fixed;
     left: 12px;
     right: 12px;
-    top: calc(88px + env(safe-area-inset-top));
-    bottom: calc(16px + env(safe-area-inset-bottom));
+    top: auto;
+    bottom: calc(12px + env(safe-area-inset-bottom));
     width: auto;
     max-width: none;
-    height: auto;
-    max-height: none;
+    max-height: 70dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     padding: 0;
-    border-radius: 18px;
-    z-index: 3400;
+    border-radius: 22px 22px 16px 16px;
+    z-index: 20;
     gap: 0;
+    height: 72px;
+    transition: height 250ms ease, transform 250ms ease;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel.is-collapsed {
+    height: 72px;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel.is-expanded {
+    height: min(70dvh, 620px);
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__header {
+    position: sticky;
+    top: 0;
+    z-index: 7;
+    min-height: 72px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 56px 10px 12px;
+    background: rgba(246, 241, 233, 0.96);
+    border-bottom: 1px solid rgba(120, 130, 120, 0.24);
+    cursor: pointer;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(11px, 3vw, 13px);
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #2f2a24;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__subtitle {
+    margin: 2px 0 0;
+    font-size: clamp(11px, 3.3vw, 13px);
+    line-height: 1.25;
+    color: #6e665b;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__toggle {
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid rgba(86, 73, 53, 0.22);
+    border-radius: 999px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(248, 246, 241, 0.82);
+    color: #3f3a32;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__chevron {
+    display: inline-block;
+    transform: rotate(180deg);
+    transition: transform 220ms ease;
+    line-height: 1;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel.is-expanded .mobile-info-drawer__chevron {
+    transform: rotate(0deg);
   }
 
   body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
@@ -2019,9 +2087,15 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     overflow-x: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 56px 12px 80px;
+    max-height: calc(70dvh - 72px);
+    padding: 12px;
+    padding-bottom: 24px;
     display: grid;
     gap: 10px;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel.is-collapsed .detail-panel__scroll {
+    display: none;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
@@ -2040,6 +2114,15 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     gap: 10px;
   }
 
+  body[data-map-page="preceedence"] #park-info-panel .park-box-plants,
+  body[data-map-page="preceedence"] #park-info-panel .park-box-fauna,
+  body[data-map-page="preceedence"] #park-info-panel .park-box-trees,
+  body[data-map-page="preceedence"] #park-info-panel .park-box-description,
+  body[data-map-page="preceedence"] #park-info-panel .park-box-diagram,
+  body[data-map-page="preceedence"] #park-info-panel .park-box-title {
+    height: auto;
+  }
+
   body[data-map-page="preceedence"] #park-info-panel .park-list {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -2056,16 +2139,16 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   body[data-map-page="preceedence"] #park-info-panel .park-list-item {
     width: 100%;
     display: grid;
-    grid-template-columns: 40px 1fr;
+    grid-template-columns: 38px 1fr;
     align-items: center;
     gap: 10px;
     min-width: 0;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .park-panel-name {
@@ -2109,9 +2192,13 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     bottom: 18px;
   }
 
-  body[data-map-page="preceedence"] #park-info-panel.active ~ .mapboxgl-ctrl-bottom-left,
-  body[data-map-page="preceedence"] #park-info-panel.active ~ .mapboxgl-ctrl-bottom-right {
-    opacity: 0;
-    pointer-events: none;
+  body[data-map-page="preceedence"] .mapboxgl-ctrl-bottom-left,
+  body[data-map-page="preceedence"] .mapboxgl-ctrl-bottom-right {
+    bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel.is-expanded ~ .mapboxgl-ctrl-bottom-left,
+  body[data-map-page="preceedence"] #park-info-panel.is-expanded ~ .mapboxgl-ctrl-bottom-right {
+    opacity: 0.55;
   }
 }

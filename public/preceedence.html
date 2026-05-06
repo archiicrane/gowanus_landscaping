@@ -29,8 +29,18 @@
 	<div id="map"></div>
 
 	<div id="park-info-panel" role="complementary" aria-label="Park information">
+		<div class="mobile-info-drawer__header" id="mobile-info-drawer-header" role="button" tabindex="0" aria-expanded="false" aria-controls="mobile-info-drawer-content">
+			<div class="mobile-info-drawer__meta">
+				<p class="mobile-info-drawer__title" id="mobile-drawer-title">Select a park</p>
+				<p class="mobile-info-drawer__subtitle" id="mobile-drawer-subtitle">Tap Info to expand details</p>
+			</div>
+			<button class="mobile-info-drawer__toggle" id="mobile-info-drawer-toggle" type="button" aria-label="Toggle park info drawer">
+				<span>Info</span>
+				<span class="mobile-info-drawer__chevron" aria-hidden="true">⌃</span>
+			</button>
+		</div>
 		<button class="park-panel-close" id="park-panel-close" aria-label="Close park panel">&times;</button>
-		<div class="detail-panel__scroll">
+		<div class="detail-panel__scroll" id="mobile-info-drawer-content">
 
 		<div class="park-layout-col park-layout-left">
 			<section class="park-glass-box park-box-trees">

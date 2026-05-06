@@ -660,6 +660,45 @@ function normalizeSpeciesName(row) {
 	return 'Unknown';
 }
 
+function isMobileDrawerViewport() {
+	return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+}
+
+function setMobileDrawerExpanded(panel, expanded) {
+	if (!panel || !isMobileDrawerViewport()) return;
+	panel.classList.toggle('is-expanded', !!expanded);
+	panel.classList.toggle('is-collapsed', !expanded);
+	const header = document.getElementById('mobile-info-drawer-header');
+	if (header) header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
+
+function ensureMobileDrawerWiring() {
+	const panel = document.getElementById('park-info-panel');
+	const header = document.getElementById('mobile-info-drawer-header');
+	const toggle = document.getElementById('mobile-info-drawer-toggle');
+	if (!panel || !header || !toggle || header.dataset.drawerBound === '1') return;
+
+	const toggleDrawer = (event) => {
+		if (event) event.preventDefault();
+		if (!isMobileDrawerViewport() || !panel.classList.contains('active')) return;
+		const shouldExpand = !panel.classList.contains('is-expanded');
+		setMobileDrawerExpanded(panel, shouldExpand);
+	};
+
+	header.addEventListener('click', toggleDrawer);
+	header.addEventListener('keydown', (event) => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			toggleDrawer(event);
+		}
+	});
+	toggle.addEventListener('click', (event) => {
+		event.stopPropagation();
+		toggleDrawer(event);
+	});
+
+	header.dataset.drawerBound = '1';
+}
+
 // ─── Park info panel ──────────────────────────────────────────────────────────
 function openParkPanel(props) {
 	const panel      = document.getElementById('park-info-panel');
@@ -689,11 +728,25 @@ function openParkPanel(props) {
 		linkEl.style.display = props.link ? 'inline-block' : 'none';
 	}
 
+	const mobileTitle = document.getElementById('mobile-drawer-title');
+	const mobileSubtitle = document.getElementById('mobile-drawer-subtitle');
+	if (mobileTitle) mobileTitle.textContent = props.name || 'Park details';
+	if (mobileSubtitle) {
+		const distanceText = props.distance_label || props.established ? `${props.distance_label || ''}${props.distance_label && props.established ? ' · ' : ''}${props.established ? `Est. ${props.established}` : ''}` : 'Tap Info to expand details';
+		mobileSubtitle.textContent = distanceText;
+	}
+
 
 	const fauna = parseArrayProp(props.wildlife);
 	renderGroupedFaunaList('park-fauna-list', fauna, 'No fauna list');
 
 	panel.classList.add('active');
+	ensureMobileDrawerWiring();
+	if (isMobileDrawerViewport()) {
+		setMobileDrawerExpanded(panel, false);
+	} else {
+		panel.classList.remove('is-collapsed', 'is-expanded');
+	}
 }
 
 const osmDotCache = new Map();
@@ -1414,10 +1467,17 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 	if (closeBtn) {
 		closeBtn.addEventListener('click', () => {
 			const panel = document.getElementById('park-info-panel');
-			if (panel) panel.classList.remove('active');
+			if (!panel) return;
+			if (isMobileDrawerViewport()) {
+				setMobileDrawerExpanded(panel, false);
+				return;
+			}
+			panel.classList.remove('active');
 			clearSelectedParkContext(map);
 		});
 	}
+
+	ensureMobileDrawerWiring();
 
 	const tooltip = document.getElementById('map-tooltip');
 
