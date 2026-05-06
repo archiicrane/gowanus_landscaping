@@ -715,6 +715,40 @@ function ensureMobileDrawerWiring() {
 	toggle.dataset.drawerBound = '1';
 }
 
+function setupMobilePanelTabs() {
+	const tabBtns = document.querySelectorAll('.mobile-panel-tab-btn');
+	const panelContents = document.querySelectorAll('.mobile-panel-content');
+	const mobileTitleEl = document.getElementById('mobile-panel-title');
+
+	if (!tabBtns.length || !panelContents.length) return;
+
+	// Set first tab active by default
+	const firstTab = tabBtns[0];
+	if (firstTab && !firstTab.classList.contains('active')) {
+		firstTab.classList.add('active');
+		const firstContent = document.querySelector('.mobile-panel-content[data-tab="' + firstTab.dataset.tab + '"]');
+		if (firstContent) firstContent.classList.add('active');
+	}
+
+	// Listen for tab clicks
+	tabBtns.forEach(btn => {
+		btn.addEventListener('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			const tabName = btn.dataset.tab;
+
+			// Deactivate all tabs and contents
+			tabBtns.forEach(b => b.classList.remove('active'));
+			panelContents.forEach(p => p.classList.remove('active'));
+
+			// Activate selected tab and content
+			btn.classList.add('active');
+			const activeContent = document.querySelector('.mobile-panel-content[data-tab="' + tabName + '"]');
+			if (activeContent) activeContent.classList.add('active');
+		});
+	});
+}
+
 // ─── Park info panel ──────────────────────────────────────────────────────────
 function openParkPanel(props) {
 	const panel      = document.getElementById('park-info-panel');
@@ -752,12 +786,16 @@ function openParkPanel(props) {
 		mobileSubtitle.textContent = distanceText;
 	}
 
+	// Update mobile panel footer title
+	const mobilePanelTitle = document.getElementById('mobile-panel-title');
+	if (mobilePanelTitle) mobilePanelTitle.textContent = props.name || 'Park';
 
 	const fauna = parseArrayProp(props.wildlife);
 	renderGroupedFaunaList('park-fauna-list', fauna, 'No fauna list');
 
 	panel.classList.add('active');
 	ensureMobileDrawerWiring();
+	setupMobilePanelTabs();
 	if (isMobileDrawerViewport()) {
 		setMobileDrawerExpanded(panel, false);
 	} else {

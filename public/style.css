@@ -2003,8 +2003,8 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     max-width: none;
     max-height: 70dvh;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 72px 1fr auto;
     padding: 0;
     border-radius: 22px 22px 16px 16px;
     z-index: 20;
@@ -2015,10 +2015,12 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
   body[data-map-page="preceedence"] #park-info-panel.is-collapsed {
     height: 72px;
+    grid-template-rows: 72px;
   }
 
   body[data-map-page="preceedence"] #park-info-panel.is-expanded {
     height: min(70dvh, 620px);
+    grid-template-rows: 72px 1fr auto;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__header {
@@ -2203,5 +2205,95 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   body[data-map-page="preceedence"] #park-info-panel.is-expanded ~ .mapboxgl-ctrl-bottom-left,
   body[data-map-page="preceedence"] #park-info-panel.is-expanded ~ .mapboxgl-ctrl-bottom-right {
     opacity: 0.55;
+  }
+
+  /* Mobile tabbed panel interface */
+  body[data-map-page="preceedence"] .detail-panel__scroll {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(120, 130, 120, 0.16);
+    background: rgba(246, 241, 233, 0.6);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-tab-btn {
+    padding: 6px 14px;
+    border: 1px solid rgba(86, 73, 53, 0.22);
+    border-radius: 20px;
+    background: rgba(248, 246, 241, 0.7);
+    color: #5f5a52;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 200ms ease;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-tab-btn:hover {
+    background: rgba(248, 246, 241, 0.95);
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-tab-btn.active {
+    background: #3f6e56;
+    color: #f6f1e9;
+    border-color: #3f6e56;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-content {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    padding-bottom: 12px;
+    gap: 10px;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-content.active {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-footer {
+    position: relative;
+    z-index: 9;
+    background: rgba(246, 241, 233, 0.98);
+    border-top: 1px solid rgba(120, 130, 120, 0.24);
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-title-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  body[data-map-page="preceedence"] .mobile-panel-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(13px, 4vw, 16px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #2f2a24;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 }
