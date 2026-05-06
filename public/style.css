@@ -2071,6 +2071,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     position: relative;
     z-index: 8;
     touch-action: manipulation;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .mobile-info-drawer__chevron {

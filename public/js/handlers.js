@@ -676,44 +676,43 @@ function ensureMobileDrawerWiring() {
 	const panel = document.getElementById('park-info-panel');
 	const header = document.getElementById('mobile-info-drawer-header');
 	const toggle = document.getElementById('mobile-info-drawer-toggle');
-	if (!panel || !header || !toggle || header.dataset.drawerBound === '1') return;
-	let suppressToggleClickUntil = 0;
+	if (!panel || !header || !toggle || toggle.dataset.drawerBound === '1') return;
 
 	const toggleDrawer = (event) => {
-		if (event) event.preventDefault();
 		if (!isMobileDrawerViewport()) return;
 		if (!panel.classList.contains('active')) panel.classList.add('active');
 		const shouldExpand = !panel.classList.contains('is-expanded');
 		setMobileDrawerExpanded(panel, shouldExpand);
 	};
 
-	header.addEventListener('click', toggleDrawer);
+	// Only bind to the button, not the header
+	// On mobile: use touchend (fires reliably before synthetic click)
+	// On desktop: use click (works with mouse)
+	if (window.matchMedia('(hover: none)').matches) {
+		// Touch device
+		toggle.addEventListener('touchend', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			toggleDrawer(e);
+		}, { passive: false });
+	} else {
+		// Desktop/mouse device
+		toggle.addEventListener('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			toggleDrawer(e);
+		});
+	}
+
+	// Keyboard support on the header
 	header.addEventListener('keydown', (event) => {
-		if (event.key === 'Enter' || event.key === ' ') {
+		if ((event.key === 'Enter' || event.key === ' ') && isMobileDrawerViewport()) {
+			event.preventDefault();
 			toggleDrawer(event);
 		}
 	});
-	toggle.addEventListener('pointerup', (event) => {
-		event.stopPropagation();
-		suppressToggleClickUntil = Date.now() + 500;
-		toggleDrawer(event);
-	});
-	toggle.addEventListener('touchend', (event) => {
-		event.stopPropagation();
-		suppressToggleClickUntil = Date.now() + 500;
-		toggleDrawer(event);
-	}, { passive: false });
-	toggle.addEventListener('click', (event) => {
-		if (Date.now() < suppressToggleClickUntil) {
-			event.preventDefault();
-			event.stopPropagation();
-			return;
-		}
-		event.stopPropagation();
-		toggleDrawer(event);
-	});
 
-	header.dataset.drawerBound = '1';
+	toggle.dataset.drawerBound = '1';
 }
 
 // ─── Park info panel ──────────────────────────────────────────────────────────
