@@ -67,6 +67,33 @@
       background: #f2eee7;
     }
 
+    @media (max-width: 768px) {
+      body.drawings-page {
+        padding-top: calc(56px + env(safe-area-inset-top));
+      }
+
+      .drawings-layout {
+        width: min(100%, calc(100vw - 24px));
+        margin: 12px auto calc(20px + env(safe-area-inset-bottom));
+        gap: clamp(10px, 2.8vw, 14px);
+      }
+
+      .drawings-panel {
+        padding: clamp(12px, 3vw, 16px);
+        border-radius: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .drawings-layout {
+        width: min(100%, calc(100vw - 20px));
+      }
+
+      .drawings-panel {
+        padding: 12px;
+      }
+    }
+
     /* Heights set by JS based on rendered width × aspect ratio */
   </style>
 </head>

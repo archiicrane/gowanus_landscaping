@@ -69,17 +69,34 @@
 	color: #3b3a2f;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
 	#tree-info-panel {
-		right: 8px;
-		top: 118px;
-		width: calc(100vw - 16px);
+		right: 12px;
+		left: 12px;
+		top: calc(64px + env(safe-area-inset-top));
+		width: calc(100vw - 24px);
 		min-width: 0;
-		max-height: calc(100vh - 132px);
+		max-height: calc(100dvh - 32px);
+		border-radius: 18px;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
+	}
+
+	#tree-info-panel .tree-popup-close-btn {
+		min-width: 44px;
+		min-height: 44px;
 	}
 
 	@keyframes fadeSlideInPanel {
 		from { right: -30px; opacity: 0; }
-		to { right: 8px; opacity: 1; }
+		to { right: 12px; opacity: 1; }
+	}
+}
+
+@media (max-width: 480px) {
+	#tree-info-panel {
+		left: 10px;
+		right: 10px;
+		width: calc(100vw - 20px);
 	}
 }

@@ -105,6 +105,35 @@
       .asset-grid, .photo-grid { grid-template-columns: 1fr; }
       .asset-card img, .photo-card img { height: 220px; }
     }
+    @media (max-width: 768px) {
+      .reference-layout { width: min(100%, calc(100vw - 24px)); margin: 12px auto 32px; gap: clamp(10px, 2.5vw, 14px); }
+      .reference-panel { padding: clamp(12px, 3.2vw, 16px); border-radius: 18px; overflow: hidden; }
+      .reference-hero h1 { font-size: clamp(24px, 7vw, 40px); line-height: 1.08; }
+      .reference-hero p { font-size: clamp(14px, 3.8vw, 16px); }
+      .asset-grid,
+      .overview-grid,
+      .photo-grid,
+      .flora-grid { grid-template-columns: 1fr; gap: clamp(10px, 2.8vw, 14px); }
+      .flora-orb { width: clamp(116px, 36vw, 142px); height: clamp(116px, 36vw, 142px); }
+      .scb-panel { padding: clamp(12px, 3vw, 16px); }
+      .scb-map { min-height: 240px; }
+      .photo-card img,
+      .asset-card img { height: clamp(180px, 48vw, 230px); }
+    }
+    @media (max-width: 480px) {
+      .reference-page { padding-top: calc(56px + env(safe-area-inset-top)); }
+      .reference-layout { width: min(100%, calc(100vw - 20px)); margin-bottom: 24px; }
+      .reference-panel { padding: 12px; }
+      .kicker { font-size: 10px; }
+      .flora-name { font-size: 10px; }
+      .flora-kind { font-size: 9px; }
+      .scb-title { font-size: clamp(15px, 4.5vw, 20px); }
+      .scb-subtitle,
+      .scb-callout-note { font-size: 10px; }
+      .scb-callout-label { font-size: 10.5px; }
+      .scb-pin,
+      .scb-callout-num { width: 20px; height: 20px; }
+    }
   </style>
 </head>
 <body class="reference-page">

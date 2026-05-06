@@ -21,6 +21,11 @@
   --font-sans: 'Barlow', sans-serif;
   --font-serif: 'Barlow', sans-serif;
   --font-display: 'Barlow Condensed', sans-serif;
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 14px;
+  --space-lg: 20px;
+  --panel-radius: 18px;
 }
 
 * {
@@ -54,6 +59,7 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
+  overflow-x: hidden;
   background: #ebe8df;
   color: var(--ink);
   font-family: var(--font-sans);
@@ -1463,12 +1469,12 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   #map-story-panels { width: min(48vw, 360px); right: 10px; top: 132px; bottom: 10px; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   #map-story-panels { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 44vh; }
   .story-panel-group.active { grid-template-rows: auto auto minmax(140px, 1fr); }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .top-bar {
     overflow: visible;
     justify-content: space-between;
@@ -1612,7 +1618,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 }
 
 /* Mobile scrollbar styling for touch-scrollable UI elements */
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   html,
   body,
   .nav-links,
@@ -1654,5 +1660,303 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     background: linear-gradient(180deg, rgba(111, 100, 88, 0.62) 0%, rgba(96, 123, 102, 0.68) 100%);
     border: 1px solid rgba(242, 238, 231, 0.65);
     border-radius: 999px;
+  }
+}
+
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .top-bar {
+    min-height: 56px;
+    height: auto;
+    padding-left: max(var(--space-sm), env(safe-area-inset-left));
+    padding-right: max(var(--space-sm), env(safe-area-inset-right));
+    gap: var(--space-sm);
+  }
+
+  .brand {
+    font-size: clamp(10px, 2.5vw, 12px);
+    max-width: min(52vw, 210px);
+  }
+
+  .mobile-menu-btn,
+  .park-panel-close,
+  .tree-popup-close-btn,
+  .observable-modal-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .top-bar.nav-open .nav-links {
+    width: min(100%, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    left: max(var(--space-sm), env(safe-area-inset-left));
+    right: max(var(--space-sm), env(safe-area-inset-right));
+    border-radius: var(--panel-radius);
+    padding: var(--space-sm);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-size: clamp(12px, 3.2vw, 14px);
+  }
+
+  #sub-top-bar {
+    top: 56px;
+    padding: var(--space-sm) max(var(--space-sm), env(safe-area-inset-right)) var(--space-xs) max(var(--space-sm), env(safe-area-inset-left));
+    min-height: 70px;
+    gap: var(--space-sm);
+  }
+
+  #map {
+    top: 132px;
+  }
+
+  #layer-panel,
+  #mode-toggle {
+    max-width: 100%;
+  }
+
+  #map-story-panels {
+    position: fixed;
+    left: max(var(--space-sm), env(safe-area-inset-left));
+    right: max(var(--space-sm), env(safe-area-inset-right));
+    bottom: calc(var(--space-sm) + env(safe-area-inset-bottom));
+    top: auto;
+    width: auto;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 32px);
+    border-radius: var(--panel-radius);
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    background: transparent;
+  }
+
+  body[data-map-page="analysis"] #map-story-panels {
+    bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+    max-height: min(40dvh, 320px);
+  }
+
+  .story-panel-group.active {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: var(--space-sm);
+    min-height: 0;
+  }
+
+  .story-card {
+    padding: var(--space-md);
+    border-radius: var(--panel-radius);
+  }
+
+  .story-card h3 {
+    font-size: clamp(15px, 5vw, 20px);
+  }
+
+  .story-note,
+  .board-subhead,
+  .chart-desc {
+    font-size: clamp(11px, 3.4vw, 13px);
+    line-height: 1.45;
+  }
+
+  #tree-info-panel {
+    position: fixed;
+    left: max(var(--space-sm), env(safe-area-inset-left));
+    right: max(var(--space-sm), env(safe-area-inset-right));
+    top: calc(64px + env(safe-area-inset-top));
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 32px);
+    border-radius: var(--panel-radius);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  #park-info-panel,
+  body[data-map-page="preceedence"] #park-info-panel {
+    position: fixed;
+    left: max(var(--space-sm), env(safe-area-inset-left));
+    right: max(var(--space-sm), env(safe-area-inset-right));
+    top: calc(64px + env(safe-area-inset-top));
+    bottom: auto;
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 32px);
+    padding: var(--space-md);
+    border-radius: var(--panel-radius);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    display: block;
+    gap: var(--space-sm);
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
+    display: grid;
+    gap: var(--space-sm);
+    height: auto;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .park-list {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .park-list-svg {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .park-panel-name {
+    font-size: clamp(20px, 6vw, 28px);
+    line-height: 1.15;
+  }
+
+  .park-callout {
+    min-width: 0;
+    max-width: 100%;
+    width: min(100%, 280px);
+  }
+
+  .mapboxgl-ctrl-top-left,
+  .mapboxgl-ctrl-top-right {
+    top: calc(70px + env(safe-area-inset-top));
+  }
+
+  .mapboxgl-ctrl-top-right,
+  .mapboxgl-ctrl-bottom-right {
+    right: max(var(--space-sm), env(safe-area-inset-right));
+  }
+
+  .mapboxgl-ctrl-top-left,
+  .mapboxgl-ctrl-bottom-left {
+    left: max(var(--space-sm), env(safe-area-inset-left));
+  }
+
+
+  body[data-map-page="analysis"] .mapboxgl-ctrl-bottom-left,
+  body[data-map-page="analysis"] .mapboxgl-ctrl-bottom-right {
+    bottom: calc(min(40dvh, 320px) + var(--space-lg) + env(safe-area-inset-bottom));
+  }
+
+  body[data-map-page="analysis"] #map-tooltip {
+    max-width: min(72vw, 280px);
+    font-size: clamp(10px, 3vw, 12px);
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .park-panel-close {
+    top: 8px;
+    right: 8px;
+    transform: none;
+  }
+  .mapboxgl-ctrl-bottom-left,
+  .mapboxgl-ctrl-bottom-right {
+    bottom: calc(var(--space-sm) + env(safe-area-inset-bottom));
+  }
+
+  .mapboxgl-ctrl-group button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .observable-modal-panel {
+    width: calc(100vw - 24px);
+    height: min(calc(100dvh - 32px), 720px);
+    border-radius: var(--panel-radius);
+  }
+
+  main,
+  .diagrams-layout,
+  .flora-main,
+  .reference-layout,
+  .drawings-layout,
+  .section,
+  .page-hero {
+    width: min(100%, calc(100vw - 24px));
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --space-xs: 5px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+  }
+
+  .top-bar {
+    min-height: 54px;
+  }
+
+  #sub-top-bar {
+    min-height: 66px;
+    padding-top: var(--space-xs);
+    padding-bottom: var(--space-xs);
+  }
+
+  #map {
+    top: 126px;
+  }
+
+  body[data-map-page="analysis"] #map-story-panels {
+    max-height: min(42dvh, 300px);
+  }
+
+  body[data-map-page="analysis"] .mapboxgl-ctrl-bottom-left,
+  body[data-map-page="analysis"] .mapboxgl-ctrl-bottom-right {
+    bottom: calc(min(42dvh, 300px) + var(--space-md) + env(safe-area-inset-bottom));
+  }
+
+  .story-card,
+  .board-section,
+  .flora-header,
+  .proposal-sankey,
+  .species-board {
+    padding: var(--space-md);
+  }
+
+  .metric-value {
+    font-size: clamp(22px, 7vw, 28px);
+  }
+
+  .metric-card,
+  .chart-card {
+    min-height: 0;
+  }
+
+  .chart-wrap {
+    height: clamp(220px, 58vw, 320px);
+  }
+
+  .chart-wrap--wide,
+  .chart-wrap--donut,
+  .chart-wrap--gap {
+    height: clamp(200px, 56vw, 300px);
   }
 }

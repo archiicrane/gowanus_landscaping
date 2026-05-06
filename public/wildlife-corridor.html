@@ -351,6 +351,59 @@
 				height: 180px;
 			}
 		}
+
+		@media (max-width: 768px) {
+			body {
+				padding-top: calc(56px + env(safe-area-inset-top));
+				padding-bottom: env(safe-area-inset-bottom);
+			}
+
+			.page-hero,
+			.section,
+			hr.divider {
+				max-width: calc(100vw - 24px);
+			}
+
+			.page-hero,
+			.matrix-wrap,
+			.verdict-box,
+			.animal-card,
+			.corridor-diagram {
+				border-radius: 18px;
+			}
+
+			.section-heading {
+				font-size: clamp(16px, 5vw, 22px);
+			}
+
+			.section-sub,
+			.animal-card p,
+			.matrix-table {
+				font-size: clamp(12px, 3.4vw, 14px);
+			}
+
+			.cards-grid {
+				grid-template-columns: 1fr;
+				gap: 12px;
+			}
+		}
+
+		@media (max-width: 480px) {
+			.page-hero,
+			.section {
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+
+			.verdict-box {
+				padding: 14px;
+				gap: 12px;
+			}
+
+			.matrix-wrap {
+				padding: 10px;
+			}
+		}
 	</style>
 </head>
 <body>
