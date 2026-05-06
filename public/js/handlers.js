@@ -677,6 +677,7 @@ function ensureMobileDrawerWiring() {
 	const header = document.getElementById('mobile-info-drawer-header');
 	const toggle = document.getElementById('mobile-info-drawer-toggle');
 	if (!panel || !header || !toggle || header.dataset.drawerBound === '1') return;
+	let suppressToggleClickUntil = 0;
 
 	const toggleDrawer = (event) => {
 		if (event) event.preventDefault();
@@ -692,11 +693,22 @@ function ensureMobileDrawerWiring() {
 			toggleDrawer(event);
 		}
 	});
-	toggle.addEventListener('click', (event) => {
+	toggle.addEventListener('pointerup', (event) => {
 		event.stopPropagation();
+		suppressToggleClickUntil = Date.now() + 500;
 		toggleDrawer(event);
 	});
-	toggle.addEventListener('pointerup', (event) => {
+	toggle.addEventListener('touchend', (event) => {
+		event.stopPropagation();
+		suppressToggleClickUntil = Date.now() + 500;
+		toggleDrawer(event);
+	}, { passive: false });
+	toggle.addEventListener('click', (event) => {
+		if (Date.now() < suppressToggleClickUntil) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
 		event.stopPropagation();
 		toggleDrawer(event);
 	});
