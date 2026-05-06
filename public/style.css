@@ -119,6 +119,72 @@ body.diagrams-page::before {
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
+
+  .desktop-book-controls {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3800;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(62, 72, 66, 0.25);
+    background: rgba(245, 241, 233, 0.95);
+    box-shadow: 0 10px 24px rgba(29, 35, 31, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .desktop-book-controls.is-visible {
+    display: inline-flex;
+  }
+
+  .desktop-book-btn {
+    border: 1px solid rgba(62, 72, 66, 0.28);
+    border-radius: 999px;
+    min-height: 36px;
+    padding: 0 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2f2a24;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .desktop-book-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .desktop-book-controls.is-active #desktop-book-toggle {
+    background: #3f6e56;
+    color: #f6f1e9;
+    border-color: #3f6e56;
+  }
+
+  .desktop-book-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .desktop-book-count {
+    min-width: 44px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4d4a43;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-book-controls {
+    display: none !important;
+  }
 }
 
 /* ---------- Shared Navigation ---------- */
