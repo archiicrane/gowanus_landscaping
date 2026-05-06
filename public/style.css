@@ -98,6 +98,29 @@ body.diagrams-page::before {
   will-change: transform;
 }
 
+@media (min-width: 769px) {
+  body.desktop-flip-mode:not([data-map-page]) {
+    overflow: hidden;
+    padding-top: 0 !important;
+  }
+
+  body.desktop-flip-mode:not([data-map-page]) .desktop-flip-main {
+    height: 100dvh;
+    box-sizing: border-box;
+    padding-top: 56px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body.desktop-flip-mode:not([data-map-page]) .desktop-flip-slide {
+    min-height: calc(100dvh - 56px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
 /* ---------- Shared Navigation ---------- */
 .top-bar {
   position: fixed;
