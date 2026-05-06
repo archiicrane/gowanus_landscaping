@@ -148,6 +148,32 @@ h4,
   min-width: 0;
 }
 
+.mobile-menu-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(86, 73, 53, 0.22);
+  background: rgba(248, 246, 241, 0.82);
+  color: var(--ink);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  width: 16px;
+  height: 1.7px;
+  border-radius: 2px;
+  background: #4f4a42;
+}
+
+.mobile-menu-btn span + span {
+  margin-top: 3.5px;
+}
+
 .nav-btn {
   text-decoration: none;
   color: var(--ink-muted);
@@ -1442,6 +1468,66 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   .story-panel-group.active { grid-template-rows: auto auto minmax(140px, 1fr); }
 }
 
+@media (max-width: 760px) {
+  .top-bar {
+    overflow: visible;
+    justify-content: space-between;
+    padding: 0 10px;
+  }
+
+  .brand {
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    max-width: 52vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 8px;
+    left: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    max-height: calc(100vh - 84px);
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(248, 248, 246, 0.94);
+    border: 1px solid rgba(120, 130, 120, 0.34);
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(32, 44, 38, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 2400;
+  }
+
+  .top-bar.nav-open .nav-links {
+    display: flex;
+  }
+
+  .nav-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 9px;
+  }
+
+  .top-bar.nav-open .mobile-menu-btn {
+    background: rgba(79, 127, 99, 0.18);
+    border-color: rgba(79, 127, 99, 0.36);
+  }
+}
+
 @media (max-width: 700px) {
   .diagrams-grid { grid-template-columns: 1fr; }
   .metric-card,
@@ -1455,29 +1541,9 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
   .diagrams-layout { padding-bottom: 50px; }
   .board-header-row h2 { font-size: 20px; }
   .metric-value { font-size: 28px; }
-  .top-bar { padding: 0 10px; }
-  .brand { font-size: 11px; letter-spacing: 0.08em; }
-  .nav-btn { padding: 5px 9px; font-size: 12px; }
+  .brand { font-size: 10px; letter-spacing: 0.07em; }
+  .nav-btn { font-size: 12px; }
   #mode-toggle { transform: none; padding: 4px 6px; gap: 6px; }
-  .top-bar {
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-  }
-  .brand {
-    flex: 0 0 auto;
-    min-width: max-content;
-  }
-  .nav-links {
-    flex: 1 1 auto;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
-  }
   #sub-top-bar {
     min-height: 68px;
     gap: 8px;
@@ -1532,14 +1598,6 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     text-overflow: ellipsis;
     white-space: nowrap;
     opacity: 0.9;
-  }
-  .top-bar {
-    justify-content: space-between;
-  }
-  .nav-links {
-    flex: 1 1 auto;
-    justify-content: flex-start;
-    padding-left: 6px;
   }
   .layer-panel-title {
     display: none;
