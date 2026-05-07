@@ -99,6 +99,9 @@ export async function initMap() {
 		wireLayerToggles(map);
 		applyPageProfile(mapPage);
 		wireObservableOverlay(map);
+		if (!isPreceedencePage) {
+			initMapIntroSequence(map);
+		}
 	});
 
 	map.on('error', (e) => {
@@ -380,6 +383,10 @@ function initMapIntroSequence(map) {
 	const studyBounds   = getStudyBounds(STUDY_RING);
 	const heatToggle    = document.getElementById('toggle-heat');
 
+	// If there's no parks panel (analysis page), skip the parks stage
+	// and start directly at the boundary/existing view (stage 1).
+	const hasParksStage = !!parksPanel;
+
 	if (parksPanel)    parksPanel.classList.add('active');
 	if (existingPanel) existingPanel.classList.remove('active');
 	if (bioswalePanel) bioswalePanel.classList.remove('active');
@@ -389,7 +396,7 @@ function initMapIntroSequence(map) {
 	// Fixed zoom level for the topography close-up (Stage 2)
 	const stageZoom = 14.8;
 
-	let stage = 0;
+	let stage = hasParksStage ? 0 : 1;
 	let transitioning = false;
 	let userHeatPreference = null;
 
