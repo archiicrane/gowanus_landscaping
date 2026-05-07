@@ -496,54 +496,307 @@ export function addStudyClipMask(map) {
 	});
 }
 
+// ─── Bioswale helpers ────────────────────────────────────────────────────────
+
+const _BSWS_BOUNDS = (() => {
+	const lngs = STUDY_RING.map(([lng]) => lng);
+	const lats = STUDY_RING.map(([, lat]) => lat);
+	return { west: Math.min(...lngs), east: Math.max(...lngs), south: Math.min(...lats), north: Math.max(...lats) };
+})();
+
+function _bswsClamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+function _bswsPointInStudy(pt) {
+	return pt[0] >= _BSWS_BOUNDS.west && pt[0] <= _BSWS_BOUNDS.east &&
+		pt[1] >= _BSWS_BOUNDS.south && pt[1] <= _BSWS_BOUNDS.north &&
+		pointInStudyPolygon(pt);
+}
+
+function _bswsClipLine(coords) {
+	const segs = [];
+	let cur = [];
+	for (const pt of coords) {
+		if (_bswsPointInStudy(pt)) {
+			cur.push(pt);
+		} else if (cur.length > 1) {
+			segs.push(cur);
+			cur = [];
+		} else {
+			cur = [];
+		}
+	}
+	if (cur.length > 1) segs.push(cur);
+	return segs;
+}
+
+function _bswsLineLen(coords) {
+	let l = 0;
+	for (let i = 1; i < coords.length; i++) {
+		const dx = coords[i][0] - coords[i-1][0];
+		const dy = coords[i][1] - coords[i-1][1];
+		l += Math.sqrt(dx*dx + dy*dy);
+	}
+	return l;
+}
+
+function _bswsGeomBounds(geometry) {
+	let minLng = Infinity, maxLng = -Infinity, minLat = Infinity, maxLat = -Infinity;
+	const visit = (n) => {
+		if (!Array.isArray(n)) return;
+		if (typeof n[0] === 'number' && typeof n[1] === 'number') {
+			minLng = Math.min(minLng, n[0]); maxLng = Math.max(maxLng, n[0]);
+			minLat = Math.min(minLat, n[1]); maxLat = Math.max(maxLat, n[1]);
+			return;
+		}
+		for (const c of n) visit(c);
+	};
+	visit(geometry.coordinates);
+	if (!Number.isFinite(minLng)) return null;
+	return { minLng, maxLng, minLat, maxLat };
+}
+
+function _bswsBoundsOverlap(a, b, pad = 0) {
+	return !(a.maxLng < b.minLng - pad || a.minLng > b.maxLng + pad ||
+		a.maxLat < b.minLat - pad || a.minLat > b.maxLat + pad);
+}
+
+function _bswsGetLineCoords(geometry) {
+	if (!geometry) return [];
+	if (geometry.type === 'LineString') return [geometry.coordinates];
+	if (geometry.type === 'MultiLineString') return geometry.coordinates;
+	return [];
+}
+
+function _bswsSamplePoints(coords, n = 7) {
+	if (coords.length <= n) return coords;
+	const pts = [];
+	for (let i = 0; i < n; i++) {
+		pts.push(coords[Math.round((i / (n - 1)) * (coords.length - 1))]);
+	}
+	return pts;
+}
+
+function _bswsBuildContourIndex(features) {
+	const samples = [];
+	const sz = 0.00028;
+	const buckets = new Map();
+	let minElev = Infinity, maxElev = -Infinity;
+	for (const f of features || []) {
+		const elev = Number(f?.properties?.elev_m ?? f?.properties?.ELEV);
+		if (!Number.isFinite(elev)) continue;
+		for (const coords of _bswsGetLineCoords(f.geometry)) {
+			if (!Array.isArray(coords) || coords.length < 2) continue;
+			const stride = Math.max(1, Math.floor(coords.length / 4));
+			for (let i = 0; i < coords.length; i += stride) {
+				const c = coords[i];
+				if (!Array.isArray(c) || c.length < 2) continue;
+				const s = { lng: c[0], lat: c[1], elev };
+				const idx = samples.push(s) - 1;
+				const key = `${Math.floor(s.lng / sz)}:${Math.floor(s.lat / sz)}`;
+				if (!buckets.has(key)) buckets.set(key, []);
+				buckets.get(key).push(idx);
+			}
+		}
+		if (elev < minElev) minElev = elev;
+		if (elev > maxElev) maxElev = elev;
+	}
+	if (!samples.length) return null;
+	return { samples, buckets, sz, minElev, maxElev };
+}
+
+function _bswsEstimateElev(lng, lat, idx) {
+	const { samples, buckets, sz } = idx;
+	const cx = Math.floor(lng / sz), cy = Math.floor(lat / sz);
+	const cands = [];
+	for (let r = 0; r <= 3 && cands.length < 32; r++) {
+		for (let dx = -r; dx <= r; dx++) {
+			for (let dy = -r; dy <= r; dy++) {
+				const b = buckets.get(`${cx+dx}:${cy+dy}`);
+				if (b) for (const i of b) cands.push(samples[i]);
+			}
+		}
+	}
+	if (!cands.length) return null;
+	let wsum = 0, esum = 0;
+	for (const s of cands) {
+		const d2 = (s.lng-lng)**2 + (s.lat-lat)**2;
+		const w = 1 / Math.max(d2, 1e-12);
+		wsum += w; esum += s.elev * w;
+	}
+	return wsum > 0 ? esum / wsum : null;
+}
+
+function _bswsLineContourStats(coords, idx) {
+	if (!idx) return null;
+	const elevs = [];
+	for (const [lng, lat] of _bswsSamplePoints(coords, 9)) {
+		const v = _bswsEstimateElev(lng, lat, idx);
+		if (Number.isFinite(v)) elevs.push(v);
+	}
+	if (elevs.length < 4) return null;
+	const avg = elevs.reduce((s, v) => s + v, 0) / elevs.length;
+	return { avg, relief: Math.max(...elevs) - Math.min(...elevs) };
+}
+
+function _bswsFloodBounds(floodData) {
+	if (!floodData?.features?.length) return [];
+	const out = [];
+	for (const f of floodData.features) {
+		if (Number(f.properties?.fshri ?? 0) < 2) continue;
+		const b = _bswsGeomBounds(f.geometry);
+		if (b) out.push(b);
+	}
+	return out;
+}
+
+function _bswsSegmentKey(coords, cls, name = '') {
+	const a = `${coords[0][0].toFixed(5)}:${coords[0][1].toFixed(5)}`;
+	const b = `${coords[coords.length-1][0].toFixed(5)}:${coords[coords.length-1][1].toFixed(5)}`;
+	const [u, v] = a < b ? [a, b] : [b, a];
+	return `${cls}|${name}|${u}|${v}`;
+}
+
+function _bswsSelectBest(segs) {
+	const ranked = [...segs].sort((a, b) => {
+		if (b.score !== a.score) return b.score - a.score;
+		if (a.avgContourElev !== b.avgContourElev) return a.avgContourElev - b.avgContourElev;
+		return 0;
+	});
+	const strict = ranked.filter(s => s.score >= 6.1);
+	if (strict.length >= 20) return strict.slice(0, 110);
+	return ranked.filter(s => s.score >= 5.2).slice(0, 110);
+}
+
+// ─── Bioswale Opportunity Layer (dynamic road-scoring) ───────────────────────
+
 export async function addBioswaleOpportunityLayer(map) {
-	let bioswaleData;
+	if (map.getLayer('bioswale-street-core-right')) return;
+
+	// Load flood and contour data for scoring
+	let floodData = null;
+	let contourFeatures = [];
 	try {
-		const res = await fetch('/data/bioswales.geojson');
-		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		bioswaleData = await res.json();
-	} catch (err) {
-		console.error('[LAYERS] Failed to load shared bioswale geometry:', err);
+		const r = await fetch('/data/flood-vulnerability.geojson');
+		if (r.ok) floodData = await r.json();
+	} catch (_) { /* scoring degrades gracefully */ }
+	try {
+		const r = await fetch('/data/con_lines_gowanus_clipped.geojson');
+		if (r.ok) { const d = await r.json(); contourFeatures = d.features || []; }
+	} catch (_) { /* scoring degrades gracefully */ }
+
+	// Wait for map tiles to be loaded so querySourceFeatures returns road data
+	await new Promise(resolve => map.once('idle', resolve));
+
+	const targetClasses = ['street', 'secondary', 'tertiary', 'residential', 'service'];
+	const roadFeatures = map.querySourceFeatures('composite', {
+		sourceLayer: 'road',
+		filter: ['match', ['get', 'class'], targetClasses, true, false],
+	});
+
+	const floodBounds = _bswsFloodBounds(floodData);
+	const contourIndex = contourFeatures.length ? _bswsBuildContourIndex(contourFeatures) : null;
+	const contourRange = contourIndex ? Math.max(1e-6, contourIndex.maxElev - contourIndex.minElev) : 1;
+
+	const unique = new Set();
+	const candidates = [];
+
+	for (const feature of roadFeatures) {
+		const cls = feature.properties?.class || 'street';
+		const name = feature.properties?.name || '';
+		for (const coords of _bswsGetLineCoords(feature.geometry)) {
+			for (const seg of _bswsClipLine(coords)) {
+				if (seg.length < 4 || _bswsLineLen(seg) < 0.00035) continue;
+				const bounds = _bswsGeomBounds({ coordinates: seg });
+				if (!bounds) continue;
+
+				const cStats = _bswsLineContourStats(seg, contourIndex);
+				const floodNearby = floodBounds.some(fb => _bswsBoundsOverlap(bounds, fb, 0.0003));
+
+				const contourLow = cStats
+					? _bswsClamp((contourIndex.maxElev - cStats.avg) / contourRange, 0, 1) : 0;
+				const contourSlope = cStats
+					? 1 - _bswsClamp(cStats.relief / Math.max(1.2, contourRange * 0.09), 0, 1) : 0.5;
+				const clsSuit =
+					(cls === 'residential' || cls === 'street') ? 1 :
+					(cls === 'tertiary' ? 0.72 : 0.48);
+
+				const score =
+					(floodNearby ? 3.1 : 0) +
+					(contourLow * 3.0) +
+					(contourSlope * 1.5) +
+					clsSuit;
+
+				const key = _bswsSegmentKey(seg, cls, name);
+				if (unique.has(key)) continue;
+				unique.add(key);
+
+				candidates.push({
+					type: 'Feature',
+					properties: { class: cls, name, score: +score.toFixed(2) },
+					geometry: { type: 'LineString', coordinates: seg },
+					score,
+					avgContourElev: cStats ? cStats.avg : Infinity,
+				});
+			}
+		}
+	}
+
+	const selected = _bswsSelectBest(candidates).map(f => ({
+		type: 'Feature',
+		properties: f.properties,
+		geometry: f.geometry,
+	}));
+
+	if (!selected.length) {
+		console.warn('[LAYERS] No bioswale segments scored — road tiles may not be loaded yet.');
 		return;
 	}
 
-	if (map.getLayer('bioswale-corridor-outline')) map.removeLayer('bioswale-corridor-outline');
-	if (map.getLayer('bioswale-corridor-fill')) map.removeLayer('bioswale-corridor-fill');
-	if (map.getSource('bioswale-corridor')) map.removeSource('bioswale-corridor');
+	for (const id of ['bioswale-street-glow-left', 'bioswale-street-core-left',
+		'bioswale-street-glow-right', 'bioswale-street-core-right']) {
+		if (map.getLayer(id)) map.removeLayer(id);
+	}
+	if (map.getSource('bioswale-streets')) map.removeSource('bioswale-streets');
 
-	map.addSource('bioswale-corridor', {
+	map.addSource('bioswale-streets', {
 		type: 'geojson',
-		data: bioswaleData,
+		data: { type: 'FeatureCollection', features: selected },
 	});
 
-	map.addLayer({
-		id: 'bioswale-corridor-fill',
-		type: 'fill',
-		source: 'bioswale-corridor',
-		paint: {
-			'fill-color': '#7ea081',
-			'fill-opacity': 0.24,
-		},
-	}, 'building');
+	const offsetR = ['interpolate', ['linear'], ['zoom'],
+		12, ['match', ['get', 'class'], 'secondary', 3.4, 'tertiary', 3.0, 'residential', 2.8, 'service', 2.4, 2.8],
+		18, ['match', ['get', 'class'], 'secondary', 9.2, 'tertiary', 8.0, 'residential', 7.4, 'service', 6.6, 7.2],
+	];
+	const offsetL = ['interpolate', ['linear'], ['zoom'],
+		12, ['match', ['get', 'class'], 'secondary', -3.4, 'tertiary', -3.0, 'residential', -2.8, 'service', -2.4, -2.8],
+		18, ['match', ['get', 'class'], 'secondary', -9.2, 'tertiary', -8.0, 'residential', -7.4, 'service', -6.6, -7.2],
+	];
 
-	map.addLayer({
-		id: 'bioswale-corridor-outline',
-		type: 'line',
-		source: 'bioswale-corridor',
-		layout: {
-			'line-cap': 'round',
-			'line-join': 'round',
-		},
-		paint: {
-			'line-color': '#4f7656',
-			'line-width': [
-				'interpolate', ['linear'], ['zoom'],
-				12, 1.4,
-				17, 3.2,
-			],
-			'line-opacity': 0.9,
-		},
-	}, 'building');
+	const glowPaint = (offset) => ({
+		'line-color': '#bef264',
+		'line-offset': offset,
+		'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3.4, 15, 5.4, 18, 8.2],
+		'line-opacity': 0.48,
+	});
+	const corePaint = (offset) => ({
+		'line-color': '#4d7c0f',
+		'line-offset': offset,
+		'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1.25, 15, 2.1, 18, 3.2],
+		'line-dasharray': [1.2, 0.8],
+		'line-opacity': 1,
+	});
+	const lineLayout = { 'line-join': 'round', 'line-cap': 'round' };
+
+	map.addLayer({ id: 'bioswale-street-glow-right',  type: 'line', source: 'bioswale-streets', layout: lineLayout, paint: glowPaint(offsetR) });
+	map.addLayer({ id: 'bioswale-street-core-right',  type: 'line', source: 'bioswale-streets', layout: lineLayout, paint: corePaint(offsetR) });
+	map.addLayer({ id: 'bioswale-street-glow-left',   type: 'line', source: 'bioswale-streets', layout: lineLayout, paint: glowPaint(offsetL) });
+	map.addLayer({ id: 'bioswale-street-core-left',   type: 'line', source: 'bioswale-streets', layout: lineLayout, paint: corePaint(offsetL) });
+
+	// Move to top so they render above other layers
+	for (const id of ['bioswale-street-glow-right', 'bioswale-street-core-right',
+		'bioswale-street-glow-left', 'bioswale-street-core-left']) {
+		if (map.getLayer(id)) map.moveLayer(id);
+	}
 }
 
 // ─── 1ft Contours ───────────────────────────────────────────────────────────

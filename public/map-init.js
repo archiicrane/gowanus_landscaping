@@ -271,7 +271,7 @@ function wireLayerToggles(map) {
 		{ id: 'toggle-cso',       layers: ['cso-outfalls-circle'] },
 		{ id: 'toggle-remediation', layers: ['remediation-brownfield-fill', 'remediation-brownfield-line', 'remediation-superfund-fill', 'remediation-superfund-line', 'remediation-sites-labels'] },
 		{ id: 'toggle-heat',      layers: ['topography-heatmap', 'study-clip-mask'] },
-		{ id: 'toggle-bioswale',  layers: ['bioswale-corridor-fill', 'bioswale-corridor-outline'] },
+		{ id: 'toggle-bioswale',  layers: ['bioswale-street-glow-right', 'bioswale-street-core-right', 'bioswale-street-glow-left', 'bioswale-street-core-left'] },
 		{ id: 'toggle-bounding',  layers: ['study-boundary-fill', 'study-boundary-line'] },
 	];
 
