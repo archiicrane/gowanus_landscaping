@@ -1039,9 +1039,9 @@ body[data-map-page="preceedence"] #park-info-panel {
   position: fixed;
   top: 72px;
   left: 14px;
-  right: 14px;
+  right: auto;
   bottom: 16px;
-  width: auto;
+  width: min(980px, calc(100vw - 28px));
   max-height: none;
   background: transparent;
   border: 0;
