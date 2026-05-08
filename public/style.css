@@ -1088,6 +1088,26 @@ body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
   align-content: stretch;
 }
 
+/* Desktop: make the scroll wrapper a row so both columns are visible */
+body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  grid-column: 1 / -1;
+  height: 100%;
+  overflow: visible;
+  padding: 0;
+}
+
+body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
+  flex: 0 0 clamp(230px, 28%, 330px);
+}
+
+body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
+  flex: 1;
+  min-width: 0;
+}
+
 body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
   pointer-events: auto;
   border-radius: var(--panel-glass-radius);
@@ -1216,6 +1236,10 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(6, minmax(78px, auto));
     gap: 7px;
+  }
+
+  body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+    display: contents;
   }
 
   body[data-map-page="preceedence"] #park-info-panel .park-layout-left,
@@ -2299,3 +2323,88 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
     opacity: 0.55;
   }
 }
+
+  /* ------------------------------------------------------------------ */
+  /* Presentation layout stabilization overrides                         */
+  /* Keeps existing behavior but resolves conflicting responsive rules.  */
+  /* ------------------------------------------------------------------ */
+
+  /* Desktop: keep precedents panel as two clear columns. */
+  @media (min-width: 769px) {
+    body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      grid-column: 1 / -1;
+      height: 100%;
+      overflow: visible;
+      padding: 0;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
+      flex: 0 0 clamp(230px, 28%, 330px);
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+      height: 100%;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
+      flex: 1;
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+      height: 100%;
+    }
+  }
+
+  @media (max-width: 980px) {
+    body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+      display: contents;
+    }
+  }
+
+  /* Mobile + small tablet: unify nav/map/panel positioning. */
+  @media (max-width: 768px) {
+    .top-bar {
+      height: 56px;
+      min-height: 56px;
+      padding-left: max(10px, env(safe-area-inset-left));
+      padding-right: max(10px, env(safe-area-inset-right));
+    }
+
+    /* Non-map pages keep clean flow below fixed nav. */
+    body:not([data-map-page]):not(.site-plan-page) {
+      padding-top: calc(56px + env(safe-area-inset-top));
+    }
+
+    /* Analysis map sits below nav + sub-top-bar; precedents under nav only. */
+    body[data-map-page="analysis"] #map {
+      top: 126px;
+    }
+
+    body[data-map-page="preceedence"] #map {
+      top: 56px;
+    }
+
+    /* Keep restored mobile drawer model; disable stale tabbed-mobile remnants. */
+    body[data-map-page="preceedence"] #park-info-panel .mobile-panel-tabs,
+    body[data-map-page="preceedence"] #park-info-panel .mobile-panel-content {
+      display: none !important;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .park-layout-col {
+      display: grid !important;
+      gap: 10px;
+      min-height: 0;
+      height: auto;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
