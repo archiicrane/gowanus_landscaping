@@ -1,6 +1,6 @@
 // handlers.js - Hover and click interactions for all map layers
 
-// â”€â”€â”€ Park Tree Data Enrichment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// GöÇGöÇGöÇ Park Tree Data Enrichment GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 // Published tree inventory data for parks with comprehensive catalogues.
 // Source: Park alliances and historical records (TreeKeeper, published inventories).
 // Used to supplement/validate OSM data when mapping is incomplete.
@@ -664,83 +664,47 @@ function isMobileDrawerViewport() {
 	return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
 }
 
-let isMobileInfoOpen = false;
-let activeMobileTab = 'trees';
-
-function applyMobileDrawerState() {
-	const panel = document.getElementById('park-info-panel');
-	const header = document.getElementById('mobile-info-drawer-header');
+function setMobileDrawerExpanded(panel, expanded) {
 	if (!panel || !isMobileDrawerViewport()) return;
-
-	panel.classList.toggle('is-expanded', isMobileInfoOpen);
-	panel.classList.toggle('is-collapsed', !isMobileInfoOpen);
-	if (header) header.setAttribute('aria-expanded', isMobileInfoOpen ? 'true' : 'false');
-
-	const tabs = document.querySelectorAll('.mobile-panel-tab-btn');
-	const contentPanels = document.querySelectorAll('.mobile-panel-content');
-	tabs.forEach((btn) => {
-		btn.classList.toggle('active', btn.dataset.tab === activeMobileTab);
-	});
-	contentPanels.forEach((section) => {
-		const isActive = section.dataset.tab === activeMobileTab;
-		section.classList.toggle('active', isActive);
-		if (isActive) section.scrollTop = 0;
-	});
-}
-
-function setMobileInfoOpen(next) {
-	isMobileInfoOpen = !!next;
-	applyMobileDrawerState();
-}
-
-function setActiveMobileTab(nextTab) {
-	activeMobileTab = nextTab || 'trees';
-	setMobileInfoOpen(true);
+	panel.classList.toggle('is-expanded', !!expanded);
+	panel.classList.toggle('is-collapsed', !expanded);
+	const header = document.getElementById('mobile-info-drawer-header');
+	if (header) header.setAttribute('aria-expanded', expanded ? 'true' : 'false');
 }
 
 function ensureMobileDrawerWiring() {
 	const panel = document.getElementById('park-info-panel');
 	const header = document.getElementById('mobile-info-drawer-header');
 	const toggle = document.getElementById('mobile-info-drawer-toggle');
-	const tabsContainer = document.getElementById('mobile-panel-tabs');
-	if (!panel || !header || !toggle || !tabsContainer || panel.dataset.mobileBound === '1') return;
+	if (!panel || !header || !toggle || header.dataset.drawerBound === '1') return;
 
 	const toggleDrawer = (event) => {
+		if (event) event.preventDefault();
 		if (!isMobileDrawerViewport()) return;
-		if (event) {
-			event.preventDefault();
-			event.stopPropagation();
-		}
 		if (!panel.classList.contains('active')) panel.classList.add('active');
-		setMobileInfoOpen(!isMobileInfoOpen);
+		const shouldExpand = !panel.classList.contains('is-expanded');
+		setMobileDrawerExpanded(panel, shouldExpand);
 	};
 
-	header.addEventListener('click', (event) => {
-		if (event.target.closest('#mobile-info-drawer-toggle')) return;
-		toggleDrawer(event);
-	});
-	toggle.addEventListener('click', toggleDrawer);
-
+	header.addEventListener('click', toggleDrawer);
 	header.addEventListener('keydown', (event) => {
-		if (!isMobileDrawerViewport()) return;
 		if (event.key === 'Enter' || event.key === ' ') {
 			toggleDrawer(event);
 		}
 	});
-
-	tabsContainer.addEventListener('click', (event) => {
-		const btn = event.target.closest('.mobile-panel-tab-btn');
-		if (!btn) return;
-		event.preventDefault();
+	toggle.addEventListener('click', (event) => {
 		event.stopPropagation();
-		setActiveMobileTab(btn.dataset.tab || 'trees');
+		toggleDrawer(event);
+	});
+	toggle.addEventListener('pointerup', (event) => {
+		event.stopPropagation();
+		toggleDrawer(event);
 	});
 
-	panel.dataset.mobileBound = '1';
-	applyMobileDrawerState();
+	header.dataset.drawerBound = '1';
 }
 
-// â”€â”€â”€ Park info panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// GöÇGöÇGöÇ Park info panel GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 function openParkPanel(props) {
 	const panel      = document.getElementById('park-info-panel');
 	const imgEl      = document.getElementById('park-panel-image');
@@ -755,18 +719,8 @@ function openParkPanel(props) {
 	const programsEl = document.getElementById('park-panel-programs');
 	const linkEl     = document.getElementById('park-panel-link');
 
-	// Desktop versions
-	const nameElDT    = document.getElementById('park-panel-name-desktop');
-	const distElDT    = document.getElementById('park-panel-distance-desktop');
-	const areaElDT    = document.getElementById('park-panel-area-desktop');
-	const estElDT     = document.getElementById('park-panel-established-desktop');
-	const descElDT    = document.getElementById('park-panel-desc-desktop');
-	const ecoElDT     = document.getElementById('park-panel-ecology-desktop');
-	const linkElDT    = document.getElementById('park-panel-link-desktop');
-
 	if (!panel) return;
 
-	// Update mobile versions
 	if (nameEl) nameEl.textContent = props.name || 'Park';
 	if (distEl) distEl.textContent = props.distance_label || '';
 	if (areaEl) areaEl.textContent = props.area_acres ? `${props.area_acres} ac` : '';
@@ -779,26 +733,14 @@ function openParkPanel(props) {
 		linkEl.style.display = props.link ? 'inline-block' : 'none';
 	}
 
-	// Update desktop versions
-	if (nameElDT) nameElDT.textContent = props.name || 'Park';
-	if (distElDT) distElDT.textContent = props.distance_label || '';
-	if (areaElDT) areaElDT.textContent = props.area_acres ? `${props.area_acres} ac` : '';
-	if (estElDT) estElDT.textContent  = props.established ? `Est. ${props.established}` : '';
-	if (descElDT) descElDT.textContent = props.description || '';
-	if (ecoElDT) ecoElDT.textContent  = props.ecology_note || '';
-
-	if (linkElDT) {
-		linkElDT.href = props.link || '#';
-		linkElDT.style.display = props.link ? 'inline-block' : 'none';
-	}
-
 	const mobileTitle = document.getElementById('mobile-drawer-title');
 	const mobileSubtitle = document.getElementById('mobile-drawer-subtitle');
 	if (mobileTitle) mobileTitle.textContent = props.name || 'Park details';
 	if (mobileSubtitle) {
-		const distanceText = props.distance_label || props.established ? `${props.distance_label || ''}${props.distance_label && props.established ? ' Â· ' : ''}${props.established ? `Est. ${props.established}` : ''}` : 'Tap Info to expand details';
+		const distanceText = props.distance_label || props.established ? `${props.distance_label || ''}${props.distance_label && props.established ? ' -+ ' : ''}${props.established ? `Est. ${props.established}` : ''}` : 'Tap Info to expand details';
 		mobileSubtitle.textContent = distanceText;
 	}
+
 
 	const fauna = parseArrayProp(props.wildlife);
 	renderGroupedFaunaList('park-fauna-list', fauna, 'No fauna list');
@@ -806,8 +748,7 @@ function openParkPanel(props) {
 	panel.classList.add('active');
 	ensureMobileDrawerWiring();
 	if (isMobileDrawerViewport()) {
-		activeMobileTab = 'trees';
-		setMobileInfoOpen(false);
+		setMobileDrawerExpanded(panel, false);
 	} else {
 		panel.classList.remove('is-collapsed', 'is-expanded');
 	}
@@ -1310,12 +1251,6 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 	const metricsEl = document.getElementById('park-tree-metrics');
 	const barsEl = document.getElementById('park-tree-type-bars');
 	const noteEl = document.getElementById('park-tree-note');
-	
-	// Desktop versions
-	const metricsElDT = document.getElementById('park-tree-metrics-desktop');
-	const barsElDT = document.getElementById('park-tree-type-bars-desktop');
-	const noteElDT = document.getElementById('park-tree-note-desktop');
-	
 	if (!metricsEl || !barsEl || !noteEl) return;
 	
 	let dataLabel = 'Observed';
@@ -1353,15 +1288,11 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		<div class="park-tree-metric"><span>Shape</span><strong>${compactness.toFixed(2)}</strong></div>
 	`;
 
-	if (metricsElDT) {
-		metricsElDT.innerHTML = metricsEl.innerHTML;
-	}
-
 	const countValues = topSpecies
 		.map((d) => Number(d.count))
 		.filter((v) => Number.isFinite(v) && v > 0);
 	const max = countValues.length ? Math.max(...countValues) : 1;
-	const barsHtml = topSpecies.length
+	barsEl.innerHTML = topSpecies.length
 		? topSpecies.map((d) => `
 			<div class="park-tree-bar-row">
 				<span class="park-tree-bar-label">${d.species}</span>
@@ -1371,15 +1302,7 @@ function renderPreceedenceDiagram({ treeCount, areaAcres, densityPerAcre, compac
 		`).join('')
 		: '<p class="park-tree-empty">Species breakdown not available for this park in the source dataset.</p>';
 
-	barsEl.innerHTML = barsHtml;
-	if (barsElDT) {
-		barsElDT.innerHTML = barsHtml;
-	}
-
 	noteEl.textContent = noteText;
-	if (noteElDT) {
-		noteElDT.textContent = noteText;
-	}
 }
 
 async function analyzePreceedenceParkTrees(map, feature) {
@@ -1493,16 +1416,10 @@ async function analyzePreceedenceParkTrees(map, feature) {
 
 	const floraProfile = PARK_FLORA_PROFILES[parkId] || [];
 	const floraFromTrees = topSpecies.map((s) => s.species);
-	
-	// Update both mobile and desktop versions
 	updateParkList('park-tree-list', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
-	updateParkList('park-tree-list-desktop', floraFromTrees, 'No tree species available', SPECIES_SVG_FOLDER);
 	updateParkList('park-flora-list', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
-	updateParkList('park-flora-list-desktop', [...floraProfile, ...floraFromTrees], 'No plant profile available', SPECIES_SVG_FOLDER);
-	
 	const faunaItems = parseArrayProp(feature?.properties?.wildlife);
 	renderGroupedFaunaList('park-fauna-list', faunaItems, 'No fauna list');
-	renderGroupedFaunaList('park-fauna-list-desktop', faunaItems, 'No fauna list');
 	updatePreceedenceFaunaOverlays(map, feature, faunaItems);
 }
 
@@ -1512,7 +1429,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 
 
 
-	// â”€â”€â”€ Nearby Parks: click â†’ side panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// GöÇGöÇGöÇ Nearby Parks: click GåÆ side panel GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 	if (map.getLayer('nearby-parks-fill')) {
 		map.on('click', 'nearby-parks-fill', async (e) => {
 			const feature = e.features && e.features[0];
@@ -1557,7 +1474,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 			const panel = document.getElementById('park-info-panel');
 			if (!panel) return;
 			if (isMobileDrawerViewport()) {
-				setMobileInfoOpen(false);
+				setMobileDrawerExpanded(panel, false);
 				return;
 			}
 			panel.classList.remove('active');
@@ -1569,7 +1486,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 
 	const tooltip = document.getElementById('map-tooltip');
 
-	// â”€â”€â”€ Trees: hover tooltip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// GöÇGöÇGöÇ Trees: hover tooltip GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 	if (map.getLayer('trees-circles')) {
 		map.on('mouseenter', 'trees-circles', (e) => {
 			map.getCanvas().style.cursor = 'pointer';
@@ -1593,7 +1510,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 		});
 	}
 
-	// â”€â”€â”€ Trees: click popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// GöÇGöÇGöÇ Trees: click popup GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 	if (map.getLayer('trees-circles')) {
 		map.on('click', 'trees-circles', (e) => {
 			const props = e.features[0]?.properties;
@@ -1621,7 +1538,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 		});
 	}
 
-	// â”€â”€â”€ Buildings: click popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// GöÇGöÇGöÇ Buildings: click popup GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 	if (map.getLayer('buildings-extrusion')) {
 		map.on('mouseenter', 'buildings-extrusion', () => {
 			map.getCanvas().style.cursor = 'pointer';
@@ -1653,7 +1570,7 @@ export function setupMapHandlers(map, nearbyParksData = null) {
 		});
 	}
 
-	// â”€â”€â”€ CSO Outfalls: hover + popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+	// GöÇGöÇGöÇ CSO Outfalls: hover + popup GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 	if (map.getLayer('cso-outfalls-circle')) {
 		map.on('mouseenter', 'cso-outfalls-circle', () => {
 			map.getCanvas().style.cursor = 'pointer';
