@@ -94,6 +94,25 @@ export async function initMap() {
 			await addCsoOutfallsLayer(map);
 			await addRemediationSitesLayer(map);
 			await addBioswaleOpportunityLayer(map);
+
+			// Hide everything except the lot boundary immediately so there is no
+			// flash of all layers before the toggle wiring runs.
+			const hideOnLoad = [
+				'buildings-extrusion',
+				'trees-circles', 'trees-labels',
+				'park-outline',
+				'topography-heatmap', 'study-clip-mask',
+				'contour-lines',
+				'flood-vulnerability-fill',
+				'cso-outfalls-circle',
+				'remediation-brownfield-fill', 'remediation-brownfield-line',
+				'remediation-superfund-fill', 'remediation-superfund-line', 'remediation-sites-labels',
+				'bioswale-street-glow-right', 'bioswale-street-core-right',
+				'bioswale-street-glow-left', 'bioswale-street-core-left',
+			];
+			for (const id of hideOnLoad) {
+				if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+			}
 		}
 		setupMapHandlers(map, resolvedParksData);
 		wireLayerToggles(map);
