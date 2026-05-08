@@ -1038,10 +1038,10 @@ body.diagrams-embed-mode .board-section {
 body[data-map-page="preceedence"] #park-info-panel {
   position: fixed;
   top: 72px;
-  left: 14px;
+  left: auto;
   right: 14px;
   bottom: 16px;
-  width: auto;
+  width: min(920px, calc(100vw - 28px));
   max-height: none;
   background: transparent;
   border: 0;
