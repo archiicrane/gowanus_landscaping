@@ -84,7 +84,7 @@
       height: 82%;
       object-fit: contain;
       object-position: center center;
-      filter: drop-shadow(0 3px 5px rgba(35, 30, 24, 0.22));
+      mix-blend-mode: multiply;
       pointer-events: none;
     }
     .flora-name { font-size: 11px; color: #4f4740; line-height: 1.35; text-align: center; min-height: 28px; }
@@ -323,12 +323,12 @@
           <img src="${path}" alt="${label} SVG" />
         </div>
         <p class="flora-name">${label}</p>
-        <p class="flora-kind">${kind} ? ${habitat.name}</p>
+        <p class="flora-kind">${kind} &middot; ${habitat.name}</p>
       `;
       floraGrid.appendChild(card);
     });
 
-    libraryCount.textContent = `${ALL_LIBRARY_SVGS.length} flora/fauna SVGs loaded from your full project set`;
+    libraryCount.textContent = '';
   </script>
 </body>
 </html>
