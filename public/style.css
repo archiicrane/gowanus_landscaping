@@ -1048,11 +1048,11 @@ body[data-map-page="preceedence"] #park-info-panel {
   box-shadow: none;
   border-radius: 0;
   display: grid;
-  grid-template-columns: minmax(230px, 330px) minmax(420px, 580px);
+  grid-template-columns: minmax(220px, 300px) clamp(340px, 24vw, 420px);
   justify-content: space-between;
   align-items: stretch;
-  gap: 12px;
-  z-index: 3100;
+  gap: 16px;
+  z-index: 1900;
   overflow: visible;
   pointer-events: none;
   opacity: 0;
@@ -1092,7 +1092,8 @@ body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
 body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
   display: flex;
   flex-direction: row;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
   grid-column: 1 / -1;
   height: 100%;
   overflow: visible;
@@ -1100,12 +1101,22 @@ body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
-  flex: 0 0 clamp(230px, 28%, 330px);
+  flex: 0 0 clamp(220px, 22vw, 300px);
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 clamp(340px, 24vw, 420px);
+  width: clamp(340px, 24vw, 420px);
+  max-width: 420px;
+  min-width: 340px;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+body[data-map-page="preceedence"] #park-info-panel .precedent-panel {
+  pointer-events: auto;
 }
 
 body[data-map-page="preceedence"] #park-info-panel .park-glass-box {
@@ -1223,7 +1234,7 @@ body[data-map-page="preceedence"] #park-info-panel .park-tree-bar-row {
 
 @media (max-width: 1300px) {
   body[data-map-page="preceedence"] #park-info-panel {
-    grid-template-columns: minmax(220px, 280px) minmax(340px, 430px);
+    grid-template-columns: minmax(210px, 280px) clamp(340px, 28vw, 420px);
   }
 }
 
