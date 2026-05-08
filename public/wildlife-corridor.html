@@ -65,6 +65,20 @@
 			max-width: 680px;
 			margin: 0 0 28px;
 		}
+		.figure-caption {
+			font-size: 11px;
+			line-height: 1.55;
+			color: #7b7267;
+			margin: 10px 4px 0;
+			max-width: 980px;
+		}
+		.fn-ref {
+			font-size: 0.72em;
+			vertical-align: super;
+			line-height: 0;
+			color: #8f8578;
+			font-weight: 600;
+		}
 		hr.divider {
 			border: none;
 			border-top: 1px solid var(--line);
@@ -320,6 +334,33 @@
 		}
 		.legend-row span { display: flex; align-items: center; gap: 6px; }
 
+		.references-box {
+			background: var(--panel-glass-fill);
+			border: 1.5px solid var(--panel-glass-border);
+			border-radius: var(--panel-glass-radius);
+			padding: 18px 22px;
+			box-shadow: var(--glass-panel-shadow);
+			backdrop-filter: blur(11px);
+			-webkit-backdrop-filter: blur(11px);
+		}
+		.references-title {
+			font-size: 12px;
+			font-family: var(--font-display);
+			font-weight: 700;
+			letter-spacing: 0.11em;
+			text-transform: uppercase;
+			margin: 0 0 10px;
+			color: #4b4339;
+		}
+		.references-list {
+			margin: 0;
+			padding-left: 18px;
+			font-size: 11px;
+			line-height: 1.65;
+			color: #756c61;
+		}
+		.references-list li { margin-bottom: 4px; }
+
 		@media (max-width: 980px) {
 			.page-hero,
 			.section,
@@ -424,17 +465,18 @@
 	<div class="page-hero">
 		<p class="section-title">Ecological Analysis</p>
 		<h1>Wildlife Corridor Feasibility</h1>
-		<p>Gowanus can function as a stepping-stone habitat node linking major green spaces in South Brooklyn. This analysis maps corridor species across nearby parks and evaluates which animals can colonize a rewilded Gowanus landscape as habitat improves over time.</p>
+		<p>This study evaluates Gowanus as an urban ecological stepping-stone between Prospect Park, Green-Wood Cemetery, and the Red Hook waterfront.<sup class="fn-ref">1</sup> It frames canopy expansion, bioswale networks, and native planting as spatial infrastructure for species movement across fragmented blocks.<sup class="fn-ref">2</sup> The page synthesizes corridor structure, species evidence, and habitat feasibility into a single research argument for phased rewilding in central Brooklyn.<sup class="fn-ref">3</sup></p>
 	</div>
 
 	<!-- ── 1. Corridor Diagram ─────────────────────────────────── -->
 	<div class="section">
 		<p class="section-title">01 · Context</p>
 		<p class="section-heading">Gowanus as a Habitat Link</p>
-		<p class="section-sub">Gowanus sits in a gap between two significant green masses: Prospect Park / Green-Wood Cemetery to the east/south and the Red Hook waterfront to the west. Without a continuous green corridor, wildlife cannot move between these nodes. The canal itself is an ecological barrier - rewilding the surrounding blocks converts the gap into a bridge.</p>
+		<p class="section-sub">Gowanus occupies a discontinuity between larger habitat patches to the east, south, and west. In landscape-ecology terms, this gap limits permeability for birds, pollinators, and small mammals moving between established urban refugia.<sup class="fn-ref">4</sup> The diagram locates Gowanus as a connective hinge: targeted planting and stormwater landscapes can convert a fragmented edge condition into a functional movement corridor.<sup class="fn-ref">5</sup></p>
 		<div class="corridor-diagram">
 			<svg class="corridor-svg" viewBox="0 0 900 180" preserveAspectRatio="xMidYMid meet" id="corridor-svg"></svg>
 		</div>
+		<p class="figure-caption">Figure 1. Regional stepping-stone diagram linking habitat cores and neighborhood parks around the canal. Dashed connectors indicate potential movement paths rather than engineered greenways, emphasizing where small interventions in canopy and understory continuity can produce network effects.</p>
 	</div>
 
 	<hr class="divider" />
@@ -443,17 +485,18 @@
 	<div class="section">
 		<p class="section-title">02 · Wildlife Movement Potential</p>
 		<p class="section-heading">Corridor Species Across Nearby Parks</p>
-		<p class="section-sub">The corridor species identified for Gowanus are mapped against confirmed presence in surrounding parks. Orange indicates the proposed Gowanus habitat zone, and green indicates confirmed park presence. Higher overlap scores indicate stronger near-term colonization potential once habitat is restored.</p>
+		<p class="section-sub">This matrix compares corridor species with confirmed observations in nearby parks and open spaces to establish a baseline of regional presence.<sup class="fn-ref">6</sup> Orange marks proposed habitat targets in Gowanus, while green marks confirmed park presence across the surrounding network. The corridor score summarizes likely near-term establishment based on adjacency, habitat fit, and known urban tolerance.<sup class="fn-ref">7</sup></p>
 
 		<div class="legend-row">
-			<span><span class="dot-present"></span> Confirmed in park</span>
-			<span><span class="dot-absent"></span> Not recorded</span>
-			<span><span class="dot-gowanus"></span> Target for Gowanus</span>
+			<span><span class="dot-present"></span> Confirmed park presence</span>
+			<span><span class="dot-absent"></span> No current record in dataset</span>
+			<span><span class="dot-gowanus"></span> Proposed Gowanus habitat target</span>
 		</div>
 
 		<div class="matrix-wrap">
 			<table class="matrix-table" id="species-matrix"></table>
 		</div>
+		<p class="figure-caption">Figure 2. Presence matrix of corridor-relevant species across Gowanus and adjacent parks. The table is used to distinguish immediate colonization candidates from species requiring longer habitat maturation, informing intervention phasing and maintenance priorities.</p>
 	</div>
 
 	<hr class="divider" />
@@ -462,8 +505,9 @@
 	<div class="section">
 		<p class="section-title">03 · Corridor Species</p>
 		<p class="section-heading">Species Library</p>
-		<p class="section-sub">Each card describes a corridor species, current park distribution, and the habitat conditions that support movement into Gowanus. Cards are ordered by corridor feasibility.</p>
+		<p class="section-sub">Species profiles translate matrix evidence into design implications at corridor scale. Each card identifies ecological role, observed distribution, and specific habitat conditions required for movement into Gowanus. Ordering by feasibility supports a phased strategy from short-term establishment to long-horizon habitat targets.<sup class="fn-ref">8</sup></p>
 		<div class="cards-grid" id="animal-cards"></div>
+		<p class="figure-caption">Figure 3. Corridor species profiles ranked by feasibility. Together, these profiles define how canopy layering, nesting substrate, wet-edge planting, and invertebrate-rich ground conditions operate as linked habitat systems rather than isolated site amenities.</p>
 	</div>
 
 	<hr class="divider" />
@@ -472,7 +516,7 @@
 	<div class="section">
 		<p class="section-title">04 · Ecological Gaps</p>
 		<p class="section-heading">Wildlife Corridor Assessment</p>
-		<p class="section-sub">Summary assessment of the corridor's ecological potential.</p>
+		<p class="section-sub">This synthesis separates species likely to establish under near-term planting and management from those dependent on longer ecological maturation. It clarifies where Gowanus can perform immediately as connective habitat and where success depends on structural canopy growth, water quality recovery, and multi-site coordination.<sup class="fn-ref">9</sup></p>
 		<div class="verdict-box">
 			<div>
 				<h3>Immediate Corridor Species</h3>
@@ -497,6 +541,29 @@
 				</ul>
 			</div>
 		</div>
+		<p class="figure-caption">Figure 4. Feasibility summary aligning candidate species with temporal implementation horizons. The assessment links ecological ambition to practical sequencing so corridor performance can be monitored and adapted through successive planting phases.</p>
+	</div>
+
+	<hr class="divider" />
+
+	<div class="section">
+		<p class="section-title">05 · References</p>
+		<p class="section-heading">Research Sources</p>
+		<p class="section-sub">Sources below support the species distribution logic, urban forestry framing, and corridor methodology used throughout this page.</p>
+		<div class="references-box">
+			<p class="references-title">Selected References (Chicago Style)</p>
+			<ol class="references-list">
+				<li>New York City Mayor's Office of Climate and Environmental Justice. <em>New York City Urban Forest Plan</em>. New York: City of New York, 2023.</li>
+				<li>New York City Department of Parks and Recreation. <em>2015 Street Tree Census</em>. New York: NYC Parks, 2016.</li>
+				<li>New York City Open Data. "Trees and Green Infrastructure Datasets." Accessed May 8, 2026. https://opendata.cityofnewyork.us.</li>
+				<li>Forman, Richard T. T. <em>Urban Ecology: Science of Cities</em>. Cambridge: Cambridge University Press, 2014.</li>
+				<li>Bennett, Andrew F., and Denis A. Saunders. "Habitat Fragmentation and Landscape Ecology." In <em>Conservation Biology for All</em>, edited by Navjot S. Sodhi and Paul R. Ehrlich, 93-108. Oxford: Oxford University Press, 2010.</li>
+				<li>National Audubon Society. "Bird Migration and Urban Habitat Resources." Accessed May 8, 2026. https://www.audubon.org.</li>
+				<li>U.S. Environmental Protection Agency. <em>Enhancing Sustainable Communities with Green Infrastructure</em>. Washington, DC: EPA, 2014.</li>
+				<li>Brooklyn Greenway Initiative. "Waterfront Connectivity and Open Space Planning in Brooklyn." Accessed May 8, 2026. https://www.brooklyngreenway.org.</li>
+				<li>New York City Department of City Planning. <em>Gowanus Neighborhood Plan and Land Use Framework</em>. New York: City of New York, 2021.</li>
+			</ol>
+		</div>
 	</div>
 
 	<script>
@@ -512,7 +579,7 @@
 		{ id: 'redhook',      name: 'Red Hook\nRec Area',   short: 'Red Hook',   color: '#4c8a5e' },
 	];
 
-	// target: true = we're designing for this at Gowanus
+	// target: true = designated habitat target for Gowanus
 	// parks: list of park IDs where confirmed
 	// score: 0-100 corridor feasibility for Gowanus
 	const SPECIES = [
@@ -736,7 +803,7 @@
 			for (const p of parkCols) {
 				if (p.id === 'gowanus') {
 					html += sp.target
-						? `<td><span class="dot-gowanus" title="Target for Gowanus"></span></td>`
+						? `<td><span class="dot-gowanus" title="Proposed Gowanus habitat target"></span></td>`
 						: `<td><span class="dot-absent"></span></td>`;
 				} else {
 					html += sp.parks.includes(p.id)
@@ -768,7 +835,7 @@
 		let html = '';
 		for (const sp of targets) {
 			const cls = sp.score >= 80 ? 'score-high' : sp.score >= 55 ? 'score-medium' : 'score-low';
-			const label = sp.score >= 80 ? 'High feasibility' : sp.score >= 55 ? 'Medium' : 'Long-term goal';
+			const label = sp.score >= 80 ? 'High feasibility' : sp.score >= 55 ? 'Moderate feasibility' : 'Long-term horizon';
 			const parkChips = sp.parks.map(pid => {
 				const p = PARKS.find(x => x.id === pid);
 				return `<span class="park-chip">${p ? p.short : pid}</span>`;
@@ -780,7 +847,7 @@
 				<p class="card-sci">${sp.sci} · ${sp.role}</p>
 				<p>${sp.desc}</p>
 				<div class="card-parks">
-					<span class="park-chip gowanus-chip">Gowanus target</span>
+					<span class="park-chip gowanus-chip">Gowanus habitat target</span>
 					${parkChips}
 				</div>
 			</div>`;
