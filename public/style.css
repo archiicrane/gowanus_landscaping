@@ -104,6 +104,35 @@ body.diagrams-page::before {
     padding-top: 0 !important;
   }
 
+  /* Desktop: keep panel groups on opposite sides (left list, right details). */
+  @media (min-width: 981px) {
+    body[data-map-page="preceedence"] #park-info-panel {
+      left: 14px;
+      right: 14px;
+      width: auto;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .detail-panel__scroll {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: stretch;
+      gap: 18px;
+      height: 100%;
+      overflow: visible;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .park-layout-left {
+      flex: 0 0 clamp(210px, 22vw, 300px);
+      max-width: 300px;
+    }
+
+    body[data-map-page="preceedence"] #park-info-panel .park-layout-right {
+      flex: 0 0 min(58vw, 860px);
+      max-width: 860px;
+    }
+  }
+
   body.desktop-flip-mode:not([data-map-page]) .desktop-flip-main {
     height: 100dvh;
     box-sizing: border-box;
